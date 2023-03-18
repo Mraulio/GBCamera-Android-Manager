@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">GBCamera Manager</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">GBCamera Manager</string>
+    <string name="nav_header_subtitle">https://github.com/Mraulio</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_palettes">Palettes</string>
+    <string name="menu_settings">Settings</string>
+</resources>

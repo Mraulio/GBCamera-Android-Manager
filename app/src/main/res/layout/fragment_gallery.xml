@@ -19,4 +19,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <GridView
+        android:id="@+id/gridView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="#D5D5D5"
+        android:horizontalSpacing="10dp"
+        android:stretchMode="columnWidth"
+        android:scrollbars="horizontal"
+        android:numColumns="3"
+        android:verticalSpacing="10dp"
+        tools:ignore="MissingConstraints" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnLoadImages"
+        tools:ignore="MissingConstraints"></Button>
 </androidx.constraintlayout.widget.ConstraintLayout>

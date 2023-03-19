@@ -1,12 +1,17 @@
 package com.mraulio.gbcameramanager;
 
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
+import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -16,10 +21,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+    public static List<Bitmap> imageList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,34 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        /**
+         * I ask for storage permissions
+         */
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            // Ask for permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    1);
+        }
+
+        /**
+         * I call the extractImagesSav method
+         */
+
+        Methods.extractSavImages(this);
+
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            System.out.println("PERMISION GRANTED*********************");            //resume tasks needing this permission
+            Toast toast = Toast.makeText(this, "Permisos otorgados", Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
     @Override

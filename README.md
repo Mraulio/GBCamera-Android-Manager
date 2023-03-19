@@ -3,7 +3,7 @@ Android app to manage a Game Boy Camera gallery and communicate via usb serial w
 
 ## Some useful information
   * [Gameboy 2BPP Graphics Format](https://www.huderlem.com/demos/gameboy2bpp.html) info.
-  * [Arduino Printer Emulator](https://mofosyne.github.io/arduino-gameboy-printer-emulator/), and a online [decoder](https://mofosyne.github.io/arduino-gameboy-printer-emulator/GameBoyPrinterDecoderJS/gameboy_printer_js_raw_decoder.html)
+  * [Arduino Printer Emulator](https://mofosyne.github.io/arduino-gameboy-printer-emulator/), and an online [decoder](https://mofosyne.github.io/arduino-gameboy-printer-emulator/GameBoyPrinterDecoderJS/gameboy_printer_js_raw_decoder.html)
   * [GBxCart communication protocol](https://github.com/lesserkuma/FlashGBX/blob/master/FlashGBX/hw_GBxCartRW.py), with the help of [Lesserkuma](https://github.com/lesserkuma).
   * [Gallery](https://herrzatacke.github.io/gb-printer-web/#/gallery) inspiration by [HerrZatacke](https://github.com/HerrZatacke/gb-printer-web).
   * Based on [gameboycameralib](https://github.com/KodeMunkie/gameboycameralib) to decode images, modified to work on Android.

@@ -27,11 +27,10 @@ public class Methods {
      * *******************************************************************
      * TO READ THE SAV IMAGES
      */
-//    protected static List<Bitmap> imageList = null;
+    protected static List<Bitmap> imageList100 = null;
 
     public static void extractSavImages(Context context) {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
-//        imageList = null;
         LocalDateTime now = LocalDateTime.now();
         File latestFile = null;
         try {
@@ -50,7 +49,19 @@ public class Methods {
 ////                        "Size: " + latestFile.length() / 1024 + "KB");
 //            }
 //            if (savFile.length() / 1024 == 128) {
-                MainActivity.imageList = extractor.extract(savFile);
+
+                //Extract the images
+
+            //Testing 3k images to see performance
+                imageList100 = extractor.extract(savFile);
+            for (Bitmap elemento : imageList100) {
+                // Bucle for que repite 100 veces y agrega cada elemento a la lista vacía
+                for (int i = 0; i < 100; i++) {
+                    MainActivity.imageList.add(elemento);
+                }
+            }
+//            Toast toast = Toast.makeText(context, MainActivity.imageList.size(), Toast.LENGTH_LONG);
+//            toast.show();
 //                tv.append("\nThe image list has: " + imageList.size() + " images.");
 
 //            for (int i = 0; i < imageList.size(); i++) {
@@ -76,6 +87,57 @@ public class Methods {
             e.printStackTrace();
         }
 //        return imageList;
+    }
+
+
+    public static class ImageAdapter extends BaseAdapter {
+        private List<Bitmap> images;
+        private Context context;
+        public int itemsPage;
+
+        public ImageAdapter(Context context, List<Bitmap> images, int itemsPage) {
+            this.context = context;
+            this.images = images;
+            this.itemsPage = itemsPage;
+        }
+
+        public int getCount() {
+            return images.size();
+        }
+//        public int getCount() {
+//            return itemsPerPage;
+//        }
+
+        public Object getItem(int position) {
+            return images.get(position);
+        }
+
+        public long getItemId(int position) {
+            return position;
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ImageView imageView;
+            if (convertView == null) {
+                // Si la vista aún no ha sido creada, inflar el layout del elemento de la lista
+                convertView = LayoutInflater.from(context).inflate(R.layout.row_items, parent, false);
+                // Crear una nueva vista de imagen
+                imageView = convertView.findViewById(R.id.imageView);
+                // Establecer la vista de imagen como la vista del elemento de la lista
+                convertView.setTag(imageView);
+            } else {
+                // Si la vista ya existe, obtener la vista de imagen del tag
+                imageView = (ImageView) convertView.getTag();
+            }
+            //Obtener la imagen de la lista
+
+            Bitmap image = images.get(position);
+
+
+            imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
+            return convertView;
+        }
+
     }
 
 

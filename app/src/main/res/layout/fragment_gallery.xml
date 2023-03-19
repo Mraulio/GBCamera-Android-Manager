@@ -31,9 +31,9 @@
         android:numColumns="3"
         android:verticalSpacing="10dp"
         tools:ignore="MissingConstraints" />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btnLoadImages"
-        tools:ignore="MissingConstraints"></Button>
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/btnLoadImages"-->
+<!--        tools:ignore="MissingConstraints"></Button>-->
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -20,14 +20,16 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
+import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
-    public static List<Bitmap> imageList;
+    public static List<Bitmap> imageList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,11 +71,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         /**
-         * I call the extractImagesSav method
+         * I call the extractImagesSav method and load the images on the GalleryFragment gridview
          */
-
         Methods.extractSavImages(this);
-
+        Methods.ImageAdapter imageAdapter = new Methods.ImageAdapter(this, MainActivity.imageList, MainActivity.imageList.size());
+        GalleryFragment.loadImages(imageAdapter);
+        /**
+         *
+         */
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

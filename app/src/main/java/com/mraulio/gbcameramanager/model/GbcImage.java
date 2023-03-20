@@ -6,6 +6,7 @@ public class GbcImage {
     private Bitmap bitmap;
     private int paletteIndex;
     private String name;
+    boolean favorite;
 
     public GbcImage(){}
 
@@ -37,5 +38,13 @@ public class GbcImage {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
     }
 }

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +34,7 @@ public class Methods {
     public static List<Bitmap> completeImageList;
     public static List<Bitmap> imageList = new ArrayList<>();
     public static ArrayList<GbcImage> gbcImagesList = new ArrayList<>();
+    public static List<GbcPalette> gbcPalettesList = new ArrayList<>();
 
     /**
      * *******************************************************************
@@ -67,7 +70,10 @@ public class Methods {
             //Create gbcImage objects for each image
             for (Bitmap image: imageList){
                 GbcImage gbcImage = new GbcImage();
-                gbcImage.setBitmap(image);
+                if (nameIndex%2==0)
+                gbcImage.setBitmap(cambiarPaleta(image,1));
+                else
+                    gbcImage.setBitmap(image);
                 gbcImage.setName("Image "+nameIndex);
                 gbcImagesList.add(gbcImage);
                 nameIndex++;
@@ -101,7 +107,49 @@ public class Methods {
         }
 //        return imageList;
     }
+    //Change Palette
+    public static Bitmap cambiarPaleta(Bitmap image, int index) {
 
+        int[] allpixels = new int[image.getHeight() * image.getWidth()];
+        image.getPixels(allpixels, 0, image.getWidth(), 0, 0, image.getWidth(), image.getHeight());
+        GbcPalette palette = gbcPalettesList.get(index);
+        for (int i = 0; i < allpixels.length; i++) {
+            if (allpixels[i] == gbcPalettesList.get(0).getPaletteColors()[0]) {
+                allpixels[i] = palette.getPaletteColors()[0];
+            } else if (allpixels[i] == gbcPalettesList.get(0).getPaletteColors()[1]) {
+                allpixels[i] = palette.getPaletteColors()[1];
+            } else if (allpixels[i] == gbcPalettesList.get(0).getPaletteColors()[2]) {
+                allpixels[i] = palette.getPaletteColors()[2];
+            } else if (allpixels[i] == gbcPalettesList.get(0).getPaletteColors()[3]) {
+                allpixels[i] = palette.getPaletteColors()[3];
+            }
+        }
+
+        image.setPixels(allpixels, 0, image.getWidth(), 0, 0, image.getWidth(), image.getHeight());
+        return image;
+    }
+//
+//    public static void updateGridView(int page, GridView gridView) {
+//        //Por si la lista de imagenes es mas corta que el tamaño de paginacion
+////        itemsPerPage = 12;
+//
+////        if (imageList.size() < itemsPerPage) {
+////            itemsPerPage = imageList.size();
+////        }
+////        int lastPage = (imageList.size() - 1) / itemsPerPage;
+//
+//        //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
+////        if (currentPage == lastPage) {
+////            itemsPerPage = imageList.size() % itemsPerPage;
+////            startIndex = imageList.size() - itemsPerPage;
+////            endIndex = imageList.size();
+////        } else {
+////            startIndex = page * itemsPerPage;
+////            endIndex = Math.min(startIndex + itemsPerPage, imageList.size());
+////        }
+//        List<Bitmap> imagesForPage = imageList;
+//        gridView.setAdapter(new ImageAdapter(gridView.getContext(), imagesForPage,imageList.size()));
+//    }
 
     public static class ImageAdapter extends BaseAdapter {
         private List<GbcImage> gbcImages;
@@ -152,8 +200,8 @@ public class Methods {
             Bitmap image = gbcImages.get(position).getBitmap();
             String name = gbcImages.get(position).getName();
 
-            imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 1, image.getHeight() * 20, false));
-            textView.setText(name);
+            imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
+//            textView.setText(name);
             return convertView;
         }
     }

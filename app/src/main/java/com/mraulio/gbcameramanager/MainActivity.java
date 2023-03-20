@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager;
 
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
@@ -20,6 +21,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
+import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.util.ArrayList;
@@ -69,16 +71,42 @@ public class MainActivity extends AppCompatActivity {
                     1);
         }
 
+        addPalettes();
         /**
          * I call the extractImagesSav method and load the images on the GalleryFragment gridview
          */
         Methods.extractSavImages(this);
+//        Methods.ImageAdapter imageAdapter = new Methods.ImageAdapter(this, Methods.gbcImagesList, Methods.gbcImagesList.size());
         Methods.CustomGridViewAdapter imageAdapter = new Methods.CustomGridViewAdapter(this, R.layout.row_items, Methods.gbcImagesList);
         GalleryFragment.loadImages(imageAdapter);
         /**
          *
          */
     }
+
+    private void addPalettes(){
+        //Palette GAMEBOY_LCD_PALETTE
+        int[] GAMEBOY_LCD_PALETTE = {
+                Color.rgb(155, 188, 15),
+                Color.rgb(139, 172, 15),
+                Color.rgb(48, 98, 48),
+                Color.rgb(15, 56, 15)
+        };
+        int[] EVEN_DIST_PALETTE = {
+                Color.rgb(255, 255, 255),
+                Color.rgb(170, 170, 170),
+                Color.rgb(85, 85, 85),
+                Color.rgb(0, 0, 0)
+        };
+        GbcPalette gbcPalette1 = new GbcPalette();
+        gbcPalette1.setPaletteColors(EVEN_DIST_PALETTE);
+        Methods.gbcPalettesList.add(gbcPalette1);
+        GbcPalette gbcPalette2 = new GbcPalette();
+        gbcPalette2.setPaletteColors(GAMEBOY_LCD_PALETTE);
+        Methods.gbcPalettesList.add(gbcPalette2);
+    }
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

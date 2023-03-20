@@ -36,7 +36,7 @@ public class SaveImageExtractor implements Extractor {
 
     @Override
     public List<Bitmap> extract(byte[] rawData) {
-        List<Bitmap> images = new ArrayList<>(31);//31 to get the last seen, but needs tweak
+        List<Bitmap> images = new ArrayList<>(30);//31 to get the last seen, but needs tweak
         try {
             for (int i = IMAGE_START_LOCATION; i < rawData.length; i += NEXT_IMAGE_START_OFFSET) {
 

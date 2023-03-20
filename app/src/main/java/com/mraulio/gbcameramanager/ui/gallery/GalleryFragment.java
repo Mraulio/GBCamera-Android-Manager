@@ -63,7 +63,7 @@ public class GalleryFragment extends Fragment {
          */
     }
 
-    public static void loadImages(Methods.ImageAdapter imageAdapter) {
+    public static void loadImages(Methods.CustomGridViewAdapter imageAdapter) {
         gridView.setAdapter(imageAdapter);
     }
 

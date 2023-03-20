@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
-    public static List<Bitmap> imageList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
          * I call the extractImagesSav method and load the images on the GalleryFragment gridview
          */
         Methods.extractSavImages(this);
-        Methods.ImageAdapter imageAdapter = new Methods.ImageAdapter(this, MainActivity.imageList, MainActivity.imageList.size());
+        Methods.CustomGridViewAdapter imageAdapter = new Methods.CustomGridViewAdapter(this, R.layout.row_items, Methods.gbcImagesList);
         GalleryFragment.loadImages(imageAdapter);
         /**
          *

@@ -12,6 +12,11 @@ public class GbcPalette {
 
     public GbcPalette(){}
 
+    public GbcPalette(int[] paletteColors, String name) {
+        this.paletteColors = paletteColors;
+        this.name = name;
+    }
+
     public int[] getPaletteColors() {
         return paletteColors;
     }

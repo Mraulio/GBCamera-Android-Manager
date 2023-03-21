@@ -1,6 +1,8 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
@@ -37,16 +40,17 @@ import java.util.ArrayList;
 
 public class PalettesFragment extends Fragment {
 
-//    private FragmentSlideshowBinding binding;
-
+    //    private FragmentSlideshowBinding binding;
+    CustomGridViewAdapterPalette imageAdapter;
     GridView gridViewPalettes;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
 
         View view = inflater.inflate(R.layout.fragment_palettes, container, false);
         Button btnColorPicker = view.findViewById(R.id.btnColorPicker);
-        ImageView imageViewPalette = view.findViewById(R.id.imageViewPalette);
+        Button btnAdd = view.findViewById(R.id.btnAdd);
         int[] selectedColors = new int[4];
 //        ColorPicker colorPicker = new ColorPicker(this);
 //        colorPicker.setColors(new int[] {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW});
@@ -84,8 +88,30 @@ public class PalettesFragment extends Fragment {
                         .show();
             }
         });
+        gridViewPalettes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Bitmap image = Methods.gbcPalettesList.get(position).paletteViewer();
+// Crear el diálogo personalizado
+                final Dialog dialog = new Dialog(getContext());
+                dialog.setContentView(R.layout.custom_dialog);
+//                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                ImageView imageView = dialog.findViewById(R.id.image_view);
+                imageView.setImageBitmap(image);
+//                builder.setView(imageView);
+                dialog.show();
+            }
+        });
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GbcPalette customPalette = new GbcPalette( new int[]{ Color.rgb(85, 85, 85), Color.rgb(85, 85, 85), Color.rgb(85, 85, 85), Color.rgb(85, 85, 85)},"Create");
+                imageAdapter.add(customPalette);
+                imageAdapter.notifyDataSetChanged();
+            }
+        });
 
-        CustomGridViewAdapterPalette imageAdapter = new CustomGridViewAdapterPalette(getContext(), R.layout.row_items, Methods.gbcPalettesList);
+        imageAdapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList);
         gridViewPalettes.setAdapter(imageAdapter);
         return view;
 //        PalettesViewModel slideshowViewModel =
@@ -138,7 +164,7 @@ public class PalettesFragment extends Fragment {
                 row = inflater.inflate(layoutResourceId, parent, false);
 
                 holder = new RecordHolder();
-                holder.txtTitle = (TextView) row.findViewById(R.id.tvName);
+                holder.txtTitle = (TextView) row.findViewById(R.id.tvPaletteName);
                 holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
                 row.setTag(holder);
             } else {
@@ -159,7 +185,6 @@ public class PalettesFragment extends Fragment {
 
         }
     }
-
 
 
 //    @Override

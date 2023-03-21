@@ -100,9 +100,11 @@ public class MainActivity extends AppCompatActivity {
         };
         GbcPalette gbcPalette1 = new GbcPalette();
         gbcPalette1.setPaletteColors(EVEN_DIST_PALETTE);
+        gbcPalette1.setName("Greyscale");
         Methods.gbcPalettesList.add(gbcPalette1);
         GbcPalette gbcPalette2 = new GbcPalette();
         gbcPalette2.setPaletteColors(GAMEBOY_LCD_PALETTE);
+        gbcPalette2.setName("DMG");
         Methods.gbcPalettesList.add(gbcPalette2);
     }
 

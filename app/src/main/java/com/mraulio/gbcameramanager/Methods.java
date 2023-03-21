@@ -34,7 +34,7 @@ public class Methods {
     public static List<Bitmap> completeImageList;
     public static List<Bitmap> imageList = new ArrayList<>();
     public static ArrayList<GbcImage> gbcImagesList = new ArrayList<>();
-    public static List<GbcPalette> gbcPalettesList = new ArrayList<>();
+    public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
 
     /**
      * *******************************************************************

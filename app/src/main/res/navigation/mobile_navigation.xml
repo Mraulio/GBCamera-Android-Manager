@@ -15,11 +15,11 @@
         android:id="@+id/nav_settings"
         android:name="com.mraulio.gbcameramanager.ui.settings.SettingsFragment"
         android:label="@string/menu_settings"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_settings" />
 
     <fragment
         android:id="@+id/nav_palettes"
         android:name="com.mraulio.gbcameramanager.ui.palettes.PalettesFragment"
         android:label="@string/menu_palettes"
-        tools:layout="@layout/fragment_slideshow" />
+        tools:layout="@layout/fragment_palettes" />
 </navigation>

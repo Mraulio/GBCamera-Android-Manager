@@ -9,4 +9,5 @@ Android app to manage a Game Boy Camera gallery and communicate via usb serial w
   * Based on [gameboycameralib](https://github.com/KodeMunkie/gameboycameralib) to decode images, modified to work on Android.
   * Library used for serial communication: [https://github.com/mik3y/usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android).
   * Personal Game Boy Camera Instagram account: [@gbcameroid](https://www.instagram.com/gbcameroid/).
+  * Using this as a [color picker library](https://github.com/QuadFlask/colorpicker)
 

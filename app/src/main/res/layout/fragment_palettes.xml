@@ -20,23 +20,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Color Picker"
-        android:id="@+id/btnColorPicker"
-        tools:ignore="MissingConstraints"></Button>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add palette"
         android:id="@+id/btnAdd"
         tools:ignore="MissingConstraints"></Button>
-    <ImageView
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:id="@+id/imageViewPalette"
-        tools:ignore="MissingConstraints"></ImageView>
+
     <GridView
         android:id="@+id/gridViewPalettes"
         android:layout_width="wrap_content"
@@ -47,8 +38,7 @@
         android:stretchMode="columnWidth"
         android:scrollbars="horizontal"
         android:numColumns="3"
-        android:verticalSpacing="10dp"
-        tools:ignore="MissingConstraints" />
+        android:verticalSpacing="10dp" />
 <!--    <FrameLayout-->
 <!--        android:id="@+id/color_picker_container"-->
 <!--        android:layout_width="match_parent"-->

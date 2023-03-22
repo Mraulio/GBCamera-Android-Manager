@@ -91,14 +91,74 @@ public class GalleryFragment extends Fragment {
 
 //        btnLoadImages.setOnClickListener(v -> loadImages());
 
+        /**
+         * Dialog when clicking an image
+         */
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int selectedPosition=0;
+
+                // Obtener la imagen seleccionada
+                if (currentPage != lastPage) {
+                    selectedPosition = position + (currentPage * itemsPerPage);
+                }else{
+                    selectedPosition = listBitmaps.size()-(itemsPerPage-position);
+                }
+                Bitmap selectedImage = listBitmaps.get(selectedPosition);
+
+                // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
                 dialog.setContentView(R.layout.custom_dialog);
+
+                // Configurar la vista de imagen del diálogo
+                ImageView imageView = dialog.findViewById(R.id.image_view);
+                imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage, selectedImage.getWidth() * 6, selectedImage.getHeight() * 6, false));
+
+                // Configurar el botón de cierre del diálogo
+                Button saveButton = dialog.findViewById(R.id.save_button);
+                Button paletteButton = dialog.findViewById(R.id.btn_palette);
+
+
+//                saveButton.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        LocalDateTime now = LocalDateTime.now();
+//                        String fileName = "image_";
+//                        fileName += dtf.format(now) + ".png";
+//                        saveImage(selectedImage, fileName);
+//                    }
+//                });
+
+//                paletteButton.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        cambiarPaleta(selectedImage);
+//                        int selectedPosition2=0;
+//
+//                        // Obtener la imagen seleccionada
+//                        if (currentPage != lastPage) {
+//                            selectedPosition2 = position + (currentPage * itemsPerPage);
+//                        }else{
+//                            selectedPosition2 = imageList.size()-(itemsPerPage-position);
+//                        }
+//                        imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage, selectedImage.getWidth() * 6, selectedImage.getHeight() * 6, false));
+//                        imageList.set(selectedPosition2, selectedImage);
+//                        updateGridView(currentPage, gridView);
+//                    }
+//                });
+
+// Configurar el diálogo para que ocupe toda la pantalla
+//                Window window = dialog.getWindow();
+//                window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+//
+//// Configurar el diálogo para que sea transparente
+//                window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                // Mostrar el diálogo
                 dialog.show();
             }
         });
+
 
 
         /**

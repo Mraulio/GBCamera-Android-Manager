@@ -4,19 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.palettes.PalettesFragment">
+    tools:context=".ui.settings.SettingsFragment">
 
     <TextView
-        android:id="@+id/text_slideshow"
+        android:id="@+id/text_settings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:textAlignment="center"
+        android:text="Settings"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+<!--    Spinner for selecting export size-->
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/spExportSize"
+        tools:ignore="MissingConstraints"></Spinner>
 </androidx.constraintlayout.widget.ConstraintLayout>

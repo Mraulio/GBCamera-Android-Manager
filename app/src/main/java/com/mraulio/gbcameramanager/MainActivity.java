@@ -1,12 +1,18 @@
 package com.mraulio.gbcameramanager;
 
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
+import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -15,6 +21,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
+import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        addPalettes();//Before loading gallery fragment
+        Methods.extractSavImages(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -36,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         // Passing each menu ID as a set of Ids because each
@@ -47,6 +61,53 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        /**
+         * I ask for storage permissions
+         */
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            // Ask for permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    1);
+        }
+
+    }
+
+    private void addPalettes() {
+        //Palette GAMEBOY_LCD_PALETTE
+        int[] GAMEBOY_LCD_PALETTE = {
+                Color.rgb(155, 188, 15),
+                Color.rgb(139, 172, 15),
+                Color.rgb(48, 98, 48),
+                Color.rgb(15, 56, 15)
+        };
+        int[] EVEN_DIST_PALETTE = {
+                Color.rgb(255, 255, 255),
+                Color.rgb(170, 170, 170),
+                Color.rgb(85, 85, 85),
+                Color.rgb(0, 0, 0)
+        };
+        GbcPalette gbcPalette1 = new GbcPalette();
+        gbcPalette1.setPaletteColors(EVEN_DIST_PALETTE);
+        gbcPalette1.setName("Greyscale");
+        Methods.gbcPalettesList.add(gbcPalette1);
+        GbcPalette gbcPalette2 = new GbcPalette();
+        gbcPalette2.setPaletteColors(GAMEBOY_LCD_PALETTE);
+        gbcPalette2.setName("DMG");
+        Methods.gbcPalettesList.add(gbcPalette2);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            System.out.println("PERMISION GRANTED*********************");            //resume tasks needing this permission
+            Toast toast = Toast.makeText(this, "Permisos otorgados", Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -28,12 +30,17 @@ import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GalleryFragment extends Fragment {
 
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
 
     //    List<Bitmap> imageList;
     public static GridView gridView;
@@ -120,15 +127,15 @@ public class GalleryFragment extends Fragment {
                 Button paletteButton = dialog.findViewById(R.id.btn_palette);
 
 
-//                saveButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        LocalDateTime now = LocalDateTime.now();
-//                        String fileName = "image_";
-//                        fileName += dtf.format(now) + ".png";
-//                        saveImage(selectedImage, fileName);
-//                    }
-//                });
+                saveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        LocalDateTime now = LocalDateTime.now();
+                        String fileName = "image_";
+                        fileName += dtf.format(now) + ".png";
+                        saveImage(selectedImage, fileName);
+                    }
+                });
 
 //                paletteButton.setOnClickListener(new View.OnClickListener() {
 //                    @Override
@@ -187,7 +194,35 @@ public class GalleryFragment extends Fragment {
 //        int endIndex = startIndex + itemsPerPage;
 //        gridView.setAdapter(new CustomGridViewAdapter(getActivity(), R.layout.row_items, Methods.gbcImagesList.subList(startIndex, endIndex)));
 //    }
+private void saveImage(Bitmap image, String fileName) {
+    File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+    File file = new File(directory, fileName);
+    try {
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists() && !parent.mkdirs()) {
+            throw new IllegalStateException("Couldn't create dir: " + parent);
+        }
+//            if (!file.exists()) { // Si no existe, crea el archivo.
+//                file.createNewFile();
+//            }
+    } catch (Exception e) {
+//        Toast toast = Toast.makeText(get, "Error al crear el fichero" + e.toString(), Toast.LENGTH_LONG);
+//        toast.show();
+    }
+    try (FileOutputStream out = new FileOutputStream(file)) {
+        Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false);
 
+        scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+        Toast toast = Toast.makeText(getContext(), "SAVED", Toast.LENGTH_LONG);
+        toast.show();
+        // PNG is a lossless format, the compression factor (100) is ignored
+
+    } catch (IOException e) {
+        e.printStackTrace();
+//        Toast toast = Toast.makeText(this, "Error al crear el fos" + e.toString(), Toast.LENGTH_LONG);
+//        toast.show();
+    }
+}
 
     private void updateGridView(int page, GridView gridView) {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion

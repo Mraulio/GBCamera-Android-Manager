@@ -33,7 +33,7 @@ public class Methods {
 
     public static List<Bitmap> completeImageList;
     public static List<Bitmap> imageList = new ArrayList<>();
-    public static ArrayList<GbcImage> gbcImagesList = new ArrayList<>();
+    public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
 
     /**
@@ -49,7 +49,7 @@ public class Methods {
         try {
             File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-            File savFile = new File(downloadsDirectory + "/PHOTO_2023-01-14_17-32-04_Ramen_Gansos.sav");
+            File savFile = new File(downloadsDirectory + "/gbc.sav");
 //            File[] files = folder.listFiles();
 //            if (files != null && files.length > 0) {
 //                Arrays.sort(files, new Comparator<File>() {
@@ -69,6 +69,7 @@ public class Methods {
             int nameIndex = 1;
             //Create gbcImage objects for each image
             for (Bitmap image: imageList){
+                GbcImage.numImages++;
                 GbcImage gbcImage = new GbcImage();
                 if (nameIndex%2==0)
                 gbcImage.setBitmap(cambiarPaleta(image,1));
@@ -206,53 +207,7 @@ public class Methods {
         }
     }
 
-    /**
-     * Other way to show images on the GridView, with the Text
-     */
-    public static class CustomGridViewAdapter extends ArrayAdapter<GbcImage> {
-        Context context;
-        int layoutResourceId;
-        ArrayList<GbcImage> data = new ArrayList<GbcImage>();
 
-        public CustomGridViewAdapter(Context context, int layoutResourceId,
-                                     ArrayList<GbcImage> data) {
-            super(context, layoutResourceId, data);
-            this.layoutResourceId = layoutResourceId;
-            this.context = context;
-            this.data = data;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View row = convertView;
-            RecordHolder holder = null;
-
-            if (row == null) {
-                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-                row = inflater.inflate(layoutResourceId, parent, false);
-
-                holder = new RecordHolder();
-                holder.txtTitle = (TextView) row.findViewById(R.id.tvName);
-                holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
-                row.setTag(holder);
-            } else {
-                holder = (RecordHolder) row.getTag();
-            }
-
-            Bitmap image = data.get(position).getBitmap();
-            String name = data.get(position).getName();
-            holder.txtTitle.setText(name);
-            holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
-            return row;
-
-        }
-
-        private class RecordHolder {
-            TextView txtTitle;
-            ImageView imageItem;
-
-        }
-    }
 
 
 }

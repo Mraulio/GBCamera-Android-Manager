@@ -53,7 +53,6 @@ public class GbcPalette {
             canvas.drawRect(rect, paint);
         }
         return bitmap;
-// Establece el bitmap resultante como origen del ImageView
-//        imageViewPalette.setImageBitmap(bitmap);
+
     }
 }

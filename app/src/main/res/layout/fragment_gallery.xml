@@ -1,39 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.gallery.GalleryFragment">
+    tools:context=".ui.gallery.GalleryFragment"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:weightSum="3">
 
-    <TextView
-        android:id="@+id/text_gallery"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <GridView
-        android:id="@+id/gridView"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_weight="2">
+        <TextView
+            android:id="@+id/text_gallery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAlignment="center"
+            android:textSize="20sp"/>
+        <GridView
+            android:id="@+id/gridView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#D5D5D5"
+            android:horizontalSpacing="10dp"
+            android:stretchMode="columnWidth"
+            android:scrollbars="horizontal"
+            android:numColumns="3"
+            android:verticalSpacing="10dp"/>
+    </LinearLayout>
+
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:layout_weight="1">
+    <Button
+        android:id="@+id/btnPrevPage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="#D5D5D5"
-        android:horizontalSpacing="10dp"
-        android:stretchMode="columnWidth"
-        android:scrollbars="horizontal"
-        android:numColumns="3"
-        android:verticalSpacing="10dp"
-        tools:ignore="MissingConstraints" />
-<!--    <Button-->
+        android:text="Prev"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_page"
+        android:layout_marginHorizontal="20dp"
+        android:text="Page X of X"></TextView>
+    <Button
+        android:id="@+id/btnNextPage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NExt"/>
+</LinearLayout>
+
+
+    <!--    <Button-->
 <!--        android:layout_width="wrap_content"-->
 <!--        android:layout_height="wrap_content"-->
 <!--        android:id="@+id/btnLoadImages"-->
 <!--        tools:ignore="MissingConstraints"></Button>-->
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        addPalettes();//Before loading gallery fragment
+        Methods.extractSavImages(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         // Passing each menu ID as a set of Ids because each
@@ -71,20 +74,9 @@ public class MainActivity extends AppCompatActivity {
                     1);
         }
 
-        addPalettes();
-        /**
-         * I call the extractImagesSav method and load the images on the GalleryFragment gridview
-         */
-        Methods.extractSavImages(this);
-//        Methods.ImageAdapter imageAdapter = new Methods.ImageAdapter(this, Methods.gbcImagesList, Methods.gbcImagesList.size());
-        Methods.CustomGridViewAdapter imageAdapter = new Methods.CustomGridViewAdapter(this, R.layout.row_items, Methods.gbcImagesList);
-        GalleryFragment.loadImages(imageAdapter);
-        /**
-         *
-         */
     }
 
-    private void addPalettes(){
+    private void addPalettes() {
         //Palette GAMEBOY_LCD_PALETTE
         int[] GAMEBOY_LCD_PALETTE = {
                 Color.rgb(155, 188, 15),
@@ -107,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
         gbcPalette2.setName("DMG");
         Methods.gbcPalettesList.add(gbcPalette2);
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

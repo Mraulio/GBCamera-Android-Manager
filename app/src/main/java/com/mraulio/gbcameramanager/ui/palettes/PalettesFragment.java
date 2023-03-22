@@ -246,15 +246,6 @@ public class PalettesFragment extends Fragment {
         imageAdapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList);
         gridViewPalettes.setAdapter(imageAdapter);
         return view;
-//        PalettesViewModel slideshowViewModel =
-//                new ViewModelProvider(this).get(PalettesViewModel.class);
-//
-//        binding = FragmentSlideshowBinding.inflate(inflater, container, false);
-//        View root = binding.getRoot();
-//
-//        final TextView textView = binding.textSlideshow;
-//        slideshowViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-//        return root;
 
     }
 
@@ -340,10 +331,5 @@ public class PalettesFragment extends Fragment {
         return bitmap;
     }
 
-//    @Override
-//    public void onDestroyView() {btnColorPicker.setOnClickListener(new View.OnClickListener() {
 
-//        super.onDestroyView();
-//        binding = null;
-//    }
 }

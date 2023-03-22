@@ -7,6 +7,7 @@ public class GbcImage {
     private int paletteIndex;
     private String name;
     boolean favorite;
+    public static int numImages= 0;
 
     public GbcImage(){}
 

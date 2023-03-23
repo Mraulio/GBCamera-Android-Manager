@@ -10,5 +10,6 @@ import java.io.IOException;
  */
 public interface Codec {
     Bitmap decode(byte[] data);
+    Bitmap decodeWithPalette(int paletteIndex,byte[] data);
     byte[] encode(Bitmap image) throws IOException;
 }

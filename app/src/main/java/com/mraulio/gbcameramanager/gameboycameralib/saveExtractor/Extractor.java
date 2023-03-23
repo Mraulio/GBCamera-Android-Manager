@@ -31,6 +31,13 @@ public interface Extractor {
      */
     List<Bitmap> extract(byte[] rawData);
 
+
+
+
+    //Added by Mraulio
+    List<byte[]> extractBytes(byte[] rawData);
+    List<byte[]> extractBytes(File file) throws IOException;
+
     /**
      * Extract images from a local file system file and return as PNG byte data
      *

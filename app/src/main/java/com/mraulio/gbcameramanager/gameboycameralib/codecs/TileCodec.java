@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.gameboycameralib.codecs;
 
 import android.graphics.Bitmap;
 
+import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
 
@@ -19,11 +20,16 @@ public class TileCodec implements Codec {
     public static final int TILE_WIDTH = 8;
     public static final int TILE_HEIGHT = 8;
     public static final int TILE_BYTES_LENGTH = 16;
+    private int paletteIndex;
 
-    private final IndexedPalette palette;
+    private IndexedPalette palette = new IndexedPalette();
 
     public TileCodec(IndexedPalette palette) {
         this.palette = palette;
+    }
+    //Added by Mraulio
+    public TileCodec(int paletteIndex) {
+        this.paletteIndex = paletteIndex;
     }
 
     @Override
@@ -39,6 +45,20 @@ public class TileCodec implements Codec {
         }
         return buf;
     }
+
+    @Override
+    public Bitmap decodeWithPalette(int paletteIndex, byte[] tileData) {
+        Bitmap buf = Bitmap.createBitmap(TILE_WIDTH, TILE_HEIGHT, Bitmap.Config.ARGB_8888);
+        int[] color = Methods.gbcPalettesList.get(paletteIndex).getPaletteColors();
+        for (int y=0; y<TILE_HEIGHT; y++) {
+            byte lowByte = reverseBitEndianess(tileData[y*ROW_BYTES]);
+            byte highByte = reverseBitEndianess(tileData[y*ROW_BYTES+1]);
+            for (int x=0; x<TILE_WIDTH; x++) {
+                int paletteIndexx = getPaletteIndex(getBit(lowByte, x), getBit(highByte, x));
+                buf.setPixel(x, y, color[paletteIndexx]);
+            }
+        }
+        return buf;    }
 
     @Override
     public byte[] encode(Bitmap buf) {
@@ -80,6 +100,10 @@ public class TileCodec implements Codec {
         index |= lowBit;
         return index;
     }
+
+
+
+
     /**
      * Los datos transmitidos en GB (dump de memoria o impresora) tienen bits con endianness invertido
      * @param byteToReverse

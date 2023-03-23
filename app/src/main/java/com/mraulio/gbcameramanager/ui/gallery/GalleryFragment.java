@@ -1,5 +1,8 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.IMAGE_HEIGHT;
+import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.IMAGE_WIDTH;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -29,6 +32,8 @@ import androidx.fragment.app.Fragment;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
+import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
@@ -53,7 +58,7 @@ public class GalleryFragment extends Fragment {
     static int endIndex = 0;
     static int currentPage = 0;
     static int lastPage = 0;
-    List<Bitmap> listBitmaps = new ArrayList<>();
+//    List<Bitmap> listBitmaps = new ArrayList<>();
     TextView tv_page;
 
 
@@ -105,9 +110,9 @@ public class GalleryFragment extends Fragment {
                 if (currentPage != lastPage) {
                     selectedPosition = position + (currentPage * itemsPerPage);
                 } else {
-                    selectedPosition = listBitmaps.size() - (itemsPerPage - position);
+                    selectedPosition = Methods.completeImageList.size() - (itemsPerPage - position);
                 }
-                Bitmap selectedImage = listBitmaps.get(selectedPosition);
+                Bitmap selectedImage = Methods.completeImageList.get(selectedPosition);
 
                 // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
@@ -166,10 +171,15 @@ public class GalleryFragment extends Fragment {
          * I call the extractImagesSav method and load the images on the GalleryFragment gridview
          */
 //        Methods.ImageAdapter imageAdapter = new Methods.ImageAdapter(this, Methods.gbcImagesList, Methods.gbcImagesList.size());
-        for (GbcImage image : Methods.gbcImagesList) {
-            listBitmaps.add(image.getBitmap());
-        }
-        gridView.setAdapter(new CustomGridViewAdapter(getActivity(), listBitmaps, itemsPerPage));
+        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(IndexedPalette.GAMEBOY_LCD_PALETTE), IMAGE_WIDTH, IMAGE_HEIGHT);
+
+        //TOO SLOW, BETTER TO DECODE BEFORE THE IMAGES AND THEN GRAB THE BITMAP LIST FROM THE DECODED IMAGES HERE
+//        for (Bitmap image : Methods.completeImageList) {
+////            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(IndexedPalette.GAMEBOY_LCD_PALETTE), IMAGE_WIDTH, IMAGE_HEIGHT);
+//
+//            listBitmaps.add(image);
+//        }
+        gridView.setAdapter(new CustomGridViewAdapter(getActivity(), Methods.completeImageList, itemsPerPage));
         lastPage = (Methods.gbcImagesList.size() - 1) / itemsPerPage;
         tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
 
@@ -245,25 +255,26 @@ public class GalleryFragment extends Fragment {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
         itemsPerPage = 9;
 
-        if (Methods.gbcImagesList.size() < itemsPerPage) {
-            itemsPerPage = Methods.gbcImagesList.size();
+        if (Methods.completeImageList.size() < itemsPerPage) {
+            itemsPerPage = Methods.completeImageList.size();
         }
-        int lastPage = (Methods.gbcImagesList.size() - 1) / itemsPerPage;
+        int lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
 
         //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
         if (currentPage == lastPage) {
-            itemsPerPage = Methods.gbcImagesList.size() % itemsPerPage;
-            startIndex = Methods.gbcImagesList.size() - itemsPerPage;
-            endIndex = Methods.gbcImagesList.size();
+            itemsPerPage = Methods.completeImageList.size() % itemsPerPage;
+            startIndex = Methods.completeImageList.size() - itemsPerPage;
+            endIndex = Methods.completeImageList.size();
         } else {
             startIndex = page * itemsPerPage;
-            endIndex = Math.min(startIndex + itemsPerPage, Methods.gbcImagesList.size());
+            endIndex = Math.min(startIndex + itemsPerPage, Methods.completeImageList.size());
         }
-        List<Bitmap> listBitmaps = new ArrayList<>();
-        for (GbcImage image : Methods.gbcImagesList) {
-            listBitmaps.add(image.getBitmap());
-        }
-        List<Bitmap> imagesForPage = listBitmaps.subList(startIndex, endIndex);
+//        List<Bitmap> listBitmaps = new ArrayList<>();
+//        for (GbcImage image : Methods.gbcImagesList) {
+//            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(IndexedPalette.GAMEBOY_LCD_PALETTE), IMAGE_WIDTH, IMAGE_HEIGHT);
+////            listBitmaps.add(imageCodec.decode(image.getImageBytes()));
+//        }
+        List<Bitmap> imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
         gridView.setAdapter(new CustomGridViewAdapter(getContext(), imagesForPage, itemsPerPage));
     }
 

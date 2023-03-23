@@ -73,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         }
-
     }
 
     private void addPalettes() {

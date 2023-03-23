@@ -8,7 +8,9 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -52,6 +54,7 @@ public class GalleryFragment extends Fragment {
     static int currentPage = 0;
     static int lastPage = 0;
     List<Bitmap> listBitmaps = new ArrayList<>();
+    TextView tv_page;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -63,34 +66,26 @@ public class GalleryFragment extends Fragment {
 
         Button btnPrevPage = (Button) view.findViewById(R.id.btnPrevPage);
         Button btnNextPage = (Button) view.findViewById(R.id.btnNextPage);
-        TextView tv_page = (TextView) view.findViewById(R.id.tv_page);
+        tv_page = (TextView) view.findViewById(R.id.tv_page);
 
+        view.setOnTouchListener(new OnSwipeTouchListener(getContext()) {
+            @Override
+            public void onSwipeLeft() {
+                // Whatever
+            }
+        });
 
         btnPrevPage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (currentPage > 0) {
-                    currentPage--;
-                    updateGridView(currentPage, gridView);
-//                    tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
-
-                }
+                prevPage();
             }
         });
 
         btnNextPage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int lastPage = (Methods.gbcImagesList.size() - 1) / itemsPerPage;
-
-                if (currentPage < lastPage) {
-
-                    currentPage++;
-                    System.out.println("***************last page " + lastPage);
-                    System.out.println("***************current page " + currentPage);
-                    updateGridView(currentPage, gridView);
-                    tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
-                }
+                nextPage();
             }
         });
 
@@ -104,13 +99,13 @@ public class GalleryFragment extends Fragment {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                int selectedPosition=0;
+                int selectedPosition = 0;
 
                 // Obtener la imagen seleccionada
                 if (currentPage != lastPage) {
                     selectedPosition = position + (currentPage * itemsPerPage);
-                }else{
-                    selectedPosition = listBitmaps.size()-(itemsPerPage-position);
+                } else {
+                    selectedPosition = listBitmaps.size() - (itemsPerPage - position);
                 }
                 Bitmap selectedImage = listBitmaps.get(selectedPosition);
 
@@ -167,7 +162,6 @@ public class GalleryFragment extends Fragment {
         });
 
 
-
         /**
          * I call the extractImagesSav method and load the images on the GalleryFragment gridview
          */
@@ -189,40 +183,63 @@ public class GalleryFragment extends Fragment {
 
     }
 
-//    public void loadImages(CustomGridViewAdapter imageAdapter) {
+
+    //Previous page
+    private void prevPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            updateGridView(currentPage, gridView);
+//                    tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
+        }
+    }
+
+    private void nextPage(){
+        int lastPage = (Methods.gbcImagesList.size() - 1) / itemsPerPage;
+
+        if (currentPage < lastPage) {
+
+            currentPage++;
+            System.out.println("***************last page " + lastPage);
+            System.out.println("***************current page " + currentPage);
+            updateGridView(currentPage, gridView);
+            tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
+        }
+    }
+
+    //    public void loadImages(CustomGridViewAdapter imageAdapter) {
 //        int startIndex = pageNumber * itemsPerPage;
 //        int endIndex = startIndex + itemsPerPage;
 //        gridView.setAdapter(new CustomGridViewAdapter(getActivity(), R.layout.row_items, Methods.gbcImagesList.subList(startIndex, endIndex)));
 //    }
-private void saveImage(Bitmap image, String fileName) {
-    File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-    File file = new File(directory, fileName);
-    try {
-        File parent = file.getParentFile();
-        if (parent != null && !parent.exists() && !parent.mkdirs()) {
-            throw new IllegalStateException("Couldn't create dir: " + parent);
-        }
+    private void saveImage(Bitmap image, String fileName) {
+        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(directory, fileName);
+        try {
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                throw new IllegalStateException("Couldn't create dir: " + parent);
+            }
 //            if (!file.exists()) { // Si no existe, crea el archivo.
 //                file.createNewFile();
 //            }
-    } catch (Exception e) {
+        } catch (Exception e) {
 //        Toast toast = Toast.makeText(get, "Error al crear el fichero" + e.toString(), Toast.LENGTH_LONG);
 //        toast.show();
-    }
-    try (FileOutputStream out = new FileOutputStream(file)) {
-        Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false);
+        }
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false);
 
-        scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
-        Toast toast = Toast.makeText(getContext(), "SAVED", Toast.LENGTH_LONG);
-        toast.show();
-        // PNG is a lossless format, the compression factor (100) is ignored
+            scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+            Toast toast = Toast.makeText(getContext(), "SAVED", Toast.LENGTH_LONG);
+            toast.show();
+            // PNG is a lossless format, the compression factor (100) is ignored
 
-    } catch (IOException e) {
-        e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
 //        Toast toast = Toast.makeText(this, "Error al crear el fos" + e.toString(), Toast.LENGTH_LONG);
 //        toast.show();
+        }
     }
-}
 
     private void updateGridView(int page, GridView gridView) {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
@@ -307,6 +324,54 @@ private void saveImage(Bitmap image, String fileName) {
             TextView txtTitle;
             ImageView imageItem;
 
+        }
+    }
+
+    //https://stackoverflow.com/questions/4139288/android-how-to-handle-right-to-left-swipe-gestures
+    /**
+     * Detects left and right swipes across a view.
+     */
+    public class OnSwipeTouchListener implements View.OnTouchListener {
+
+        private final GestureDetector gestureDetector;
+
+        public OnSwipeTouchListener(Context context) {
+            gestureDetector = new GestureDetector(context, new GestureListener());
+        }
+
+        public void onSwipeLeft() {
+        }
+
+        public void onSwipeRight() {
+        }
+
+        public boolean onTouch(View v, MotionEvent event) {
+            return gestureDetector.onTouchEvent(event);
+        }
+
+        private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
+
+            private static final int SWIPE_DISTANCE_THRESHOLD = 100;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                float distanceX = e2.getX() - e1.getX();
+                float distanceY = e2.getY() - e1.getY();
+                if (Math.abs(distanceX) > Math.abs(distanceY) && Math.abs(distanceX) > SWIPE_DISTANCE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (distanceX > 0)
+                        onSwipeRight();
+                    else
+                        onSwipeLeft();
+                    return true;
+                }
+                return false;
+            }
         }
     }
 

@@ -63,7 +63,7 @@ public class ImageCodec implements Codec {
         for (int i = 0; i < data.length; i += TileCodec.TILE_BYTES_LENGTH) {
             byte[] tileData = new byte[TileCodec.TILE_BYTES_LENGTH];
             System.arraycopy(data, i, tileData, 0, TileCodec.TILE_BYTES_LENGTH);
-            Bitmap tile = tileCodec.decode(tileData);
+            Bitmap tile = tileCodec.decodeWithPalette(paletteIndex,tileData);
             canvas.drawBitmap(tile, xPos, yPos, null);
             xPos += TileCodec.TILE_WIDTH;
             if (xPos >= imageWidth) {

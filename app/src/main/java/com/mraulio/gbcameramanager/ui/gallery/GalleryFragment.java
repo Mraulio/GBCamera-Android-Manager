@@ -113,6 +113,7 @@ public class GalleryFragment extends Fragment {
                     selectedPosition = Methods.completeImageList.size() - (itemsPerPage - position);
                 }
                 Bitmap selectedImage = Methods.completeImageList.get(selectedPosition);
+                byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
 
                 // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
@@ -137,23 +138,24 @@ public class GalleryFragment extends Fragment {
                     }
                 });
 
-//                paletteButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        cambiarPaleta(selectedImage);
-//                        int selectedPosition2=0;
-//
-//                        // Obtener la imagen seleccionada
-//                        if (currentPage != lastPage) {
-//                            selectedPosition2 = position + (currentPage * itemsPerPage);
-//                        }else{
-//                            selectedPosition2 = imageList.size()-(itemsPerPage-position);
-//                        }
-//                        imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage, selectedImage.getWidth() * 6, selectedImage.getHeight() * 6, false));
-//                        imageList.set(selectedPosition2, selectedImage);
-//                        updateGridView(currentPage, gridView);
-//                    }
-//                });
+                //This needs to save the paletteIndex data to the GbcImage object*******************
+                paletteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bitmap changedImage = paletteChanger(selectedImageBytes);
+                        int selectedPosition2;
+
+                        // Obtener la imagen seleccionada
+                        if (currentPage != lastPage) {
+                            selectedPosition2 = position + (currentPage * itemsPerPage);
+                        }else{
+                            selectedPosition2 = Methods.completeImageList.size()-(itemsPerPage-position);
+                        }
+                        imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
+                        Methods.completeImageList.set(selectedPosition2, changedImage);
+                        updateGridView(currentPage, gridView);
+                    }
+                });
 
 // Configurar el diálogo para que ocupe toda la pantalla
 //                Window window = dialog.getWindow();
@@ -193,7 +195,13 @@ public class GalleryFragment extends Fragment {
 
     }
 
+    //Cambiar paleta
+    public Bitmap paletteChanger(byte[] imageBytes) {
+        ImageCodec imageCodec = new ImageCodec(0, IMAGE_WIDTH, IMAGE_HEIGHT);
+        Bitmap image = imageCodec.decodeWithPalette(0,imageBytes);
 
+        return image;
+    }
     //Previous page
     private void prevPage() {
         if (currentPage > 0) {

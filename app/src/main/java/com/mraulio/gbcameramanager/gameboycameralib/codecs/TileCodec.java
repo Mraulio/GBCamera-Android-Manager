@@ -35,14 +35,14 @@ public class TileCodec implements Codec {
     @Override
     public Bitmap decode(byte[] tileData) {
         Bitmap buf = Bitmap.createBitmap(TILE_WIDTH, TILE_HEIGHT, Bitmap.Config.ARGB_8888);
-        for (int y=0; y<TILE_HEIGHT; y++) {
-            byte lowByte = reverseBitEndianess(tileData[y*ROW_BYTES]);
-            byte highByte = reverseBitEndianess(tileData[y*ROW_BYTES+1]);
-            for (int x=0; x<TILE_WIDTH; x++) {
-                int paletteIndex = getPaletteIndex(getBit(lowByte, x), getBit(highByte, x));
-                buf.setPixel(x, y, palette.getRGB(paletteIndex));
-            }
-        }
+//        for (int y=0; y<TILE_HEIGHT; y++) {
+//            byte lowByte = reverseBitEndianess(tileData[y*ROW_BYTES]);
+//            byte highByte = reverseBitEndianess(tileData[y*ROW_BYTES+1]);
+//            for (int x=0; x<TILE_WIDTH; x++) {
+//                int paletteIndex = getPaletteIndex(getBit(lowByte, x), getBit(highByte, x));
+//                buf.setPixel(x, y, palette.getRGB(paletteIndex));
+//            }
+//        }
         return buf;
     }
 

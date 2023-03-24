@@ -82,8 +82,8 @@ public class Methods {
 //                    gbcImage.setBitmap(imageBytes);
                 gbcImage.setName("Image " + (GbcImage.numImages + 1));
                 gbcImagesList.add(gbcImage);
-                ImageCodec imageCodec = new ImageCodec(1, IMAGE_WIDTH, IMAGE_HEIGHT);
-                completeImageList.add(imageCodec.decodeWithPalette(1, gbcImage.getImageBytes()));
+                ImageCodec imageCodec = new ImageCodec(0, IMAGE_WIDTH, IMAGE_HEIGHT);
+                completeImageList.add(imageCodec.decodeWithPalette(0, gbcImage.getImageBytes()));
             }
 
 

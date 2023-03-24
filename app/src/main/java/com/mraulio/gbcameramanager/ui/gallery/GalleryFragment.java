@@ -112,7 +112,7 @@ public class GalleryFragment extends Fragment {
                 } else {
                     selectedPosition = Methods.completeImageList.size() - (itemsPerPage - position);
                 }
-                Bitmap selectedImage = Methods.completeImageList.get(selectedPosition);
+                final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
                 byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
 
                 // Crear el diálogo personalizado
@@ -121,7 +121,7 @@ public class GalleryFragment extends Fragment {
 
                 // Configurar la vista de imagen del diálogo
                 ImageView imageView = dialog.findViewById(R.id.image_view);
-                imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage, selectedImage.getWidth() * 6, selectedImage.getHeight() * 6, false));
+                imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
 
                 // Configurar el botón de cierre del diálogo
                 Button saveButton = dialog.findViewById(R.id.save_button);
@@ -134,7 +134,7 @@ public class GalleryFragment extends Fragment {
                         LocalDateTime now = LocalDateTime.now();
                         String fileName = "image_";
                         fileName += dtf.format(now) + ".png";
-                        saveImage(selectedImage, fileName);
+                        saveImage(selectedImage[0], fileName);
                     }
                 });
 
@@ -144,12 +144,12 @@ public class GalleryFragment extends Fragment {
                     public void onClick(View v) {
                         Bitmap changedImage = paletteChanger(selectedImageBytes);
                         int selectedPosition2;
-
+                        selectedImage[0] = changedImage;
                         // Obtener la imagen seleccionada
                         if (currentPage != lastPage) {
                             selectedPosition2 = position + (currentPage * itemsPerPage);
-                        }else{
-                            selectedPosition2 = Methods.completeImageList.size()-(itemsPerPage-position);
+                        } else {
+                            selectedPosition2 = Methods.completeImageList.size() - (itemsPerPage - position);
                         }
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
                         Methods.completeImageList.set(selectedPosition2, changedImage);
@@ -197,12 +197,13 @@ public class GalleryFragment extends Fragment {
 
     //Cambiar paleta
     public Bitmap paletteChanger(byte[] imageBytes) {
-        ImageCodec imageCodec = new ImageCodec(0, IMAGE_WIDTH, IMAGE_HEIGHT);
-        Bitmap image = imageCodec.decodeWithPalette(0,imageBytes);
+        ImageCodec imageCodec = new ImageCodec(Methods.gbcPalettesList.size()-1, IMAGE_WIDTH, IMAGE_HEIGHT);
+        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.size()-1,imageBytes);
 
         return image;
     }
-    //Previous page
+    //Previous pagebalexea
+
     private void prevPage() {
         if (currentPage > 0) {
             currentPage--;

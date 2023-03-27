@@ -52,8 +52,8 @@ public class GalleryFragment extends Fragment{
     //    List<Bitmap> imageList;
     public static GridView gridView;
 
-    private int pageNumber = 0;
-    private static int itemsPerPage = 9;
+//    private int pageNumber = 0;
+    private static int itemsPerPage = 5;
     static int startIndex = 0;
     static int endIndex = 0;
     static int currentPage = 0;
@@ -197,9 +197,10 @@ public class GalleryFragment extends Fragment{
 //
 //            listBitmaps.add(image);
 //        }
-        gridView.setAdapter(new CustomGridViewAdapter(getActivity(), Methods.completeImageList, itemsPerPage));
-        lastPage = (Methods.gbcImagesList.size() - 1) / itemsPerPage;
+//        gridView.setAdapter(new CustomGridViewAdapter(getActivity(), Methods.completeImageList, itemsPerPage));
+        lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
         tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
+        updateGridView(currentPage,gridView);
 
 //        CustomGridViewAdapter imageAdapter = new CustomGridViewAdapter(getContext(), Methods.gbcImagesList,itemsPerPage);
 //        loadImages(imageAdapter);
@@ -250,12 +251,8 @@ public class GalleryFragment extends Fragment{
             if (parent != null && !parent.exists() && !parent.mkdirs()) {
                 throw new IllegalStateException("Couldn't create dir: " + parent);
             }
-//            if (!file.exists()) { // Si no existe, crea el archivo.
-//                file.createNewFile();
-//            }
         } catch (Exception e) {
-//        Toast toast = Toast.makeText(get, "Error al crear el fichero" + e.toString(), Toast.LENGTH_LONG);
-//        toast.show();
+            System.out.println(e.toString());
         }
         try (FileOutputStream out = new FileOutputStream(file)) {
             Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false);
@@ -267,14 +264,12 @@ public class GalleryFragment extends Fragment{
 
         } catch (IOException e) {
             e.printStackTrace();
-//        Toast toast = Toast.makeText(this, "Error al crear el fos" + e.toString(), Toast.LENGTH_LONG);
-//        toast.show();
         }
     }
 
     private void updateGridView(int page, GridView gridView) {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
-        itemsPerPage = 9;
+        itemsPerPage = 5;
 
         if (Methods.completeImageList.size() < itemsPerPage) {
             itemsPerPage = Methods.completeImageList.size();
@@ -282,10 +277,14 @@ public class GalleryFragment extends Fragment{
         int lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
 
         //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
-        if (currentPage == lastPage) {
+        if (currentPage == lastPage && (Methods.completeImageList.size() % itemsPerPage)!= 0) {
             itemsPerPage = Methods.completeImageList.size() % itemsPerPage;
+            System.out.println("++++++++++"+itemsPerPage);
+
             startIndex = Methods.completeImageList.size() - itemsPerPage;
+            System.out.println("++++++++++"+startIndex);
             endIndex = Methods.completeImageList.size();
+
         } else {
             startIndex = page * itemsPerPage;
             endIndex = Math.min(startIndex + itemsPerPage, Methods.completeImageList.size());

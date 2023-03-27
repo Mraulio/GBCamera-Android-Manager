@@ -86,7 +86,6 @@ public class Methods {
                 completeImageList.add(imageCodec.decodeWithPalette(0, gbcImage.getImageBytes()));
             }
 
-
             //Create gbcImage objects for each image
 //            for (Bitmap image: imageList){
 //                GbcImage.numImages++;

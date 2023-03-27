@@ -7,8 +7,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.GestureDetector;
@@ -16,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
@@ -29,13 +26,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
-import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,14 +40,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GalleryFragment extends Fragment{
+public class GalleryFragment extends Fragment {
 
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
 
     //    List<Bitmap> imageList;
     public static GridView gridView;
 
-//    private int pageNumber = 0;
+    //    private int pageNumber = 0;
     private static int itemsPerPage = 7;
     static int startIndex = 0;
     static int endIndex = 0;
@@ -60,7 +55,6 @@ public class GalleryFragment extends Fragment{
     static int lastPage = 0;
     //    List<Bitmap> listBitmaps = new ArrayList<>();
     TextView tv_page;
-
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -79,6 +73,7 @@ public class GalleryFragment extends Fragment{
             public void onSwipeLeft() {
                 nextPage();
             }
+
             @Override
             public void onSwipeRight() {
                 prevPage();
@@ -130,8 +125,8 @@ public class GalleryFragment extends Fragment{
                 }
                 final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
                 byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
-                System.out.println("******PULSADO EN LA IMAGEN: "+Methods.gbcImagesList.get(selectedPosition).getName()+"***********************************");
-                System.out.println("******LA IMAGEN TIENE LA PALETA: "+Methods.gbcImagesList.get(selectedPosition).getPaletteIndex()+"***********************************");
+                System.out.println("******PULSADO EN LA IMAGEN: " + Methods.gbcImagesList.get(selectedPosition).getName() + "***********************************");
+                System.out.println("******LA IMAGEN TIENE LA PALETA: " + Methods.gbcImagesList.get(selectedPosition).getPaletteIndex() + "***********************************");
 
                 // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
@@ -162,7 +157,7 @@ public class GalleryFragment extends Fragment{
                     public void onClick(View v) {
                         Bitmap changedImage = paletteChanger(selectedImageBytes);
                         int selectedPosition2;
-//                        selectedImage[0] = changedImage;
+                        selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
                         // Obtener la imagen seleccionada
                         if (currentPage != lastPage) {
                             selectedPosition2 = position + (currentPage * itemsPerPage);
@@ -203,7 +198,7 @@ public class GalleryFragment extends Fragment{
 //        gridView.setAdapter(new CustomGridViewAdapter(getActivity(), Methods.completeImageList, itemsPerPage));
         lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
         tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
-        updateGridView(currentPage,gridView);
+        updateGridView(currentPage, gridView);
 
 //        CustomGridViewAdapter imageAdapter = new CustomGridViewAdapter(getContext(), Methods.gbcImagesList,itemsPerPage);
 //        loadImages(imageAdapter);
@@ -222,6 +217,7 @@ public class GalleryFragment extends Fragment{
 
         return image;
     }
+
     //Previous page
     private void prevPage() {
         if (currentPage > 0) {
@@ -280,12 +276,12 @@ public class GalleryFragment extends Fragment{
         int lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
 
         //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
-        if (currentPage == lastPage && (Methods.completeImageList.size() % itemsPerPage)!= 0) {
+        if (currentPage == lastPage && (Methods.completeImageList.size() % itemsPerPage) != 0) {
             itemsPerPage = Methods.completeImageList.size() % itemsPerPage;
-            System.out.println("++++++++++"+itemsPerPage);
+            System.out.println("++++++++++" + itemsPerPage);
 
             startIndex = Methods.completeImageList.size() - itemsPerPage;
-            System.out.println("++++++++++"+startIndex);
+            System.out.println("++++++++++" + startIndex);
             endIndex = Methods.completeImageList.size();
 
         } else {
@@ -297,24 +293,21 @@ public class GalleryFragment extends Fragment{
 //            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(IndexedPalette.GAMEBOY_LCD_PALETTE), IMAGE_WIDTH, IMAGE_HEIGHT);
 ////            listBitmaps.add(imageCodec.decode(image.getImageBytes()));
 //        }
+        //There will be a better way to do this, but works
         List<Bitmap> imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
-        gridView.setAdapter(new CustomGridViewAdapter(getContext(), imagesForPage, itemsPerPage));
+        List<GbcImage> gbcImagesForPage = Methods.gbcImagesList.subList(startIndex,endIndex);
+        gridView.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage));
     }
 
 
-    /**
-     * Other way to show images on the GridView, with the Text
-     */
     public static class CustomGridViewAdapter extends BaseAdapter {
         private List<Bitmap> images;
         private Context context;
-        public int itemsPage;
 
 
-        public CustomGridViewAdapter(Context context, List<Bitmap> images, int itemsPage) {
+        public CustomGridViewAdapter(Context context, List<Bitmap> images) {
             this.context = context;
             this.images = images;
-            this.itemsPage = itemsPage;
         }
 
         public int getCount() {
@@ -352,6 +345,49 @@ public class GalleryFragment extends Fragment{
 
             imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 4, image.getHeight() * 4, false));
             return convertView;
+        }
+    }
+
+
+    /**
+     * Other way to show images on the GridView, with the Text
+     */
+    public static class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
+        Context context;
+        int layoutResourceId;
+        List<GbcImage> data = new ArrayList<GbcImage>();
+        private List<Bitmap> images;
+
+        public CustomGridViewAdapterImage(Context context, int layoutResourceId,
+                                          List<GbcImage> data, List<Bitmap> images) {
+            super(context, layoutResourceId, data);
+            this.layoutResourceId = layoutResourceId;
+            this.context = context;
+            this.images = images;
+            this.data = data;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View row = convertView;
+            RecordHolder holder = null;
+
+            if (row == null) {
+                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+                row = inflater.inflate(layoutResourceId, parent, false);
+
+                holder = new RecordHolder();
+                holder.txtTitle = (TextView) row.findViewById(R.id.tvName);
+                holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
+                row.setTag(holder);
+            } else {
+                holder = (RecordHolder) row.getTag();
+            }
+            Bitmap image = images.get(position);
+            String name = data.get(position).getName();
+            holder.txtTitle.setText(name);
+            holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
+            return row;
         }
 
         private class RecordHolder {

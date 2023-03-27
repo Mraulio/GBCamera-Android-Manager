@@ -45,7 +45,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GalleryFragment extends Fragment {
+public class GalleryFragment extends Fragment{
 
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
 
@@ -62,6 +62,7 @@ public class GalleryFragment extends Fragment {
     TextView tv_page;
 
 
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
@@ -76,7 +77,11 @@ public class GalleryFragment extends Fragment {
         view.setOnTouchListener(new OnSwipeTouchListener(getContext()) {
             @Override
             public void onSwipeLeft() {
-                // Whatever
+                nextPage();
+            }
+            @Override
+            public void onSwipeRight() {
+                prevPage();
             }
         });
 
@@ -98,6 +103,17 @@ public class GalleryFragment extends Fragment {
 
 //        btnLoadImages.setOnClickListener(v -> loadImages());
 
+        //To swipe over the gridview. Not working properly, selects the first image of the row
+//        gridView.setOnTouchListener(new OnSwipeTouchListener(getContext()) {
+//            @Override
+//            public void onSwipeLeft() {
+//                nextPage();
+//            }
+//            @Override
+//            public void onSwipeRight() {
+//                prevPage();
+//            }
+//        });
         /**
          * Dialog when clicking an image
          */

@@ -53,7 +53,7 @@ public class GalleryFragment extends Fragment{
     public static GridView gridView;
 
 //    private int pageNumber = 0;
-    private static int itemsPerPage = 5;
+    private static int itemsPerPage = 7;
     static int startIndex = 0;
     static int endIndex = 0;
     static int currentPage = 0;
@@ -130,6 +130,8 @@ public class GalleryFragment extends Fragment{
                 }
                 final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
                 byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
+                System.out.println("******PULSADO EN LA IMAGEN: "+Methods.gbcImagesList.get(selectedPosition).getName()+"***********************************");
+                System.out.println("******LA IMAGEN TIENE LA PALETA: "+Methods.gbcImagesList.get(selectedPosition).getPaletteIndex()+"***********************************");
 
                 // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
@@ -160,7 +162,7 @@ public class GalleryFragment extends Fragment{
                     public void onClick(View v) {
                         Bitmap changedImage = paletteChanger(selectedImageBytes);
                         int selectedPosition2;
-                        selectedImage[0] = changedImage;
+//                        selectedImage[0] = changedImage;
                         // Obtener la imagen seleccionada
                         if (currentPage != lastPage) {
                             selectedPosition2 = position + (currentPage * itemsPerPage);
@@ -169,6 +171,7 @@ public class GalleryFragment extends Fragment{
                         }
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
                         Methods.completeImageList.set(selectedPosition2, changedImage);
+                        Methods.gbcImagesList.get(selectedPosition2).setPaletteIndex(Methods.gbcPalettesList.size() - 1);
                         updateGridView(currentPage, gridView);
                     }
                 });
@@ -269,7 +272,7 @@ public class GalleryFragment extends Fragment{
 
     private void updateGridView(int page, GridView gridView) {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
-        itemsPerPage = 5;
+        itemsPerPage = 7;
 
         if (Methods.completeImageList.size() < itemsPerPage) {
             itemsPerPage = Methods.completeImageList.size();
@@ -358,10 +361,10 @@ public class GalleryFragment extends Fragment{
         }
     }
 
-    //https://stackoverflow.com/questions/4139288/android-how-to-handle-right-to-left-swipe-gestures
 
     /**
      * Detects left and right swipes across a view.
+     * https://stackoverflow.com/questions/4139288/android-how-to-handle-right-to-left-swipe-gestures
      */
     public class OnSwipeTouchListener implements View.OnTouchListener {
 

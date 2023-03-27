@@ -58,7 +58,7 @@ public class GalleryFragment extends Fragment {
     static int endIndex = 0;
     static int currentPage = 0;
     static int lastPage = 0;
-//    List<Bitmap> listBitmaps = new ArrayList<>();
+    //    List<Bitmap> listBitmaps = new ArrayList<>();
     TextView tv_page;
 
 
@@ -159,7 +159,7 @@ public class GalleryFragment extends Fragment {
 
 // Configurar el diálogo para que ocupe toda la pantalla
 //                Window window = dialog.getWindow();
-//                window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+//                window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 //
 //// Configurar el diálogo para que sea transparente
 //                window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -197,28 +197,24 @@ public class GalleryFragment extends Fragment {
 
     //Cambiar paleta
     public Bitmap paletteChanger(byte[] imageBytes) {
-        ImageCodec imageCodec = new ImageCodec(Methods.gbcPalettesList.size()-1, IMAGE_WIDTH, IMAGE_HEIGHT);
-        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.size()-1,imageBytes);
+        ImageCodec imageCodec = new ImageCodec(Methods.gbcPalettesList.size() - 1, IMAGE_WIDTH, IMAGE_HEIGHT);
+        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.size() - 1, imageBytes);
 
         return image;
     }
-    //Previous pagebalexea
-
+    //Previous page
     private void prevPage() {
         if (currentPage > 0) {
             currentPage--;
             updateGridView(currentPage, gridView);
-//                    tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
+            tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
         }
     }
 
-    private void nextPage(){
-        int lastPage = (Methods.gbcImagesList.size() - 1) / itemsPerPage;
-
+    private void nextPage() {
         if (currentPage < lastPage) {
-
             currentPage++;
-            System.out.println("***************last page " + lastPage);
+            System.out.println("***************last page" + lastPage);
             System.out.println("***************current page " + currentPage);
             updateGridView(currentPage, gridView);
             tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
@@ -348,6 +344,7 @@ public class GalleryFragment extends Fragment {
     }
 
     //https://stackoverflow.com/questions/4139288/android-how-to-handle-right-to-left-swipe-gestures
+
     /**
      * Detects left and right swipes across a view.
      */

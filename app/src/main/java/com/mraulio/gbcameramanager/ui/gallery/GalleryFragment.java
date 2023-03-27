@@ -26,11 +26,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -139,6 +141,9 @@ public class GalleryFragment extends Fragment {
                 // Configurar el botón de cierre del diálogo
                 Button saveButton = dialog.findViewById(R.id.save_button);
                 Button paletteButton = dialog.findViewById(R.id.btn_palette);
+                GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
+
+                gridViewPalette.setAdapter(new CustomGridViewAdapterPalette(getContext(),R.layout.palette_grid_item, Methods.gbcPalettesList));
 
 
                 saveButton.setOnClickListener(new View.OnClickListener() {
@@ -389,7 +394,6 @@ public class GalleryFragment extends Fragment {
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
             return row;
         }
-
         private class RecordHolder {
             TextView txtTitle;
             ImageView imageItem;

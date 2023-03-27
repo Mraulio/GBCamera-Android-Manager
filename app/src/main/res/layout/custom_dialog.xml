@@ -25,6 +25,16 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
         android:text="save" />
+    <GridView
+        android:id="@+id/gridViewPal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#D5D5D5"
+        android:horizontalSpacing="10dp"
+        android:stretchMode="columnWidth"
+        android:scrollbars="horizontal"
+        android:numColumns="3"
+        android:verticalSpacing="10dp"/>
 
 
 </LinearLayout>

@@ -33,6 +33,7 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
@@ -264,51 +265,6 @@ public class PalettesFragment extends Fragment {
     /**
      * Other way to show images on the GridView, with the Text
      */
-    public static class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
-        Context context;
-        int layoutResourceId;
-        ArrayList<GbcPalette> data = new ArrayList<GbcPalette>();
-
-        public CustomGridViewAdapterPalette(Context context, int layoutResourceId,
-                                            ArrayList<GbcPalette> data) {
-            super(context, layoutResourceId, data);
-            this.layoutResourceId = layoutResourceId;
-            this.context = context;
-            this.data = data;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View row = convertView;
-            RecordHolder holder = null;
-
-            if (row == null) {
-                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-                row = inflater.inflate(layoutResourceId, parent, false);
-
-                holder = new RecordHolder();
-                holder.txtTitle = (TextView) row.findViewById(R.id.tvPaletteName);
-                holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
-                row.setTag(holder);
-            } else {
-                holder = (RecordHolder) row.getTag();
-            }
-
-            Bitmap image = data.get(position).paletteViewer();
-            String name = data.get(position).getName();
-            holder.txtTitle.setText(name);
-            holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
-            return row;
-
-        }
-
-        private class RecordHolder {
-            TextView txtTitle;
-            ImageView imageItem;
-
-        }
-    }
-
     private Bitmap paletteMaker(int[] palette) {
 
         // Divide el ancho del ImageView por cuatro para obtener el ancho de cada sección

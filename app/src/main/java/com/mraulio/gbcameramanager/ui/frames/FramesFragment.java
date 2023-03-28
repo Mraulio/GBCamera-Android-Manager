@@ -33,9 +33,7 @@ public class FramesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
-        TextView textView = view.findViewById(R.id.textViewFrames);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
-        textView.setText("test");
         // Inflate the layout for this fragment
         gridView.setAdapter(new CustomGridViewAdapterFrames(getContext(),R.layout.frames_row_items, Methods.framesList));
         return view;

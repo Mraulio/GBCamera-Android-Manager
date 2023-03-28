@@ -20,7 +20,7 @@
     <fragment
         android:id="@+id/nav_frames"
         android:name="com.mraulio.gbcameramanager.ui.frames.FramesFragment"
-        android:label="@string/menu_palettes"
+        android:label="@string/menu_frames"
         tools:layout="@layout/fragment_frames" />
 
     <fragment

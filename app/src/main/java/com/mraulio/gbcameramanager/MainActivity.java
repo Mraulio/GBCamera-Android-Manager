@@ -91,15 +91,13 @@ public class MainActivity extends AppCompatActivity {
         blackFrame.setFrameBitmap(bitmap);
         Methods.framesList.add(blackFrame);
 
-        //Blue frame
-        Arrays.fill(pixels, Color.BLUE);
+        //White frame
+        Arrays.fill(pixels, Color.WHITE);
         bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
         GbcFrame blueFrame = new GbcFrame();
-        blueFrame.setFrameName("Blue Frame");
+        blueFrame.setFrameName("White frame");
         blueFrame.setFrameBitmap(bitmap);
         Methods.framesList.add(blueFrame);
-
-
     }
 
     private void addPalettes() {

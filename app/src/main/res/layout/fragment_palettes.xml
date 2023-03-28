@@ -37,6 +37,7 @@
         android:horizontalSpacing="10dp"
         android:stretchMode="columnWidth"
         android:scrollbars="horizontal"
+        android:padding="10dp"
         android:numColumns="3"
         android:verticalSpacing="10dp" />
 <!--    <FrameLayout-->

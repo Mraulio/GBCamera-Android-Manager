@@ -121,6 +121,40 @@ public class MainActivity extends AppCompatActivity {
         gbcPalette2.setPaletteColors(GAMEBOY_LCD_PALETTE);
         gbcPalette2.setName("DMG");
         Methods.gbcPalettesList.add(gbcPalette2);
+
+        //Adding palettes from here https://www.npmjs.com/package/gb-palettes
+        int[] cmyk_palette = {
+                Color.parseColor("#ffff00"),
+                Color.parseColor("#0be8fd"),
+                Color.parseColor("#fb00fa"),
+                Color.parseColor("#373737")
+        };
+        GbcPalette gbcPalette3 = new GbcPalette();
+        gbcPalette3.setPaletteColors(cmyk_palette);
+        gbcPalette3.setName("CMYK");
+        Methods.gbcPalettesList.add(gbcPalette3);
+
+        int[] tram_palette = {
+                Color.parseColor("#f3c677"),
+                Color.parseColor("#e64a4e"),
+                Color.parseColor("#912978"),
+                Color.parseColor("#0c0a3e")
+        };
+        GbcPalette gbcPalette5 = new GbcPalette();
+        gbcPalette5.setPaletteColors(tram_palette);
+        gbcPalette5.setName("Tramonto al Parco");
+        Methods.gbcPalettesList.add(gbcPalette5);
+        //My won palettes
+        int[] cute_palette = {
+                Color.parseColor("#ffc36d"),
+                Color.parseColor("#fe6f9b"),
+                Color.parseColor("#c64ab3"),
+                Color.parseColor("#7b50b9")
+        };
+        GbcPalette gbcPalette4 = new GbcPalette();
+        gbcPalette4.setPaletteColors(cute_palette);
+        gbcPalette4.setName("Cute");
+        Methods.gbcPalettesList.add(gbcPalette4);
     }
 
     @Override

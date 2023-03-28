@@ -86,8 +86,7 @@ public class Methods {
                 gbcImage.setName("Image " + (GbcImage.numImages));
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
-                gbcImagesList.add(gbcImage);
-                ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), IMAGE_WIDTH, IMAGE_HEIGHT);
+                ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 128, 112);
                 Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
@@ -97,8 +96,8 @@ public class Methods {
                     image = framed;
                 }
                 completeImageList.add(image);
+                gbcImagesList.add(gbcImage);
             }
-
         } catch (IOException e) {
             Toast toast = Toast.makeText(context, "Error\n" + e.toString(), Toast.LENGTH_LONG);
             toast.show();
@@ -106,6 +105,4 @@ public class Methods {
             e.printStackTrace();
         }
     }
-
-
 }

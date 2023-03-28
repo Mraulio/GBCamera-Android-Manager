@@ -7,6 +7,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.GestureDetector;
@@ -14,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
@@ -143,24 +146,13 @@ public class GalleryFragment extends Fragment {
                 Button paletteButton = dialog.findViewById(R.id.btn_palette);
                 GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
 
-                gridViewPalette.setAdapter(new CustomGridViewAdapterPalette(getContext(),R.layout.palette_grid_item, Methods.gbcPalettesList));
-
-
-                saveButton.setOnClickListener(new View.OnClickListener() {
+                gridViewPalette.setAdapter(new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList));
+                gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        LocalDateTime now = LocalDateTime.now();
-                        String fileName = "image_";
-                        fileName += dtf.format(now) + ".png";
-                        saveImage(selectedImage[0], fileName);
-                    }
-                });
+                    public void onItemClick(AdapterView<?> parent, View view, int position2, long id) {
+                        //Action when clicking a palette inside the Dialog
+                        Bitmap changedImage = paletteChanger(position2, selectedImageBytes);
 
-                //This needs to save the paletteIndex data to the GbcImage object*******************
-                paletteButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Bitmap changedImage = paletteChanger(selectedImageBytes);
                         int selectedPosition2;
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
                         // Obtener la imagen seleccionada
@@ -175,6 +167,36 @@ public class GalleryFragment extends Fragment {
                         updateGridView(currentPage, gridView);
                     }
                 });
+
+                saveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        LocalDateTime now = LocalDateTime.now();
+                        String fileName = "image_";
+                        fileName += dtf.format(now) + ".png";
+                        saveImage(selectedImage[0], fileName);
+                    }
+                });
+
+                //This needs to save the paletteIndex data to the GbcImage object*******************
+//                paletteButton.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Bitmap changedImage = paletteChanger(selectedImageBytes);
+//                        int selectedPosition2;
+//                        selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
+//                        // Obtener la imagen seleccionada
+//                        if (currentPage != lastPage) {
+//                            selectedPosition2 = position + (currentPage * itemsPerPage);
+//                        } else {
+//                            selectedPosition2 = Methods.completeImageList.size() - (itemsPerPage - position);
+//                        }
+//                        imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
+//                        Methods.completeImageList.set(selectedPosition2, changedImage);
+//                        Methods.gbcImagesList.get(selectedPosition2).setPaletteIndex(Methods.gbcPalettesList.size() - 1);
+//                        updateGridView(currentPage, gridView);
+//                    }
+//                });
 
 // Configurar el diálogo para que ocupe toda la pantalla
 //                Window window = dialog.getWindow();
@@ -216,9 +238,9 @@ public class GalleryFragment extends Fragment {
     }
 
     //Cambiar paleta
-    public Bitmap paletteChanger(byte[] imageBytes) {
-        ImageCodec imageCodec = new ImageCodec(Methods.gbcPalettesList.size() - 1, IMAGE_WIDTH, IMAGE_HEIGHT);
-        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.size() - 1, imageBytes);
+    public Bitmap paletteChanger(int index, byte[] imageBytes) {
+        ImageCodec imageCodec = new ImageCodec(index, IMAGE_WIDTH, IMAGE_HEIGHT);
+        Bitmap image = imageCodec.decodeWithPalette(index, imageBytes);
 
         return image;
     }
@@ -300,7 +322,7 @@ public class GalleryFragment extends Fragment {
 //        }
         //There will be a better way to do this, but works
         List<Bitmap> imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
-        List<GbcImage> gbcImagesForPage = Methods.gbcImagesList.subList(startIndex,endIndex);
+        List<GbcImage> gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
         gridView.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage));
     }
 
@@ -394,6 +416,7 @@ public class GalleryFragment extends Fragment {
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
             return row;
         }
+
         private class RecordHolder {
             TextView txtTitle;
             ImageView imageItem;

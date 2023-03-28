@@ -46,7 +46,6 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         } else {
             holder = (RecordHolder) row.getTag();
         }
-
         Bitmap image = data.get(position).paletteViewer();
         String name = data.get(position).getName();
         holder.txtTitle.setText(name);

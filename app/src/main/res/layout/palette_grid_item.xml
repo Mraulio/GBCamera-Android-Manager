@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_margin="1dp"
     android:padding="2dp"
-    app:cardElevation="4dp"
     app:cardBackgroundColor="#fff"
     app:cardCornerRadius="4dp"
-    android:layout_height="wrap_content">
+    app:cardElevation="4dp">
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,16 +20,18 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
-            android:padding="3dp"
             android:background="@color/white"
-            android:src="@mipmap/ic_launcher"
-            android:scaleType="fitXY"/>
+            android:padding="3dp"
+            android:scaleType="fitXY"
+            android:src="@mipmap/ic_launcher" />
+
         <TextView
+            android:id="@+id/tvPaletteName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="nombre paleta"
-            android:id="@+id/tvPaletteName"></TextView>
-
+            android:maxLines="1"
+            android:scrollHorizontally="true"
+            android:text="nombre paleta"></TextView>
 
     </LinearLayout>
 

@@ -54,7 +54,7 @@ public class GalleryFragment extends Fragment {
     public static GridView gridView;
 
     //    private int pageNumber = 0;
-    private static int itemsPerPage = 7;
+    private static int itemsPerPage = 12;
     static int startIndex = 0;
     static int endIndex = 0;
     static int currentPage = 0;
@@ -299,7 +299,7 @@ public class GalleryFragment extends Fragment {
 
     private void updateGridView(int page, GridView gridView) {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
-        itemsPerPage = 7;
+        itemsPerPage = 12;
 
         if (Methods.completeImageList.size() < itemsPerPage) {
             itemsPerPage = Methods.completeImageList.size();

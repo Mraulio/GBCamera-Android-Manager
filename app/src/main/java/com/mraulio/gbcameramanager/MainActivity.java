@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager;
 
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -71,12 +72,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addFrames(){
+    private void addFrames() {
         int width = 160;
         int height = 144;
         int[] pixels = new int[width * height];
+
+        //Nintendo frame from drawable-nodpi resource (so it is not automatically scaled to the dpi)
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.nintendo_frame);
+        GbcFrame nintendoframe = new GbcFrame();
+        nintendoframe.setFrameName("Nintendo Frame");
+        nintendoframe.setFrameBitmap(bitmap);
+        Methods.framesList.add(nintendoframe);
+
         Arrays.fill(pixels, Color.BLACK);
-        Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+        bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
         GbcFrame blackFrame = new GbcFrame();
         blackFrame.setFrameName("Black Frame");
         blackFrame.setFrameBitmap(bitmap);
@@ -92,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
     private void addPalettes() {
         //Palette GAMEBOY_LCD_PALETTE
         int[] GAMEBOY_LCD_PALETTE = {

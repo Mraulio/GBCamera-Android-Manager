@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,9 +84,19 @@ public class Methods {
 //                else
 //                    gbcImage.setBitmap(imageBytes);
                 gbcImage.setName("Image " + (GbcImage.numImages));
+                gbcImage.setFrameIndex(0);
+                gbcImage.setPaletteIndex(0);
                 gbcImagesList.add(gbcImage);
-                ImageCodec imageCodec = new ImageCodec(0, IMAGE_WIDTH, IMAGE_HEIGHT);
-                completeImageList.add(imageCodec.decodeWithPalette(0, gbcImage.getImageBytes()));
+                ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), IMAGE_WIDTH, IMAGE_HEIGHT);
+                Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
+                if (image.getHeight() == 112 && image.getWidth() == 128) {
+                    //I need to use copy because if not it's inmutable bitmap
+                    Bitmap framed = framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    Canvas canvas = new Canvas(framed);
+                    canvas.drawBitmap(image, 16, 16, null);
+                    image = framed;
+                }
+                completeImageList.add(image);
             }
 
         } catch (IOException e) {

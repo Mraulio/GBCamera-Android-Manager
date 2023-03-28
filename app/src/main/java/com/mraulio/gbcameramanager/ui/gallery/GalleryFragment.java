@@ -121,14 +121,15 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedPosition = 0;
-                final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
-                System.out.println("El tamaño es "+selectedImage[0].getWidth()+"x"+selectedImage[0].getHeight());
+
                 // Obtener la imagen seleccionada
                 if (currentPage != lastPage) {
                     selectedPosition = position + (currentPage * itemsPerPage);
                 } else {
                     selectedPosition = Methods.completeImageList.size() - (itemsPerPage - position);
                 }
+                final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
+                System.out.println("El tamaño es "+selectedImage[0].getWidth()+"x"+selectedImage[0].getHeight());
                 byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
                 System.out.println("******PULSADO EN LA IMAGEN: " + Methods.gbcImagesList.get(selectedPosition).getName() + "***********************************");
                 System.out.println("******LA IMAGEN TIENE LA PALETA: " + Methods.gbcImagesList.get(selectedPosition).getPaletteIndex() + "***********************************");

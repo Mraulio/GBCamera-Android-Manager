@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 public class GbcImage {
 //    private Bitmap bitmap;
     private int paletteIndex;
+    private int frameIndex;
     private String name;
     boolean favorite;
     public static int numImages= 0;
@@ -59,5 +60,21 @@ public class GbcImage {
 
     public void setImageBytes(byte[] imageBytes) {
         this.imageBytes = imageBytes;
+    }
+
+    public int getFrameIndex() {
+        return frameIndex;
+    }
+
+    public void setFrameIndex(int frameIndex) {
+        this.frameIndex = frameIndex;
+    }
+
+    public static int getNumImages() {
+        return numImages;
+    }
+
+    public static void setNumImages(int numImages) {
+        GbcImage.numImages = numImages;
     }
 }

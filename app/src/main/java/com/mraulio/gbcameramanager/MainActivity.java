@@ -89,6 +89,15 @@ public class MainActivity extends AppCompatActivity {
         blackFrame.setFrameBitmap(bitmap);
         Methods.framesList.add(blackFrame);
 
+        //Blue frame
+        Arrays.fill(pixels, Color.BLUE);
+        bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+        GbcFrame blueFrame = new GbcFrame();
+        blueFrame.setFrameName("Blue Frame");
+        blueFrame.setFrameBitmap(bitmap);
+        Methods.framesList.add(blueFrame);
+
+
     }
     private void addPalettes() {
         //Palette GAMEBOY_LCD_PALETTE

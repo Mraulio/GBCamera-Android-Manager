@@ -21,10 +21,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPalettes();//Before loading gallery fragment
+        addFrames();
         Methods.extractSavImages(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -75,6 +78,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void addFrames(){
+        int width = 160;
+        int height = 144;
+        int[] pixels = new int[width * height];
+        Arrays.fill(pixels, Color.BLACK);
+        Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+        GbcFrame blackFrame = new GbcFrame();
+        blackFrame.setFrameName("Black Frame");
+        blackFrame.setFrameBitmap(bitmap);
+        Methods.framesList.add(blackFrame);
+
+    }
     private void addPalettes() {
         //Palette GAMEBOY_LCD_PALETTE
         int[] GAMEBOY_LCD_PALETTE = {

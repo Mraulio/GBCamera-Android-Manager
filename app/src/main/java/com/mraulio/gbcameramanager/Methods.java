@@ -22,6 +22,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
@@ -40,6 +41,7 @@ public class Methods {
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<byte[]> listImageBytes = new ArrayList<>();
+    public static List<GbcFrame> framesList = new ArrayList<>();
 
     /**
      * *******************************************************************

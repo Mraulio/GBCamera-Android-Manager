@@ -10,8 +10,6 @@
         android:name="com.mraulio.gbcameramanager.ui.gallery.GalleryFragment"
         android:label="@string/menu_gallery"
         tools:layout="@layout/fragment_gallery" />
-
-
     <fragment
         android:id="@+id/nav_palettes"
         android:name="com.mraulio.gbcameramanager.ui.palettes.PalettesFragment"
@@ -22,7 +20,11 @@
         android:name="com.mraulio.gbcameramanager.ui.frames.FramesFragment"
         android:label="@string/menu_frames"
         tools:layout="@layout/fragment_frames" />
-
+    <fragment
+        android:id="@+id/nav_import"
+        android:name="com.mraulio.gbcameramanager.ui.importFile.ImportFragment"
+        android:label="@string/menu_import"
+        tools:layout="@layout/fragment_import" />
     <fragment
         android:id="@+id/nav_settings"
         android:name="com.mraulio.gbcameramanager.ui.settings.SettingsFragment"

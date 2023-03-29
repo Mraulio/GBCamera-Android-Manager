@@ -79,13 +79,14 @@ public class Methods {
             for (byte[] imageBytes : listImageBytes) {
                 GbcImage gbcImage = new GbcImage();
                 gbcImage.setImageBytes(imageBytes);
+                GbcImage.numImages++;
 //                if (nameIndex%2==0)
 //                    gbcImage.setImageBytes(cambiarPaleta(imageBytes,1));
 //                else
 //                    gbcImage.setBitmap(imageBytes);
                 gbcImage.setName("Image " + (GbcImage.numImages));
-                gbcImage.setFrameIndex(0);
-                gbcImage.setPaletteIndex(0);
+//                gbcImage.setFrameIndex(0);
+//                gbcImage.setPaletteIndex(0);
                 ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 128, 112);
                 Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
                 if (image.getHeight() == 112 && image.getWidth() == 128) {

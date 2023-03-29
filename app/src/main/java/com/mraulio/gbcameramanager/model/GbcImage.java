@@ -11,9 +11,9 @@ public class GbcImage {
     public static int numImages= 0;
     private byte[] imageBytes;
 
-    public GbcImage(){
-        numImages++; //Add 1 image to the total
-        paletteIndex = 0;//I set the first palette as the default
+    public GbcImage(){         //Add 1 image to the total
+        paletteIndex = 0;
+        frameIndex = 0;//I set the first palette as the default
     }
 
 //    public GbcImage(Bitmap bitmap, int paletteIndex, String name) {

@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mraulio.gbcameramanager.gameboycameralib.codecs.Codec;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
@@ -27,8 +28,12 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,5 +110,85 @@ public class Methods {
 
             e.printStackTrace();
         }
+    }
+
+    public static void extractHexImages(){
+        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        //*******PARA LEER EL FICHERO HEXDATA
+        File ficheroHex = new File(directory, "hexData30.txt");
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            FileInputStream inputStream = new FileInputStream(ficheroHex);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line = bufferedReader.readLine();
+            while (line != null) {
+                stringBuilder.append(line).append('\n');
+                line = bufferedReader.readLine();
+            }
+            bufferedReader.close();
+            inputStream.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String fileContent = stringBuilder.toString();
+
+        List<byte[]> listaBytes= new ArrayList<>();
+        //******FIN DE LEER EL FICHERO
+        System.out.println("La longitud del fichero hex es de : " + fileContent.length());
+        List<String> dataList = RawToTileData.separateData(fileContent);
+        for (String string:dataList) {
+            String data = string.replaceAll(System.lineSeparator(), " ");
+            byte[] bytes = convertToByteArray(data);
+            listaBytes.add(bytes);
+        }
+        for (byte[] imageBytes : listaBytes) {
+            GbcImage gbcImage = new GbcImage();
+            gbcImage.setImageBytes(imageBytes);
+            GbcImage.numImages++;
+//                if (nameIndex%2==0)
+//                    gbcImage.setImageBytes(cambiarPaleta(imageBytes,1));
+//                else
+//                    gbcImage.setBitmap(imageBytes);
+            gbcImage.setName("Image " + (GbcImage.numImages));
+//                gbcImage.setFrameIndex(0);
+//                gbcImage.setPaletteIndex(0);
+            ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 160, 144);
+            Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
+            if (image.getHeight() == 112 && image.getWidth() == 128) {
+                //I need to use copy because if not it's inmutable bitmap
+                Bitmap framed = framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                Canvas canvas = new Canvas(framed);
+                canvas.drawBitmap(image, 16, 16, null);
+                image = framed;
+            }
+            completeImageList.add(image);
+            gbcImagesList.add(gbcImage);
+        }
+
+    }
+
+    private static byte[] convertToByteArray(String data) {
+        String[] byteStrings = data.split(" ");
+        byte[] bytes = new byte[byteStrings.length];
+
+        for (int i = 0; i < byteStrings.length; i++) {
+            bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
+                    + Character.digit(byteStrings[i].charAt(1), 16));
+        }
+        System.out.println(bytes.length);
+        return bytes;
+    }
+    private static Bitmap decodeImage(byte[] bytes, String data) {
+        int height = (data.length()+1) / 120;//REVISAR ESTO
+        System.out.println("*************la altura calculada es:"+height);
+        System.out.println("**********La longitud es es:" + data.length());
+        Codec decoder = new ImageCodec(0, 160, height);
+        return decoder.decode(bytes);
     }
 }

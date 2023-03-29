@@ -142,8 +142,9 @@ public class Methods {
         //******FIN DE LEER EL FICHERO
         System.out.println("La longitud del fichero hex es de : " + fileContent.length());
         List<String> dataList = RawToTileData.separateData(fileContent);
+        String data = "";
         for (String string:dataList) {
-            String data = string.replaceAll(System.lineSeparator(), " ");
+            data = string.replaceAll(System.lineSeparator(), " ");
             byte[] bytes = convertToByteArray(data);
             listaBytes.add(bytes);
         }
@@ -158,7 +159,8 @@ public class Methods {
             gbcImage.setName("Image " + (GbcImage.numImages));
 //                gbcImage.setFrameIndex(0);
 //                gbcImage.setPaletteIndex(0);
-            ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 160, 144);
+            int height = (data.length()+1) / 120;//To get the real height of the image
+            ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 160, height);
             Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
             if (image.getHeight() == 112 && image.getWidth() == 128) {
                 //I need to use copy because if not it's inmutable bitmap

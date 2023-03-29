@@ -34,6 +34,7 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
+import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
@@ -58,6 +59,8 @@ public class PalettesFragment extends Fragment {
 
 
         View view = inflater.inflate(R.layout.fragment_palettes, container, false);
+        MainActivity.pressBack=false;
+
         Button btnAdd = view.findViewById(R.id.btnAdd);
         int[] selectedColors = new int[4];
 //        ColorPicker colorPicker = new ColorPicker(this);

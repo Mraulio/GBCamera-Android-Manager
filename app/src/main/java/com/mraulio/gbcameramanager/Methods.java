@@ -53,8 +53,6 @@ public class Methods {
      * *******************************************************************
      * TO READ THE SAV IMAGES
      */
-    protected static List<GbcImage> imageList100 = null;
-
     public static void extractSavImages(Context context) {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         LocalDateTime now = LocalDateTime.now();
@@ -143,36 +141,19 @@ public class Methods {
         System.out.println("La longitud del fichero hex es de : " + fileContent.length());
         List<String> dataList = RawToTileData.separateData(fileContent);
         String data = "";
-        for (String string:dataList) {
+        for (String string : dataList) {
             data = string.replaceAll(System.lineSeparator(), " ");
             byte[] bytes = convertToByteArray(data);
-            listaBytes.add(bytes);
-        }
-        for (byte[] imageBytes : listaBytes) {
             GbcImage gbcImage = new GbcImage();
-            gbcImage.setImageBytes(imageBytes);
             GbcImage.numImages++;
-//                if (nameIndex%2==0)
-//                    gbcImage.setImageBytes(cambiarPaleta(imageBytes,1));
-//                else
-//                    gbcImage.setBitmap(imageBytes);
+            gbcImage.setImageBytes(bytes);
             gbcImage.setName("Image " + (GbcImage.numImages));
-//                gbcImage.setFrameIndex(0);
-//                gbcImage.setPaletteIndex(0);
-            int height = (data.length()+1) / 120;//To get the real height of the image
+            int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 160, height);
             Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
-            if (image.getHeight() == 112 && image.getWidth() == 128) {
-                //I need to use copy because if not it's inmutable bitmap
-                Bitmap framed = framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-                Canvas canvas = new Canvas(framed);
-                canvas.drawBitmap(image, 16, 16, null);
-                image = framed;
-            }
             completeImageList.add(image);
             gbcImagesList.add(gbcImage);
         }
-
     }
 
     private static byte[] convertToByteArray(String data) {
@@ -186,11 +167,5 @@ public class Methods {
         System.out.println(bytes.length);
         return bytes;
     }
-    private static Bitmap decodeImage(byte[] bytes, String data) {
-        int height = (data.length()+1) / 120;//REVISAR ESTO
-        System.out.println("*************la altura calculada es:"+height);
-        System.out.println("**********La longitud es es:" + data.length());
-        Codec decoder = new ImageCodec(0, 160, height);
-        return decoder.decode(bytes);
-    }
+
 }

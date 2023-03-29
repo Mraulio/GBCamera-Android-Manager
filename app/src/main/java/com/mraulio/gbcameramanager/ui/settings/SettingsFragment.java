@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 
 
@@ -19,6 +20,7 @@ public class SettingsFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
+        MainActivity.pressBack=false;
 
         return view;
     }

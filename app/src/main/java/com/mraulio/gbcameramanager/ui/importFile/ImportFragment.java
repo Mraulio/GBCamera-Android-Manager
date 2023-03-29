@@ -26,8 +26,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.RawToTileData;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
@@ -35,10 +37,15 @@ import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtra
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -49,14 +56,14 @@ import java.util.List;
 public class ImportFragment extends Fragment {
     public static final int PICKFILE_RESULT_CODE = 1;
     private static final int PICKFILE_REQUEST_CODE = 2;
-    Uri selectedFile;
     List<GbcImage> importedImagesList = new ArrayList<>();
     public static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
-    File copiedFile;
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
     TextView tvFileName;
     String fileName;
+    boolean savFile = false;
+    String fileContent = "";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,6 +73,7 @@ public class ImportFragment extends Fragment {
         Button btnExtractFile = view.findViewById(R.id.btnExtractFile);
         Button btnAddImages = view.findViewById(R.id.btnAddImages);
 
+        MainActivity.pressBack = false;
 
         tvFileName = view.findViewById(R.id.tvFileName);
         GridView gridViewImport = view.findViewById(R.id.gridViewImport);
@@ -82,7 +90,12 @@ public class ImportFragment extends Fragment {
                 importedImagesList.clear();
                 importedImagesBitmaps.clear();
                 listImportedImageBytes.clear();
-                extractSavImages(getContext());
+                gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
+
+                if (savFile)
+                    extractSavImages(getContext());
+                else
+                    extractHexImagesFromFile(fileContent);
                 tvFileName.setText("" + importedImagesList.size());//"" to make it work
                 gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
 
@@ -93,7 +106,9 @@ public class ImportFragment extends Fragment {
             public void onClick(View v) {
                 GbcImage.numImages += importedImagesList.size();
                 Methods.gbcImagesList.addAll(importedImagesList);
+                System.out.println("****************GbcImageList" + Methods.gbcImagesList.size() + "*****************************");
                 Methods.completeImageList.addAll(importedImagesBitmaps);
+                System.out.println("****************Complete Image List" + Methods.completeImageList.size() + "*****************************");
             }
         });
         // Inflate the layout for this fragment
@@ -110,12 +125,15 @@ public class ImportFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 123 && resultCode == Activity.RESULT_OK && data != null) {
+
             Uri uri = data.getData();
+            String[] aux = uri.getPath().split("/");
+            fileName = aux[aux.length - 1];
             //I check the extension of the file
-            if (uri.getPath().substring(uri.getPath().length() - 3).equals("sav")){
+            if (uri.getPath().substring(uri.getPath().length() - 3).equals("sav")) {
                 ByteArrayOutputStream byteStream = null;
-                String[] aux =uri.getPath().split("/");
-                fileName = aux[aux.length-1];
+                savFile = true;
+
                 try {
                     InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
                     // Crear un ByteArrayOutputStream para copiar el contenido del archivo
@@ -133,37 +151,44 @@ public class ImportFragment extends Fragment {
                 }
                 // Obtener los bytes del archivo como un byte[]
                 fileBytes = byteStream.toByteArray();
-                tvFileName.setText(""+fileBytes.length+" Name: "+uri.getPath());
+                tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
+            } else if (uri.getPath().substring(uri.getPath().length() - 3).equals("txt")) {
+                savFile = false;
+                try {
+                    InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                    // Crear un ByteArrayOutputStream para copiar el contenido del archivo
+                    StringBuilder stringBuilder = new StringBuilder();
+                    try {
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
+                        String line = bufferedReader.readLine();
+                        while (line != null) {
+                            stringBuilder.append(line).append('\n');
+                            line = bufferedReader.readLine();
+                        }
+                        bufferedReader.close();
+                        inputStream.close();
+
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    fileContent = stringBuilder.toString();
+                    fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
+                    tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
+                } catch (Exception e) {
+                }
             }
-
-            // Usa el archivo o la ruta absoluta aquí
         }
     }
-//    public String getFilePathFromUri(Uri uri) {
-//        String filePath = "x";
-//        String[] projection = { MediaStore.Images.Media.DATA };
-//        Cursor cursor = getContext().getContentResolver().query(uri, projection, null, null, null);
-//        if (cursor != null && cursor.moveToFirst()) {
-//            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-//            filePath = cursor.getString(columnIndex);
-//            cursor.close();
-//        }else filePath="no hay";
-//        return filePath;
-//    }
+
 
     public void extractSavImages(Context context) {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
-        LocalDateTime now = LocalDateTime.now();
-        File latestFile = null;
         try {
-//            File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-//
-//            File savFile = new File(downloadsDirectory + "/PXLR2_2022-08-25_18-07-09.sav");
-
             //Extract the images
             listImportedImageBytes = extractor.extractBytes(fileBytes);
-//            imageList = extractor.extract(savFile);
             int nameIndex = 1;
             for (byte[] imageBytes : listImportedImageBytes) {
                 GbcImage gbcImage = new GbcImage();
@@ -182,8 +207,6 @@ public class ImportFragment extends Fragment {
                 }
                 importedImagesBitmaps.add(image);
                 importedImagesList.add(gbcImage);
-                System.out.println("****************AAAAAAAAAAAAAA************************************" + GbcImage.numImages);
-
             }
         } catch (Exception e) {
             Toast toast = Toast.makeText(context, "Error\n" + e.toString(), Toast.LENGTH_LONG);
@@ -238,5 +261,97 @@ public class ImportFragment extends Fragment {
             ImageView imageItem;
 
         }
+    }
+
+    public void extractHexImages() {
+        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        //*******PARA LEER EL FICHERO HEXDATA
+        File ficheroHex = new File(directory, "timelapse.txt");
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            FileInputStream inputStream = new FileInputStream(ficheroHex);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line = bufferedReader.readLine();
+            while (line != null) {
+                stringBuilder.append(line).append('\n');
+                line = bufferedReader.readLine();
+            }
+            bufferedReader.close();
+            inputStream.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String fileContent = stringBuilder.toString();
+
+        List<byte[]> listaBytes = new ArrayList<>();
+        //******FIN DE LEER EL FICHERO
+        System.out.println("La longitud del fichero hex es de : " + fileContent.length());
+        List<String> dataList = RawToTileData.separateData(fileContent);
+        String data = "";
+        for (String string : dataList) {
+            data = string.replaceAll(System.lineSeparator(), " ");
+            byte[] bytes = convertToByteArray(data);
+            listaBytes.add(bytes);
+        }
+        for (byte[] imageBytes : listaBytes) {
+            GbcImage gbcImage = new GbcImage();
+            gbcImage.setImageBytes(imageBytes);
+//                if (nameIndex%2==0)
+//                    gbcImage.setImageBytes(cambiarPaleta(imageBytes,1));
+//                else
+//                    gbcImage.setBitmap(imageBytes);
+            gbcImage.setName("Image " + (GbcImage.numImages));
+//                gbcImage.setFrameIndex(0);
+//                gbcImage.setPaletteIndex(0);
+            int height = (data.length() + 1) / 120;//To get the real height of the image
+            ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 160, height);
+            Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
+            if (image.getHeight() == 112 && image.getWidth() == 128) {
+                //I need to use copy because if not it's inmutable bitmap
+                Bitmap framed = Methods.framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                Canvas canvas = new Canvas(framed);
+                canvas.drawBitmap(image, 16, 16, null);
+                image = framed;
+            }
+            importedImagesBitmaps.add(image);
+            importedImagesList.add(gbcImage);
+        }
+
+    }
+
+    public void extractHexImagesFromFile(String fileContent) {
+//        List<byte[]> listaBytes = new ArrayList<>();
+        System.out.println("La longitud del fichero hex es de : " + fileContent.length());
+        List<String> dataList = RawToTileData.separateData(fileContent);
+        String data = "";
+        for (String string : dataList) {
+            data = string.replaceAll(System.lineSeparator(), " ");
+            byte[] bytes = convertToByteArray(data);
+            GbcImage gbcImage = new GbcImage();
+            gbcImage.setImageBytes(bytes);
+            gbcImage.setName("Image " + (GbcImage.numImages));
+            int height = (data.length() + 1) / 120;//To get the real height of the image
+            ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 160, height);
+            Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
+            importedImagesBitmaps.add(image);
+            importedImagesList.add(gbcImage);
+        }
+    }
+
+    private static byte[] convertToByteArray(String data) {
+        String[] byteStrings = data.split(" ");
+        byte[] bytes = new byte[byteStrings.length];
+        for (int i = 0; i < byteStrings.length; i++) {
+            bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
+                    + Character.digit(byteStrings[i].charAt(1), 16));
+        }
+        System.out.println(bytes.length);
+        return bytes;
     }
 }

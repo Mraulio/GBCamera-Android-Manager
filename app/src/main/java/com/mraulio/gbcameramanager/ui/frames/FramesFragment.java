@@ -15,6 +15,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -34,6 +35,8 @@ public class FramesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
+        MainActivity.pressBack=false;
+
         // Inflate the layout for this fragment
         gridView.setAdapter(new CustomGridViewAdapterFrames(getContext(),R.layout.frames_row_items, Methods.framesList));
         return view;

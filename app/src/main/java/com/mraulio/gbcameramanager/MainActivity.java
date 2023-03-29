@@ -1,9 +1,12 @@
 package com.mraulio.gbcameramanager;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
@@ -12,6 +15,7 @@ import android.widget.Toast;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
@@ -34,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+    public static boolean pressBack = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         addPalettes();//Before loading gallery fragment
         addFrames();
         Methods.extractHexImages();
-        Methods.extractSavImages(this);
+//        Methods.extractSavImages(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -168,6 +173,16 @@ public class MainActivity extends AppCompatActivity {
             toast.show();
         }
     }
+
+    //This makes the app not get closed when pressing back
+//    @Override
+//    public void onBackPressed() {
+//        if (pressBack) {
+//            super.onBackPressed();
+//            //additional code
+//            moveTaskToBack(true);
+//        }
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -204,9 +204,9 @@ public class GalleryFragment extends Fragment {
             }
         });
 
-        lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
-        tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
+//        lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
         updateGridView(currentPage, gridView);
+        tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
 
         tv.setText("Total of images: " + GbcImage.numImages);
 
@@ -305,7 +305,7 @@ public class GalleryFragment extends Fragment {
         if (Methods.completeImageList.size() < itemsPerPage) {
             itemsPerPage = Methods.completeImageList.size();
         }
-        int lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
+        lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
 
         //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
         if (currentPage == lastPage && (Methods.completeImageList.size() % itemsPerPage) != 0) {

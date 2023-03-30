@@ -37,6 +37,7 @@ import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
 
 import java.io.File;
@@ -61,6 +62,7 @@ public class GalleryFragment extends Fragment {
     static int currentPage = 0;
     static int lastPage = 0;
     boolean crop = false;
+    boolean showPalettes = true;
     //    List<Bitmap> listBitmaps = new ArrayList<>();
     TextView tv_page;
 
@@ -68,7 +70,7 @@ public class GalleryFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
-        MainActivity.pressBack=true;
+        MainActivity.pressBack = true;
         TextView tv = (TextView) view.findViewById(R.id.text_gallery);
         gridView = (GridView) view.findViewById(R.id.gridView);
 
@@ -124,18 +126,14 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedPosition = 0;
+
                 // Obtener la imagen seleccionada
                 if (currentPage != lastPage) {
                     selectedPosition = position + (currentPage * itemsPerPage);
                 } else {
                     selectedPosition = Methods.completeImageList.size() - (itemsPerPage - position);
                 }
-
                 final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
-                LocalDateTime now = LocalDateTime.now();
-                String fileName = "image_";
-                fileName += dtf.format(now) + ".png";
-                saveImage(selectedImage[0], fileName);
                 System.out.println("El tamaño es " + selectedImage[0].getWidth() + "x" + selectedImage[0].getHeight());
                 byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
                 System.out.println("******PULSADO EN LA IMAGEN: " + Methods.gbcImagesList.get(selectedPosition).getName() + "***********************************");
@@ -152,35 +150,92 @@ public class GalleryFragment extends Fragment {
                 // Configurar el botón de cierre del diálogo
                 Button saveButton = dialog.findViewById(R.id.save_button);
                 Button cropButton = dialog.findViewById(R.id.crop_save_button);
-                Button paletteButton = dialog.findViewById(R.id.btn_palette);
+//                Button paletteButton = dialog.findViewById(R.id.btn_palette);
+                Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
                 GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
-
-                gridViewPalette.setAdapter(new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList));
-                gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
+                showPalettes = true;
+                paletteFrameSelButton.setText("Show frames.");
+                gridViewFrames.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList));
+                gridViewFrames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position2, long id) {
+                    public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                         //Action when clicking a palette inside the Dialog
-                        int selectedPosition2;
+                        int globalImageIndex;
+                        Bitmap framed = null;
+                        byte[] imageBytes = null;
                         // Obtener la imagen seleccionada
                         if (currentPage != lastPage) {
-                            selectedPosition2 = position + (currentPage * itemsPerPage);
+                            globalImageIndex = position + (currentPage * itemsPerPage);
                         } else {
-                            selectedPosition2 = Methods.completeImageList.size() - (itemsPerPage - position);
+                            globalImageIndex = Methods.completeImageList.size() - (itemsPerPage - position);
                         }
-                        Bitmap changedImage = paletteChanger(position2, Methods.gbcImagesList.get(selectedPosition2).getImageBytes());
-                        selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
+                        if (Methods.completeImageList.get(globalImageIndex).getHeight() == 144 && Methods.completeImageList.get(globalImageIndex).getWidth() == 160) {
+                            //I need to use copy because if not it's inmutable bitmap
+                            framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                            Canvas canvas = new Canvas(framed);
+                            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeImageList.get(globalImageIndex), 16, 16, 128, 112);
+                            canvas.drawBitmap(croppedBitmap, 16, 16, null);
+                            Methods.completeImageList.set(globalImageIndex, framed);
+                            try {
+                                imageBytes = Methods.encodeImage(framed);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
+                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
+                        selectedImage[0] = framed;
+                        Methods.completeImageList.set(globalImageIndex, framed);
+                        Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);
 
-
-
-
-
-                        imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
-                        Methods.completeImageList.set(selectedPosition2, changedImage);
-                        Methods.gbcImagesList.get(selectedPosition2).setPaletteIndex(position2);
                         updateGridView(currentPage, gridView);
                     }
                 });
+                gridViewPalette.setAdapter(new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList));
+                gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int selectedPaletteIndex, long id) {
+                        //Action when clicking a palette inside the Dialog
+                        int globalImageIndex;
+                        // Obtener la imagen seleccionada
+                        if (currentPage != lastPage) {
+                            globalImageIndex = position + (currentPage * itemsPerPage);
+                        } else {
+                            globalImageIndex = Methods.completeImageList.size() - (itemsPerPage - position);
+                        }
+                        Bitmap changedImage = paletteChanger(selectedPaletteIndex, Methods.gbcImagesList.get(globalImageIndex).getImageBytes());
+                        selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
+                        imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
+                        Methods.completeImageList.set(globalImageIndex, changedImage);
+//                        try {
+//                            Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(changedImage));
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
 
+                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(selectedPaletteIndex);
+                        updateGridView(currentPage, gridView);
+                    }
+                });
+                paletteFrameSelButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (showPalettes) {
+                            showPalettes = false;
+                            paletteFrameSelButton.setText("Show palettes");
+                            gridViewPalette.setVisibility(View.GONE);
+                            gridViewFrames.setVisibility(View.VISIBLE);
+
+                        } else {
+                            showPalettes = true;
+                            paletteFrameSelButton.setText("Show frames");
+                            gridViewFrames.setVisibility(View.GONE);
+                            gridViewPalette.setVisibility(View.VISIBLE);
+
+                        }
+                    }
+                });
                 saveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -225,8 +280,7 @@ public class GalleryFragment extends Fragment {
 
     //Cambiar paleta
     public Bitmap paletteChanger(int index, byte[] imageBytes) {
-        System.out.println(imageBytes.length+"++++++++++++++++++++++++++++++++++++++++++++++++++++/144");
-        ImageCodec imageCodec = new ImageCodec(index, 160, imageBytes.length/40);//imageBytes.length/40 to get the height of the image
+        ImageCodec imageCodec = new ImageCodec(index, 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(index, imageBytes);
 
 //        //If the image is 128x112 (extracted from sav) I apply the frame

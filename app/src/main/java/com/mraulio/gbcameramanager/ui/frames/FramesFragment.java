@@ -43,7 +43,7 @@ public class FramesFragment extends Fragment {
     }
 
 
-    public class CustomGridViewAdapterFrames extends ArrayAdapter<GbcFrame> {
+    public static class CustomGridViewAdapterFrames extends ArrayAdapter<GbcFrame> {
         Context context;
         int layoutResourceId;
         List<GbcFrame> data = new ArrayList<GbcFrame>();

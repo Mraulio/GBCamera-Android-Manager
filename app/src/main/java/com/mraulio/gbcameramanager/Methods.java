@@ -89,7 +89,6 @@ public class Methods {
                 ImageCodec imageCodec = new ImageCodec(0, 128, 112);
                 Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
-                    System.out.println("***********ENTERING ADDING FRAME*************");
                     //I need to use copy because if not it's inmutable bitmap
                     Bitmap framed = framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);

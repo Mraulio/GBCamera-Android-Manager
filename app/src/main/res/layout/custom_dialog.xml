@@ -1,7 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="#EAEAEA"
     android:orientation="vertical"
     android:padding="5dp">
 
@@ -10,15 +10,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:background="@color/black"
         android:scaleType="fitCenter" />
 
-    <Button
-        android:id="@+id/btn_palette"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Change palette" />
+<!--    <Button-->
+<!--        android:id="@+id/btn_palette"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="center_horizontal"-->
+<!--        android:text="Change palette" />-->
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -43,6 +42,13 @@
             android:text="Crop&amp;Save" />
     </LinearLayout>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show palettes"
+        android:layout_gravity="center"
+        android:id="@+id/btnPaletteFrame"></Button>
+
 
     <GridView
         android:id="@+id/gridViewPal"
@@ -54,6 +60,17 @@
         android:scrollbars="horizontal"
         android:stretchMode="columnWidth"
         android:verticalSpacing="10dp" />
+    <GridView
+        android:id="@+id/gridViewFra"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#D5D5D5"
+        android:horizontalSpacing="10dp"
+        android:numColumns="5"
+        android:scrollbars="horizontal"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="10dp"
+        android:visibility="gone"/>
 
 
 </LinearLayout>

@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.SQLOutput;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -118,7 +119,7 @@ public class Methods {
     public static void extractHexImages(){
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         //*******PARA LEER EL FICHERO HEXDATA
-        File ficheroHex = new File(directory, "hexData30.txt");
+        File ficheroHex = new File(directory, "pano2cabo.txt");
         StringBuilder stringBuilder = new StringBuilder();
 
         try {
@@ -143,11 +144,12 @@ public class Methods {
 
         List<byte[]> listaBytes= new ArrayList<>();
         //******FIN DE LEER EL FICHERO
-        System.out.println("La longitud del fichero hex es de : " + fileContent.length());
+        System.out.println("La longitud del fichero hex es de : " + fileContent.length()+"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         List<String> dataList = RawToTileData.separateData(fileContent);
         String data = "";
         for (String string : dataList) {
             data = string.replaceAll(System.lineSeparator(), " ");
+            System.out.println("-----------------------------------HACIENDO PALMAS+++++++++++++++++++++++++++++++++++++++++++++++++++++"+data.length());
             byte[] bytes = convertToByteArray(data);
             GbcImage gbcImage = new GbcImage();
             GbcImage.numImages++;
@@ -164,10 +166,18 @@ public class Methods {
     private static byte[] convertToByteArray(String data) {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];
+        System.out.println("*************************CONVERTING TO BYTE ARRAY**********************-------------/*/**//*/*/");
+        System.out.println(data.length());
 
         for (int i = 0; i < byteStrings.length; i++) {
+            try{
             bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
                     + Character.digit(byteStrings[i].charAt(1), 16));
+
+            }catch (Exception e){
+
+            System.out.println("*********************************************ERRORRRRRRR"+i);
+            }
         }
         System.out.println(bytes.length);
         return bytes;

@@ -130,7 +130,12 @@ public class GalleryFragment extends Fragment {
                 } else {
                     selectedPosition = Methods.completeImageList.size() - (itemsPerPage - position);
                 }
+
                 final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
+                LocalDateTime now = LocalDateTime.now();
+                String fileName = "image_";
+                fileName += dtf.format(now) + ".png";
+                saveImage(selectedImage[0], fileName);
                 System.out.println("El tamaño es " + selectedImage[0].getWidth() + "x" + selectedImage[0].getHeight());
                 byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
                 System.out.println("******PULSADO EN LA IMAGEN: " + Methods.gbcImagesList.get(selectedPosition).getName() + "***********************************");
@@ -164,6 +169,11 @@ public class GalleryFragment extends Fragment {
                         }
                         Bitmap changedImage = paletteChanger(position2, Methods.gbcImagesList.get(selectedPosition2).getImageBytes());
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
+
+
+
+
+
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
                         Methods.completeImageList.set(selectedPosition2, changedImage);
                         Methods.gbcImagesList.get(selectedPosition2).setPaletteIndex(position2);

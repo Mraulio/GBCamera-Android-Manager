@@ -46,14 +46,14 @@ public class RawToTileData {
                 } else if (line.startsWith("88 33 02")) {
                     // PRINT command
                     // Fin de imagen, se guarda en la lista y se borra para empezar de 0 para la siguiente
-                    dataList.add(outputString.toString());
-                    outputString.setLength(0);
-                    if (line.startsWith("88 33 02 00 04 00 01 00")) {
-                        // 0 margins
-                    } else if (!line.startsWith("88 33 02 00 04 00 01 00")) {
+                    if (line.startsWith("88 33 02 00 04 00 01 10") || line.startsWith("88 33 02 00 04 00 01 00")) {
+                        // 0 margins, I just continue adding data to the outputString after deleting last \n
+                        outputString.deleteCharAt(outputString.length()-1);//To delete the last added \n
+                    } else {
                         // DIFFERENT MARGIN
+                        dataList.add(outputString.toString());
+                        outputString.setLength(0);
                     }
-
                 } else if (line.startsWith("88 33 0F")) {
                     // INQUIRY command
                 } else if (line.startsWith("88 33 08")) {
@@ -64,8 +64,8 @@ public class RawToTileData {
             // Handle exception
         }
 
-        System.out.println(dataList.size());
-        System.out.println(dataList.get(0) + dataList.get(1) + dataList.get(2));
+        System.out.println("CANTIDAD DE IMAGENES: " + dataList.size());
+//        System.out.println(dataList.get(0) + dataList.get(1) + dataList.get(2));
         return dataList;
     }
 

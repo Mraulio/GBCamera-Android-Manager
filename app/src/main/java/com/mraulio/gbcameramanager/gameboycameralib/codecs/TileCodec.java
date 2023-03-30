@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
+import java.io.IOException;
+
 
 /**
  * Codec para decodificar y codificar una imagen de mosaico de 8x8 píxeles
@@ -84,6 +86,12 @@ public class TileCodec implements Codec {
             result[y*ROW_BYTES+1] = highByte;
         }
         return result;
+    }
+
+    @Override
+    public byte[] encodeInternal(Bitmap image) throws IOException {
+        //Not used
+        return new byte[0];
     }
 
     public byte setBit(byte b, int position) {

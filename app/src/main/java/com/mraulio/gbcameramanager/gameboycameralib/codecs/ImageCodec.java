@@ -5,6 +5,9 @@ import android.graphics.Canvas;
 
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 
 public class ImageCodec implements Codec {
 
@@ -82,5 +85,21 @@ public class ImageCodec implements Codec {
     public byte[] encode(Bitmap buf) {
         // This method is not used for now.
         return null;
+    }
+
+    public byte[] encodeInternal(Bitmap buf) {
+        Codec tileCodec = new TileCodec(palette);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (int y=0; y+TileCodec.TILE_HEIGHT<=buf.getHeight(); y+=TileCodec.TILE_HEIGHT) {
+            for (int x=0; x+TileCodec.TILE_WIDTH<=buf.getWidth(); x+=TileCodec.TILE_WIDTH) {
+                try {
+                    baos.write(tileCodec.encode(Bitmap.createBitmap(buf, x, y, TileCodec.TILE_WIDTH, TileCodec.TILE_HEIGHT)));
+                } catch (Exception e) {
+                    // Can likely be ignored for this in memory stream type
+                    e.printStackTrace();
+                }
+            }
+        }
+        return baos.toByteArray();
     }
 }

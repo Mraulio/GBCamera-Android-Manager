@@ -81,24 +81,24 @@ public class Methods {
 
             for (byte[] imageBytes : listImageBytes) {
                 GbcImage gbcImage = new GbcImage();
-                gbcImage.setImageBytes(imageBytes);
                 GbcImage.numImages++;
-//                if (nameIndex%2==0)
-//                    gbcImage.setImageBytes(cambiarPaleta(imageBytes,1));
-//                else
-//                    gbcImage.setBitmap(imageBytes);
                 gbcImage.setName("Image " + (GbcImage.numImages));
-//                gbcImage.setFrameIndex(0);
-//                gbcImage.setPaletteIndex(0);
-                ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 128, 112);
-                Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
+                gbcImage.setFrameIndex(0);
+                gbcImage.setPaletteIndex(0);
+                ImageCodec imageCodec = new ImageCodec(0, 128, 112);
+                Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
+                    System.out.println("***********ENTERING ADDING FRAME*************");
                     //I need to use copy because if not it's inmutable bitmap
                     Bitmap framed = framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
+                    imageBytes= encodeImage(image);
+                    System.out.println("***********"+image.getHeight()+" "+image.getWidth()+"*************");
+
                 }
+                gbcImage.setImageBytes(imageBytes);
                 completeImageList.add(image);
                 gbcImagesList.add(gbcImage);
             }
@@ -109,7 +109,12 @@ public class Methods {
             e.printStackTrace();
         }
     }
-
+    public static byte[] encodeImage(Bitmap bitmap) throws IOException {
+        System.out.println("*************la altura calculada es:" + bitmap.getHeight());
+//        System.out.println("**********La longitud es es:" + data.length());
+        Codec decoder = new ImageCodec(0, 160, bitmap.getHeight());
+        return decoder.encodeInternal(bitmap);
+    }
     public static void extractHexImages(){
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         //*******PARA LEER EL FICHERO HEXDATA

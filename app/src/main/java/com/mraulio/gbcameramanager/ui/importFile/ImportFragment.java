@@ -192,19 +192,23 @@ public class ImportFragment extends Fragment {
             int nameIndex = 1;
             for (byte[] imageBytes : listImportedImageBytes) {
                 GbcImage gbcImage = new GbcImage();
-                gbcImage.setImageBytes(imageBytes);
                 gbcImage.setName(nameIndex++ + "-" + fileName);
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
                 ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 128, 112);
-                Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
+                Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
+                    System.out.println("***********ENTERING ADDING FRAME*************");
                     //I need to use copy because if not it's inmutable bitmap
                     Bitmap framed = Methods.framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
+                    imageBytes= Methods.encodeImage(image);
+                    System.out.println("***********"+image.getHeight()+" "+image.getWidth()+"*************");
+
                 }
+                gbcImage.setImageBytes(imageBytes);
                 importedImagesBitmaps.add(image);
                 importedImagesList.add(gbcImage);
             }

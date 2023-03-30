@@ -162,7 +162,7 @@ public class GalleryFragment extends Fragment {
                         } else {
                             selectedPosition2 = Methods.completeImageList.size() - (itemsPerPage - position);
                         }
-                        Bitmap changedImage = paletteChanger2(position2, selectedImage[0], selectedPosition2);
+                        Bitmap changedImage = paletteChanger(position2, Methods.gbcImagesList.get(selectedPosition2).getImageBytes());
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
                         Methods.completeImageList.set(selectedPosition2, changedImage);
@@ -215,18 +215,19 @@ public class GalleryFragment extends Fragment {
 
     //Cambiar paleta
     public Bitmap paletteChanger(int index, byte[] imageBytes) {
-        ImageCodec imageCodec = new ImageCodec(index, IMAGE_WIDTH, IMAGE_HEIGHT);
+        System.out.println(imageBytes.length+"++++++++++++++++++++++++++++++++++++++++++++++++++++/144");
+        ImageCodec imageCodec = new ImageCodec(index, 160, imageBytes.length/40);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(index, imageBytes);
 
-        //If the image is 128x112 (extracted from sav) I apply the frame
-        if (image.getHeight() == 112 && image.getWidth() == 128) {
-            ImageCodec imageCodec2 = new ImageCodec(index, 160, 144);
-            //I need to use copy because if not it's inmutable bitmap
-            Bitmap framed = Methods.framesList.get(1).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-            Canvas canvas = new Canvas(framed);
-            canvas.drawBitmap(image, 16, 16, null);
-            image = framed;
-        }
+//        //If the image is 128x112 (extracted from sav) I apply the frame
+//        if (image.getHeight() == 112 && image.getWidth() == 128) {
+//            ImageCodec imageCodec2 = new ImageCodec(index, 160, 144);
+//            //I need to use copy because if not it's inmutable bitmap
+//            Bitmap framed = Methods.framesList.get(1).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+//            Canvas canvas = new Canvas(framed);
+//            canvas.drawBitmap(image, 16, 16, null);
+//            image = framed;
+//        }
         return image;
     }
 

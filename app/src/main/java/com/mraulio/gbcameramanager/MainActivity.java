@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         addPalettes();//Before loading gallery fragment
         addFrames();
         Methods.extractHexImages();
-//        Methods.extractSavImages(this);
+        Methods.extractSavImages(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

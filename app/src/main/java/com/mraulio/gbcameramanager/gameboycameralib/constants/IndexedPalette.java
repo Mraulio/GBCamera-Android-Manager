@@ -48,9 +48,9 @@ public class IndexedPalette {
 
     private int[] palette;
 
-    public IndexedPalette() {
-        this(EVEN_DIST_PALETTE);
-    }
+//    public IndexedPalette() {
+//        this(EVEN_DIST_PALETTE);
+//    }
 
     public IndexedPalette(int[] palette) {
         this.palette = palette;

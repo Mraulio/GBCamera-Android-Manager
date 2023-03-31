@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
+import com.mraulio.gbcameramanager.model.GbcImage;
 
 import java.io.IOException;
 
@@ -24,7 +25,7 @@ public class TileCodec implements Codec {
     public static final int TILE_BYTES_LENGTH = 16;
     private int paletteIndex;
 
-    private IndexedPalette palette = new IndexedPalette();
+    private IndexedPalette palette;
 
     public TileCodec(IndexedPalette palette) {
         this.palette = palette;
@@ -89,7 +90,7 @@ public class TileCodec implements Codec {
     }
 
     @Override
-    public byte[] encodeInternal(Bitmap image) throws IOException {
+    public byte[] encodeInternal(Bitmap image, GbcImage gbcImage) throws IOException {
         //Not used
         return new byte[0];
     }

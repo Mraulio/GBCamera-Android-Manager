@@ -10,7 +10,8 @@ public class GbcPalette {
     private int[] paletteColors;
     private String name;
 
-    public GbcPalette(){}
+    public GbcPalette() {
+    }
 
     public GbcPalette(int[] paletteColors, String name) {
         this.paletteColors = paletteColors;
@@ -45,6 +46,7 @@ public class GbcPalette {
         // Obtén el objeto Canvas del bitmap para poder dibujar en él
         Canvas canvas = new Canvas(bitmap);
 
+
 // Dibuja un rectángulo para cada sección del ImageView y establece el color correspondiente del array
         for (int i = 0; i < colors.length; i++) {
             Rect rect = new Rect(i * sectionWidth, 0, (i + 1) * sectionWidth, widthHeigh);
@@ -54,5 +56,14 @@ public class GbcPalette {
         }
         return bitmap;
 
+    }
+
+    public int getIndex(int rgb) {
+        for (int i = 0; i < paletteColors.length; ++i) {
+            if (paletteColors[i] == rgb) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Specified RGB colour does not exist in the indexed palette");
     }
 }

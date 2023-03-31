@@ -44,7 +44,6 @@ import java.util.List;
 public class Methods {
 
     public static List<Bitmap> completeImageList = new ArrayList<>();
-    public static List<Bitmap> imageList = new ArrayList<>();
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<byte[]> listImageBytes = new ArrayList<>();
@@ -55,7 +54,7 @@ public class Methods {
      * TO READ THE SAV IMAGES
      */
     public static void extractSavImages(Context context) {
-        Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
+        Extractor extractor = new SaveImageExtractor(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()));
         LocalDateTime now = LocalDateTime.now();
         File latestFile = null;
         try {
@@ -86,7 +85,7 @@ public class Methods {
                 gbcImage.setName("Image " + (GbcImage.numImages));
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
-                ImageCodec imageCodec = new ImageCodec(0, 128, 112);
+                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 128, 112);
                 Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
@@ -94,8 +93,8 @@ public class Methods {
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
-                    imageBytes= encodeImage(image);
-                    System.out.println("***********"+image.getHeight()+" "+image.getWidth()+"*************");
+//                    imageBytes= encodeImage(image, gbcImage);
+                    System.out.println("******y*****"+image.getHeight()+" "+image.getWidth()+"*************");
 
                 }
                 gbcImage.setImageBytes(imageBytes);
@@ -109,11 +108,14 @@ public class Methods {
             e.printStackTrace();
         }
     }
-    public static byte[] encodeImage(Bitmap bitmap) throws IOException {
+    public static byte[] encodeImage(Bitmap bitmap, GbcImage gbcImage) throws IOException {
         System.out.println("*************la altura calculada es:" + bitmap.getHeight());
 //        System.out.println("**********La longitud es es:" + data.length());
-        Codec decoder = new ImageCodec(0, 160, bitmap.getHeight());
-        return decoder.encodeInternal(bitmap);
+        System.out.println("*************La paleta de la imagen es:" + gbcImage.getPaletteIndex()+"************PALETA");
+        System.out.println("*************La paleta de la imagen es:" + Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()[0]+"************PALETA COLOR primero");
+
+        Codec decoder = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, bitmap.getHeight());
+        return decoder.encodeInternal(bitmap, gbcImage);
     }
     public static void extractHexImages(){
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -148,14 +150,13 @@ public class Methods {
         String data = "";
         for (String string : dataList) {
             data = string.replaceAll(System.lineSeparator(), " ");
-            System.out.println("-----------------------------------HACIENDO PALMAS+++++++++++++++++++++++++++++++++++++++++++++++++++++"+data.length());
             byte[] bytes = convertToByteArray(data);
             GbcImage gbcImage = new GbcImage();
             GbcImage.numImages++;
             gbcImage.setImageBytes(bytes);
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(gbcImage.getPaletteIndex(), 160, height);
+            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
             Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
             completeImageList.add(image);
             gbcImagesList.add(gbcImage);
@@ -174,8 +175,6 @@ public class Methods {
                     + Character.digit(byteStrings[i].charAt(1), 16));
 
             }catch (Exception e){
-
-            System.out.println("*********************************************ERRORRRRRRR"+i);
             }
         }
         System.out.println(bytes.length);

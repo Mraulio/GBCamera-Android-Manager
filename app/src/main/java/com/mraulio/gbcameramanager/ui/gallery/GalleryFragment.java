@@ -179,11 +179,12 @@ public class GalleryFragment extends Fragment {
                             framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                             //I need to apply the palette to the frame so the 4 colors are the same on all the image
                             try {
-                                byte[] framedBytes = Methods.encodeImage(framed,Methods.gbcImagesList.get(globalImageIndex));
-                                System.out.println("///////////////////////////////////FRAMED BYTES: "+framedBytes.length+"*********************---");
+//                                byte[] framedBytes = Methods.encodeImage(framed,Methods.gbcImagesList.get(globalImageIndex));
+//                                System.out.println("///////////////////////////////////FRAMED BYTES: "+framedBytes.length+"*********************---");
 //                                framed= paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(),framedBytes,Methods.gbcImagesList.get(globalImageIndex) );
-
-                            } catch (IOException e) {
+                                framed = paletteChanger2(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(),framed,0);
+                                framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                             Canvas canvas = new Canvas(framed);
@@ -191,17 +192,17 @@ public class GalleryFragment extends Fragment {
                             canvas.drawBitmap(croppedBitmap, 16, 16, null);
                             Methods.completeImageList.set(globalImageIndex, framed);
                             System.out.println("+++++++++++++++++++++Complete image list image height: "+Methods.completeImageList.get(globalImageIndex).getHeight()+"/*/*/*/*/*/*");
-                            try {
-                                System.out.println("++++++++++++++++++++++++++++++++++++Frame height: "+ framed.getHeight()+"-************--*-**-*-*-*-*-*-*-*-*-*");
-
-                                imageBytes = Methods.encodeImage(framed, Methods.gbcImagesList.get(globalImageIndex));
-                                System.out.println("++++++++++++++++++++++++++++++++++++Frame changed bytes length: "+imageBytes.length+"-************--*-**-*-*-*-*-*-*-*-*-*");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+//                            try {
+//                                System.out.println("++++++++++++++++++++++++++++++++++++Frame height: "+ framed.getHeight()+"-************--*-**-*-*-*-*-*-*-*-*-*");
+//
+////                                imageBytes = Methods.encodeImage(framed, Methods.gbcImagesList.get(globalImageIndex));
+//                                System.out.println("++++++++++++++++++++++++++++++++++++Frame changed bytes length: "+imageBytes.length+"-************--*-**-*-*-*-*-*-*-*-*-*");
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
                         }
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
-                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
+//                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
                         selectedImage[0] = framed;
                         Methods.completeImageList.set(globalImageIndex, framed);
                         Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);

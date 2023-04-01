@@ -93,9 +93,8 @@ public class Methods {
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
-//                    imageBytes= encodeImage(image, gbcImage);
+                    imageBytes= encodeImage(image, gbcImage);
                     System.out.println("******y*****"+image.getHeight()+" "+image.getWidth()+"*************");
-
                 }
                 gbcImage.setImageBytes(imageBytes);
                 completeImageList.add(image);

@@ -39,7 +39,8 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
         RecordHolder holder = null;
-        int selectedColor =Color.parseColor("#ffc36d");
+        int notSelectedColor = Color.parseColor("#FFFFFF");
+        int selectedColor =Color.parseColor("#8C97B3");
 
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
@@ -53,11 +54,14 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         } else {
             holder = (RecordHolder) row.getTag();
         }
-        holder.imageItem.setBackgroundColor(0);
+        holder.cardView.setBackgroundColor(notSelectedColor);
+        holder.imageItem.setBackgroundColor(notSelectedColor);
+
 
         if (position == lastSelectedPosition) {
+            holder.cardView.setBackgroundColor(selectedColor);
             holder.imageItem.setBackgroundColor(selectedColor);
-            System.out.println("////////////////////////Cambiando fondo***************");
+
         }
 
         Bitmap image = data.get(position).paletteViewer();

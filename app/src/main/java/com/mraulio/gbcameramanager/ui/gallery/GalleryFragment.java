@@ -155,8 +155,19 @@ public class GalleryFragment extends Fragment {
                 GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
                 CheckBox cbFrameKeep = dialog.findViewById(R.id.cbFrameKeep);
                 showPalettes = true;
+
+                int globalImageIndex;
+                if (currentPage != lastPage) {
+                    globalImageIndex = position + (currentPage * itemsPerPage);
+                } else {
+                    globalImageIndex = Methods.completeImageList.size() - (itemsPerPage - position);
+                }
+
+
                 paletteFrameSelButton.setText("Show frames.");
-                gridViewFrames.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList));
+                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList);
+                frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
+                gridViewFrames.setAdapter(frameAdapter);
 
                 //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
                 if (selectedImage[0].getHeight() != 144) {
@@ -171,12 +182,6 @@ public class GalleryFragment extends Fragment {
                         else keepFrame = true;
                     }
                 });
-                int globalImageIndex;
-                if (currentPage != lastPage) {
-                    globalImageIndex = position + (currentPage * itemsPerPage);
-                } else {
-                    globalImageIndex = Methods.completeImageList.size() - (itemsPerPage - position);
-                }
 
                 gridViewFrames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
@@ -189,12 +194,13 @@ public class GalleryFragment extends Fragment {
                         selectedImage[0] = framed;
                         Methods.completeImageList.set(globalImageIndex, framed);
                         Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);
-
+                        frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
+                        frameAdapter.notifyDataSetChanged();
                         updateGridView(currentPage, gridView);
                     }
                 });
                 CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList);
-                adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
+                adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
                 gridViewPalette.setAdapter(adapterPalette);
                 gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
@@ -214,8 +220,8 @@ public class GalleryFragment extends Fragment {
                         if (keepFrame) {
                             changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
                         }
-                        Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(position2);
-                        adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
+                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
+                        adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
                         adapterPalette.notifyDataSetChanged();
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));

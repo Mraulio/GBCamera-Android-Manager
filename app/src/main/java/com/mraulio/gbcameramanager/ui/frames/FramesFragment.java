@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.frames;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -42,11 +43,14 @@ public class FramesFragment extends Fragment {
         return view;
     }
 
-
     public static class CustomGridViewAdapterFrames extends ArrayAdapter<GbcFrame> {
         Context context;
         int layoutResourceId;
         List<GbcFrame> data = new ArrayList<GbcFrame>();
+        int notSelectedColor = Color.parseColor("#FFFFFF");
+        int selectedColor =Color.parseColor("#8C97B3");
+        int lastSelectedPosition = -1; // Inicialmente no hay ningún elemento seleccionado
+
 
         public CustomGridViewAdapterFrames(Context context, int layoutResourceId,
                                            List<GbcFrame> data) {
@@ -72,7 +76,15 @@ public class FramesFragment extends Fragment {
             } else {
                 holder = (RecordHolder) row.getTag();
             }
+            holder.txtTitle.setBackgroundColor(notSelectedColor);
+            holder.imageItem.setBackgroundColor(notSelectedColor);
 
+
+            if (position == lastSelectedPosition) {
+                holder.txtTitle.setBackgroundColor(selectedColor);
+                holder.imageItem.setBackgroundColor(selectedColor);
+
+            }
             Bitmap image = data.get(position).getFrameBitmap();
             String name = data.get(position).getFrameName();
             holder.txtTitle.setText(name);
@@ -85,6 +97,10 @@ public class FramesFragment extends Fragment {
             TextView txtTitle;
             ImageView imageItem;
 
+        }
+        // Método para actualizar la última posición seleccionada
+        public void setLastSelectedPosition(int position) {
+            lastSelectedPosition = position;
         }
     }
 }

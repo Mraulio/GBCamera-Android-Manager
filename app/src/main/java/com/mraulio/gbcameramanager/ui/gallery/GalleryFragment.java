@@ -137,11 +137,7 @@ public class GalleryFragment extends Fragment {
                     selectedPosition = Methods.completeImageList.size() - (itemsPerPage - position);
                 }
                 final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
-                System.out.println("El tamaño es " + selectedImage[0].getWidth() + "x" + selectedImage[0].getHeight());
                 byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
-                System.out.println("******PULSADO EN LA IMAGEN: " + Methods.gbcImagesList.get(selectedPosition).getName() + "***********************************");
-                System.out.println("******LA IMAGEN TIENE LA PALETA: " + Methods.gbcImagesList.get(selectedPosition).getPaletteIndex() + "***********************************");
-
                 // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
                 dialog.setContentView(R.layout.custom_dialog);
@@ -162,6 +158,12 @@ public class GalleryFragment extends Fragment {
                 paletteFrameSelButton.setText("Show frames.");
                 gridViewFrames.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList));
 
+                //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
+                if (selectedImage[0].getHeight() != 144) {
+                    cbFrameKeep.setVisibility(View.GONE);
+                    paletteFrameSelButton.setVisibility(View.GONE);
+                }
+
                 cbFrameKeep.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -180,7 +182,7 @@ public class GalleryFragment extends Fragment {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                         //Action when clicking a frame inside the Dialog
-                        Bitmap framed = frameChange(globalImageIndex, selectedFrameIndex,keepFrame);
+                        Bitmap framed = frameChange(globalImageIndex, selectedFrameIndex, keepFrame);
 
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
 //                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
@@ -196,14 +198,21 @@ public class GalleryFragment extends Fragment {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position2, long id) {
                         //Action when clicking a palette inside the Dialog
-                        Bitmap changedImage = paletteChanger2(position2, selectedImage[0], globalImageIndex);
-//                        if (keepFrame) {
-//                           changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(),keepFrame);
-//                        }
+                        Bitmap changedImage;
+                        if (!keepFrame){
+                            changedImage= paletteChanger2(0, selectedImage[0], globalImageIndex);
+                            Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(0);//Need to set this to the palette 0 to then change it with the frame
+                            changedImage = paletteChanger2(position2, changedImage, globalImageIndex);
+
+                        }else
+                        changedImage = paletteChanger2(position2, selectedImage[0], globalImageIndex);
+                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
+                        Methods.completeImageList.set(globalImageIndex, changedImage);
+                        if (keepFrame) {
+                            changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
+                        }
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
-                        Methods.completeImageList.set(globalImageIndex, changedImage);
-                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
                         updateGridView(currentPage, gridView);
                     }
                 });
@@ -250,20 +259,16 @@ public class GalleryFragment extends Fragment {
 // Configurar el diálogo para que ocupe toda la pantalla
 //                Window window = dialog.getWindow();
 //                window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//
-//// Configurar el diálogo para que sea transparente
-//                window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
                 //Show Dialog
                 dialog.show();
             }
         });
 
-//        lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
         updateGridView(currentPage, gridView);
         tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
 
         tv.setText("Total of images: " + GbcImage.numImages);
-
         return view;
     }
 
@@ -286,25 +291,17 @@ public class GalleryFragment extends Fragment {
     }
 
     private Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) {
-        byte[] imageBytes = null;
         // Obtener la imagen seleccionada
         Bitmap framed = null;
         if (Methods.completeImageList.get(globalImageIndex).getHeight() == 144 && Methods.completeImageList.get(globalImageIndex).getWidth() == 160) {
             //I need to use copy because if not it's inmutable bitmap
             framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-            //I need to apply the palette to the frame so the 4 colors are the same on all the image
-            try {
-//                                byte[] framedBytes = Methods.encodeImage(framed,Methods.gbcImagesList.get(globalImageIndex));
-//                                System.out.println("///////////////////////////////////FRAMED BYTES: "+framedBytes.length+"*********************---");
-//                                framed= paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(),framedBytes,Methods.gbcImagesList.get(globalImageIndex) );
-                if (!keepFrame) {
-                    Toast toast = Toast.makeText(getContext(), "Changing frame color", Toast.LENGTH_SHORT);
-                    toast.show();
-                    framed = paletteChanger2(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), framed, 0);
-                    framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+
+            if (!keepFrame) {
+                Toast toast = Toast.makeText(getContext(), "Changing frame color", Toast.LENGTH_SHORT);
+                toast.show();
+                framed = paletteChanger2(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), framed, 0);
+                framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
             Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeImageList.get(globalImageIndex), 16, 16, 128, 112);
@@ -349,8 +346,6 @@ public class GalleryFragment extends Fragment {
     private void nextPage() {
         if (currentPage < lastPage) {
             currentPage++;
-            System.out.println("***************last page" + lastPage);
-            System.out.println("***************current page " + currentPage);
             updateGridView(currentPage, gridView);
             tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
         }
@@ -395,21 +390,14 @@ public class GalleryFragment extends Fragment {
         //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
         if (currentPage == lastPage && (Methods.completeImageList.size() % itemsPerPage) != 0) {
             itemsPerPage = Methods.completeImageList.size() % itemsPerPage;
-            System.out.println("++++++++++" + itemsPerPage);
-
             startIndex = Methods.completeImageList.size() - itemsPerPage;
-            System.out.println("++++++++++" + startIndex);
             endIndex = Methods.completeImageList.size();
 
         } else {
             startIndex = page * itemsPerPage;
             endIndex = Math.min(startIndex + itemsPerPage, Methods.completeImageList.size());
         }
-//        List<Bitmap> listBitmaps = new ArrayList<>();
-//        for (GbcImage image : Methods.gbcImagesList) {
-//            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(IndexedPalette.GAMEBOY_LCD_PALETTE), IMAGE_WIDTH, IMAGE_HEIGHT);
-////            listBitmaps.add(imageCodec.decode(image.getImageBytes()));
-//        }
+
         //There will be a better way to do this, but works
         List<Bitmap> imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
         List<GbcImage> gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);

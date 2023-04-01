@@ -94,25 +94,16 @@ public class Methods {
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
                     imageBytes= encodeImage(image, gbcImage);
-                    System.out.println("******y*****"+image.getHeight()+" "+image.getWidth()+"*************");
                 }
                 gbcImage.setImageBytes(imageBytes);
                 completeImageList.add(image);
                 gbcImagesList.add(gbcImage);
             }
         } catch (IOException e) {
-            Toast toast = Toast.makeText(context, "Error\n" + e.toString(), Toast.LENGTH_LONG);
-            toast.show();
-
             e.printStackTrace();
         }
     }
     public static byte[] encodeImage(Bitmap bitmap, GbcImage gbcImage) throws IOException {
-        System.out.println("*************la altura calculada es:" + bitmap.getHeight());
-//        System.out.println("**********La longitud es es:" + data.length());
-        System.out.println("*************La paleta de la imagen es:" + gbcImage.getPaletteIndex()+"************PALETA");
-        System.out.println("*************La paleta de la imagen es:" + Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()[0]+"************PALETA COLOR primero");
-
         Codec decoder = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, bitmap.getHeight());
         return decoder.encodeInternal(bitmap, gbcImage);
     }
@@ -144,7 +135,6 @@ public class Methods {
 
         List<byte[]> listaBytes= new ArrayList<>();
         //******FIN DE LEER EL FICHERO
-        System.out.println("La longitud del fichero hex es de : " + fileContent.length()+"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         List<String> dataList = RawToTileData.separateData(fileContent);
         String data = "";
         for (String string : dataList) {
@@ -165,9 +155,7 @@ public class Methods {
     private static byte[] convertToByteArray(String data) {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];
-        System.out.println("*************************CONVERTING TO BYTE ARRAY**********************-------------/*/**//*/*/");
         System.out.println(data.length());
-
         for (int i = 0; i < byteStrings.length; i++) {
             try{
             bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)

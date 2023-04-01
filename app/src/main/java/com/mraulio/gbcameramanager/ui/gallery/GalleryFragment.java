@@ -193,24 +193,30 @@ public class GalleryFragment extends Fragment {
                         updateGridView(currentPage, gridView);
                     }
                 });
-                gridViewPalette.setAdapter(new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList));
+                CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList);
+                adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
+                gridViewPalette.setAdapter(adapterPalette);
                 gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position2, long id) {
                         //Action when clicking a palette inside the Dialog
                         Bitmap changedImage;
-                        if (!keepFrame){
-                            changedImage= paletteChanger2(0, selectedImage[0], globalImageIndex);
+
+                        if (!keepFrame) {
+                            changedImage = paletteChanger2(0, selectedImage[0], globalImageIndex);
                             Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(0);//Need to set this to the palette 0 to then change it with the frame
                             changedImage = paletteChanger2(position2, changedImage, globalImageIndex);
 
-                        }else
-                        changedImage = paletteChanger2(position2, selectedImage[0], globalImageIndex);
+                        } else
+                            changedImage = paletteChanger2(position2, selectedImage[0], globalImageIndex);
                         Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
                         Methods.completeImageList.set(globalImageIndex, changedImage);
                         if (keepFrame) {
                             changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
                         }
+                        Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(position2);
+                        adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
+                        adapterPalette.notifyDataSetChanged();
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
                         updateGridView(currentPage, gridView);

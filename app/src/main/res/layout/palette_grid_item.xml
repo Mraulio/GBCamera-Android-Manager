@@ -7,6 +7,7 @@
     android:padding="2dp"
     app:cardBackgroundColor="#fff"
     app:cardCornerRadius="4dp"
+    android:id="@+id/cardViewPalette"
     app:cardElevation="4dp">
 
     <LinearLayout

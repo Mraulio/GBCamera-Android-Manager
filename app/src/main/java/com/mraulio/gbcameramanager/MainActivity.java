@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
+    public static int exportSize = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

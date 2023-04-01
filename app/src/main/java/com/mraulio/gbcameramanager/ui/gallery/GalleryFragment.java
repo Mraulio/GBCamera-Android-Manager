@@ -39,12 +39,10 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
-import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -54,10 +52,7 @@ public class GalleryFragment extends Fragment {
 
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
 
-    //    List<Bitmap> imageList;
     public static GridView gridView;
-
-    //    private int pageNumber = 0;
     private static int itemsPerPage = 15;
     static int startIndex = 0;
     static int endIndex = 0;
@@ -65,7 +60,6 @@ public class GalleryFragment extends Fragment {
     static int lastPage = 0;
     boolean crop = false;
     boolean showPalettes = true;
-    //    List<Bitmap> listBitmaps = new ArrayList<>();
     TextView tv_page;
     boolean keepFrame = false;
 
@@ -107,10 +101,6 @@ public class GalleryFragment extends Fragment {
             }
         });
 
-//        Button btnLoadImages = (Button) view.findViewById(R.id.btnLoadImages);
-
-//        btnLoadImages.setOnClickListener(v -> loadImages());
-
         //To swipe over the gridview. Not working properly, selects the first image of the row
 //        gridView.setOnTouchListener(new OnSwipeTouchListener(getContext()) {
 //            @Override
@@ -129,7 +119,7 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedPosition = 0;
-
+                keepFrame = false;
                 // Obtener la imagen seleccionada
                 if (currentPage != lastPage) {
                     selectedPosition = position + (currentPage * itemsPerPage);
@@ -242,7 +232,6 @@ public class GalleryFragment extends Fragment {
                             paletteFrameSelButton.setText("Show frames");
                             gridViewFrames.setVisibility(View.GONE);
                             gridViewPalette.setVisibility(View.VISIBLE);
-
                         }
                     }
                 });
@@ -310,8 +299,6 @@ public class GalleryFragment extends Fragment {
             framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
 
             if (!keepFrame) {
-                Toast toast = Toast.makeText(getContext(), "Changing frame color", Toast.LENGTH_SHORT);
-                toast.show();
                 framed = paletteChanger2(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), framed, 0);
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
@@ -378,7 +365,7 @@ public class GalleryFragment extends Fragment {
             System.out.println(e.toString());
         }
         try (FileOutputStream out = new FileOutputStream(file)) {
-            Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false);
+            Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
 
             scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
             Toast toast = Toast.makeText(getContext(), "SAVED", Toast.LENGTH_LONG);

@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -66,6 +67,7 @@ public class GalleryFragment extends Fragment {
     boolean showPalettes = true;
     //    List<Bitmap> listBitmaps = new ArrayList<>();
     TextView tv_page;
+    boolean keepFrame = false;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -155,10 +157,18 @@ public class GalleryFragment extends Fragment {
                 Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
                 GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
                 GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
+                CheckBox cbFrameKeep = dialog.findViewById(R.id.cbFrameKeep);
                 showPalettes = true;
                 paletteFrameSelButton.setText("Show frames.");
                 gridViewFrames.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList));
 
+                cbFrameKeep.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (keepFrame) keepFrame = false;
+                        else keepFrame = true;
+                    }
+                });
                 int globalImageIndex;
                 if (currentPage != lastPage) {
                     globalImageIndex = position + (currentPage * itemsPerPage);
@@ -170,37 +180,8 @@ public class GalleryFragment extends Fragment {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                         //Action when clicking a frame inside the Dialog
-                        Bitmap framed = null;
-                        byte[] imageBytes = null;
-                        // Obtener la imagen seleccionada
+                        Bitmap framed = frameChange(globalImageIndex, selectedFrameIndex,keepFrame);
 
-                        if (Methods.completeImageList.get(globalImageIndex).getHeight() == 144 && Methods.completeImageList.get(globalImageIndex).getWidth() == 160) {
-                            //I need to use copy because if not it's inmutable bitmap
-                            framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-                            //I need to apply the palette to the frame so the 4 colors are the same on all the image
-                            try {
-//                                byte[] framedBytes = Methods.encodeImage(framed,Methods.gbcImagesList.get(globalImageIndex));
-//                                System.out.println("///////////////////////////////////FRAMED BYTES: "+framedBytes.length+"*********************---");
-//                                framed= paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(),framedBytes,Methods.gbcImagesList.get(globalImageIndex) );
-                                framed = paletteChanger2(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(),framed,0);
-                                framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            Canvas canvas = new Canvas(framed);
-                            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeImageList.get(globalImageIndex), 16, 16, 128, 112);
-                            canvas.drawBitmap(croppedBitmap, 16, 16, null);
-                            Methods.completeImageList.set(globalImageIndex, framed);
-                            System.out.println("+++++++++++++++++++++Complete image list image height: "+Methods.completeImageList.get(globalImageIndex).getHeight()+"/*/*/*/*/*/*");
-//                            try {
-//                                System.out.println("++++++++++++++++++++++++++++++++++++Frame height: "+ framed.getHeight()+"-************--*-**-*-*-*-*-*-*-*-*-*");
-//
-////                                imageBytes = Methods.encodeImage(framed, Methods.gbcImagesList.get(globalImageIndex));
-//                                System.out.println("++++++++++++++++++++++++++++++++++++Frame changed bytes length: "+imageBytes.length+"-************--*-**-*-*-*-*-*-*-*-*-*");
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-                        }
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
 //                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
                         selectedImage[0] = framed;
@@ -215,8 +196,10 @@ public class GalleryFragment extends Fragment {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position2, long id) {
                         //Action when clicking a palette inside the Dialog
-
-                        Bitmap changedImage = paletteChanger2(position2,  selectedImage[0],globalImageIndex);
+                        Bitmap changedImage = paletteChanger2(position2, selectedImage[0], globalImageIndex);
+//                        if (keepFrame) {
+//                           changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(),keepFrame);
+//                        }
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
                         Methods.completeImageList.set(globalImageIndex, changedImage);
@@ -287,11 +270,11 @@ public class GalleryFragment extends Fragment {
     //Cambiar paleta
     public Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
-        System.out.println("************************HEIGHT"+(imageBytes.length / 40)+"++++++++++++++++++++++++++++++");
+        System.out.println("************************HEIGHT" + (imageBytes.length / 40) + "++++++++++++++++++++++++++++++");
         Bitmap image = imageCodec.decodeWithPalette(index, imageBytes);
 
         //If the image is 128x112 (extracted from sav) I apply the frame
-        if ((imageBytes.length / 40)==112) {
+        if ((imageBytes.length / 40) == 112) {
             ImageCodec imageCodec2 = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, 144);
             //I need to use copy because if not it's inmutable bitmap
             Bitmap framed = Methods.framesList.get(1).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -301,6 +284,36 @@ public class GalleryFragment extends Fragment {
         }
         return image;
     }
+
+    private Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) {
+        byte[] imageBytes = null;
+        // Obtener la imagen seleccionada
+        Bitmap framed = null;
+        if (Methods.completeImageList.get(globalImageIndex).getHeight() == 144 && Methods.completeImageList.get(globalImageIndex).getWidth() == 160) {
+            //I need to use copy because if not it's inmutable bitmap
+            framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+            //I need to apply the palette to the frame so the 4 colors are the same on all the image
+            try {
+//                                byte[] framedBytes = Methods.encodeImage(framed,Methods.gbcImagesList.get(globalImageIndex));
+//                                System.out.println("///////////////////////////////////FRAMED BYTES: "+framedBytes.length+"*********************---");
+//                                framed= paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(),framedBytes,Methods.gbcImagesList.get(globalImageIndex) );
+                if (!keepFrame) {
+                    Toast toast = Toast.makeText(getContext(), "Changing frame color", Toast.LENGTH_SHORT);
+                    toast.show();
+                    framed = paletteChanger2(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), framed, 0);
+                    framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Canvas canvas = new Canvas(framed);
+            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeImageList.get(globalImageIndex), 16, 16, 128, 112);
+            canvas.drawBitmap(croppedBitmap, 16, 16, null);
+            Methods.completeImageList.set(globalImageIndex, framed);
+        }
+        return framed;
+    }
+
 
     //This one changes pixel by pixel of the bitmap, but works better with the frames
     public Bitmap paletteChanger2(int newPaletteIndex, Bitmap bitmap, int imageIndex) {

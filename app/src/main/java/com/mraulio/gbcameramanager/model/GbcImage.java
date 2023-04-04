@@ -3,27 +3,32 @@ package com.mraulio.gbcameramanager.model;
 import android.graphics.Bitmap;
 
 public class GbcImage {
-    private Bitmap bitmap;
+//    private Bitmap bitmap;
     private int paletteIndex;
+    private int frameIndex;
     private String name;
     boolean favorite;
     public static int numImages= 0;
+    private byte[] imageBytes;
 
-    public GbcImage(){}
-
-    public GbcImage(Bitmap bitmap, int paletteIndex, String name) {
-        this.bitmap = bitmap;
-        this.paletteIndex = paletteIndex;
-        this.name = name;
+    public GbcImage(){         //Add 1 image to the total
+        paletteIndex = 0;
+        frameIndex = 0;//I set the first palette as the default
     }
 
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
+//    public GbcImage(Bitmap bitmap, int paletteIndex, String name) {
+//        this.bitmap = bitmap;
+//        this.paletteIndex = paletteIndex;
+//        this.name = name;
+//    }
 
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
-    }
+//    public Bitmap getBitmap() {
+//        return bitmap;
+//    }
+//
+//    public void setBitmap(Bitmap bitmap) {
+//        this.bitmap = bitmap;
+//    }
 
     public int getPaletteIndex() {
         return paletteIndex;
@@ -47,5 +52,29 @@ public class GbcImage {
 
     public void setFavorite(boolean favorite) {
         this.favorite = favorite;
+    }
+
+    public byte[] getImageBytes() {
+        return imageBytes;
+    }
+
+    public void setImageBytes(byte[] imageBytes) {
+        this.imageBytes = imageBytes;
+    }
+
+    public int getFrameIndex() {
+        return frameIndex;
+    }
+
+    public void setFrameIndex(int frameIndex) {
+        this.frameIndex = frameIndex;
+    }
+
+    public static int getNumImages() {
+        return numImages;
+    }
+
+    public static void setNumImages(int numImages) {
+        GbcImage.numImages = numImages;
     }
 }

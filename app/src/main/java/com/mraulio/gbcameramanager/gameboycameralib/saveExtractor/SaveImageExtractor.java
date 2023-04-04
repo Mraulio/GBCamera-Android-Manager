@@ -64,6 +64,43 @@ public class SaveImageExtractor implements Extractor {
         return images;
     }
 
+
+
+    @Override
+    public List<byte[]> extractBytes(File file) throws IOException {
+        return extractBytes(Files.readAllBytes(file.toPath()));//Modificado
+    }
+    //Added by me
+    @Override
+    public List<byte[]> extractBytes(byte[] rawData) {
+        List<byte[]> images = new ArrayList<>(30);//31 to get the last seen, but needs tweak
+        try {
+            for (int i = IMAGE_START_LOCATION; i < rawData.length; i += NEXT_IMAGE_START_OFFSET) {
+
+                // The full size images
+                byte[] image = new byte[IMAGE_LENGTH];
+                System.arraycopy(rawData, i, image, 0, IMAGE_LENGTH);
+////                if (i!=0 && isEmptyImage(image)) {//FOR THE DELETED IMAGES, CHECK THIS
+////                    continue;
+////                }
+//                if (i == 0){
+//                    i += NEXT_IMAGE_START_OFFSET;//0 means it's the last seen, then we need to continue on 0x2000
+//                }
+                images.add(image);
+
+                // The thumbs
+//                byte[] thumbImage = new byte[SMALL_IMAGE_LENGTH];
+//                System.arraycopy(rawData, i + SMALL_IMAGE_START_OFFSET, thumbImage, 0, SMALL_IMAGE_LENGTH);
+//                images.add(smallImageCodec.decode(thumbImage));
+            }
+
+        } catch (Exception e) {
+            // Just print the error and continue to return what images we have
+            e.printStackTrace();
+        }
+        return images;
+    }
+
     @Override
     public List<byte[]> extractAsPng(File file) throws IOException {
         return extract(file).stream().map(this::imageToBytes).collect(Collectors.toList());

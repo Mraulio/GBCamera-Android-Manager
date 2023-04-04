@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_margin="1dp"
     android:padding="2dp"
-    app:cardElevation="4dp"
     app:cardBackgroundColor="#fff"
     app:cardCornerRadius="4dp"
-    android:layout_height="wrap_content">
+    app:cardElevation="4dp">
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,31 +20,36 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
-            android:padding="3dp"
             android:background="@color/white"
-            android:src="@mipmap/ic_launcher"
-            android:scaleType="fitXY"/>
+            android:padding="3dp"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/ic_launcher" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tvName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Name"
                 android:layout_below="@+id/imageView"
                 android:layout_centerHorizontal="true"
-                android:id="@+id/tvName"/>
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Palette"
-                android:textSize="9sp"
-                android:id="@+id/paletteButton"></Button>
+                android:text="Name" />
+
+
+            <!--            <Button-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:text="Palette"-->
+            <!--                android:textSize="9sp"-->
+            <!--                android:id="@+id/paletteButton"></Button>-->
+
 
         </LinearLayout>
+
 
     </LinearLayout>
 

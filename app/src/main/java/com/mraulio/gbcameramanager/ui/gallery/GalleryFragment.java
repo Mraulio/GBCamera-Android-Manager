@@ -39,6 +39,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
+import com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -119,6 +120,8 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedPosition = 0;
+                Toast toast = Toast.makeText(getContext(), "Size: " + Methods.listImageBytes, Toast.LENGTH_LONG);
+
                 keepFrame = false;
                 // Obtener la imagen seleccionada
                 if (currentPage != lastPage) {
@@ -137,6 +140,8 @@ public class GalleryFragment extends Fragment {
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
 
                 // Configurar el botón de cierre del diálogo
+                Button printButton = dialog.findViewById(R.id.print_button);
+
                 Button saveButton = dialog.findViewById(R.id.save_button);
                 Button cropButton = dialog.findViewById(R.id.crop_save_button);
 //                Button paletteButton = dialog.findViewById(R.id.btn_palette);
@@ -235,6 +240,22 @@ public class GalleryFragment extends Fragment {
                         }
                     }
                 });
+
+                printButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            MainActivity.printIndex = globalImageIndex;
+                            UsbSerialFragment.btnPrintImage.callOnClick();//This works.
+                            Toast toast = Toast.makeText(getContext(), "Printing, please wait..." + MainActivity.exportSize, Toast.LENGTH_LONG);
+                            toast.show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+
                 saveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -368,7 +389,7 @@ public class GalleryFragment extends Fragment {
             Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
 
             scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
-            Toast toast = Toast.makeText(getContext(), "SAVED x"+MainActivity.exportSize, Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), "SAVED x" + MainActivity.exportSize, Toast.LENGTH_LONG);
             toast.show();
             // PNG is a lossless format, the compression factor (100) is ignored
 

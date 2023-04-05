@@ -44,6 +44,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static int printIndex;
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     public static boolean pressBack = true;

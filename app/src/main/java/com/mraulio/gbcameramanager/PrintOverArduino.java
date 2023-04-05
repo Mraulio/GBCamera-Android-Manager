@@ -190,7 +190,52 @@ public class PrintOverArduino {
             tv.append("Error EMPTY, PRINT" + e.toString());
 
         }
+        tv.append(""+outputStream.toByteArray().length);
 
+        return outputStream.toByteArray();
+    }
+    private byte[] createDataWithImageBytes(TextView tv, byte[] imageBytes) {
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            outputStream.write(getCommandBytes(INIT));
+
+        } catch (Exception e) {
+        }
+        tv.append(""+imageBytes.length);
+//        List<byte[]> chunkList = new ArrayList<>();
+//        String data_nospace = onlyTileData.replaceAll(System.lineSeparator(), " ").replaceAll(" ", "");
+//        int len2 = data_nospace.length();
+//        byte[] bytesTileData = new byte[len2 / 2];
+//        for (int i = 0; i < len2; i += 2) {
+//            bytesTileData[i / 2] = (byte) ((Character.digit(data_nospace.charAt(i), 16) << 4)
+//                    + Character.digit(data_nospace.charAt(i + 1), 16));
+//        }
+        int chunkSize = 640;//each data packet size, 640 + 4 from the start checksum
+        for (int i = 0; i < imageBytes.length; i += chunkSize) {
+            int chunkLength = Math.min(chunkSize, imageBytes.length - i);
+            byte[] chunk = Arrays.copyOfRange(imageBytes, i, i + chunkLength);
+            try {
+                outputStream.write(getCommandBytes(DATA_COMMAND));
+                outputStream.write(chunk);//I write the 640 bytes
+                outputStream.write(checksumCalc(chunk)); //I write the Checksum, need to calculate it with start_checksum+data
+                outputStream.write(getCommandBytes(END_DATA));//The last 2 bytes
+
+            } catch (Exception e) {
+                tv.append(e.toString());
+            }
+//            System.out.println(chunk.length);
+            // haz algo con el chunk, como enviarlo a través de la red o guardarlo en un archivo
+        }
+
+        try {
+            outputStream.write(getCommandBytes(EMPTY_DATA));
+            outputStream.write(getCommandBytes(PRINT));
+        } catch (Exception e) {
+            tv.append("Error EMPTY, PRINT" + e.toString());
+
+        }
+        tv.append(""+outputStream.toByteArray().length);
         return outputStream.toByteArray();
     }
 
@@ -209,7 +254,7 @@ public class PrintOverArduino {
         return bytes;
     }
 
-    public void sendThread(UsbDeviceConnection connection, UsbDevice usbDevice, TextView textView, Context context) {
+    public void sendThread(UsbDeviceConnection connection, UsbDevice usbDevice, TextView textView) {
         UsbEndpoint endpoint = null;
         for (int i = 0; i < usbDevice.getInterfaceCount(); i++) {
             UsbInterface usbInterface = usbDevice.getInterface(i);
@@ -246,8 +291,8 @@ public class PrintOverArduino {
 //         *
 //         */
 
-
-        byte[] byteArray = createData(textView);
+//        byte[] byteArray = createData(textView);
+        byte[] byteArray = createDataWithImageBytes(textView,Methods.gbcImagesList.get(MainActivity.printIndex).getImageBytes());
         textView.append("byte array length:" + byteArray.length);
         percentage = byteArray.length;
 

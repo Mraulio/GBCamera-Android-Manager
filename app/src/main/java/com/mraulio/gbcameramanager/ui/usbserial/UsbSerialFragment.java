@@ -31,6 +31,7 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
+import com.mraulio.gbcameramanager.Connecter;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.PrintOverArduino;
@@ -64,8 +65,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
 
     File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-    UsbDeviceConnection connection;
-    UsbManager manager = MainActivity.manager;
+    static UsbDeviceConnection connection;
+    static UsbManager manager = MainActivity.manager;
     SerialInputOutputManager usbIoManager;
     private static final String ACTION_USB_PERMISSION =
             "com.android.example.USB_PERMISSION";
@@ -78,12 +79,13 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 //    List<Bitmap> imageList = new ArrayList<>();
     public static boolean freeTv = false;
     DecimalFormat df = new DecimalFormat("#.00");
-    TextView tv, tvMode;
-    Button btnReadSav, boton, btnSave, btnShare, btnShowInfo, btnReadRom, btnPowerOff, btnSCT, btnPowerOn, btnReadRam, btnFullRom, btnRomImages, btnPrintImage;
+    static TextView tv;
+    TextView tvMode;
+    public static Button btnReadSav, boton, btnSave, btnShare, btnShowInfo, btnReadRom, btnPowerOff, btnSCT, btnPowerOn, btnReadRam, btnFullRom, btnRomImages, btnPrintImage;
     RadioButton rbGbx, rbApe, rbPrint;
     RadioGroup rbGroup;
 
-    UsbSerialPort port = null;
+    static UsbSerialPort port = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -142,7 +144,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     }
                     UsbSerialDriver driver = availableDrivers.get(0);
 
-                    printOverArduino.sendThread(connection, driver.getDevice(), tv, getContext());
+                    printOverArduino.sendThread(connection, driver.getDevice(), tv);
                 } catch (Exception e) {
                     tv.append(e.toString());
                     Toast toast = Toast.makeText(getContext(), "Error en PRINT IMAGE\n" + e.toString(), Toast.LENGTH_LONG);
@@ -196,7 +198,29 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         return view;
     }
 
-    private void arduinoPrinterMode() {
+    public static void printOnGallery() throws IOException {
+
+        //PRINT IMAGE
+//                printOverArduino.sendImage(port, tv);
+        try {
+        PrintOverArduino printOverArduino = new PrintOverArduino();
+            Connecter.connect(tv.getContext(), tv);
+            port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+            if (availableDrivers.isEmpty()) {
+                return;
+            }
+            UsbSerialDriver driver = availableDrivers.get(0);
+
+            printOverArduino.sendThread(connection, driver.getDevice(), tv);
+        } catch (Exception e) {
+            tv.append(e.toString());
+//            Toast toast = Toast.makeText(getContext(), "Error en PRINT IMAGE\n" + e.toString(), Toast.LENGTH_LONG);
+//            toast.show();
+        }
+    }
+
+    public void arduinoPrinterMode() {
         try {
             gbxMode = false;
             tvMode.setVisibility(View.VISIBLE);
@@ -634,7 +658,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 //                tv.append(String.format("%02X ", b));
                 PrintOverArduino.count++;
             }
-            tv.setText("Sending image..." + df.format((PrintOverArduino.count / PrintOverArduino.percentage) * 100) + "%.");
+//            tv.setText("Sending image..." + df.format((PrintOverArduino.count / PrintOverArduino.percentage) * 100) + "%.");
             if (freeTv)
                 tv.append("PRINTING");
         });

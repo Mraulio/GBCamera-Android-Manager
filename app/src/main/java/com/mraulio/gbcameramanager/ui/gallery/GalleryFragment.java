@@ -6,12 +6,15 @@ import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageCo
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -141,6 +144,7 @@ public class GalleryFragment extends Fragment {
 
                 // Configurar el botón de cierre del diálogo
                 Button printButton = dialog.findViewById(R.id.print_button);
+                Button shareButton = dialog.findViewById(R.id.share_button);
 
                 Button saveButton = dialog.findViewById(R.id.save_button);
                 Button cropButton = dialog.findViewById(R.id.crop_save_button);
@@ -238,7 +242,7 @@ public class GalleryFragment extends Fragment {
                         }
                     }
                 });
-
+//                UsbSerialFragment.rbPrint.callOnClick();//Clicking on this on startup to set the printing mode on gallery without entering the other fragment.
                 printButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -253,7 +257,14 @@ public class GalleryFragment extends Fragment {
                     }
                 });
 
+                shareButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bitmap sharedBitmap = Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * MainActivity.exportSize, selectedImage[0].getHeight() * MainActivity.exportSize, false);
 
+                        shareImage(sharedBitmap);
+                    }
+                });
                 saveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -379,7 +390,16 @@ public class GalleryFragment extends Fragment {
             tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
         }
     }
+    private void shareImage(Bitmap bitmap) {
 
+        String bitmapPath = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), bitmap, "image", "share image");
+        Uri bitmapUri = Uri.parse(bitmapPath);
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("image/png");
+        intent.putExtra(Intent.EXTRA_STREAM, bitmapUri);
+        startActivity(Intent.createChooser(intent, "Share"));
+    }
     private void saveImage(Bitmap image, String fileName) {
         if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
             image = Bitmap.createBitmap(image, 16, 16, 128, 112);

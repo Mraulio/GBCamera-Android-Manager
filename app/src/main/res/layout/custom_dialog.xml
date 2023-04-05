@@ -7,7 +7,7 @@
 
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
@@ -20,32 +20,47 @@
     <!--        android:text="Change palette" />-->
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:weightSum="4"
         android:orientation="horizontal">
         <Button
             android:id="@+id/print_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
+            android:layout_weight="1"
             android:text="PRINT" />
         <Button
             android:id="@+id/save_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
+            android:layout_weight="1"
+
             android:text="save" />
 
         <Button
             android:id="@+id/crop_save_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
-            android:text="Crop&amp;Save" />
+            android:layout_weight="1"
+
+            android:text="Crop &amp; Save" />
+        <Button
+            android:id="@+id/share_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+
+            android:layout_marginHorizontal="3dp"
+            android:text="Share" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"

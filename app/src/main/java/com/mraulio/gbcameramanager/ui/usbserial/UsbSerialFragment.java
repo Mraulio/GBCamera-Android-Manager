@@ -65,12 +65,13 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
 
     File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
     static UsbDeviceConnection connection;
     static UsbManager manager = MainActivity.manager;
     SerialInputOutputManager usbIoManager;
-    private static final String ACTION_USB_PERMISSION =
-            "com.android.example.USB_PERMISSION";
-    private UsbDevice device;
+
+    private static final String ACTION_USB_PERMISSION ="com.android.example.USB_PERMISSION";
+
     GridView gridView;
     ImageView img;
     static int itemsPerPage = 30;
@@ -82,7 +83,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     static TextView tv;
     TextView tvMode;
     public static Button btnReadSav, boton, btnSave, btnShare, btnShowInfo, btnReadRom, btnPowerOff, btnSCT, btnPowerOn, btnReadRam, btnFullRom, btnRomImages, btnPrintImage;
-    RadioButton rbGbx, rbApe, rbPrint;
+    RadioButton rbGbx, rbApe;
+    public static RadioButton rbPrint;
     RadioGroup rbGroup;
 
     static UsbSerialPort port = null;

@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static int exportSize = 4;
+    public static UsbManager manager;
+
     private static final String ACTION_USB_PERMISSION =
             "com.android.example.USB_PERMISSION";
     private UsbDevice device;
@@ -71,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    UsbManager manager;
     SerialInputOutputManager usbIoManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

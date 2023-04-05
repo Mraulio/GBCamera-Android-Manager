@@ -11,6 +11,8 @@
     <string name="menu_palettes">Palettes</string>
     <string name="menu_frames">Frames</string>
     <string name="menu_import">Import</string>
+    <string name="menu_usbserial">USB Serial</string>
+
     <string name="menu_settings">Settings</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

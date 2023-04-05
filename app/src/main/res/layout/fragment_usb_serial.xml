@@ -1,14 +1,217 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.usbserial.UsbSerialFragment">
+    android:orientation="vertical"
+    android:weightSum="6"
+    tools:context=".MainActivity">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-</FrameLayout>
+        <!--        <Button-->
+        <!--            android:id="@+id/boton"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="Connect"-->
+        <!--            android:layout_margin="5dp"-->
+        <!--            android:textSize="20sp"></Button>-->
+
+
+        <!--        <Button-->
+        <!--            android:id="@+id/btnShare"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="Share"-->
+        <!--            android:layout_margin="5dp"-->
+        <!--            android:textSize="20sp"></Button>-->
+
+        <!--                <Button-->
+        <!--                    android:id="@+id/btnShowInfo"-->
+        <!--                    android:layout_width="wrap_content"-->
+        <!--                    android:layout_height="wrap_content"-->
+        <!--                    android:text="Show device info"-->
+        <!--                    android:layout_margin="5dp"-->
+        <!--                    android:textSize="20sp"></Button>-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioGroup
+                android:id="@+id/rbGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/rbApe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="10dp"
+                    android:text="Arduino Printer Emulator"></RadioButton>
+
+                <RadioButton
+                    android:id="@+id/rbGbx"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginHorizontal="10dp"
+                    android:text="GBxCart">
+
+                </RadioButton>
+                <RadioButton
+                    android:id="@+id/rbPrint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginHorizontal="10dp"
+                    android:textColor="#FF5722"
+                    android:textStyle="bold"
+                    android:text="Print to Arduino - GBP">
+                </RadioButton>
+            </RadioGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="--Modo Aqui--"
+                android:layout_marginHorizontal="5dp"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:visibility="gone"></TextView>
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Save"
+                android:textSize="15sp"
+                android:visibility="gone"></Button>
+            <Button
+                android:id="@+id/btnReadRom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:text="Read Rom Name"
+                android:textSize="15sp"
+                android:visibility="gone"></Button>
+            <Button
+                android:id="@+id/btnReadRam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:text="Read and Save Ram"
+                android:textSize="15sp"
+                android:visibility="gone"></Button>
+
+            <Button
+                android:id="@+id/btnFullRom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:text="Dump Full PHOTO! ROM"
+                android:textSize="15sp"
+                android:backgroundTint="#804F4F"
+                android:visibility="gone"></Button>
+            <Button
+                android:id="@+id/btnROMImages"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:text="View ROM images"
+                android:textSize="15sp"
+                android:backgroundTint="#804F4F"
+                android:visibility="gone"></Button>
+            <Button
+                android:id="@+id/btnPrintImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:text="Print image"
+                android:textSize="15sp"
+                android:backgroundTint="#804F4F"
+                android:visibility="gone"></Button>
+        </LinearLayout>
+
+
+        <!--        <Button-->
+        <!--            android:id="@+id/btnReadSav"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="Read Images"-->
+        <!--            android:layout_margin="5dp"-->
+        <!--            android:textSize="20sp"></Button>-->
+        <!--        <Button-->
+        <!--            android:id="@+id/btnPowerOff"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="Power Off"-->
+        <!--            android:layout_margin="5dp"-->
+        <!--            android:textSize="20sp"></Button>-->
+        <!--        <Button-->
+        <!--            android:id="@+id/btnSCT"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="SCT"-->
+        <!--            android:layout_margin="5dp"-->
+        <!--            android:textSize="20sp"></Button>-->
+        <!--        <Button-->
+        <!--            android:id="@+id/btnPowerOn"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="Power On"-->
+        <!--            android:layout_margin="5dp"-->
+        <!--            android:textSize="20sp"></Button>-->
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:background="#E3E3E3"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:gravity="bottom"
+            android:scrollbars="vertical"
+            android:text=""
+            android:textSize="15sp" />
+        <!--    <ImageView-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:id="@+id/img"></ImageView>-->
+        <GridView
+            android:id="@+id/gridView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="#D5D5D5"
+            android:horizontalSpacing="10dp"
+            android:numColumns="3"
+            android:scrollbars="horizontal"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="10dp" />
+    </LinearLayout>
+
+
+</LinearLayout>

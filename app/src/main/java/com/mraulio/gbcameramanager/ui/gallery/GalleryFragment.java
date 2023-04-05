@@ -247,7 +247,7 @@ public class GalleryFragment extends Fragment {
                         try {
                             MainActivity.printIndex = globalImageIndex;
                             UsbSerialFragment.btnPrintImage.callOnClick();//This works.
-                            Toast toast = Toast.makeText(getContext(), "Printing, please wait..." + MainActivity.exportSize, Toast.LENGTH_LONG);
+                            Toast toast = Toast.makeText(getContext(), "Printing, please wait...", Toast.LENGTH_LONG);
                             toast.show();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -327,6 +327,11 @@ public class GalleryFragment extends Fragment {
             Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeImageList.get(globalImageIndex), 16, 16, 128, 112);
             canvas.drawBitmap(croppedBitmap, 16, 16, null);
             Methods.completeImageList.set(globalImageIndex, framed);
+            try {
+                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(framed, Methods.gbcImagesList.get(globalImageIndex)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return framed;
     }

@@ -93,7 +93,7 @@ public class ImageCodec implements Codec {
     public byte[] encodeInternal(Bitmap buf, GbcImage gbcImage) {
         //I had an error here, need to select the palette index from the actual image.
         //Also need to change the frame palette alongside this so the colors are the same
-        IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors());
+        IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors());
         Codec tileCodec = new TileCodec(ip);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int aux = 0;

@@ -87,7 +87,7 @@ public class Methods {
         }
     }
     public static byte[] encodeImage(Bitmap bitmap, GbcImage gbcImage) throws IOException {
-        Codec decoder = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, bitmap.getHeight());
+        Codec decoder = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, bitmap.getHeight());
         return decoder.encodeInternal(bitmap, gbcImage);
     }
     public static void extractHexImages(){

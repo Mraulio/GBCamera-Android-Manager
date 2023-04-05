@@ -35,6 +35,7 @@ import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.StartCreation;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
@@ -75,7 +76,6 @@ public class GalleryFragment extends Fragment {
         Button btnPrevPage = (Button) view.findViewById(R.id.btnPrevPage);
         Button btnNextPage = (Button) view.findViewById(R.id.btnNextPage);
         tv_page = (TextView) view.findViewById(R.id.tv_page);
-
         view.setOnTouchListener(new OnSwipeTouchListener(getContext()) {
             @Override
             public void onSwipeLeft() {
@@ -158,7 +158,6 @@ public class GalleryFragment extends Fragment {
                     globalImageIndex = Methods.completeImageList.size() - (itemsPerPage - position);
                 }
 
-
                 paletteFrameSelButton.setText("Show frames.");
                 FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList);
                 frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
@@ -177,7 +176,6 @@ public class GalleryFragment extends Fragment {
                         else keepFrame = true;
                     }
                 });
-
                 gridViewFrames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
@@ -286,14 +284,45 @@ public class GalleryFragment extends Fragment {
                 dialog.show();
             }
         });
+        if (Methods.gbcImagesList.size() > 0) {
+            updateGridView(currentPage, gridView);
+            tv.setText("Total of images: " + GbcImage.numImages);
 
-        updateGridView(currentPage, gridView);
+        } else {
+            tv.setText("No images in the gallery. Go to Import tab.");
+        }
         tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
 
-        tv.setText("Total of images: " + GbcImage.numImages);
         return view;
     }
-
+    private Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) {
+        // Obtener la imagen seleccionada
+        Bitmap framed = null;
+        Bitmap framedAux = null;
+        if (Methods.completeImageList.get(globalImageIndex).getHeight() == 144 && Methods.completeImageList.get(globalImageIndex).getWidth() == 160) {
+            //I need to use copy because if not it's inmutable bitmap
+            framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+            framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
+            Canvas canvasAux = new Canvas(framedAux);
+            Bitmap setToPalette = paletteChanger2(0,Methods.completeImageList.get(globalImageIndex),globalImageIndex);
+            Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
+            canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
+            if (!keepFrame) {
+                framed = paletteChanger2(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), framed, 0);
+                framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
+            }
+            Canvas canvas = new Canvas(framed);
+            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeImageList.get(globalImageIndex), 16, 16, 128, 112);
+            canvas.drawBitmap(croppedBitmap, 16, 16, null);
+            Methods.completeImageList.set(globalImageIndex, framed);
+            try {
+                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(framedAux, Methods.gbcImagesList.get(globalImageIndex)));//Use the framedAux because it doesn't a different palette to encode
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return framed;
+    }
     //Cambiar paleta
     public Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
@@ -311,31 +340,6 @@ public class GalleryFragment extends Fragment {
         }
         return image;
     }
-
-    private Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) {
-        // Obtener la imagen seleccionada
-        Bitmap framed = null;
-        if (Methods.completeImageList.get(globalImageIndex).getHeight() == 144 && Methods.completeImageList.get(globalImageIndex).getWidth() == 160) {
-            //I need to use copy because if not it's inmutable bitmap
-            framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-
-            if (!keepFrame) {
-                framed = paletteChanger2(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), framed, 0);
-                framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
-            }
-            Canvas canvas = new Canvas(framed);
-            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeImageList.get(globalImageIndex), 16, 16, 128, 112);
-            canvas.drawBitmap(croppedBitmap, 16, 16, null);
-            Methods.completeImageList.set(globalImageIndex, framed);
-            try {
-                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(framed, Methods.gbcImagesList.get(globalImageIndex)));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return framed;
-    }
-
 
     //This one changes pixel by pixel of the bitmap, but works better with the frames
     public Bitmap paletteChanger2(int newPaletteIndex, Bitmap bitmap, int imageIndex) {

@@ -194,7 +194,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 gbxMode();
             }
         });
-
         return view;
     }
 

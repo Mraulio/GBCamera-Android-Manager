@@ -368,7 +368,7 @@ public class GalleryFragment extends Fragment {
             Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
 
             scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
-            Toast toast = Toast.makeText(getContext(), "SAVED", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), "SAVED x"+MainActivity.exportSize, Toast.LENGTH_LONG);
             toast.show();
             // PNG is a lossless format, the compression factor (100) is ignored
 

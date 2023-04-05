@@ -1,13 +1,20 @@
 package com.mraulio.gbcameramanager;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.widget.Toast;
@@ -25,6 +32,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
@@ -40,7 +48,31 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static int exportSize = 4;
+    private static final String ACTION_USB_PERMISSION =
+            "com.android.example.USB_PERMISSION";
+    private UsbDevice device;
+    private UsbManager usbManager;
+    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (ACTION_USB_PERMISSION.equals(action)) {
+                synchronized (this) {
+                    device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
+                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                        if (device != null) {
+                            //call method to set up device communication
+                        }
+                    } else {
+                        Log.d("TAG", "permission denied for device " + device);
+                    }
+                }
+            }
+        }
+    };
+
+    UsbManager manager;
+    SerialInputOutputManager usbIoManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +80,10 @@ public class MainActivity extends AppCompatActivity {
         addFrames();
         Methods.extractHexImages();
         Methods.extractSavImages(this);
+        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        registerReceiver(usbReceiver, filter);
+
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

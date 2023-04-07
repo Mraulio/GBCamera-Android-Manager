@@ -427,8 +427,8 @@ public class GalleryFragment extends Fragment {
     }
 
     private void shareImage(Bitmap bitmap) {
-        if (bitmap.getHeight() == (144*MainActivity.exportSize) && bitmap.getWidth() == (160*MainActivity.exportSize) && crop) {
-            bitmap = Bitmap.createBitmap(bitmap, 16, 16, 128, 112);
+        if ((bitmap.getHeight()/MainActivity.exportSize)==144 && (bitmap.getWidth()/MainActivity.exportSize) == 160 && crop) {
+            bitmap = Bitmap.createBitmap(bitmap, 16*MainActivity.exportSize, 16*MainActivity.exportSize, 128*MainActivity.exportSize, 112*MainActivity.exportSize);
         }
         String bitmapPath = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), bitmap, "image", "share image");
         Uri bitmapUri = Uri.parse(bitmapPath);

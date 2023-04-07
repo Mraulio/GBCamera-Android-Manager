@@ -138,6 +138,15 @@
                 android:backgroundTint="#804F4F"
                 android:visibility="gone"></Button>
             <Button
+                android:id="@+id/btnPrintBanner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:text="Print test banner"
+                android:textSize="15sp"
+                android:backgroundTint="#804F4F"
+                android:visibility="gone"></Button>
+            <Button
                 android:id="@+id/btnPrintImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -179,7 +188,23 @@
         <!--            android:textSize="20sp"></Button>-->
 
     </LinearLayout>
-
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:id="@+id/tvSleepTime"
+            android:layout_height="wrap_content"
+            android:text="Choose sleep time: "
+            android:visibility="gone"></TextView>
+        <Spinner
+            android:id="@+id/spSleepTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"></Spinner>
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

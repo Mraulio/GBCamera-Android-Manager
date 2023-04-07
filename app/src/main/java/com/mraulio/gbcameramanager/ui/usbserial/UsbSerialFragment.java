@@ -18,12 +18,15 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,14 +84,16 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     //    List<Bitmap> imageList = new ArrayList<>();
     public static boolean freeTv = false;
     DecimalFormat df = new DecimalFormat("#.00");
-    static TextView tv;
+    static TextView tv, tvSleepTime;
+    ;
     TextView tvMode;
-    public static Button btnReadSav, boton, btnSave, btnShare, btnShowInfo, btnReadRom, btnPowerOff, btnSCT, btnPowerOn, btnReadRam, btnFullRom, btnRomImages, btnPrintImage;
+    public static Button btnReadSav, boton, btnSave, btnShare, btnShowInfo, btnReadRom, btnPowerOff, btnSCT, btnPowerOn, btnReadRam, btnFullRom, btnRomImages, btnPrintImage, btnPrintBanner;
     RadioButton rbGbx, rbApe;
     public static RadioButton rbPrint;
     RadioGroup rbGroup;
 
     static UsbSerialPort port = null;
+    Spinner spSleepTime;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -112,10 +117,83 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         btnReadRam = (Button) view.findViewById(R.id.btnReadRam);
         btnRomImages = (Button) view.findViewById(R.id.btnROMImages);
         btnPrintImage = (Button) view.findViewById(R.id.btnPrintImage);
+        btnPrintBanner = (Button) view.findViewById(R.id.btnPrintBanner);
         rbApe = (RadioButton) view.findViewById(R.id.rbApe);
         rbGbx = (RadioButton) view.findViewById(R.id.rbGbx);
         rbPrint = (RadioButton) view.findViewById(R.id.rbPrint);
+        tvSleepTime = (TextView) view.findViewById(R.id.tvSleepTime);
+        spSleepTime = (Spinner) view.findViewById(R.id.spSleepTime);
 
+        List<Integer> sizesInteger = new ArrayList<>();
+        sizesInteger.add(0);
+        sizesInteger.add(20);
+        sizesInteger.add(40);
+        sizesInteger.add(80);
+        sizesInteger.add(100);
+        sizesInteger.add(120);
+        sizesInteger.add(150);
+        sizesInteger.add(151);
+        sizesInteger.add(155);
+        sizesInteger.add(160);
+        sizesInteger.add(200);
+        sizesInteger.add(300);
+
+
+        List<String> sizes = new ArrayList<>();
+        sizes.add("0");
+        sizes.add("20");
+        sizes.add("40");
+        sizes.add("80");
+        sizes.add("100");
+        sizes.add("120");
+        sizes.add("150");
+        sizes.add("151");
+        sizes.add("155");
+        sizes.add("160");
+        sizes.add("200");
+        sizes.add("300");
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, sizes);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spSleepTime.setAdapter(adapter);
+
+        spSleepTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // I set the export size on the Main activity int as the selected one
+                PrintOverArduino.sleepTime = sizesInteger.get(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Acción que quieres hacer cuando no se selecciona ningún elemento en el Spinner
+            }
+        });
+
+        btnPrintBanner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                dataCreate.setLength(0);
+                //PRINT IMAGE
+                PrintOverArduino printOverArduino = new PrintOverArduino();
+                printOverArduino.oneImage = false;
+                printOverArduino.banner = true;
+//                printOverArduino.sendImage(port, tv);
+                try {
+                    List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+                    if (availableDrivers.isEmpty()) {
+                        return;
+                    }
+                    UsbSerialDriver driver = availableDrivers.get(0);
+                    printOverArduino.sendThreadDelay(connection, driver.getDevice(), tv,getContext());
+                } catch (Exception e) {
+                    tv.append(e.toString());
+                    Toast toast = Toast.makeText(getContext(), "Error en PRINT IMAGE\n" + e.toString(), Toast.LENGTH_LONG);
+                    toast.show();
+                }
+            }
+        });
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,6 +218,9 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 dataCreate.setLength(0);
                 //PRINT IMAGE
                 PrintOverArduino printOverArduino = new PrintOverArduino();
+
+                printOverArduino.oneImage = true;
+                printOverArduino.banner = false;
 //                printOverArduino.sendImage(port, tv);
                 try {
                     List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
@@ -148,7 +229,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     }
                     UsbSerialDriver driver = availableDrivers.get(0);
 
-                    printOverArduino.sendThread(connection, driver.getDevice(), tv);
+                    printOverArduino.sendThreadDelay(connection, driver.getDevice(), tv,getContext());
                 } catch (Exception e) {
                     tv.append(e.toString());
                     Toast toast = Toast.makeText(getContext(), "Error en PRINT IMAGE\n" + e.toString(), Toast.LENGTH_LONG);
@@ -179,22 +260,21 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         rbApe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                connect();
+//                connect();
                 arduinoPrinterMode();
             }
         });
         rbPrint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                connect();
+//                connect();
                 printOverArduinoMode();
-
             }
         });
         rbGbx.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                connect();
+//                connect();
                 gbxMode();
             }
         });
@@ -230,6 +310,10 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             tvMode.setText("Arduino Printer Emulator MODE");
             rbGroup.setVisibility(View.GONE);
             btnSave.setVisibility(View.VISIBLE);
+            spSleepTime.setVisibility(View.GONE);
+            tvSleepTime.setVisibility(View.GONE);
+            btnPrintBanner.setVisibility(View.GONE);
+
             connect();
             usbIoManager.start();
             tv.append("//Connected\n");
@@ -246,8 +330,10 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             tvMode.setVisibility(View.VISIBLE);
             tvMode.setText("PRINT");
             rbGroup.setVisibility(View.GONE);
-//            btnSave.setVisibility(View.VISIBLE);
+            btnPrintBanner.setVisibility(View.VISIBLE);
             btnPrintImage.setVisibility(View.VISIBLE);
+            spSleepTime.setVisibility(View.VISIBLE);
+            tvSleepTime.setVisibility(View.VISIBLE);
             connect();
             usbIoManager.start();
 //            usbIoManager.stop();
@@ -267,6 +353,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         btnReadRam.setVisibility(View.VISIBLE);
         btnFullRom.setVisibility(View.VISIBLE);
         btnReadRom.setVisibility(View.VISIBLE);
+
 
         try {
             connect();
@@ -661,7 +748,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             }
         }
         getActivity().runOnUiThread(() -> {
-            tv.setText(dataCreate.toString());
+            tv.append(dataCreate.toString());
         });
     }
 

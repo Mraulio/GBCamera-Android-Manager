@@ -75,15 +75,11 @@ public class MainActivity extends AppCompatActivity {
         if (Methods.gbcPalettesList.size() == 0) {
             StartCreation.addPalettes();//Before loading gallery fragment
         }
-        StartCreation.addPalettes();//Before loading gallery fragment
-        StartCreation.addPalettes();//Before loading gallery fragment
-        StartCreation.addPalettes();//Before loading gallery fragment
 
         if (Methods.framesList.size() == 0) {
             StartCreation.addFrames(this.getBaseContext());
 
         }
-        StartCreation.addFrames(this.getBaseContext());
 
         if (Methods.gbcImagesList.size() == 0) {
             Methods.extractSavImages(this);

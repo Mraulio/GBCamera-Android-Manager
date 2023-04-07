@@ -1,5 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:background="#EAEAEA"
     android:orientation="vertical"
@@ -8,7 +8,7 @@
     <ImageView
         android:id="@+id/image_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
 
@@ -23,67 +23,94 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:weightSum="4"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="4">
+
         <Button
             android:id="@+id/print_button"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
             android:layout_weight="1"
-            android:text="PRINT" />
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
+            android:text="PRINT"
+            android:textSize="10dp" />
+
+        <CheckBox
+            android:id="@+id/cbCrop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Crop"></CheckBox>
+
         <Button
             android:id="@+id/save_button"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
             android:layout_weight="1"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:backgroundTint="#4E8A50"
+            android:maxLines="1"
+            android:text="save"
+            android:textSize="10dp" />
 
-            android:text="save" />
+        <!--        <Button-->
+        <!--            android:id="@+id/crop_save_button"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_gravity="center_horizontal"-->
+        <!--            android:layout_marginHorizontal="3dp"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:autoSizeMaxTextSize="30sp"-->
+        <!--            android:autoSizeMinTextSize="1sp"-->
+        <!--            android:autoSizeTextType="uniform"-->
+        <!--            android:maxLines="1"-->
+        <!--            android:text="Crop &amp; Save"-->
+        <!--            android:textSize="10dp" />-->
 
-        <Button
-            android:id="@+id/crop_save_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginHorizontal="3dp"
-            android:layout_weight="1"
-
-            android:text="Crop &amp; Save" />
         <Button
             android:id="@+id/share_button"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
-
-            android:layout_marginHorizontal="3dp"
-            android:text="Share" />
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
+            android:text="Share"
+            android:textSize="10dp" />
     </LinearLayout>
+
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center">
+        android:layout_gravity="center"
+        android:orientation="horizontal">
 
         <CheckBox
+            android:id="@+id/cbFrameKeep"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Keep frame color"
             android:layout_marginHorizontal="10dp"
-            android:id="@+id/cbFrameKeep"></CheckBox>
+            android:text="Keep frame color"></CheckBox>
 
         <Button
             android:id="@+id/btnPaletteFrame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
             android:text="Show palettes"></Button>
     </LinearLayout>
-
-
-
 
     <GridView
         android:id="@+id/gridViewPal"

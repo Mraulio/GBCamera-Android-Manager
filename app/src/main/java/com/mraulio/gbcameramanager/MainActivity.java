@@ -7,22 +7,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
+
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.os.Build;
+
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.view.Menu;
 import android.widget.Toast;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
@@ -34,13 +28,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
-import com.mraulio.gbcameramanager.model.GbcFrame;
-import com.mraulio.gbcameramanager.model.GbcPalette;
-import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -81,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
 //        Methods.extractHexImages();
-//        Methods.extractSavImages(this);
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
@@ -89,10 +75,20 @@ public class MainActivity extends AppCompatActivity {
         if (Methods.gbcPalettesList.size() == 0) {
             StartCreation.addPalettes();//Before loading gallery fragment
         }
+        StartCreation.addPalettes();//Before loading gallery fragment
+        StartCreation.addPalettes();//Before loading gallery fragment
+        StartCreation.addPalettes();//Before loading gallery fragment
+
         if (Methods.framesList.size() == 0) {
             StartCreation.addFrames(this.getBaseContext());
 
         }
+        StartCreation.addFrames(this.getBaseContext());
+
+        if (Methods.gbcImagesList.size() == 0) {
+            Methods.extractSavImages(this);
+        }
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 

@@ -6,7 +6,9 @@ import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageCo
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -15,6 +17,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -58,7 +62,7 @@ public class GalleryFragment extends Fragment {
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
 
     public static GridView gridView;
-    private static int itemsPerPage = 15;
+    private static int itemsPerPage = 12;
     static int startIndex = 0;
     static int endIndex = 0;
     static int currentPage = 0;
@@ -67,6 +71,7 @@ public class GalleryFragment extends Fragment {
     boolean showPalettes = true;
     TextView tv_page;
     boolean keepFrame = false;
+//    Resources.Theme theme = getActivity().getTheme();//I get the theme
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -124,7 +129,7 @@ public class GalleryFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedPosition = 0;
                 Toast toast = Toast.makeText(getContext(), "Size: " + Methods.listImageBytes, Toast.LENGTH_LONG);
-
+                crop = false;
                 keepFrame = false;
                 // Obtener la imagen seleccionada
                 if (currentPage != lastPage) {
@@ -137,6 +142,7 @@ public class GalleryFragment extends Fragment {
                 // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
                 dialog.setContentView(R.layout.custom_dialog);
+                dialog.setCancelable(true);//So it closes when clicking outside or back button
 
                 // Configurar la vista de imagen del diálogo
                 ImageView imageView = dialog.findViewById(R.id.image_view);
@@ -147,12 +153,14 @@ public class GalleryFragment extends Fragment {
                 Button shareButton = dialog.findViewById(R.id.share_button);
 
                 Button saveButton = dialog.findViewById(R.id.save_button);
-                Button cropButton = dialog.findViewById(R.id.crop_save_button);
+//                Button cropButton = dialog.findViewById(R.id.crop_save_button);
 //                Button paletteButton = dialog.findViewById(R.id.btn_palette);
                 Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
                 GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
                 GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
                 CheckBox cbFrameKeep = dialog.findViewById(R.id.cbFrameKeep);
+                CheckBox cbCrop = dialog.findViewById(R.id.cbCrop);
+
                 showPalettes = true;
 
                 int globalImageIndex;
@@ -180,12 +188,21 @@ public class GalleryFragment extends Fragment {
                         else keepFrame = true;
                     }
                 });
+                cbCrop.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (!crop) {
+                            crop = true;
+                        } else {
+                            crop = false;
+                        }
+                    }
+                });
                 gridViewFrames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                         //Action when clicking a frame inside the Dialog
                         Bitmap framed = frameChange(globalImageIndex, selectedFrameIndex, keepFrame);
-
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
 //                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
                         selectedImage[0] = framed;
@@ -204,7 +221,12 @@ public class GalleryFragment extends Fragment {
                     public void onItemClick(AdapterView<?> parent, View view, int position2, long id) {
                         //Action when clicking a palette inside the Dialog
                         Bitmap changedImage;
-
+// Establece el nuevo color primario
+                        // Declara un objeto TypedValue
+//                        TypedValue typedValue = new TypedValue();
+//                        theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
+//                        int newColor = Methods.gbcPalettesList.get(position2).getPaletteColors()[0]; // Reemplaza "red" con tu nuevo color
+//                        theme.setColorPrimary(newColor);
                         if (!keepFrame) {
                             changedImage = paletteChanger2(0, selectedImage[0], globalImageIndex);
                             Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(0);//Need to set this to the palette 0 to then change it with the frame
@@ -261,36 +283,47 @@ public class GalleryFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         Bitmap sharedBitmap = Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * MainActivity.exportSize, selectedImage[0].getHeight() * MainActivity.exportSize, false);
-
                         shareImage(sharedBitmap);
                     }
                 });
                 saveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        crop = false;
+//                        crop = false;
                         LocalDateTime now = LocalDateTime.now();
                         String fileName = "image_";
                         fileName += dtf.format(now) + ".png";
                         saveImage(selectedImage[0], fileName);
                     }
                 });
-                cropButton.setOnClickListener(new View.OnClickListener() {
+//                cropButton.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+////                        crop = true;
+//                        LocalDateTime now = LocalDateTime.now();
+//                        String fileName = "image_";
+//                        fileName += dtf.format(now) + ".png";
+//                        saveImage(selectedImage[0], fileName);
+//                    }
+//                });
+
+
+// Configurar el diálogo para que ocupe el 80% de  la pantalla
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                int screenWidth = displayMetrics.widthPixels;
+                int desiredWidth = (int) (screenWidth * 0.8);
+                Window window = dialog.getWindow();
+                window.setLayout(desiredWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+                //To only dismiss it instead of cancelling when clicking outside it
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
-                    public void onClick(View v) {
-                        crop = true;
-                        LocalDateTime now = LocalDateTime.now();
-                        String fileName = "image_";
-                        fileName += dtf.format(now) + ".png";
-                        saveImage(selectedImage[0], fileName);
+                    public void onCancel(DialogInterface dialog) {
+                        // Acción al presionar fuera del diálogo o el botón de retroceso
+                        dialog.dismiss();
                     }
                 });
-
-
-// Configurar el diálogo para que ocupe toda la pantalla
-//                Window window = dialog.getWindow();
-//                window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
                 //Show Dialog
                 dialog.show();
             }
@@ -306,6 +339,7 @@ public class GalleryFragment extends Fragment {
 
         return view;
     }
+
     private Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) {
         // Obtener la imagen seleccionada
         Bitmap framed = null;
@@ -315,7 +349,7 @@ public class GalleryFragment extends Fragment {
             framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
-            Bitmap setToPalette = paletteChanger2(0,Methods.completeImageList.get(globalImageIndex),globalImageIndex);
+            Bitmap setToPalette = paletteChanger2(0, Methods.completeImageList.get(globalImageIndex), globalImageIndex);
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
@@ -334,6 +368,7 @@ public class GalleryFragment extends Fragment {
         }
         return framed;
     }
+
     //Cambiar paleta
     public Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
@@ -390,8 +425,11 @@ public class GalleryFragment extends Fragment {
             tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
         }
     }
-    private void shareImage(Bitmap bitmap) {
 
+    private void shareImage(Bitmap bitmap) {
+        if (bitmap.getHeight() == (144*MainActivity.exportSize) && bitmap.getWidth() == (160*MainActivity.exportSize) && crop) {
+            bitmap = Bitmap.createBitmap(bitmap, 16, 16, 128, 112);
+        }
         String bitmapPath = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), bitmap, "image", "share image");
         Uri bitmapUri = Uri.parse(bitmapPath);
 
@@ -400,6 +438,7 @@ public class GalleryFragment extends Fragment {
         intent.putExtra(Intent.EXTRA_STREAM, bitmapUri);
         startActivity(Intent.createChooser(intent, "Share"));
     }
+
     private void saveImage(Bitmap image, String fileName) {
         if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
             image = Bitmap.createBitmap(image, 16, 16, 128, 112);
@@ -429,7 +468,7 @@ public class GalleryFragment extends Fragment {
 
     private void updateGridView(int page, GridView gridView) {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
-        itemsPerPage = 15;
+        itemsPerPage = 12;
 
         if (Methods.completeImageList.size() < itemsPerPage) {
             itemsPerPage = Methods.completeImageList.size();
@@ -451,55 +490,6 @@ public class GalleryFragment extends Fragment {
         List<Bitmap> imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
         List<GbcImage> gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
         gridView.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage));
-    }
-
-
-    public static class CustomGridViewAdapter extends BaseAdapter {
-        private List<Bitmap> images;
-        private Context context;
-
-
-        public CustomGridViewAdapter(Context context, List<Bitmap> images) {
-            this.context = context;
-            this.images = images;
-        }
-
-        public int getCount() {
-            return itemsPerPage;
-        }
-
-        public Object getItem(int position) {
-            return images.get(position);
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ImageView imageView;
-            if (convertView == null) {
-                // Si la vista aún no ha sido creada, inflar el layout del elemento de la lista
-                convertView = LayoutInflater.from(context).inflate(R.layout.row_items, parent, false);
-                // Crear una nueva vista de imagen
-                imageView = convertView.findViewById(R.id.imageView);
-                // Establecer la vista de imagen como la vista del elemento de la lista
-                convertView.setTag(imageView);
-            } else {
-                // Si la vista ya existe, obtener la vista de imagen del tag
-                imageView = (ImageView) convertView.getTag();
-            }
-            //Obtener la imagen de la lista
-
-            Bitmap image = images.get(position);
-
-            // Establecer la imagen en la vista de imagen
-//            imageView.setImageBitmap(image);
-
-            imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 4, image.getHeight() * 4, false));
-            return convertView;
-        }
     }
 
 
@@ -540,7 +530,10 @@ public class GalleryFragment extends Fragment {
             Bitmap image = images.get(position);
             String name = data.get(position).getName();
             holder.txtTitle.setText(name);
-            holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
+            holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
+//            if (image != null && !image.isRecycled()) {
+//                image.recycle();
+//            }
             return row;
         }
 

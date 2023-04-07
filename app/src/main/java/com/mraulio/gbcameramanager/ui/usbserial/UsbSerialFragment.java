@@ -70,14 +70,15 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     static UsbManager manager = MainActivity.manager;
     SerialInputOutputManager usbIoManager;
 
-    private static final String ACTION_USB_PERMISSION ="com.android.example.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
+    StringBuilder dataCreate = new StringBuilder();
 
     GridView gridView;
     ImageView img;
     static int itemsPerPage = 30;
     boolean gbxMode = true;
     public static List<File> fullRomFileList = new ArrayList<>();
-//    List<Bitmap> imageList = new ArrayList<>();
+    //    List<Bitmap> imageList = new ArrayList<>();
     public static boolean freeTv = false;
     DecimalFormat df = new DecimalFormat("#.00");
     static TextView tv;
@@ -136,6 +137,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         btnPrintImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dataCreate.setLength(0);
                 //PRINT IMAGE
                 PrintOverArduino printOverArduino = new PrintOverArduino();
 //                printOverArduino.sendImage(port, tv);
@@ -204,7 +206,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         //PRINT IMAGE
 //                printOverArduino.sendImage(port, tv);
         try {
-        PrintOverArduino printOverArduino = new PrintOverArduino();
+            PrintOverArduino printOverArduino = new PrintOverArduino();
             Connecter.connect(tv.getContext(), tv);
             port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
             List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
@@ -327,8 +329,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                         Canvas canvas = new Canvas(framed);
                         canvas.drawBitmap(image, 16, 16, null);
                         image = framed;
-                        imageBytes= Methods.encodeImage(image,gbcImage);
-                        System.out.println("***********"+image.getHeight()+" "+image.getWidth()+"*************");
+                        imageBytes = Methods.encodeImage(image, gbcImage);
+                        System.out.println("***********" + image.getHeight() + " " + image.getWidth() + "*************");
 
                     }
                     gbcImage.setImageBytes(imageBytes);
@@ -653,18 +655,30 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     @Override
     public void onNewData(byte[] data) {
         //USE ON ARDUINO MODE ONLY
-        getActivity().runOnUiThread(() -> {
-//            tv.append(new String(data));
-            for (byte b : data) {
-//                tv.append(String.format("%02X ", b));
-                PrintOverArduino.count++;
+        for (byte b : data) {
+            if (!String.format("%02X ", b).equals("00 ")) {
+                dataCreate.append(String.format("%02X ", b));
             }
-//            tv.setText("Sending image..." + df.format((PrintOverArduino.count / PrintOverArduino.percentage) * 100) + "%.");
-            if (freeTv)
-                tv.append("PRINTING");
+        }
+        getActivity().runOnUiThread(() -> {
+            tv.setText(dataCreate.toString());
         });
     }
 
+    //    @Override
+//    public void onNewData(byte[] data) {
+//        //USE ON ARDUINO MODE ONLY
+//        getActivity().runOnUiThread(() -> {
+////            tv.append(new String(data));
+//            for (byte b : data) {
+////                tv.append(String.format("%02X ", b));
+//                PrintOverArduino.count++;
+//            }
+////            tv.setText("Sending image..." + df.format((PrintOverArduino.count / PrintOverArduino.percentage) * 100) + "%.");
+//            if (freeTv)
+//                tv.append("PRINTING");
+//        });
+//    }
     @Override
     public void onRunError(Exception e) {
 

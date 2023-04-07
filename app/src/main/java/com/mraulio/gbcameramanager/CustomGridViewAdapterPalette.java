@@ -67,7 +67,10 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         Bitmap image = data.get(position).paletteViewer();
         String name = data.get(position).getName();
         holder.txtTitle.setText(name);
-        holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
+        holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
+        if (image != null && !image.isRecycled()) {
+            image.recycle();
+        }
         return row;
     }
 

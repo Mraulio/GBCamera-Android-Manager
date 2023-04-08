@@ -91,7 +91,6 @@ public class ImportFragment extends Fragment {
                 importedImagesBitmaps.clear();
                 listImportedImageBytes.clear();
                 gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
-
                 if (savFile)
                     extractSavImages(getContext());
                 else

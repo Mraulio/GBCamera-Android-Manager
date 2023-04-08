@@ -357,4 +357,5 @@ public class ImportFragment extends Fragment {
         System.out.println(bytes.length);
         return bytes;
     }
+
 }

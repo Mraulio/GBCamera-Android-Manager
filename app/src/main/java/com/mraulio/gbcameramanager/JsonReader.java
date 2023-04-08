@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager;
 
 import android.os.Environment;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,10 +11,41 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 public class JsonReader {
+
+    public static List<String> readerFrames() throws IOException, JSONException {
+        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/fr.json")), StandardCharsets.UTF_8);
+        boolean frame = true;
+        List<String> stringValues = new ArrayList<>();
+        List<String> finalValues = new ArrayList<>();
+
+        // Crear un objeto JSONObject a partir del String JSON
+
+        // Acceder a los valores del JSON
+        JSONObject jsonObject = new JSONObject(jsonString);
+        JSONArray frames = jsonObject.getJSONObject("state").getJSONArray("frames");
+        System.out.println("Hay estos frames: " + frames.length());
+
+        for (int i = 0; i < frames.length(); i++) {
+            JSONObject image = frames.getJSONObject(i);
+            String hash = image.getString("id");
+//            System.out.println(hash); // o haz algo más con el valor obtenido
+            System.out.println(jsonObject.getString("frame-"+hash));
+            stringValues.add("frame-"+hash);
+        }
+        for (String value : stringValues) {
+            String hash = jsonObject.getString(value);
+            finalValues.add(eachFrame(hash));
+        }
+        System.out.println("//////////////Hay estos frames:"+finalValues.size());
+        return finalValues;
+    }
 
     public static String reader() throws IOException, JSONException {
         File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -30,12 +62,14 @@ public class JsonReader {
                     .getJSONObject(0)
                     .getString("hash");
             value = jsonObject.getString(hash);
+
         } else {
             String hash = "frame-" + jsonObject.getJSONObject("state")
                     .getJSONArray("frames")
-                    .getJSONObject(20)
+                    .getJSONObject(22)
                     .getString("hash");
             value = jsonObject.getString(hash);
+
         }
         System.out.println(value+"*******************");
         byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
@@ -58,14 +92,11 @@ public class JsonReader {
         System.out.println(uncompressedData);
         String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
         StringBuilder sb = new StringBuilder();
-
         for (
                 int i = 0; i < outputString.length(); i += 2) {
             sb.append(outputString.substring(i, i + 2));
             sb.append(" ");
         }
-
-        String spacedOutputString = sb.toString().trim();
         System.out.println(outputString);
         String primeraParte = outputString.substring(0, 1280);
         String central = outputString.substring(1280, 3072);//esta parte tiene la informacion de los lados del marco, lo divido en 14, cada una de 128 caracteres
@@ -105,4 +136,68 @@ public class JsonReader {
         System.out.println("Resultado devuelto: "+resultado.toString());
         return resultado.toString();
     }
+
+    public static String eachFrame(String value) {
+        byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
+
+//        System.out.println(value);
+        Inflater inflater = new Inflater();
+        inflater.setInput(compressedBytes);
+
+        byte[] outputBytes = new byte[compressedBytes.length * 100];
+        int length = 0;
+        try {
+            length = inflater.inflate(outputBytes);
+            inflater.end();
+        } catch (DataFormatException e) {
+            System.out.println("Error al descomprimir los datos: " + e.getMessage());
+        }
+
+        String uncompressedData = new String(outputBytes, 0, length, StandardCharsets.UTF_8);
+//        System.out.println(uncompressedData);
+        String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < outputString.length(); i += 2) {
+            try {//Esto lo pongo para el marco en blanco por ejemplo que da StringIndexOutOfBoundsException, hay que arreglarlo
+            sb.append(outputString.substring(i, i + 2));
+            sb.append(" ");}
+            catch (Exception e){}
+        }
+
+//        System.out.println(outputString);
+        String primeraParte = outputString.substring(0, 1280);
+        String central = outputString.substring(1280, 3072);//esta parte tiene la informacion de los lados del marco, lo divido en 14, cada una de 128 caracteres
+        String[] partes = new String[14];
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(primeraParte);
+        for (int i = 0; i < 14; i++) {
+            String parte = central.substring(i * 128, (i + 1) * 128);  // Obtener la parte de 128 caracteres
+            StringBuilder builder = new StringBuilder(parte);  // Crear un StringBuilder a partir de la parte
+            for (int j = 0; j < 512; j++) {
+                builder.insert(64, '0');  // Insertar el caracter '0' en la posicion 64
+            }
+            partes[i] = builder.toString();  // Guardar la parte con los '0' agregados en el array
+            stringBuilder.append(partes[i]);
+//            System.out.println(partes[i].length());
+        }
+        String ultimaParte = outputString.substring(outputString.length() - 1280);
+        stringBuilder.append(ultimaParte);
+//        System.out.println(primeraParte);
+//        System.out.println(central);
+//        System.out.println(ultimaParte);
+        String terminada = stringBuilder.toString();
+//        System.out.println(terminada.length()+":  "+terminada);
+        StringBuilder resultado = new StringBuilder();
+
+        for (int i = 0; i < terminada.length(); i += 2) {
+            if (i > 0) {
+                resultado.append(" "); // añade un espacio cada dos caracteres
+            }
+            resultado.append(terminada.substring(i, i + 2));
+        }
+
+       return  resultado.toString();
+    }
+
 }

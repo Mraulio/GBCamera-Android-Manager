@@ -51,24 +51,24 @@ public class FramesFragment extends Fragment {
         btnImportFrames.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String textoJson = "";
+                List<String> listFramesString = new ArrayList<>();
                 try {
-                    textoJson = JsonReader.reader();
+                    listFramesString = JsonReader.readerFrames();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                System.out.println(textoJson.length() + "***********************************");
-                System.out.println("Entering extractHexImages");
-                byte[] bytes = convertToByteArray(textoJson);
-                GbcFrame gbcFrame = new GbcFrame();
-                gbcFrame.setFrameName("next frame");
-                int height = (textoJson.length() + 1) / 120;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
-                Bitmap image = imageCodec.decodeWithPalette(0, bytes);
-                gbcFrame.setFrameBitmap(image);
-                Methods.framesList.add(gbcFrame);
+                for (String str: listFramesString) {
+                    byte[] bytes = convertToByteArray(str);
+                    GbcFrame gbcFrame = new GbcFrame();
+                    gbcFrame.setFrameName("next frame");
+                    int height = (str.length() + 1) / 120;//To get the real height of the image
+                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
+                    Bitmap image = imageCodec.decodeWithPalette(0, bytes);
+                    gbcFrame.setFrameBitmap(image);
+                    Methods.framesList.add(gbcFrame);
+                }
                 customGridViewAdapterFrames.notifyDataSetChanged();
 
             }
@@ -154,5 +154,7 @@ public class FramesFragment extends Fragment {
             lastSelectedPosition = position;
         }
     }
+
+
 }
 

@@ -47,7 +47,7 @@ public class FramesFragment extends Fragment {
         btnImportFrames = view.findViewById(R.id.btnImportFrames);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
-        CustomGridViewAdapterFrames customGridViewAdapterFrames =  new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList);
+        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList);
         btnImportFrames.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -59,7 +59,8 @@ public class FramesFragment extends Fragment {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                for (String str: listFramesString) {
+                for (String str : listFramesString) {
+
                     byte[] bytes = convertToByteArray(str);
                     GbcFrame gbcFrame = new GbcFrame();
                     gbcFrame.setFrameName("next frame");
@@ -140,7 +141,6 @@ public class FramesFragment extends Fragment {
 //                image.recycle();
 //            }
             return row;
-
         }
 
         private class RecordHolder {

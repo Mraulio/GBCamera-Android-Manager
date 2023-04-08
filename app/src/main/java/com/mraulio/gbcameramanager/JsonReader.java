@@ -20,7 +20,7 @@ public class JsonReader {
 
     public static List<String> readerFrames() throws IOException, JSONException {
         File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/fr.json")), StandardCharsets.UTF_8);
+        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/frames.json")), StandardCharsets.UTF_8);
         boolean frame = true;
         List<String> stringValues = new ArrayList<>();
         List<String> finalValues = new ArrayList<>();
@@ -34,19 +34,56 @@ public class JsonReader {
 
         for (int i = 0; i < frames.length(); i++) {
             JSONObject image = frames.getJSONObject(i);
-            String hash = image.getString("id");
+            String hash = image.getString("hash");
 //            System.out.println(hash); // o haz algo más con el valor obtenido
-            System.out.println(jsonObject.getString("frame-"+hash));
-            stringValues.add("frame-"+hash);
+//            System.out.println(jsonObject.getString(hash));
+            stringValues.add(hash);
         }
+        System.out.println("Hay estos: "+stringValues.size());
+
         for (String value : stringValues) {
-            String hash = jsonObject.getString(value);
+            System.out.println("El valor es: " + value);
+
+            String hash = jsonObject.getString("frame-"+value);
+            System.out.println(eachFrame(hash));
+
             finalValues.add(eachFrame(hash));
         }
-        System.out.println("//////////////Hay estos frames:"+finalValues.size());
         return finalValues;
     }
+    public static List<String> readerImages(String jsonString) throws IOException, JSONException {
+//        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+//        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/frames.json")), StandardCharsets.UTF_8);
+        boolean frame = true;
+        List<String> stringValues = new ArrayList<>();
+        List<String> finalValues = new ArrayList<>();
 
+        // Crear un objeto JSONObject a partir del String JSON
+
+        // Acceder a los valores del JSON
+        JSONObject jsonObject = new JSONObject(jsonString);
+        JSONArray images = jsonObject.getJSONObject("state").getJSONArray("images");
+        System.out.println("There are images: " + images.length());
+
+        for (int i = 0; i < images.length(); i++) {
+            JSONObject image = images.getJSONObject(i);
+            String hash = image.getString("hash");
+//            System.out.println(hash); // o haz algo más con el valor obtenido
+//            System.out.println(jsonObject.getString(hash));
+            stringValues.add(hash);
+        }
+        System.out.println("Hay estos: "+stringValues.size());
+
+        for (String value : stringValues) {
+            System.out.println("El valor es: " + value);
+
+            String hash = jsonObject.getString(value);
+            System.out.println(eachImage(hash));
+
+            finalValues.add(eachImage(hash));
+        }
+        return finalValues;
+    }
     public static String reader() throws IOException, JSONException {
         File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/frames.json")), StandardCharsets.UTF_8);
@@ -78,7 +115,7 @@ public class JsonReader {
         Inflater inflater = new Inflater();
         inflater.setInput(compressedBytes);
 
-        byte[] outputBytes = new byte[compressedBytes.length * 100];
+        byte[] outputBytes = new byte[compressedBytes.length * 200];//Because the compressed is much smaller
         int length = 0;
         try {
             length = inflater.inflate(outputBytes);
@@ -135,6 +172,31 @@ public class JsonReader {
 
         System.out.println("Resultado devuelto: "+resultado.toString());
         return resultado.toString();
+    }
+
+    public static String eachImage(String value){
+        byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
+        Inflater inflater = new Inflater();
+        inflater.setInput(compressedBytes);
+        byte[] outputBytes = new byte[compressedBytes.length * 300];
+        int length = 0;
+        try {
+            length = inflater.inflate(outputBytes);
+            inflater.end();
+        } catch (DataFormatException e) {
+            System.out.println("Error al descomprimir los datos: " + e.getMessage());
+        }
+        String uncompressedData = new String(outputBytes, 0, length, StandardCharsets.UTF_8);
+//        System.out.println(uncompressedData);
+        String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < outputString.length(); i += 2) {
+            try {//Esto lo pongo para el marco en blanco por ejemplo que da StringIndexOutOfBoundsException, hay que arreglarlo
+                sb.append(outputString.substring(i, i + 2));
+                sb.append(" ");}
+            catch (Exception e){}
+        }
+        return sb.toString();
     }
 
     public static String eachFrame(String value) {

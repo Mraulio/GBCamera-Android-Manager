@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mraulio.gbcameramanager.JsonReader;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
@@ -36,6 +37,8 @@ import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -63,6 +66,7 @@ public class ImportFragment extends Fragment {
     TextView tvFileName;
     String fileName;
     boolean savFile = false;
+    boolean isJson = false;
     String fileContent = "";
 
     @Override
@@ -91,10 +95,40 @@ public class ImportFragment extends Fragment {
                 importedImagesBitmaps.clear();
                 listImportedImageBytes.clear();
                 gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
-                if (savFile)
+                if (savFile && !isJson)
                     extractSavImages(getContext());
-                else
+                else if (!savFile && !isJson) {
                     extractHexImagesFromFile(fileContent);
+                } else if (!savFile && isJson) {
+                    try {
+                        List<String> listImagesString = JsonReader.readerImages(fileContent);
+                        for (String imageString : listImagesString) {
+                            byte[] imageBytes;
+                            try {
+                                imageBytes = convertToByteArray(imageString);
+                                GbcImage gbcImage = new GbcImage();
+                                GbcImage.numImages++;
+                                gbcImage.setName("Image " + (GbcImage.numImages));
+                                gbcImage.setFrameIndex(0);
+                                gbcImage.setPaletteIndex(0);
+                                int height = (imageString.length() + 1) / 120;//To get the real height of the image
+                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
+                                Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), imageBytes);
+                                gbcImage.setImageBytes(imageBytes);
+                                Methods.completeImageList.add(image);
+                                Methods.gbcImagesList.add(gbcImage);
+                                importedImagesBitmaps.add(image);
+                            } catch (Exception e){
+                                System.out.println("////////////Exception in convertToByteArray:\n"+e.toString());
+                            }
+
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
                 tvFileName.setText("" + importedImagesList.size());//"" to make it work
                 gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
 
@@ -132,6 +166,8 @@ public class ImportFragment extends Fragment {
             if (uri.getPath().substring(uri.getPath().length() - 3).equals("sav")) {
                 ByteArrayOutputStream byteStream = null;
                 savFile = true;
+                isJson = false;
+
 
                 try {
                     InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
@@ -153,6 +189,8 @@ public class ImportFragment extends Fragment {
                 tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
             } else if (uri.getPath().substring(uri.getPath().length() - 3).equals("txt")) {
                 savFile = false;
+                isJson = false;
+
                 try {
                     InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
                     // Crear un ByteArrayOutputStream para copiar el contenido del archivo
@@ -160,6 +198,33 @@ public class ImportFragment extends Fragment {
                     try {
                         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
+                        String line = bufferedReader.readLine();
+                        while (line != null) {
+                            stringBuilder.append(line).append('\n');
+                            line = bufferedReader.readLine();
+                        }
+                        bufferedReader.close();
+                        inputStream.close();
+
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    fileContent = stringBuilder.toString();
+                    fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
+                    tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
+                } catch (Exception e) {
+                }
+            } else if (uri.getPath().substring(uri.getPath().length() - 4).equals("json")) {
+                savFile = false;
+                isJson = true;
+                try {
+                    InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                    // Crear un ByteArrayOutputStream para copiar el contenido del archivo
+                    StringBuilder stringBuilder = new StringBuilder();
+                    try {
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                         String line = bufferedReader.readLine();
                         while (line != null) {
                             stringBuilder.append(line).append('\n');
@@ -203,8 +268,8 @@ public class ImportFragment extends Fragment {
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
-                    imageBytes= Methods.encodeImage(image,gbcImage);
-                    System.out.println("***********"+image.getHeight()+" "+image.getWidth()+"*************");
+                    imageBytes = Methods.encodeImage(image, gbcImage);
+                    System.out.println("***********" + image.getHeight() + " " + image.getWidth() + "*************");
 
                 }
                 gbcImage.setImageBytes(imageBytes);

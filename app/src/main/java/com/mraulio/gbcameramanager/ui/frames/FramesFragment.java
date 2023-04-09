@@ -81,6 +81,7 @@ public class FramesFragment extends Fragment {
         return view;
     }
 
+    //Refactor this on a class
     private static byte[] convertToByteArray(String data) {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];

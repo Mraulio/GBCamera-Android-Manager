@@ -6,7 +6,6 @@
     android:orientation="vertical"
     tools:context=".ui.frames.FramesFragment">
 
-    <!-- TODO: Update blank fragment layout -->
 <Button
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"

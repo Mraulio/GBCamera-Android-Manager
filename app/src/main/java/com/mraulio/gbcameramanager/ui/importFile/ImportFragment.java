@@ -419,7 +419,7 @@ public class ImportFragment extends Fragment {
             bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
                     + Character.digit(byteStrings[i].charAt(1), 16));
         }
-        System.out.println(bytes.length);
+//        System.out.println(bytes.length);
         return bytes;
     }
 

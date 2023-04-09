@@ -87,9 +87,7 @@ public class PrintOverArduino {
             } catch (Exception e) {
                 tv.append(e.toString());
             }
-//            System.out.println(chunk.length);
-            // haz algo con el chunk, como enviarlo a través de la red o guardarlo en un archivo
-        }
+       }
 
         try {
             outputStream.write(getCommandBytes(EMPTY_DATA));
@@ -151,7 +149,6 @@ public class PrintOverArduino {
         }
 
         tv.append("///////////////NEEDED PRINTS = " + printsNeeded);
-
         for (int x = 0; x < printsNeeded; x++) {
             listBytes.add(getCommandBytes(INIT));//listBytes.get(0)
             byte[] splittedArray;

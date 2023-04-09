@@ -96,19 +96,16 @@ public class ImageCodec implements Codec {
         IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors());
         Codec tileCodec = new TileCodec(ip);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int aux = 0;
         for (int y=0; y+TileCodec.TILE_HEIGHT<=buf.getHeight(); y+=TileCodec.TILE_HEIGHT) {
             for (int x=0; x+TileCodec.TILE_WIDTH<=buf.getWidth(); x+=TileCodec.TILE_WIDTH) {
                 try {
                     baos.write(tileCodec.encode(Bitmap.createBitmap(buf, x, y, TileCodec.TILE_WIDTH, TileCodec.TILE_HEIGHT)));
                 } catch (Exception e) {
                     // Can likely be ignored for this in memory stream type
-                    aux++;
                     e.printStackTrace();
                 }
             }
         }
-        System.out.println("+++++++++++++++++++++++Cuantos exceptions?: "+aux);
         return baos.toByteArray();
     }
 }

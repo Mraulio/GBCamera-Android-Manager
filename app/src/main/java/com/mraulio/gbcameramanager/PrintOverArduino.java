@@ -8,8 +8,6 @@ import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.widget.TextView;
 
-import com.hoho.android.usbserial.driver.UsbSerialPort;
-
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +15,9 @@ import java.util.List;
 
 public class PrintOverArduino {
     private final String INIT = "88 33 01 00 00 00 01 00 00 00";//81 00
-    private final String PRINT = "88 33 02 00 04 00 01 03 E4 7F 6D 01 00 00";//E4 standard palette, 7F max print intensity - 81 00
+    private final String PRINT_MARGIN = "88 33 02 00 04 00 01 03 E4 7F 6D 01 00 00";//E4 standard palette, 7F max print intensity - 81 00
+    private final String PRINT_NO_MARGIN = "88 33 02 00 04 00 01 00 E4 7F 6A 01 00 00";//E4 standard palette, 7F max print intensity - 81 00
+
     private final String DATA_COMMAND = "88 33 04 00 80 02";
     private final String EMPTY_DATA = "88 33 04 00 00 00 04 00 00 00";
     private final String END_DATA = "00 00";
@@ -93,7 +93,7 @@ public class PrintOverArduino {
 
         try {
             outputStream.write(getCommandBytes(EMPTY_DATA));
-            outputStream.write(getCommandBytes(PRINT));
+            outputStream.write(getCommandBytes(PRINT_NO_MARGIN));
         } catch (Exception e) {
             tv.append("Error EMPTY, PRINT" + e.toString());
 
@@ -117,10 +117,10 @@ public class PrintOverArduino {
         return bytes;
     }
 
-    private List<byte[]> createDataDelay(TextView tv) {
+    private List<List<byte[]>> createDataDelay(TextView tv) {
         List<byte[]> listBytes = new ArrayList<>();
+        List<List<byte[]>> listOfLists = new ArrayList<>();
 
-        listBytes.add(getCommandBytes(INIT));//listBytes.get(0)
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] bytesTileData;
         String data_nospace = "";
@@ -137,24 +137,70 @@ public class PrintOverArduino {
         }
 
         int chunkSize = 640;//each data packet size
-        for (int i = 0; i < bytesTileData.length; i += chunkSize) {
-            int chunkLength = Math.min(chunkSize, bytesTileData.length - i);
-            byte[] chunk = Arrays.copyOfRange(bytesTileData, i, i + chunkLength);
+        tv.append("///////////////CHUNKS = " + bytesTileData.length / chunkSize);
+        //I NEED TO CREATE A FULL 9 PACKETS WITH COMMANDS FOR EACH BYTE LIST TO SEND.
+        //IF IMAGE IS LARGER THAN THE 9 PACKETS, CREATE ANOTHER BYTE LIST WITH COMMANDS AND THE REST OF THE DATA PACKETS.
+
+        int printsNeeded = ((bytesTileData.length / chunkSize) / 9);
+
+//        if (printsNeeded == 0) printsNeeded++;
+
+        //If result is 0.222 or 1.4343, add 1 needed print
+        if (((bytesTileData.length / chunkSize) % 9) != 0) {
+            printsNeeded += 1;
+        }
+
+        tv.append("///////////////NEEDED PRINTS = " + printsNeeded);
+
+        for (int x = 0; x < printsNeeded; x++) {
+            listBytes.add(getCommandBytes(INIT));//listBytes.get(0)
+            byte[] splittedArray;
+            //If there is only 1 print, or its more prints and its the last one, the end is the bytesTileData.length
+            if (printsNeeded == 1 || (printsNeeded > 1 && x == printsNeeded - 1)) {
+                splittedArray = Arrays.copyOfRange(bytesTileData, x * 640 * 9, bytesTileData.length);
+            } else {
+                splittedArray = Arrays.copyOfRange(bytesTileData, x * 640 * 9, x * 640 * 9 + 640 * 9);
+            }
+            for (int i = 0; i < splittedArray.length; i += chunkSize) {
+                int chunkLength = Math.min(chunkSize, splittedArray.length - i);
+                byte[] chunk = Arrays.copyOfRange(splittedArray, i, i + chunkLength);
+                try {
+                    outputStream.write(getCommandBytes(DATA_COMMAND));
+                    outputStream.write(chunk);//I write the 640 bytes
+                    outputStream.write(checksumCalc(chunk)); //I write the Checksum, need to calculate it with start_checksum+data
+                    outputStream.write(getCommandBytes(END_DATA));//The last 2 bytes
+                    listBytes.add(outputStream.toByteArray());//listBytes.get(1-X)
+                    outputStream.reset();//Empty the outputstream
+                } catch (Exception e) {
+                    tv.append(e.toString());
+                }
+            }
+            listBytes.add(getCommandBytes(EMPTY_DATA));//listBytes.get(size-1)
+            if (x == printsNeeded - 1) {
+                listBytes.add(getCommandBytes(PRINT_MARGIN));//listBytes.get(size)
+            } else
+                listBytes.add(getCommandBytes(PRINT_NO_MARGIN));//listBytes.get(size)
+
+            listOfLists.add(new ArrayList<>(listBytes));
             try {
-                outputStream.write(getCommandBytes(DATA_COMMAND));
-                outputStream.write(chunk);//I write the 640 bytes
-                outputStream.write(checksumCalc(chunk)); //I write the Checksum, need to calculate it with start_checksum+data
-                outputStream.write(getCommandBytes(END_DATA));//The last 2 bytes
-                listBytes.add(outputStream.toByteArray());//listBytes.get(1-X)
-                outputStream.reset();//Empty the outputstream
+                tv.append("///////////////listBytes before clear = " + listBytes.size());
+
             } catch (Exception e) {
-                tv.append(e.toString());
+                tv.append("Error en listbytes size \n" + e.toString());
+            }
+            try {
+                listBytes.clear();
+            } catch (Exception e) {
+                tv.append("Error en clear\n" + e.toString());
             }
         }
-        listBytes.add(getCommandBytes(EMPTY_DATA));//listBytes.get(size-1)
-        listBytes.add(getCommandBytes(PRINT));//listBytes.get(size)
+        try {
+            tv.append("///////////////listBytes inside list of lists after clear = " + listOfLists.get(0).size());
+        } catch (Exception e) {
+            tv.append("Error en get size..\n" + e.toString());
+        }
 
-        return listBytes;
+        return listOfLists;
     }
 
     public void sendThreadDelay(UsbDeviceConnection connection, UsbDevice usbDevice, TextView textView, Context context) {
@@ -173,38 +219,38 @@ public class PrintOverArduino {
             }
         }
         if (endpoint == null) {
-            textView.append("No se pudo encontrar un endpoint válido");
+            textView.append("Could not find a valid endpoint");
         }
         UsbEndpoint finalEndpoint = endpoint;
-        List<byte[]> listBytes = createDataDelay(textView);
+        List<List<byte[]>> listOfBytes = createDataDelay(textView);
+        textView.append("\nThere are this byte[]" + listOfBytes.size());
 
         Thread sendThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                for (byte[] byteArray : listBytes) {
-                    // Enviar datos por USB
-                    connection.bulkTransfer(finalEndpoint, byteArray, byteArray.length, 0);
+                for (List<byte[]> listBytes : listOfBytes) {
+                    for (byte[] byteArray : listBytes) {
+                        // Enviar datos por USB
+                        connection.bulkTransfer(finalEndpoint, byteArray, byteArray.length, 0);
+                        try {
+                            Thread.sleep(sleepTime);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            textView.append("\nError en sleep time");
+                        }
+                    }
+                    //Wait 15s between each print. MAYBE NOT WAIT AFTER THE LAST ONE IS SENT
                     try {
-                        Thread.sleep(sleepTime);
+                        Thread.sleep(14000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
+
                 // Esperar 20000ms después de enviar el último byte
 
 //                MainActivity.freeTv = true;
-                count = 0;
-
-//                if (twoImages) {
-//                    try {
-//                        Thread.sleep(15000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                    MainActivity.freeTv = false;
-//                    connection.bulkTransfer(finalEndpoint, byteArray, byteArray.length, 0);
-//                }
-                // Realizar cualquier otra operación necesaria después de la espera de 1200ms
+//                count = 0;
             }
         });
         sendThread.start();

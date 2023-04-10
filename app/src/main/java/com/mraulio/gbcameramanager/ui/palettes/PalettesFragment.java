@@ -1,33 +1,23 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.media.Image;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
@@ -40,8 +30,6 @@ import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
-import com.mraulio.gbcameramanager.model.GbcFrame;
-import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import org.json.JSONException;
@@ -51,6 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 //import com.mraulio.gbcameramanager.databinding.FragmentSlideshowBinding;
 
+//Using this color picker:https://github.com/QuadFlask/colorpicker
+//Another color picker: https://github.com/yukuku/ambilwarna
 public class PalettesFragment extends Fragment {
 
     //    private FragmentSlideshowBinding binding;
@@ -123,7 +113,11 @@ public class PalettesFragment extends Fragment {
                         Color.rgb(0, 0, 0)
                 };
 //                ivPalette.setImageBitmap(paletteMaker(palette));
-                ivPalette.setImageBitmap(Bitmap.createScaledBitmap(paletteMaker(palette), paletteMaker(palette).getWidth() * 3, paletteMaker(palette).getHeight() * 3, false));
+                try {
+                    ivPalette.setImageBitmap(paletteMaker(palette));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 iv1 = dialog.findViewById(R.id.iv1);
                 iv2 = dialog.findViewById(R.id.iv2);
@@ -139,6 +133,7 @@ public class PalettesFragment extends Fragment {
                                 .initialColor(lastPicked)
                                 .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                                 .density(12)
+                                .showAlphaSlider(false)
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
@@ -150,7 +145,11 @@ public class PalettesFragment extends Fragment {
                                     public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                         iv1.setBackgroundColor(selectedColor);
                                         palette[0] = selectedColor;
-                                        ivPalette.setImageBitmap(paletteMaker(palette));
+                                        try {
+                                            ivPalette.setImageBitmap(paletteMaker(palette));
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                         lastPicked = selectedColor;
                                     }
                                 })
@@ -173,6 +172,7 @@ public class PalettesFragment extends Fragment {
                                 .initialColor(lastPicked)
                                 .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                                 .density(12)
+                                .showAlphaSlider(false)
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
@@ -184,7 +184,11 @@ public class PalettesFragment extends Fragment {
                                     public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                         iv2.setBackgroundColor(selectedColor);
                                         palette[1] = selectedColor;
-                                        ivPalette.setImageBitmap(paletteMaker(palette));
+                                        try {
+                                            ivPalette.setImageBitmap(paletteMaker(palette));
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                         lastPicked = selectedColor;
                                     }
                                 })
@@ -208,6 +212,7 @@ public class PalettesFragment extends Fragment {
                                 .initialColor(lastPicked)
                                 .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                                 .density(12)
+                                .showAlphaSlider(false)
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
@@ -219,7 +224,11 @@ public class PalettesFragment extends Fragment {
                                     public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                         iv3.setBackgroundColor(selectedColor);
                                         palette[2] = selectedColor;
-                                        ivPalette.setImageBitmap(paletteMaker(palette));
+                                        try {
+                                            ivPalette.setImageBitmap(paletteMaker(palette));
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                         lastPicked = selectedColor;
                                     }
                                 })
@@ -243,6 +252,7 @@ public class PalettesFragment extends Fragment {
                                 .initialColor(lastPicked)
                                 .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                                 .density(12)
+                                .showAlphaSlider(false)
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
@@ -254,7 +264,11 @@ public class PalettesFragment extends Fragment {
                                     public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                         iv4.setBackgroundColor(selectedColor);
                                         palette[3] = selectedColor;
-                                        ivPalette.setImageBitmap(paletteMaker(palette));
+                                        try {
+                                            ivPalette.setImageBitmap(paletteMaker(palette));
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                         lastPicked = selectedColor;
                                     }
                                 })
@@ -279,7 +293,12 @@ public class PalettesFragment extends Fragment {
                         dialog.hide();
                     }
                 });
-
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                int screenWidth = displayMetrics.widthPixels;
+                int desiredWidth = (int) (screenWidth * 0.8);
+                Window window = dialog.getWindow();
+                window.setLayout(desiredWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
                 dialog.show();
             }
         });
@@ -301,42 +320,17 @@ public class PalettesFragment extends Fragment {
         }
     }
 
-
-    /**
-     * Other way to show images on the GridView, with the Text
-     */
-    private Bitmap paletteMaker(int[] palette) {
-
+    private Bitmap paletteMaker(int[] palette) throws IOException {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         // Divide el ancho del ImageView por cuatro para obtener el ancho de cada sección
-        int widthHeigh = 300;
-        int sectionWidth = widthHeigh / 4;
-
-        // Crea un objeto Bitmap con el tamaño del ImageView y formato ARGB_8888
-        Bitmap bitmap = Bitmap.createBitmap(widthHeigh, widthHeigh, Bitmap.Config.ARGB_8888);
-
-        // Obtén el objeto Canvas del bitmap para poder dibujar en él
-        Canvas canvas = new Canvas(bitmap);
-
-// Dibuja un rectángulo para cada sección del ImageView y establece el color correspondiente del array
-        for (int i = 0; i < palette.length; i++) {
-            Rect rect = new Rect(i * sectionWidth, 0, (i + 1) * sectionWidth, widthHeigh);
-            Paint paint = new Paint();
-            paint.setColor(palette[i]);
-            canvas.drawRect(rect, paint);
-        }
-        return bitmap;
+        byte[] imageBytes = Methods.encodeImage(Methods.completeImageList.get(0));
+        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(palette), 160, 144);//imageBytes.length/40 to get the height of the image
+        Bitmap bitmap = imageCodec.decodeWithPalette(palette, imageBytes);
+        Bitmap upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Methods.completeImageList.get(0).getWidth() * 6, Methods.completeImageList.get(0).getHeight() * 6, false);
+        return upscaledBitmap;
     }
 
-    //Refactor this on a class
-    private static byte[] convertToByteArray(String data) {
-        String[] byteStrings = data.split(" ");
-        byte[] bytes = new byte[byteStrings.length];
-        for (int i = 0; i < byteStrings.length; i++) {
-            bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
-                    + Character.digit(byteStrings[i].charAt(1), 16));
-        }
-        System.out.println(bytes.length);
-        return bytes;
-    }
+
 
 }

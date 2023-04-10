@@ -58,7 +58,7 @@ public class ImageCodec implements Codec {
     }
 
     @Override
-    public Bitmap decodeWithPalette(int paletteIndex, byte[] data) {
+    public Bitmap decodeWithPalette(int[] palette, byte[] data) {
         Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
         IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(paletteIndex).getPaletteColors());
 
@@ -69,7 +69,7 @@ public class ImageCodec implements Codec {
         for (int i = 0; i < data.length; i += TileCodec.TILE_BYTES_LENGTH) {
             byte[] tileData = new byte[TileCodec.TILE_BYTES_LENGTH];
             System.arraycopy(data, i, tileData, 0, TileCodec.TILE_BYTES_LENGTH);
-            Bitmap tile = tileCodec.decodeWithPalette(paletteIndex,tileData);
+            Bitmap tile = tileCodec.decodeWithPalette(palette,tileData);
             canvas.drawBitmap(tile, xPos, yPos, null);
             xPos += TileCodec.TILE_WIDTH;
             if (xPos >= imageWidth) {
@@ -90,7 +90,7 @@ public class ImageCodec implements Codec {
         return null;
     }
 
-    public byte[] encodeInternal(Bitmap buf, GbcImage gbcImage) {
+    public byte[] encodeInternal(Bitmap buf) {
         //I had an error here, need to select the palette index from the actual image.
         //Also need to change the frame palette alongside this so the colors are the same
         IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors());

@@ -69,14 +69,14 @@ public class Methods {
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 128, 112);
-                Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), imageBytes);
+                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
                     Bitmap framed = framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
-                    imageBytes= encodeImage(image, gbcImage);
+                    imageBytes= encodeImage(image);
                 }
                 gbcImage.setImageBytes(imageBytes);
                 completeImageList.add(image);
@@ -86,9 +86,9 @@ public class Methods {
             e.printStackTrace();
         }
     }
-    public static byte[] encodeImage(Bitmap bitmap, GbcImage gbcImage) throws IOException {
+    public static byte[] encodeImage(Bitmap bitmap) throws IOException {
         Codec decoder = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, bitmap.getHeight());
-        return decoder.encodeInternal(bitmap, gbcImage);
+        return decoder.encodeInternal(bitmap);
     }
     public static void extractHexImages(){
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -129,7 +129,7 @@ public class Methods {
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
-            Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
+            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), gbcImage.getImageBytes());
             completeImageList.add(image);
             gbcImagesList.add(gbcImage);
         }

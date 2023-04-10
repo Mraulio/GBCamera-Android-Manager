@@ -359,7 +359,7 @@ public class GalleryFragment extends Fragment {
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), Methods.encodeImage(framed, Methods.gbcImagesList.get(globalImageIndex)), Methods.gbcImagesList.get(globalImageIndex));
+                framed = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), Methods.encodeImage(framed), Methods.gbcImagesList.get(globalImageIndex));
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
@@ -367,7 +367,7 @@ public class GalleryFragment extends Fragment {
             canvas.drawBitmap(croppedBitmap, 16, 16, null);
             Methods.completeImageList.set(globalImageIndex, framed);
             try {
-                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(framedAux, Methods.gbcImagesList.get(globalImageIndex)));//Use the framedAux because it doesn't a different palette to encode
+                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(framedAux));//Use the framedAux because it doesn't a different palette to encode
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -378,9 +378,7 @@ public class GalleryFragment extends Fragment {
     //Cambiar paleta
     public Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
-        System.out.println("************************HEIGHT" + (imageBytes.length / 40) + "++++++++++++++++++++++++++++++");
-        Bitmap image = imageCodec.decodeWithPalette(index, imageBytes);
-
+        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(index).getPaletteColors(), imageBytes);
         //If the image is 128x112 (extracted from sav) I apply the frame
         if ((imageBytes.length / 40) == 112) {
             ImageCodec imageCodec2 = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, 144);

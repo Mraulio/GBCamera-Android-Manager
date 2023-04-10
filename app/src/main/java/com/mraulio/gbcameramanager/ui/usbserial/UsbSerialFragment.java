@@ -408,7 +408,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     gbcImage.setFrameIndex(0);
                     gbcImage.setPaletteIndex(0);
                     ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 128, 112);
-                    Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), imageBytes);
+                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), imageBytes);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         System.out.println("***********ENTERING ADDING FRAME*************");
                         //I need to use copy because if not it's inmutable bitmap
@@ -416,7 +416,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                         Canvas canvas = new Canvas(framed);
                         canvas.drawBitmap(image, 16, 16, null);
                         image = framed;
-                        imageBytes = Methods.encodeImage(image, gbcImage);
+                        imageBytes = Methods.encodeImage(image);
                         System.out.println("***********" + image.getHeight() + " " + image.getWidth() + "*************");
 
                     }

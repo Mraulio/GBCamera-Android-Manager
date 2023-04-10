@@ -66,7 +66,7 @@ public class FramesFragment extends Fragment {
                     gbcFrame.setFrameName("next frame");
                     int height = (str.length() + 1) / 120;//To get the real height of the image
                     ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
-                    Bitmap image = imageCodec.decodeWithPalette(0, bytes);
+                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
                     gbcFrame.setFrameBitmap(image);
                     Methods.framesList.add(gbcFrame);
                 }

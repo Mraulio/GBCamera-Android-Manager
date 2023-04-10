@@ -113,7 +113,7 @@ public class ImportFragment extends Fragment {
                                 gbcImage.setPaletteIndex(0);
                                 int height = (imageString.length() + 1) / 120;//To get the real height of the image
                                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
-                                Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), imageBytes);
+                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), imageBytes);
                                 gbcImage.setImageBytes(imageBytes);
                                 Methods.completeImageList.add(image);
                                 Methods.gbcImagesList.add(gbcImage);
@@ -260,7 +260,7 @@ public class ImportFragment extends Fragment {
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 128, 112);
-                Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), imageBytes);
+                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     System.out.println("***********ENTERING ADDING FRAME*************");
                     //I need to use copy because if not it's inmutable bitmap
@@ -268,7 +268,7 @@ public class ImportFragment extends Fragment {
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
-                    imageBytes = Methods.encodeImage(image, gbcImage);
+                    imageBytes = Methods.encodeImage(image);
                     System.out.println("***********" + image.getHeight() + " " + image.getWidth() + "*************");
 
                 }
@@ -379,7 +379,7 @@ public class ImportFragment extends Fragment {
 //                gbcImage.setPaletteIndex(0);
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
-            Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
+            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), gbcImage.getImageBytes());
             if (image.getHeight() == 112 && image.getWidth() == 128) {
                 //I need to use copy because if not it's inmutable bitmap
                 Bitmap framed = Methods.framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -406,7 +406,7 @@ public class ImportFragment extends Fragment {
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
-            Bitmap image = imageCodec.decodeWithPalette(gbcImage.getPaletteIndex(), gbcImage.getImageBytes());
+            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), gbcImage.getImageBytes());
             importedImagesBitmaps.add(image);
             importedImagesList.add(gbcImage);
         }

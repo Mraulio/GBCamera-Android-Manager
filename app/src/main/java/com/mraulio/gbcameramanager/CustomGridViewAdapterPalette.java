@@ -57,11 +57,9 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         holder.cardView.setBackgroundColor(notSelectedColor);
         holder.imageItem.setBackgroundColor(notSelectedColor);
 
-
         if (position == lastSelectedPosition) {
             holder.cardView.setBackgroundColor(selectedColor);
             holder.imageItem.setBackgroundColor(selectedColor);
-
         }
 
         Bitmap image = data.get(position).paletteViewer();

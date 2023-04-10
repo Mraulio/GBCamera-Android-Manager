@@ -80,6 +80,8 @@ public class GalleryFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         TextView tv = (TextView) view.findViewById(R.id.text_gallery);
         gridView = (GridView) view.findViewById(R.id.gridView);
 
@@ -149,6 +151,8 @@ public class GalleryFragment extends Fragment {
                 // Configurar la vista de imagen del diálogo
                 ImageView imageView = dialog.findViewById(R.id.image_view);
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
+                int maxHeight = displayMetrics.heightPixels/2;//To set the imageview max height as the 50% of the screen, for large images
+                imageView.setMaxHeight(maxHeight);
 
                 // Configurar el botón de cierre del diálogo
                 Button printButton = dialog.findViewById(R.id.print_button);
@@ -173,7 +177,7 @@ public class GalleryFragment extends Fragment {
                 }
 
                 paletteFrameSelButton.setText("Show frames.");
-                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList);
+                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList,false);
                 frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                 gridViewFrames.setAdapter(frameAdapter);
 
@@ -220,7 +224,8 @@ public class GalleryFragment extends Fragment {
                         updateGridView(currentPage, gridView);
                     }
                 });
-                CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList);
+                CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList,false);
+
                 adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
                 gridViewPalette.setAdapter(adapterPalette);
                 gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -315,8 +320,7 @@ public class GalleryFragment extends Fragment {
 
 
 // Configurar el diálogo para que ocupe el 80% de  la pantalla
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
                 int screenWidth = displayMetrics.widthPixels;
                 int desiredWidth = (int) (screenWidth * 0.8);
                 Window window = dialog.getWindow();

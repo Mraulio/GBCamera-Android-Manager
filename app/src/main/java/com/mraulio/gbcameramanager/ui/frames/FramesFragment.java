@@ -47,7 +47,7 @@ public class FramesFragment extends Fragment {
         btnImportFrames = view.findViewById(R.id.btnImportFrames);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
-        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList);
+        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true);
         btnImportFrames.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,7 +75,6 @@ public class FramesFragment extends Fragment {
             }
         });
 
-
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames);
         return view;
@@ -96,6 +95,7 @@ public class FramesFragment extends Fragment {
     public static class CustomGridViewAdapterFrames extends ArrayAdapter<GbcFrame> {
         Context context;
         int layoutResourceId;
+        private boolean showTextView;
         List<GbcFrame> data = new ArrayList<GbcFrame>();
         int notSelectedColor = Color.parseColor("#FFFFFF");
         int selectedColor = Color.parseColor("#8C97B3");
@@ -103,11 +103,12 @@ public class FramesFragment extends Fragment {
 
 
         public CustomGridViewAdapterFrames(Context context, int layoutResourceId,
-                                           List<GbcFrame> data) {
+                                           List<GbcFrame> data, boolean showTextView) {
             super(context, layoutResourceId, data);
             this.layoutResourceId = layoutResourceId;
             this.context = context;
             this.data = data;
+            this.showTextView = showTextView;
         }
 
         @Override
@@ -133,6 +134,9 @@ public class FramesFragment extends Fragment {
             if (position == lastSelectedPosition) {
                 holder.txtTitle.setBackgroundColor(selectedColor);
                 holder.imageItem.setBackgroundColor(selectedColor);
+            }
+            if (!showTextView) {
+                holder.txtTitle.setVisibility(View.GONE);
             }
             Bitmap image = data.get(position).getFrameBitmap();
             String name = data.get(position).getFrameName();

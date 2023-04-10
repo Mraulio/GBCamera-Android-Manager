@@ -25,14 +25,16 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
     Context context;
     int layoutResourceId;
     ArrayList<GbcPalette> data = new ArrayList<GbcPalette>();
+    private boolean showTextView;
     int lastSelectedPosition = -1; // Inicialmente no hay ningún elemento seleccionado
 
     public CustomGridViewAdapterPalette(Context context, int layoutResourceId,
-                                        ArrayList<GbcPalette> data) {
+                                        ArrayList<GbcPalette> data, boolean showTextView) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
         this.data = data;
+        this.showTextView = showTextView;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         View row = convertView;
         RecordHolder holder = null;
         int notSelectedColor = Color.parseColor("#FFFFFF");
-        int selectedColor =Color.parseColor("#8C97B3");
+        int selectedColor = Color.parseColor("#8C97B3");
 
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
@@ -61,7 +63,9 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
             holder.cardView.setBackgroundColor(selectedColor);
             holder.imageItem.setBackgroundColor(selectedColor);
         }
-
+        if (!showTextView) {
+            holder.txtTitle.setVisibility(View.GONE);
+        }
         Bitmap image = data.get(position).paletteViewer();
         String name = data.get(position).getName();
         holder.txtTitle.setText(name);
@@ -78,6 +82,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         ImageView imageItem;
 
     }
+
     // Método para actualizar la última posición seleccionada
     public void setLastSelectedPosition(int position) {
         lastSelectedPosition = position;

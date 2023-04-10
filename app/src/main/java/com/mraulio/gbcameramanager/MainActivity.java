@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        Methods.extractHexImages();
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
@@ -81,9 +80,10 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        if (Methods.gbcImagesList.size() == 0) {
-            Methods.extractSavImages(this);
-        }
+//        if (Methods.gbcImagesList.size() == 0) {
+//            Methods.extractSavImages(this);
+//        }
+//        Methods.extractHexImages();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

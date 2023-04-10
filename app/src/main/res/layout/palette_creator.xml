@@ -2,52 +2,138 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#C8E1DE"
     android:orientation="vertical"
-    android:padding="30dp"
-    android:background="#C8E1DE">
+    android:padding="30dp">
 
     <EditText
+        android:id="@+id/etPaletteName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/etPaletteName"></EditText>
+        android:singleLine="true"
+        ></EditText>
 
     <ImageView
         android:id="@+id/ivPalette"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginVertical="3dp"></ImageView>
-    <ImageView
-        android:id="@+id/iv1"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginVertical="3dp"></ImageView>
 
-
-    <ImageView
-        android:id="@+id/iv2"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginVertical="3dp"></ImageView>
-
-
-    <ImageView
-        android:id="@+id/iv3"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginVertical="3dp"></ImageView>
-
-
-    <ImageView
-        android:id="@+id/iv4"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginVertical="3dp"></ImageView>
-
-    <Button
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginVertical="3dp"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <EditText
+            android:id="@+id/et1"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+
+            android:singleLine="true"
+            ></EditText>
+
+        <ImageView
+            android:id="@+id/iv1"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@color/purple_700"
+
+            ></ImageView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="3dp"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <EditText
+            android:id="@+id/et2"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+
+            android:singleLine="true"
+            ></EditText>
+
+        <ImageView
+            android:id="@+id/iv2"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@color/purple_700"
+
+            ></ImageView>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="3dp"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <EditText
+            android:id="@+id/et3"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+
+            android:singleLine="true"
+            ></EditText>
+
+        <ImageView
+            android:id="@+id/iv3"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+
+            android:layout_weight="1"
+            android:background="@color/purple_700"></ImageView>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="3dp"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <EditText
+            android:id="@+id/et4"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:singleLine="true"
+            ></EditText>
+
+        <ImageView
+            android:id="@+id/iv4"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@color/purple_700"></ImageView>
+
+    </LinearLayout>
+
+
+    <Button
         android:id="@+id/btnSavePalette"
-        android:text="Save"
-        ></Button>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save"></Button>
 
 </LinearLayout>

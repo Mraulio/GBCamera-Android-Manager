@@ -103,7 +103,6 @@ public class PrintOverArduino {
     /**
      *
      */
-
     private byte[] getCommandBytes(String data2) {
         String data = data2.replaceAll(" ", "");
         int len2 = data.length();

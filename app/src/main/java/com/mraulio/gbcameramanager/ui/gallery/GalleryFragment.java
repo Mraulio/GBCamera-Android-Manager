@@ -55,7 +55,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GalleryFragment extends Fragment {
 
@@ -202,7 +204,12 @@ public class GalleryFragment extends Fragment {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                         //Action when clicking a frame inside the Dialog
-                        Bitmap framed = frameChange(globalImageIndex, selectedFrameIndex, keepFrame);
+                        Bitmap framed = null;
+                        try {
+                            framed = frameChange(globalImageIndex, selectedFrameIndex, keepFrame);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
 //                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
                         selectedImage[0] = framed;
@@ -221,23 +228,22 @@ public class GalleryFragment extends Fragment {
                     public void onItemClick(AdapterView<?> parent, View view, int position2, long id) {
                         //Action when clicking a palette inside the Dialog
                         Bitmap changedImage;
-// Establece el nuevo color primario
-                        // Declara un objeto TypedValue
-//                        TypedValue typedValue = new TypedValue();
-//                        theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
-//                        int newColor = Methods.gbcPalettesList.get(position2).getPaletteColors()[0]; // Reemplaza "red" con tu nuevo color
-//                        theme.setColorPrimary(newColor);
                         if (!keepFrame) {
-                            changedImage = paletteChanger2(0, selectedImage[0], globalImageIndex);
                             Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(0);//Need to set this to the palette 0 to then change it with the frame
-                            changedImage = paletteChanger2(position2, changedImage, globalImageIndex);
+                            changedImage = paletteChanger(position2, Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
 
-                        } else
-                            changedImage = paletteChanger2(position2, selectedImage[0], globalImageIndex);
+                        } else {
+                            changedImage = paletteChanger(position2, Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
+                        }
                         Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
+
                         Methods.completeImageList.set(globalImageIndex, changedImage);
                         if (keepFrame) {
-                            changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
+                            try {
+                                changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                         Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
                         adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
@@ -340,20 +346,20 @@ public class GalleryFragment extends Fragment {
         return view;
     }
 
-    private Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) {
+    private Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
         // Obtener la imagen seleccionada
         Bitmap framed = null;
-        Bitmap framedAux = null;
+        Bitmap framedAux;
         if (Methods.completeImageList.get(globalImageIndex).getHeight() == 144 && Methods.completeImageList.get(globalImageIndex).getWidth() == 160) {
             //I need to use copy because if not it's inmutable bitmap
             framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
-            Bitmap setToPalette = paletteChanger2(0, Methods.completeImageList.get(globalImageIndex), globalImageIndex);
+            Bitmap setToPalette = paletteChanger(0, Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger2(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), framed, 0);
+                framed = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), Methods.encodeImage(framed, Methods.gbcImagesList.get(globalImageIndex)), Methods.gbcImagesList.get(globalImageIndex));
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
@@ -391,20 +397,23 @@ public class GalleryFragment extends Fragment {
     public Bitmap paletteChanger2(int newPaletteIndex, Bitmap bitmap, int imageIndex) {
         int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
         bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+
         int[] oldColors = Methods.gbcPalettesList.get(Methods.gbcImagesList.get(imageIndex).getPaletteIndex()).getPaletteColors();
         int[] newColors = Methods.gbcPalettesList.get(newPaletteIndex).getPaletteColors();
+
+        Map<Integer, Integer> colorIndexMap = new HashMap<>();
+        for (int i = 0; i < oldColors.length; i++) {
+            colorIndexMap.put(oldColors[i], i);
+        }
+
         for (int i = 0; i < pixels.length; i++) {
             int pixelColor = pixels[i];
-            if (pixelColor == oldColors[0]) {
-                pixels[i] = newColors[0];
-            } else if (pixelColor == oldColors[1]) {
-                pixels[i] = newColors[1];
-            } else if (pixelColor == oldColors[2]) {
-                pixels[i] = newColors[2];
-            } else if (pixelColor == oldColors[3]) {
-                pixels[i] = newColors[3];
+            if (colorIndexMap.containsKey(pixelColor)) {
+                int oldIndex = colorIndexMap.get(pixelColor);
+                pixels[i] = newColors[oldIndex];
             }
         }
+
         Bitmap newBitmap = Bitmap.createBitmap(pixels, bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         return newBitmap;
     }
@@ -427,8 +436,8 @@ public class GalleryFragment extends Fragment {
     }
 
     private void shareImage(Bitmap bitmap) {
-        if ((bitmap.getHeight()/MainActivity.exportSize)==144 && (bitmap.getWidth()/MainActivity.exportSize) == 160 && crop) {
-            bitmap = Bitmap.createBitmap(bitmap, 16*MainActivity.exportSize, 16*MainActivity.exportSize, 128*MainActivity.exportSize, 112*MainActivity.exportSize);
+        if ((bitmap.getHeight() / MainActivity.exportSize) == 144 && (bitmap.getWidth() / MainActivity.exportSize) == 160 && crop) {
+            bitmap = Bitmap.createBitmap(bitmap, 16 * MainActivity.exportSize, 16 * MainActivity.exportSize, 128 * MainActivity.exportSize, 112 * MainActivity.exportSize);
         }
         String bitmapPath = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), bitmap, "image", "share image");
         Uri bitmapUri = Uri.parse(bitmapPath);

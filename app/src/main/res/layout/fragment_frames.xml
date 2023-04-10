@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".ui.frames.FramesFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/btnImportFrames"
+    android:layout_gravity="center"
+    android:text="Import Frames from JSON">
 
+</Button>
     <GridView
         android:id="@+id/gridViewFrames"
         android:layout_width="wrap_content"
@@ -20,4 +27,4 @@
         android:layout_margin="5dp"
         android:verticalSpacing="10dp"/>
 
-</FrameLayout>
+</LinearLayout>

@@ -34,13 +34,21 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
+import com.mraulio.gbcameramanager.JsonReader;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
+import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 //import com.mraulio.gbcameramanager.databinding.FragmentSlideshowBinding;
 
 public class PalettesFragment extends Fragment {
@@ -52,6 +60,7 @@ public class PalettesFragment extends Fragment {
     ImageView iv1, iv2, iv3, iv4;
     int lastPicked = Color.rgb(155, 188, 15);
     String newPaletteName = "*Set Palette Name*";
+    Button btnImportPalettes;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -59,14 +68,42 @@ public class PalettesFragment extends Fragment {
 
 
         View view = inflater.inflate(R.layout.fragment_palettes, container, false);
-        MainActivity.pressBack=false;
+        MainActivity.pressBack = false;
 
         Button btnAdd = view.findViewById(R.id.btnAdd);
+        btnImportPalettes = view.findViewById(R.id.btnImportPalettes);
         int[] selectedColors = new int[4];
 //        ColorPicker colorPicker = new ColorPicker(this);
 //        colorPicker.setColors(new int[] {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW});
 
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
+
+        btnImportPalettes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<String> listFramesString = new ArrayList<>();
+                try {
+                    JsonReader.readerPalettes();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+//                for (String str : listFramesString) {
+//
+//                    byte[] bytes = convertToByteArray(str);
+//                    GbcFrame gbcFrame = new GbcFrame();
+//                    gbcFrame.setFrameName("next frame");
+//                    int height = (str.length() + 1) / 120;//To get the real height of the image
+//                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
+//                    Bitmap image = imageCodec.decodeWithPalette(0, bytes);
+//                    gbcFrame.setFrameBitmap(image);
+//                    Methods.framesList.add(gbcFrame);
+//                }
+                imageAdapter.notifyDataSetChanged();
+            }
+        });
+
 
         //NEEDS LOTS OF REFACTORING
         btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -290,5 +327,16 @@ public class PalettesFragment extends Fragment {
         return bitmap;
     }
 
+    //Refactor this on a class
+    private static byte[] convertToByteArray(String data) {
+        String[] byteStrings = data.split(" ");
+        byte[] bytes = new byte[byteStrings.length];
+        for (int i = 0; i < byteStrings.length; i++) {
+            bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
+                    + Character.digit(byteStrings[i].charAt(1), 16));
+        }
+        System.out.println(bytes.length);
+        return bytes;
+    }
 
 }

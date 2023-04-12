@@ -313,7 +313,7 @@ public class PalettesFragment extends Fragment {
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
-                                        toast("Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                        Methods.toast(getContext(),"Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                                     }
                                 })
                                 .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -353,7 +353,7 @@ public class PalettesFragment extends Fragment {
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
-                                        toast("Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                        Methods.toast(getContext(),"Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                                     }
                                 })
                                 .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -395,7 +395,7 @@ public class PalettesFragment extends Fragment {
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
-                                        toast("Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                        Methods.toast(getContext(),"Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                                     }
                                 })
                                 .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -437,7 +437,7 @@ public class PalettesFragment extends Fragment {
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
-                                        toast("Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                        Methods.toast(getContext(),"Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                                     }
                                 })
                                 .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -492,9 +492,7 @@ public class PalettesFragment extends Fragment {
 
     }
 
-    private void toast(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-    }
+
 
     private void changeBackgroundColor(int color) {
         View view = getView();
@@ -570,20 +568,14 @@ public class PalettesFragment extends Fragment {
                         e.printStackTrace();
                     }
                     fileContent = stringBuilder.toString();
-                    try {
-                        JsonReader.readerPalettes(fileContent);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                        JsonReader.jsonCheck(fileContent);
+
                     imageAdapter.notifyDataSetChanged();
-//                    fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
                 } catch (Exception e) {
                 }
             } else {
                 //DO NOTHING, NOT A JSON
-                toast("Not a valid palettes json.");
+                Methods.toast(getContext(), "Not a .json file.");
             }
         }
     }

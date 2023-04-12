@@ -21,6 +21,59 @@ import java.util.zip.Inflater;
 
 public class JsonReader {
 
+    public static void jsonCheck(String jsonString) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+
+            if (!jsonObject.has("state")) {
+                System.out.println("Not a valid json: 'state'.");
+                return;
+            }
+            JSONObject stateObject = jsonObject.getJSONObject("state");
+
+            if (stateObject.has("palettes")) {
+                JSONArray palettesArray = stateObject.getJSONArray("palettes");
+
+                if (palettesArray.length() == 0) {
+                    System.out.println("No palettes.");
+                    return;
+                }
+                JSONObject paletteObject = palettesArray.getJSONObject(0);
+
+                // Verificar que las claves y valores existan en el objeto de paleta
+                if (paletteObject.has("shortName") && paletteObject.has("name") && paletteObject.has("palette") && paletteObject.has("origin")) {
+//                    String shortName = paletteObject.getString("shortName");
+//                    String name = paletteObject.getString("name");
+                    JSONArray paletteArray = paletteObject.getJSONArray("palette");
+//                    String origin = paletteObject.getString("origin");
+
+                    // Verificar que la matriz de paletas tenga cuatro elementos
+                    if (paletteArray.length() == 4) {
+                        System.out.println("El JSON tiene el formato esperado.");
+                    } else {
+                        System.out.println("Not a 4 element palette.");
+                        return;
+                    }
+                    readerPalettes(palettesArray);
+                } else {
+                    System.out.println("The json doesn't have expected keys.");
+                }
+
+            } else if (stateObject.has("frames")) {
+                System.out.println("El objeto 'state' no tiene la clave 'palettes'.");
+            } else if (stateObject.has("images")) {
+                System.out.println("El objeto 'state' no tiene la clave 'palettes'.");
+            } else {
+                System.out.println("Not a valid json...");
+                return;
+            }
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static List<String> readerFrames() throws IOException, JSONException {
         File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/frames.json")), StandardCharsets.UTF_8);
@@ -89,32 +142,33 @@ public class JsonReader {
         return finalValues;
     }
 
-    public static void readerPalettes(String jsonString) throws IOException, JSONException {
-//        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-//        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/palettes.json")), StandardCharsets.UTF_8);
-
+    public static void readerPalettes(JSONArray palettesArr) {
         // Acceder a los valores del JSON
-        JSONObject jsonObject = new JSONObject(jsonString);
+//        JSONObject jsonObject = new JSONObject(jsonString);
         // Accede a los datos de palettes
-        JSONArray palettesArr = jsonObject.getJSONObject("state").getJSONArray("palettes");
-
+//        palettesArr = jsonObject.getJSONObject("state").getJSONArray("palettes");
+        System.out.println("Cantidad de paletas:"+palettesArr.length());
         // Recorre los elementos de palettes y recupera los datos que necesitas
         for (int i = 0; i < palettesArr.length(); i++) {
-            JSONObject paletteObj = palettesArr.getJSONObject(i);
-            String shortName = paletteObj.getString("shortName");
-            JSONArray paletteArr = paletteObj.getJSONArray("palette");
-            int[] paletteIntArray = new int[paletteArr.length()];
-            for (int j = 0; j < paletteArr.length(); j++) {
-                String color = paletteArr.getString(j);
-                paletteIntArray[j] = Color.parseColor(color);
+            JSONObject paletteObj = null;
+            try {
+                paletteObj = palettesArr.getJSONObject(i);
+                String shortName = paletteObj.getString("shortName");
+                JSONArray paletteArr = paletteObj.getJSONArray("palette");
+                int[] paletteIntArray = new int[paletteArr.length()];
+                for (int j = 0; j < paletteArr.length(); j++) {
+                    String color = paletteArr.getString(j);
+                    paletteIntArray[j] = Color.parseColor(color);
+                }
+                System.out.println("Añadido paleta");
+                GbcPalette gbcPalette = new GbcPalette();
+                gbcPalette.setName(shortName);
+                gbcPalette.setPaletteColors(paletteIntArray);
+                Methods.gbcPalettesList.add(gbcPalette);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-            GbcPalette gbcPalette = new GbcPalette();
-            gbcPalette.setName(shortName);
-            gbcPalette.setPaletteColors(paletteIntArray);
-            Methods.gbcPalettesList.add(gbcPalette);
         }
-
-//        return finalValues;
     }
 
     public static String reader() throws IOException, JSONException {
@@ -127,17 +181,11 @@ public class JsonReader {
         String value = "";
         // Acceder a los valores del JSON
         if (!frame) {
-            String hash = jsonObject.getJSONObject("state")
-                    .getJSONArray("images")
-                    .getJSONObject(0)
-                    .getString("hash");
+            String hash = jsonObject.getJSONObject("state").getJSONArray("images").getJSONObject(0).getString("hash");
             value = jsonObject.getString(hash);
 
         } else {
-            String hash = "frame-" + jsonObject.getJSONObject("state")
-                    .getJSONArray("frames")
-                    .getJSONObject(22)
-                    .getString("hash");
+            String hash = "frame-" + jsonObject.getJSONObject("state").getJSONArray("frames").getJSONObject(22).getString("hash");
             value = jsonObject.getString(hash);
 
         }
@@ -153,8 +201,7 @@ public class JsonReader {
         try {
             length = inflater.inflate(outputBytes);
             inflater.end();
-        } catch (
-                DataFormatException e) {
+        } catch (DataFormatException e) {
             System.out.println("Error al descomprimir los datos: " + e.getMessage());
         }
 
@@ -162,8 +209,7 @@ public class JsonReader {
         System.out.println(uncompressedData);
         String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
         StringBuilder sb = new StringBuilder();
-        for (
-                int i = 0; i < outputString.length(); i += 2) {
+        for (int i = 0; i < outputString.length(); i += 2) {
             sb.append(outputString.substring(i, i + 2));
             sb.append(" ");
         }
@@ -173,9 +219,7 @@ public class JsonReader {
         String[] partes = new String[14];
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(primeraParte);
-        for (
-                int i = 0;
-                i < 14; i++) {
+        for (int i = 0; i < 14; i++) {
             String parte = central.substring(i * 128, (i + 1) * 128);  // Obtener la parte de 128 caracteres
             StringBuilder builder = new StringBuilder(parte);  // Crear un StringBuilder a partir de la parte
             for (int j = 0; j < 512; j++) {
@@ -195,8 +239,7 @@ public class JsonReader {
         System.out.println(terminada.length() + ":  " + terminada);
         StringBuilder resultado = new StringBuilder();
 
-        for (
-                int i = 0; i < terminada.length(); i += 2) {
+        for (int i = 0; i < terminada.length(); i += 2) {
             if (i > 0) {
                 resultado.append(" "); // añade un espacio cada dos caracteres
             }
@@ -220,7 +263,6 @@ public class JsonReader {
             System.out.println("Error al descomprimir los datos: " + e.getMessage());
         }
         String uncompressedData = new String(outputBytes, 0, length, StandardCharsets.UTF_8);
-//        System.out.println(uncompressedData);
         String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < outputString.length(); i += 2) {
@@ -280,9 +322,7 @@ public class JsonReader {
         }
         String ultimaParte = outputString.substring(outputString.length() - 1280);
         stringBuilder.append(ultimaParte);
-//        System.out.println(primeraParte);
-//        System.out.println(central);
-//        System.out.println(ultimaParte);
+
         String terminada = stringBuilder.toString();
 //        System.out.println(terminada.length()+":  "+terminada);
         StringBuilder resultado = new StringBuilder();

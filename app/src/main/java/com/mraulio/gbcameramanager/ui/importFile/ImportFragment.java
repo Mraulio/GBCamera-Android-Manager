@@ -148,7 +148,7 @@ public class ImportFragment extends Fragment {
         return view;
     }
 
-    private void chooseFile() {
+    public  void chooseFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");//Any type of file
         startActivityForResult(Intent.createChooser(intent, "Select File"), 123);
@@ -167,7 +167,6 @@ public class ImportFragment extends Fragment {
                 ByteArrayOutputStream byteStream = null;
                 savFile = true;
                 isJson = false;
-
 
                 try {
                     InputStream inputStream = getContext().getContentResolver().openInputStream(uri);

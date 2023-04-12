@@ -1,10 +1,13 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -24,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.flask.colorpicker.ColorPickerView;
@@ -41,7 +45,16 @@ import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import org.json.JSONException;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 //import com.mraulio.gbcameramanager.databinding.FragmentSlideshowBinding;
@@ -60,6 +73,11 @@ public class PalettesFragment extends Fragment {
     Button btnImportPalettes;
     EditText et1, et2, et3, et4;
     String placeholderString = "";
+    String fileName;
+    byte[] fileBytes;
+    String fileContent = "";
+    File palettesFile;
+    String jsonString;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -70,40 +88,18 @@ public class PalettesFragment extends Fragment {
 
         Button btnAdd = view.findViewById(R.id.btnAdd);
         btnImportPalettes = view.findViewById(R.id.btnImportPalettes);
-        int[] selectedColors = new int[4];
-//        ColorPicker colorPicker = new ColorPicker(this);
-//        colorPicker.setColors(new int[] {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW});
 
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
 
         btnImportPalettes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<String> listFramesString = new ArrayList<>();
-                try {
-                    JsonReader.readerPalettes();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-//                for (String str : listFramesString) {
-//
-//                    byte[] bytes = convertToByteArray(str);
-//                    GbcFrame gbcFrame = new GbcFrame();
-//                    gbcFrame.setFrameName("next frame");
-//                    int height = (str.length() + 1) / 120;//To get the real height of the image
-//                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
-//                    Bitmap image = imageCodec.decodeWithPalette(0, bytes);
-//                    gbcFrame.setFrameBitmap(image);
-//                    Methods.framesList.add(gbcFrame);
-//                }
-                imageAdapter.notifyDataSetChanged();
+                chooseFile();
+
+
             }
         });
 
-
-        //NEEDS LOTS OF REFACTORING
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -533,6 +529,63 @@ public class PalettesFragment extends Fragment {
             colorString = "#" + colorString;
         }
         return Color.parseColor(colorString);
+    }
+
+    /**
+     * FILE PICKER
+     */
+    public void chooseFile() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");//Any type of file
+        startActivityForResult(Intent.createChooser(intent, "Select File"), 123);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 123 && resultCode == Activity.RESULT_OK && data != null) {
+            Uri uri = data.getData();
+            String[] aux = uri.getPath().split("/");
+
+            //I check the extension of the file
+            if (uri.getPath().substring(uri.getPath().length() - 4).equals("json")) {
+                fileName = aux[aux.length - 1];
+                try {
+                    InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                    // Crear un ByteArrayOutputStream para copiar el contenido del archivo
+                    StringBuilder stringBuilder = new StringBuilder();
+                    try {
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                        String line = bufferedReader.readLine();
+                        while (line != null) {
+                            stringBuilder.append(line).append('\n');
+                            line = bufferedReader.readLine();
+                        }
+                        bufferedReader.close();
+                        inputStream.close();
+
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    fileContent = stringBuilder.toString();
+                    try {
+                        JsonReader.readerPalettes(fileContent);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    imageAdapter.notifyDataSetChanged();
+//                    fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
+                } catch (Exception e) {
+                }
+            } else {
+                //DO NOTHING, NOT A JSON
+                toast("Not a valid palettes json.");
+            }
+        }
     }
 
 }

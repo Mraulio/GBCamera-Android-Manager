@@ -80,9 +80,9 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-//        if (Methods.gbcImagesList.size() == 0) {
-//            Methods.extractSavImages(this);
-//        }
+        if (Methods.gbcImagesList.size() == 0) {
+            Methods.extractSavImages(this);
+        }
 //        Methods.extractHexImages();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             System.out.println("PERMISION GRANTED*********************");            //resume tasks needing this permission
-            Toast toast = Toast.makeText(this, "Permisos otorgados", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(this, "Granted permissions.", Toast.LENGTH_LONG);
             toast.show();
         }
     }

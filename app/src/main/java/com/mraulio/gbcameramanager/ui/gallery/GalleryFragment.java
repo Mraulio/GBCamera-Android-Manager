@@ -36,8 +36,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.mraulio.gbcameramanager.BuildConfig;
 import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
@@ -58,6 +60,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class GalleryFragment extends Fragment {
 
@@ -449,6 +452,7 @@ public class GalleryFragment extends Fragment {
         intent.putExtra(Intent.EXTRA_STREAM, bitmapUri);
         startActivity(Intent.createChooser(intent, "Share"));
     }
+
 
     private void saveImage(Bitmap image, String fileName) {
         if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {

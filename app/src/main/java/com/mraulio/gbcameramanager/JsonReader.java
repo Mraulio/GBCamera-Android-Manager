@@ -89,14 +89,9 @@ public class JsonReader {
         return finalValues;
     }
 
-    public static void readerPalettes() throws IOException, JSONException {
-        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/palettes.json")), StandardCharsets.UTF_8);
-        boolean frame = true;
-//        List<String> stringValues = new ArrayList<>();
-//        List<String> finalValues = new ArrayList<>();
-
-        // Crear un objeto JSONObject a partir del String JSON
+    public static void readerPalettes(String jsonString) throws IOException, JSONException {
+//        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+//        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/palettes.json")), StandardCharsets.UTF_8);
 
         // Acceder a los valores del JSON
         JSONObject jsonObject = new JSONObject(jsonString);

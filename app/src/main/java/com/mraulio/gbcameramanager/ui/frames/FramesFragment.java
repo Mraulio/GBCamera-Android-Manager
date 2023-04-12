@@ -38,58 +38,45 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class FramesFragment extends Fragment {
-    Button btnImportFrames;
+//    Button btnImportFrames;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
-        btnImportFrames = view.findViewById(R.id.btnImportFrames);
+//        btnImportFrames = view.findViewById(R.id.btnImportFrames);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
         CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true);
-        btnImportFrames.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                List<String> listFramesString = new ArrayList<>();
-                try {
-                    listFramesString = JsonReader.readerFrames();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                for (String str : listFramesString) {
-
-                    byte[] bytes = convertToByteArray(str);
-                    GbcFrame gbcFrame = new GbcFrame();
-                    gbcFrame.setFrameName("next frame");
-                    int height = (str.length() + 1) / 120;//To get the real height of the image
-                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
-                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
-                    gbcFrame.setFrameBitmap(image);
-                    Methods.framesList.add(gbcFrame);
-                }
-                customGridViewAdapterFrames.notifyDataSetChanged();
-
-            }
-        });
+//        btnImportFrames.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                List<String> listFramesString = new ArrayList<>();
+//                try {
+//                    listFramesString = JsonReader.readerFrames();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                for (String str : listFramesString) {
+//
+//                    byte[] bytes = convertToByteArray(str);
+//                    GbcFrame gbcFrame = new GbcFrame();
+//                    gbcFrame.setFrameName("next frame");
+//                    int height = (str.length() + 1) / 120;//To get the real height of the image
+//                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
+//                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
+//                    gbcFrame.setFrameBitmap(image);
+//                    Methods.framesList.add(gbcFrame);
+//                }
+//                customGridViewAdapterFrames.notifyDataSetChanged();
+//            }
+//        });
 
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames);
         return view;
-    }
-
-    //Refactor this on a class
-    private static byte[] convertToByteArray(String data) {
-        String[] byteStrings = data.split(" ");
-        byte[] bytes = new byte[byteStrings.length];
-        for (int i = 0; i < byteStrings.length; i++) {
-            bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
-                    + Character.digit(byteStrings[i].charAt(1), 16));
-        }
-        System.out.println(bytes.length);
-        return bytes;
     }
 
     public static class CustomGridViewAdapterFrames extends ArrayAdapter<GbcFrame> {

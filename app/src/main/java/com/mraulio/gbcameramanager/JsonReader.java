@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Environment;
 
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DataFormatException;
@@ -21,22 +23,21 @@ import java.util.zip.Inflater;
 
 public class JsonReader {
 
-    public static void jsonCheck(String jsonString) {
+    public static List<?> jsonCheck(String jsonString) {
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
 
             if (!jsonObject.has("state")) {
                 System.out.println("Not a valid json: 'state'.");
-                return;
+                return null;
             }
             JSONObject stateObject = jsonObject.getJSONObject("state");
 
             if (stateObject.has("palettes")) {
                 JSONArray palettesArray = stateObject.getJSONArray("palettes");
-
                 if (palettesArray.length() == 0) {
                     System.out.println("No palettes.");
-                    return;
+                    return null;
                 }
                 JSONObject paletteObject = palettesArray.getJSONObject(0);
 
@@ -52,102 +53,121 @@ public class JsonReader {
                         System.out.println("El JSON tiene el formato esperado.");
                     } else {
                         System.out.println("Not a 4 element palette.");
-                        return;
+                        return null;
                     }
-                    readerPalettes(palettesArray);
+                    return readerPalettes(palettesArray);
                 } else {
                     System.out.println("The json doesn't have expected keys.");
                 }
 
             } else if (stateObject.has("frames")) {
-                System.out.println("El objeto 'state' no tiene la clave 'palettes'.");
+                //Entering frame json. There are 2 types, old with id, new with hash
+                JSONArray framesArray = stateObject.getJSONArray("frames");
+                if (framesArray.length() == 0) {
+                    System.out.println("No frames.");
+                    return null;
+                }
+                JSONObject frameObject = framesArray.getJSONObject(0);
+
+                //Verify what type of frames.json it is
+                if (frameObject.has("id") && frameObject.has("name") && !frameObject.has("hash") && !frameObject.has("tempId")) {
+                    //Old type
+                    return readerFrames(jsonObject, false);
+
+                } else if (frameObject.has("id") && frameObject.has("name") && frameObject.has("hash") && frameObject.has("tempId")) {
+                    //New type with hash
+                    return readerFrames(jsonObject, true);
+                } else {
+                    System.out.println("Not a valid frames json");
+                }
             } else if (stateObject.has("images")) {
-                System.out.println("El objeto 'state' no tiene la clave 'palettes'.");
+                //Images json
+                //Entering images json.
+                System.out.println("ENTERING 1");
+                JSONArray imagesArray = stateObject.getJSONArray("images");
+                if (imagesArray.length() == 0) {
+                    System.out.println("No images.");
+                    return null;
+                }
+                System.out.println("ENTERING 2");
+                JSONObject imageObject = imagesArray.getJSONObject(0);
+                System.out.println(imageObject);
+                if (imageObject.has("hash") && imageObject.has("created") && imageObject.has("title") && imageObject.has("lines") && imageObject.has("tags")) {
+                    //There are some more values to check, but not all images have those
+                    System.out.println("ENTERING 3");
+                    return readerImages(jsonObject);
+                } else return null;
+
+
             } else {
                 System.out.println("Not a valid json...");
-                return;
+                return null;
             }
 
 
-        } catch (JSONException e) {
+        } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    public static List<String> readerFrames() throws IOException, JSONException {
-        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/frames.json")), StandardCharsets.UTF_8);
-        boolean frame = true;
+    public static List<String> readerFrames(JSONObject jsonObject, boolean newType) throws IOException, JSONException {
+
         List<String> stringValues = new ArrayList<>();
         List<String> finalValues = new ArrayList<>();
 
-        // Crear un objeto JSONObject a partir del String JSON
-
         // Acceder a los valores del JSON
-        JSONObject jsonObject = new JSONObject(jsonString);
         JSONArray frames = jsonObject.getJSONObject("state").getJSONArray("frames");
-//        System.out.println("Hay estos frames: " + frames.length());
 
-        for (int i = 0; i < frames.length(); i++) {
-            JSONObject image = frames.getJSONObject(i);
-            String hash = image.getString("hash");
-//            System.out.println(hash); // o haz algo más con el valor obtenido
-//            System.out.println(jsonObject.getString(hash));
-            stringValues.add(hash);
+        if (newType) {//If new type I get the data from the frame-hash
+            for (int i = 0; i < frames.length(); i++) {
+                JSONObject image = frames.getJSONObject(i);
+                String hash = image.getString("hash");
+                stringValues.add(hash);
+            }
+        } else {//If old type I get the data from the frame-id
+            for (int i = 0; i < frames.length(); i++) {
+                JSONObject image = frames.getJSONObject(i);
+                String hash = image.getString("id");
+                stringValues.add(hash);
+            }
         }
-//        System.out.println("Hay estos: "+stringValues.size());
-
         for (String value : stringValues) {
-//            System.out.println("El valor es: " + value);
-
             String hash = jsonObject.getString("frame-" + value);
-//            System.out.println(eachFrame(hash));
-
             finalValues.add(eachFrame(hash));
         }
+        ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
+
         return finalValues;
     }
 
-    public static List<String> readerImages(String jsonString) throws IOException, JSONException {
-//        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-//        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/frames.json")), StandardCharsets.UTF_8);
-        boolean frame = true;
+    public static List<String> readerImages(JSONObject jsonObject) throws IOException, JSONException {
         List<String> stringValues = new ArrayList<>();
         List<String> finalValues = new ArrayList<>();
 
-        // Crear un objeto JSONObject a partir del String JSON
-
         // Acceder a los valores del JSON
-        JSONObject jsonObject = new JSONObject(jsonString);
         JSONArray images = jsonObject.getJSONObject("state").getJSONArray("images");
-//        System.out.println("There are images: " + images.length());
-
+        System.out.println("IMAGES LENGHT"+images.length());
         for (int i = 0; i < images.length(); i++) {
             JSONObject image = images.getJSONObject(i);
             String hash = image.getString("hash");
-//            System.out.println(hash); // o haz algo más con el valor obtenido
-//            System.out.println(jsonObject.getString(hash));
             stringValues.add(hash);
         }
-//        System.out.println("Hay estos: "+stringValues.size());
-
         for (String value : stringValues) {
-//            System.out.println("El valor es: " + value);
-
             String hash = jsonObject.getString(value);
-//            System.out.println(eachImage(hash));
-
             finalValues.add(eachImage(hash));
         }
+        ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
+
         return finalValues;
     }
 
-    public static void readerPalettes(JSONArray palettesArr) {
+    public static List<GbcPalette> readerPalettes(JSONArray palettesArr) {
         // Acceder a los valores del JSON
 //        JSONObject jsonObject = new JSONObject(jsonString);
         // Accede a los datos de palettes
 //        palettesArr = jsonObject.getJSONObject("state").getJSONArray("palettes");
-        System.out.println("Cantidad de paletas:"+palettesArr.length());
+        List<GbcPalette> paletteList = new ArrayList<>();
         // Recorre los elementos de palettes y recupera los datos que necesitas
         for (int i = 0; i < palettesArr.length(); i++) {
             JSONObject paletteObj = null;
@@ -160,15 +180,17 @@ public class JsonReader {
                     String color = paletteArr.getString(j);
                     paletteIntArray[j] = Color.parseColor(color);
                 }
-                System.out.println("Añadido paleta");
                 GbcPalette gbcPalette = new GbcPalette();
                 gbcPalette.setName(shortName);
                 gbcPalette.setPaletteColors(paletteIntArray);
-                Methods.gbcPalettesList.add(gbcPalette);
+                paletteList.add(gbcPalette);
+                ImportFragment.addEnum = ImportFragment.ADD_WHAT.PALETTES;
+//                Methods.gbcPalettesList.add(gbcPalette);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+        return paletteList;
     }
 
     public static String reader() throws IOException, JSONException {
@@ -266,7 +288,7 @@ public class JsonReader {
         String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < outputString.length(); i += 2) {
-            try {//Esto lo pongo para el marco en blanco por ejemplo que da StringIndexOutOfBoundsException, hay que arreglarlo
+            try {//Esto lo pongo para el marco en blanco por ejemplo que da StringIndexOutOfBoundsException, hay que arreglarlo (Creo que esta arreglado con el *300
                 sb.append(outputString.substring(i, i + 2));
                 sb.append(" ");
             } catch (Exception e) {

@@ -6,14 +6,14 @@
     android:orientation="vertical"
     tools:context=".ui.frames.FramesFragment">
 
-<Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/btnImportFrames"
-    android:layout_gravity="center"
-    android:text="Import Frames from JSON">
+<!--<Button-->
+<!--    android:layout_width="wrap_content"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:id="@+id/btnImportFrames"-->
+<!--    android:layout_gravity="center"-->
+<!--    android:text="Import Frames from JSON">-->
 
-</Button>
+<!--</Button>-->
     <GridView
         android:id="@+id/gridViewFrames"
         android:layout_width="wrap_content"

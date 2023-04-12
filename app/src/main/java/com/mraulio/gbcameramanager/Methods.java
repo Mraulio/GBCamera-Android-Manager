@@ -139,7 +139,7 @@ public class Methods {
         }
     }
 
-    private static byte[] convertToByteArray(String data) {
+    public static byte[] convertToByteArray(String data) {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];
         System.out.println(data.length());

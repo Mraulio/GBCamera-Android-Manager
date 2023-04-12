@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static int exportSize = 4;
+    public static int imagesPage = 12;
     public static UsbManager manager;
 
     private static final String ACTION_USB_PERMISSION =
@@ -80,9 +81,9 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        if (Methods.gbcImagesList.size() == 0) {
-            Methods.extractSavImages(this);
-        }
+//        if (Methods.gbcImagesList.size() == 0) {
+//            Methods.extractSavImages(this);
+//        }
 //        Methods.extractHexImages();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());

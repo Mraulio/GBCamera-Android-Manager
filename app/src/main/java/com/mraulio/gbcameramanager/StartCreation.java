@@ -9,6 +9,7 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 public class StartCreation {
     public static void addFrames(Context context) {
@@ -55,11 +56,11 @@ public class StartCreation {
         };
         GbcPalette gbcPalette1 = new GbcPalette();
         gbcPalette1.setPaletteColors(EVEN_DIST_PALETTE);
-        gbcPalette1.setName("Greyscale");
+        gbcPalette1.setName("Greyscale".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette1);
         GbcPalette gbcPalette2 = new GbcPalette();
         gbcPalette2.setPaletteColors(GAMEBOY_LCD_PALETTE);
-        gbcPalette2.setName("DMG");
+        gbcPalette2.setName("DMG".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette2);
 
         //Adding palettes from here https://www.npmjs.com/package/gb-palettes
@@ -71,7 +72,7 @@ public class StartCreation {
         };
         GbcPalette gbcPalette3 = new GbcPalette();
         gbcPalette3.setPaletteColors(cmyk_palette);
-        gbcPalette3.setName("CMYK");
+        gbcPalette3.setName("CMYK".toLowerCase(Locale.ROOT));//Lower case to be compatible with web app
         Methods.gbcPalettesList.add(gbcPalette3);
 
         int[] tram_palette = {
@@ -82,7 +83,7 @@ public class StartCreation {
         };
         GbcPalette gbcPalette5 = new GbcPalette();
         gbcPalette5.setPaletteColors(tram_palette);
-        gbcPalette5.setName("Tramonto al Parco");
+        gbcPalette5.setName("Tramonto al Parco".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette5);
         //My won palettes
         int[] cute_palette = {
@@ -93,7 +94,7 @@ public class StartCreation {
         };
         GbcPalette gbcPalette4 = new GbcPalette();
         gbcPalette4.setPaletteColors(cute_palette);
-        gbcPalette4.setName("Cute");
+        gbcPalette4.setName("Cute".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette4);
     }
 }

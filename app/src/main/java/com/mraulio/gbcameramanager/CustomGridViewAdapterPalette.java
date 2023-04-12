@@ -25,16 +25,17 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
     Context context;
     int layoutResourceId;
     ArrayList<GbcPalette> data = new ArrayList<GbcPalette>();
-    private boolean showTextView;
+    private boolean showTextView, checkDuplicate;
     int lastSelectedPosition = -1; // Inicialmente no hay ningún elemento seleccionado
 
     public CustomGridViewAdapterPalette(Context context, int layoutResourceId,
-                                        ArrayList<GbcPalette> data, boolean showTextView) {
+                                        ArrayList<GbcPalette> data, boolean showTextView, boolean checkDuplicate) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
         this.data = data;
         this.showTextView = showTextView;
+        this.checkDuplicate = checkDuplicate;
     }
 
     @Override
@@ -43,6 +44,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         RecordHolder holder = null;
         int notSelectedColor = Color.parseColor("#FFFFFF");
         int selectedColor = Color.parseColor("#8C97B3");
+        int duplicatedColor = Color.parseColor("#FF0000");
 
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
@@ -68,6 +70,15 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         }
         Bitmap image = data.get(position).paletteViewer();
         String name = data.get(position).getName();
+        if (checkDuplicate) {
+            for (GbcPalette objeto : Methods.gbcPalettesList) {
+                // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
+                if (objeto.getName().equals(name)) {
+                    // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
+                    holder.imageItem.setBackgroundColor(duplicatedColor);
+                }
+            }
+        }
         holder.txtTitle.setText(name);
         holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
         if (image != null && !image.isRecycled()) {

@@ -8,12 +8,12 @@
     android:padding="10dp"
     tools:context=".ui.palettes.PalettesFragment">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btnImportPalettes"
-        android:layout_gravity="left"
-        android:text="Import Palettes from JSON"/>
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/btnImportPalettes"-->
+<!--        android:layout_gravity="left"-->
+<!--        android:text="Import Palettes from JSON"/>-->
 
     <Button
         android:layout_width="wrap_content"

@@ -57,6 +57,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 //import com.mraulio.gbcameramanager.databinding.FragmentSlideshowBinding;
 
 //Using this color picker:https://github.com/QuadFlask/colorpicker
@@ -70,7 +71,7 @@ public class PalettesFragment extends Fragment {
     ImageView iv1, iv2, iv3, iv4;
     int lastPicked = Color.rgb(155, 188, 15);
     String newPaletteName = "*Set Palette Name*";
-    Button btnImportPalettes;
+//    Button btnImportPalettes;
     EditText et1, et2, et3, et4;
     String placeholderString = "";
     String fileName;
@@ -87,18 +88,16 @@ public class PalettesFragment extends Fragment {
         MainActivity.pressBack = false;
 
         Button btnAdd = view.findViewById(R.id.btnAdd);
-        btnImportPalettes = view.findViewById(R.id.btnImportPalettes);
+//        btnImportPalettes = view.findViewById(R.id.btnImportPalettes);
 
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
 
-        btnImportPalettes.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                chooseFile();
-
-
-            }
-        });
+//        btnImportPalettes.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                chooseFile();
+//            }
+//        });
 
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -313,7 +312,7 @@ public class PalettesFragment extends Fragment {
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
-                                        Methods.toast(getContext(),"Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                        Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                                     }
                                 })
                                 .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -353,7 +352,7 @@ public class PalettesFragment extends Fragment {
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
-                                        Methods.toast(getContext(),"Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                        Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                                     }
                                 })
                                 .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -395,7 +394,7 @@ public class PalettesFragment extends Fragment {
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
-                                        Methods.toast(getContext(),"Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                        Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                                     }
                                 })
                                 .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -437,7 +436,7 @@ public class PalettesFragment extends Fragment {
                                 .setOnColorSelectedListener(new OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int selectedColor) {
-                                        Methods.toast(getContext(),"Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                        Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                                     }
                                 })
                                 .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -469,7 +468,7 @@ public class PalettesFragment extends Fragment {
                     public void onClick(View v) {
                         newPaletteName = etPaletteName.getText().toString();
                         GbcPalette newPalette = new GbcPalette();
-                        newPalette.setName(newPaletteName);
+                        newPalette.setName(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
                         newPalette.setPaletteColors(palette);
                         Methods.gbcPalettesList.add(newPalette);
                         gridViewPalettes.setAdapter(imageAdapter);
@@ -486,13 +485,11 @@ public class PalettesFragment extends Fragment {
             }
         });
 
-        imageAdapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, true);
+        imageAdapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, true, false);
         gridViewPalettes.setAdapter(imageAdapter);
         return view;
 
     }
-
-
 
     private void changeBackgroundColor(int color) {
         View view = getView();
@@ -527,57 +524,6 @@ public class PalettesFragment extends Fragment {
             colorString = "#" + colorString;
         }
         return Color.parseColor(colorString);
-    }
-
-    /**
-     * FILE PICKER
-     */
-    public void chooseFile() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");//Any type of file
-        startActivityForResult(Intent.createChooser(intent, "Select File"), 123);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 123 && resultCode == Activity.RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            String[] aux = uri.getPath().split("/");
-
-            //I check the extension of the file
-            if (uri.getPath().substring(uri.getPath().length() - 4).equals("json")) {
-                fileName = aux[aux.length - 1];
-                try {
-                    InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                    // Crear un ByteArrayOutputStream para copiar el contenido del archivo
-                    StringBuilder stringBuilder = new StringBuilder();
-                    try {
-                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                        String line = bufferedReader.readLine();
-                        while (line != null) {
-                            stringBuilder.append(line).append('\n');
-                            line = bufferedReader.readLine();
-                        }
-                        bufferedReader.close();
-                        inputStream.close();
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    fileContent = stringBuilder.toString();
-                        JsonReader.jsonCheck(fileContent);
-
-                    imageAdapter.notifyDataSetChanged();
-                } catch (Exception e) {
-                }
-            } else {
-                //DO NOTHING, NOT A JSON
-                Methods.toast(getContext(), "Not a .json file.");
-            }
-        }
     }
 
 }

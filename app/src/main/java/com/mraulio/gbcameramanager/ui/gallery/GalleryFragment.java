@@ -67,10 +67,10 @@ public class GalleryFragment extends Fragment {
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
 
     public static GridView gridView;
-    private static int itemsPerPage = 12;
+    private static int itemsPerPage = MainActivity.imagesPage;
     static int startIndex = 0;
     static int endIndex = 0;
-    static int currentPage = 0;
+    public static int currentPage = 0;
     static int lastPage = 0;
     boolean crop = false;
     boolean showPalettes = true;
@@ -154,7 +154,7 @@ public class GalleryFragment extends Fragment {
                 // Configurar la vista de imagen del diálogo
                 ImageView imageView = dialog.findViewById(R.id.image_view);
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
-                int maxHeight = displayMetrics.heightPixels/2;//To set the imageview max height as the 50% of the screen, for large images
+                int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
                 imageView.setMaxHeight(maxHeight);
 
                 // Configurar el botón de cierre del diálogo
@@ -180,7 +180,7 @@ public class GalleryFragment extends Fragment {
                 }
 
                 paletteFrameSelButton.setText("Show frames.");
-                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList,false);
+                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false);
                 frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                 gridViewFrames.setAdapter(frameAdapter);
 
@@ -227,7 +227,7 @@ public class GalleryFragment extends Fragment {
                         updateGridView(currentPage, gridView);
                     }
                 });
-                CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList,false);
+                CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, false, false);
 
                 adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
                 gridViewPalette.setAdapter(adapterPalette);
@@ -483,7 +483,7 @@ public class GalleryFragment extends Fragment {
 
     private void updateGridView(int page, GridView gridView) {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
-        itemsPerPage = 12;
+        itemsPerPage = MainActivity.imagesPage;
 
         if (Methods.completeImageList.size() < itemsPerPage) {
             itemsPerPage = Methods.completeImageList.size();

@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.JsonReader;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
@@ -35,7 +36,10 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import org.json.JSONException;
@@ -53,13 +57,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 
 public class ImportFragment extends Fragment {
     public static final int PICKFILE_RESULT_CODE = 1;
     private static final int PICKFILE_REQUEST_CODE = 2;
     List<GbcImage> importedImagesList = new ArrayList<>();
+    List<GbcPalette> paletteHolderList = new ArrayList<>();
     public static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
@@ -68,6 +75,19 @@ public class ImportFragment extends Fragment {
     boolean savFile = false;
     boolean isJson = false;
     String fileContent = "";
+    List<?> receivedList;
+    List<GbcFrame> gbcFramesList;
+    List<GbcImage> gbcImagesList;
+    List<Bitmap> bitmapList;
+    CustomGridViewAdapterPalette customAdapterPalette;
+
+    public enum ADD_WHAT {
+        PALETTES,
+        FRAMES,
+        IMAGES
+    }
+
+    public static ADD_WHAT addEnum;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -76,7 +96,7 @@ public class ImportFragment extends Fragment {
         Button btnSelectFile = view.findViewById(R.id.btnSelectFile);
         Button btnExtractFile = view.findViewById(R.id.btnExtractFile);
         Button btnAddImages = view.findViewById(R.id.btnAddImages);
-
+        btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
 
         tvFileName = view.findViewById(R.id.tvFileName);
@@ -95,60 +115,150 @@ public class ImportFragment extends Fragment {
                 importedImagesBitmaps.clear();
                 listImportedImageBytes.clear();
                 gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
-                if (savFile && !isJson)
+                if (savFile && !isJson) {
                     extractSavImages(getContext());
-                else if (!savFile && !isJson) {
+                    tvFileName.setText("" + importedImagesList.size());//"" to make it work
+                    gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
+                } else if (!savFile && !isJson) {
                     extractHexImagesFromFile(fileContent);
+                    tvFileName.setText("" + importedImagesList.size());//"" to make it work
+                    gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
                 } else if (!savFile && isJson) {
-                    try {
-                        List<String> listImagesString = JsonReader.readerImages(fileContent);
-                        for (String imageString : listImagesString) {
-                            byte[] imageBytes;
-                            try {
-                                imageBytes = convertToByteArray(imageString);
+
+                    receivedList = JsonReader.jsonCheck(fileContent);
+                    if (receivedList == null) {
+                        Methods.toast(getContext(), "Not a valid list");
+                        return;
+                    }
+                    switch (addEnum) {
+                        case PALETTES:
+                            customAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true);
+                            gridViewImport.setAdapter(customAdapterPalette);
+                            btnAddImages.setText("Add palettes");
+                            btnAddImages.setVisibility(View.VISIBLE);
+                            break;
+
+                        case FRAMES:
+                            gbcFramesList = new ArrayList<>();
+                            for (Object str : receivedList) {
+                                byte[] bytes = convertToByteArray((String) str);
+                                GbcFrame gbcFrame = new GbcFrame();
+                                gbcFrame.setFrameName("next frame");
+                                int height = (((String) str).length() + 1) / 120;//To get the real height of the image
+                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
+                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
+                                gbcFrame.setFrameBitmap(image);
+                                gbcFramesList.add(gbcFrame);
+                            }
+                            btnAddImages.setText("Add frames");
+                            btnAddImages.setVisibility(View.VISIBLE);
+                            gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, gbcFramesList, true));
+                            break;
+                        case IMAGES:
+                            gbcImagesList = new ArrayList<>();
+                            bitmapList = new ArrayList<>();
+                            for (Object str : receivedList) {
+                                byte[] bytes = convertToByteArray((String) str);
                                 GbcImage gbcImage = new GbcImage();
-                                GbcImage.numImages++;
-                                gbcImage.setName("Image " + (GbcImage.numImages));
+                                gbcImage.setName("next image");
+                                int height = (((String) str).length() + 1) / 120;//To get the real height of the image
+                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
+                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
+                                System.out.println(image.getHeight());
+                                try {
+                                    gbcImage.setImageBytes(Methods.encodeImage(image));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                                 gbcImage.setFrameIndex(0);
                                 gbcImage.setPaletteIndex(0);
-                                int height = (imageString.length() + 1) / 120;//To get the real height of the image
-                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
-                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), imageBytes);
-                                gbcImage.setImageBytes(imageBytes);
-                                Methods.completeImageList.add(image);
-                                Methods.gbcImagesList.add(gbcImage);
-                                importedImagesBitmaps.add(image);
-                            } catch (Exception e){
-                                System.out.println("////////////Exception in convertToByteArray:\n"+e.toString());
+                                gbcImagesList.add(gbcImage);
+                                bitmapList.add(image);
                             }
-
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                            btnAddImages.setText("Add images");
+                            btnAddImages.setVisibility(View.VISIBLE);
+                            gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, gbcImagesList, bitmapList));
+                            break;
                     }
+//                    try {
+//                        List<String> listImagesString = JsonReader.readerImages(fileContent);
+//                        for (String imageString : listImagesString) {
+//                            byte[] imageBytes;
+//                            try {
+//                                imageBytes = convertToByteArray(imageString);
+//                                GbcImage gbcImage = new GbcImage();
+//                                GbcImage.numImages++;
+//                                gbcImage.setName("Image " + (GbcImage.numImages));
+//                                gbcImage.setFrameIndex(0);
+//                                gbcImage.setPaletteIndex(0);
+//                                int height = (imageString.length() + 1) / 120;//To get the real height of the image
+//                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
+//                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), imageBytes);
+//                                gbcImage.setImageBytes(imageBytes);
+//                                Methods.completeImageList.add(image);
+//                                Methods.gbcImagesList.add(gbcImage);
+//                                importedImagesBitmaps.add(image);
+//                            } catch (Exception e) {
+//                                System.out.println("////////////Exception in convertToByteArray:\n" + e.toString());
+//                            }
+//
+//                        }
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
                 }
-                tvFileName.setText("" + importedImagesList.size());//"" to make it work
-                gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
 
             }
         });
         btnAddImages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GbcImage.numImages += importedImagesList.size();
-                Methods.gbcImagesList.addAll(importedImagesList);
-                System.out.println("****************GbcImageList" + Methods.gbcImagesList.size() + "*****************************");
-                Methods.completeImageList.addAll(importedImagesBitmaps);
-                System.out.println("****************Complete Image List" + Methods.completeImageList.size() + "*****************************");
+                switch (addEnum) {
+                    case PALETTES:
+                        List<GbcPalette> newPalettes = new ArrayList<>();
+                        for (Object palette : receivedList) {
+                            boolean alreadyAdded = false;
+                            GbcPalette gbcp = (GbcPalette) palette;
+                            //If the palette already exists (by the name) it doesn't add it. Same if it's already added
+                            for (GbcPalette objeto : Methods.gbcPalettesList) {
+                                if (objeto.getName().toLowerCase(Locale.ROOT).equals(gbcp.getName())) {
+                                    alreadyAdded = true;
+                                    break;
+                                }
+                            }
+                            if (!alreadyAdded) {
+                                newPalettes.add(gbcp);
+                            }
+                        }
+                        Methods.gbcPalettesList.addAll(newPalettes);
+                        Methods.toast(getContext(), "Palettes added.");
+                        customAdapterPalette.notifyDataSetChanged();
+                        break;
+                    case FRAMES:
+                        Methods.framesList.addAll(gbcFramesList);
+                        Methods.toast(getContext(), "Frames added.");
+                        break;
+                    case IMAGES:
+                        GbcImage.numImages += gbcImagesList.size();
+                        Methods.gbcImagesList.addAll(gbcImagesList);
+                        Methods.completeImageList.addAll(bitmapList);
+                        Methods.toast(getContext(), "Images added.");
+                        break;
+                }
+//                GbcImage.numImages += importedImagesList.size();
+//                Methods.gbcImagesList.addAll(importedImagesList);
+//                System.out.println("****************GbcImageList" + Methods.gbcImagesList.size() + "*****************************");
+//                Methods.completeImageList.addAll(importedImagesBitmaps);
+//                System.out.println("****************Complete Image List" + Methods.completeImageList.size() + "*****************************");
             }
         });
         // Inflate the layout for this fragment
         return view;
     }
 
-    public  void chooseFile() {
+    public void chooseFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");//Any type of file
         startActivityForResult(Intent.createChooser(intent, "Select File"), 123);

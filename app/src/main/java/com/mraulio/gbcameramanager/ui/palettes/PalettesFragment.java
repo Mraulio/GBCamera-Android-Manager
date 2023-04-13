@@ -76,7 +76,7 @@ public class PalettesFragment extends Fragment {
     EditText et1, et2, et3, et4;
     String placeholderString = "";
     String newPaletteName = "";
-
+    int[] palette;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -92,7 +92,7 @@ public class PalettesFragment extends Fragment {
         gridViewPalettes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                int[] palette = Methods.gbcPalettesList.get(position).getPaletteColors();
+                palette = Methods.gbcPalettesList.get(position).getPaletteColors().clone();//Clone so it doesn't overwrite other palette
                 newPaletteName = Methods.gbcPalettesList.get(position).getName();
                 paletteDialog(palette, newPaletteName);
             }
@@ -145,7 +145,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 newPaletteName = "*Set Palette Name*";
-                int[] palette = Methods.gbcPalettesList.get(0).getPaletteColors();
+                palette = Methods.gbcPalettesList.get(0).getPaletteColors();
                 paletteDialog(palette, newPaletteName);
             }
         });
@@ -178,7 +178,6 @@ public class PalettesFragment extends Fragment {
                     // El usuario ha confirmado la escritura.
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(etPaletteName.getWindowToken(), 0);
-//                            etPaletteName.setText("Esto se ha cerrado");
 
                     return true;
                 }
@@ -542,13 +541,6 @@ public class PalettesFragment extends Fragment {
         dialog.show();
     }
 
-    private void changeBackgroundColor(int color) {
-        View view = getView();
-        if (view != null) {
-            view.setBackgroundColor(color);
-        }
-    }
-
     private Bitmap paletteMaker(int[] palette) throws IOException {
 //        DisplayMetrics displayMetrics = new DisplayMetrics();
 //        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -576,5 +568,4 @@ public class PalettesFragment extends Fragment {
         }
         return Color.parseColor(colorString);
     }
-
 }

@@ -86,6 +86,8 @@ public class StartCreation {
         gbcPalette5.setName("Tramonto al Parco".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette5);
 
+
+
         //My won palettes
         int[] cute_palette = {
                 Color.parseColor("#ffc36d"),

@@ -44,6 +44,7 @@ import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import org.json.JSONException;
@@ -77,6 +78,7 @@ public class PalettesFragment extends Fragment {
     String placeholderString = "";
     String newPaletteName = "";
     int[] palette;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -92,7 +94,7 @@ public class PalettesFragment extends Fragment {
         gridViewPalettes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                palette = Methods.gbcPalettesList.get(position).getPaletteColors().clone();//Clone so it doesn't overwrite other palette
+                palette = Methods.gbcPalettesList.get(position).getPaletteColors().clone();//Clone so it doesn't overwrite base palette colors.
                 newPaletteName = Methods.gbcPalettesList.get(position).getName();
                 paletteDialog(palette, newPaletteName);
             }
@@ -101,8 +103,8 @@ public class PalettesFragment extends Fragment {
         gridViewPalettes.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position<=4){
-                    Methods.toast(getContext(),"Can't delete a base palette");
+                if (position <= 4) {
+                    Methods.toast(getContext(), "Can't delete a base palette");
                 }
                 if (position > 4) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -122,6 +124,18 @@ public class PalettesFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             // Acción a realizar cuando se presiona el botón "Aceptar"
+
+                            //I change the palette index of the images that have the deleted one to 0
+                            //Also need to change the bitmap on the completeImageList so it changes on the Gallery
+                            for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
+                                if (Methods.gbcImagesList.get(i).getPaletteIndex() == position) {
+                                    Methods.gbcImagesList.get(i).setPaletteIndex(0);
+                                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
+                                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), Methods.gbcImagesList.get(i).getImageBytes());
+                                    Methods.completeImageList.set(i, image);
+                                }
+                            }
+
                             Methods.gbcPalettesList.remove(position);
                             imageAdapter.notifyDataSetChanged();
                         }
@@ -145,7 +159,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 newPaletteName = "*Set Palette Name*";
-                palette = Methods.gbcPalettesList.get(0).getPaletteColors();
+                palette = Methods.gbcPalettesList.get(0).getPaletteColors().clone();//Clone so it doesn't overwrite base palette colors.
                 paletteDialog(palette, newPaletteName);
             }
         });

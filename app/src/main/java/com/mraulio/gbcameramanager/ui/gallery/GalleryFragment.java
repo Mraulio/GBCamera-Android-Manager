@@ -135,7 +135,6 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedPosition = 0;
-                Toast toast = Toast.makeText(getContext(), "Size: " + Methods.listImageBytes, Toast.LENGTH_LONG);
                 crop = false;
                 keepFrame = false;
                 // Obtener la imagen seleccionada

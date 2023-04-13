@@ -31,7 +31,6 @@ public class Methods {
     public static List<Bitmap> completeImageList = new ArrayList<>();
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
-    public static List<byte[]> listImageBytes = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
 
     /**
@@ -61,8 +60,8 @@ public class Methods {
 //            if (savFile.length() / 1024 == 128) {
 
             //Extract the images
+            List<byte[]> listImageBytes = new ArrayList<>();
             listImageBytes = extractor.extractBytes(savFile);
-//            imageList = extractor.extract(savFile);
 
             for (byte[] imageBytes : listImageBytes) {
                 GbcImage gbcImage = new GbcImage();

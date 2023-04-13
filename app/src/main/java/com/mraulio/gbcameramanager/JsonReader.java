@@ -1,8 +1,12 @@
 package com.mraulio.gbcameramanager;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Environment;
 
+import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
+import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
@@ -83,19 +87,17 @@ public class JsonReader {
             } else if (stateObject.has("images")) {
                 //Images json
                 //Entering images json.
-                System.out.println("ENTERING 1");
                 JSONArray imagesArray = stateObject.getJSONArray("images");
                 if (imagesArray.length() == 0) {
                     System.out.println("No images.");
                     return null;
                 }
-                System.out.println("ENTERING 2");
                 JSONObject imageObject = imagesArray.getJSONObject(0);
                 System.out.println(imageObject);
                 if (imageObject.has("hash") && imageObject.has("created") && imageObject.has("title") && imageObject.has("lines") && imageObject.has("tags")) {
                     //There are some more values to check, but not all images have those
-                    System.out.println("ENTERING 3");
                     return readerImages(jsonObject);
+
                 } else return null;
 
 
@@ -147,26 +149,43 @@ public class JsonReader {
 
         // Acceder a los valores del JSON
         JSONArray images = jsonObject.getJSONObject("state").getJSONArray("images");
-        System.out.println("IMAGES LENGHT"+images.length());
         for (int i = 0; i < images.length(); i++) {
-            JSONObject image = images.getJSONObject(i);
-            String hash = image.getString("hash");
+            JSONObject imageJson = images.getJSONObject(i);
+            String hash = imageJson.getString("hash");
             stringValues.add(hash);
-        }
-        for (String value : stringValues) {
-            String hash = jsonObject.getString(value);
-            finalValues.add(eachImage(hash));
+            String data = jsonObject.getString(hash);
+            String decodedData = eachImage(data);
+            byte[] bytes = Methods.convertToByteArray(decodedData);
+            GbcImage gbcImage = new GbcImage();
+            if (!imageJson.getString("title").equals("")) {
+                gbcImage.setName(imageJson.getString("title"));
+            } else gbcImage.setName("*No title*");
+            int height = ((decodedData).length() + 1) / 120;//To get the real height of the image
+            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
+            try {
+                Bitmap imageBitmap = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
+                System.out.println(imageBitmap.getHeight());
+                try {
+                    gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                gbcImage.setFrameIndex(0);
+                gbcImage.setPaletteIndex(0);
+                ImportFragment.importedImagesList.add(gbcImage);
+                ImportFragment.importedImagesBitmaps.add(imageBitmap);
+//                ImportFragment.listImportedImageBytes.add(bytes);
+
+            } catch (Exception e) {
+                System.out.println("No se puede añadir");//Para las RGB
+            }
+
         }
         ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-
         return finalValues;
     }
 
     public static List<GbcPalette> readerPalettes(JSONArray palettesArr) {
-        // Acceder a los valores del JSON
-//        JSONObject jsonObject = new JSONObject(jsonString);
-        // Accede a los datos de palettes
-//        palettesArr = jsonObject.getJSONObject("state").getJSONArray("palettes");
         List<GbcPalette> paletteList = new ArrayList<>();
         // Recorre los elementos de palettes y recupera los datos que necesitas
         for (int i = 0; i < palettesArr.length(); i++) {
@@ -185,7 +204,6 @@ public class JsonReader {
                 gbcPalette.setPaletteColors(paletteIntArray);
                 paletteList.add(gbcPalette);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.PALETTES;
-//                Methods.gbcPalettesList.add(gbcPalette);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

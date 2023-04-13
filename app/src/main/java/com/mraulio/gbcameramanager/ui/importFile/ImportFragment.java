@@ -63,10 +63,8 @@ import java.util.Locale;
 
 
 public class ImportFragment extends Fragment {
-    public static final int PICKFILE_RESULT_CODE = 1;
-    private static final int PICKFILE_REQUEST_CODE = 2;
-    List<GbcImage> importedImagesList = new ArrayList<>();
-    List<GbcPalette> paletteHolderList = new ArrayList<>();
+
+    public static List<GbcImage> importedImagesList = new ArrayList<>();
     public static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
@@ -77,8 +75,6 @@ public class ImportFragment extends Fragment {
     String fileContent = "";
     List<?> receivedList;
     List<GbcFrame> gbcFramesList;
-    List<GbcImage> gbcImagesList;
-    List<Bitmap> bitmapList;
     CustomGridViewAdapterPalette customAdapterPalette;
 
     public enum ADD_WHAT {
@@ -119,12 +115,19 @@ public class ImportFragment extends Fragment {
                     extractSavImages(getContext());
                     tvFileName.setText("" + importedImagesList.size());//"" to make it work
                     gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
+                    btnAddImages.setText("Add images");
+                    btnAddImages.setVisibility(View.VISIBLE);
+                    ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
+
                 } else if (!savFile && !isJson) {
                     extractHexImagesFromFile(fileContent);
                     tvFileName.setText("" + importedImagesList.size());//"" to make it work
                     gridViewImport.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
-                } else if (!savFile && isJson) {
+                    btnAddImages.setText("Add images");
+                    btnAddImages.setVisibility(View.VISIBLE);
+                    ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
 
+                } else if (!savFile && isJson) {
                     receivedList = JsonReader.jsonCheck(fileContent);
                     if (receivedList == null) {
                         Methods.toast(getContext(), "Not a valid list");
@@ -155,29 +158,9 @@ public class ImportFragment extends Fragment {
                             gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, gbcFramesList, true));
                             break;
                         case IMAGES:
-                            gbcImagesList = new ArrayList<>();
-                            bitmapList = new ArrayList<>();
-                            for (Object str : receivedList) {
-                                byte[] bytes = convertToByteArray((String) str);
-                                GbcImage gbcImage = new GbcImage();
-                                gbcImage.setName("next image");
-                                int height = (((String) str).length() + 1) / 120;//To get the real height of the image
-                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
-                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
-                                System.out.println(image.getHeight());
-                                try {
-                                    gbcImage.setImageBytes(Methods.encodeImage(image));
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                gbcImage.setFrameIndex(0);
-                                gbcImage.setPaletteIndex(0);
-                                gbcImagesList.add(gbcImage);
-                                bitmapList.add(image);
-                            }
                             btnAddImages.setText("Add images");
                             btnAddImages.setVisibility(View.VISIBLE);
-                            gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, gbcImagesList, bitmapList));
+                            gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
                             break;
                     }
 //                    try {
@@ -241,17 +224,12 @@ public class ImportFragment extends Fragment {
                         Methods.toast(getContext(), "Frames added.");
                         break;
                     case IMAGES:
-                        GbcImage.numImages += gbcImagesList.size();
-                        Methods.gbcImagesList.addAll(gbcImagesList);
-                        Methods.completeImageList.addAll(bitmapList);
+                        GbcImage.numImages += importedImagesList.size();
+                        Methods.gbcImagesList.addAll(importedImagesList);
+                        Methods.completeImageList.addAll(importedImagesBitmaps);
                         Methods.toast(getContext(), "Images added.");
                         break;
                 }
-//                GbcImage.numImages += importedImagesList.size();
-//                Methods.gbcImagesList.addAll(importedImagesList);
-//                System.out.println("****************GbcImageList" + Methods.gbcImagesList.size() + "*****************************");
-//                Methods.completeImageList.addAll(importedImagesBitmaps);
-//                System.out.println("****************Complete Image List" + Methods.completeImageList.size() + "*****************************");
             }
         });
         // Inflate the layout for this fragment

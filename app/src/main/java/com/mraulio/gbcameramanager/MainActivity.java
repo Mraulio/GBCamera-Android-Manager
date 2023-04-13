@@ -81,9 +81,9 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-//        if (Methods.gbcImagesList.size() == 0) {
-//            Methods.extractSavImages(this);
-//        }
+        if (Methods.gbcImagesList.size() == 0) {
+            Methods.extractSavImages(this);
+        }
 //        Methods.extractHexImages();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());

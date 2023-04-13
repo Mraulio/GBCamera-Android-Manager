@@ -20,7 +20,12 @@
         android:layout_height="wrap_content"
         android:text="Add palette"
         android:id="@+id/btnAdd"></Button>
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textStyle="italic"
+        android:text="Long press to delete"/>
     <GridView
         android:id="@+id/gridViewPalettes"
         android:layout_width="wrap_content"

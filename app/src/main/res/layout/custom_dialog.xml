@@ -118,7 +118,7 @@
             android:text="Show palettes"
             android:layout_weight="1"
             android:autoSizeMaxTextSize="30sp"
-            android:autoSizeMinTextSize="5sp"
+            android:autoSizeMinTextSize="3sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
             android:textSize="10dp"></Button>
@@ -141,7 +141,7 @@
         android:layout_height="wrap_content"
         android:background="#D5D5D5"
         android:horizontalSpacing="10dp"
-        android:numColumns="5"
+        android:numColumns="3"
         android:scrollbars="horizontal"
         android:stretchMode="columnWidth"
         android:verticalSpacing="10dp"

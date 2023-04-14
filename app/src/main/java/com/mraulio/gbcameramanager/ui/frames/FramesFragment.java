@@ -1,7 +1,9 @@
 package com.mraulio.gbcameramanager.ui.frames;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
@@ -26,6 +29,8 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
 
 import org.json.JSONException;
 import org.w3c.dom.Text;
@@ -38,41 +43,75 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class FramesFragment extends Fragment {
-//    Button btnImportFrames;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
-//        btnImportFrames = view.findViewById(R.id.btnImportFrames);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
         CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true);
-//        btnImportFrames.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                List<String> listFramesString = new ArrayList<>();
-//                try {
-//                    listFramesString = JsonReader.readerFrames();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//                for (String str : listFramesString) {
-//
-//                    byte[] bytes = convertToByteArray(str);
-//                    GbcFrame gbcFrame = new GbcFrame();
-//                    gbcFrame.setFrameName("next frame");
-//                    int height = (str.length() + 1) / 120;//To get the real height of the image
-//                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
-//                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
-//                    gbcFrame.setFrameBitmap(image);
-//                    Methods.framesList.add(gbcFrame);
-//                }
-//                customGridViewAdapterFrames.notifyDataSetChanged();
-//            }
-//        });
+
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position <= 2) {
+                    Methods.toast(getContext(), "Can't delete a base frame");
+                }
+                if (position > 2) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Delete frame " + Methods.framesList.get(position).getFrameName() + "?");
+                    builder.setMessage("Are you sure?");
+
+                    // Crear un ImageView y establecer la imagen deseada
+                    ImageView imageView = new ImageView(getContext());
+                    imageView.setAdjustViewBounds(true);
+                    imageView.setPadding(30, 10, 30, 10);
+                    imageView.setImageBitmap(Methods.framesList.get(position).getFrameBitmap());
+
+                    // Agregar el ImageView al diseño del diálogo
+                    builder.setView(imageView);
+
+                    builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Acción a realizar cuando se presiona el botón "Aceptar"
+
+                            //I change the palette index of the images that have the deleted one to 0
+                            //Also need to change the bitmap on the completeImageList so it changes on the Gallery
+                            for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
+                                if (Methods.gbcImagesList.get(i).getFrameIndex() == position) {
+                                    Methods.gbcImagesList.get(i).setFrameIndex(0);
+//                                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteIndex()).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
+//                                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
+                                    Bitmap image = null;
+                                    try {
+                                        image = GalleryFragment.frameChange(i,0,false);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Methods.completeImageList.set(i, image);
+                                }
+                            }
+//                            new PalettesFragment.SavePaletteAsyncTask(Methods.gbcPalettesList.get(position), false).execute();
+                            Methods.framesList.remove(position);
+                            customGridViewAdapterFrames.notifyDataSetChanged();
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Acción a realizar cuando se presiona el botón "Cancelar"
+                        }
+                    });
+                    // Mostrar el diálogo
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+                return true;//true so the normal onItemClick doesn't show
+            }
+
+        });
 
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames);

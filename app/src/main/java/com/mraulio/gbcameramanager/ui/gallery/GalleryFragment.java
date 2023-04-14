@@ -343,7 +343,7 @@ public class GalleryFragment extends Fragment {
         return view;
     }
 
-    private Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
+    public static Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
         // Obtener la imagen seleccionada
         Bitmap framed = null;
         Bitmap framedAux;
@@ -373,7 +373,7 @@ public class GalleryFragment extends Fragment {
     }
 
     //Cambiar paleta
-    public Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
+    public static Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(index).getPaletteColorsInt(), imageBytes);
         //If the image is 128x112 (extracted from sav) I apply the frame

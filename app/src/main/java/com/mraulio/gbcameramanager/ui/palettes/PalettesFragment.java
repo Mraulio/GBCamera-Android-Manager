@@ -101,7 +101,7 @@ public class PalettesFragment extends Fragment {
                 if (position > 5) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle("Delete palette " + Methods.gbcPalettesList.get(position).getName() + "?");
-                    builder.setMessage("Are you sure?");
+                    builder.setMessage("Are you sure? \nDoing a Json export is recommended before continuing.");
 
                     // Crear un ImageView y establecer la imagen deseada
                     ImageView imageView = new ImageView(getContext());

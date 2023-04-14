@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
@@ -47,19 +48,24 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 //import com.mraulio.gbcameramanager.databinding.FragmentSlideshowBinding;
@@ -87,6 +93,8 @@ public class PalettesFragment extends Fragment {
         MainActivity.pressBack = false;
 
         Button btnAdd = view.findViewById(R.id.btnAdd);
+        Button btnExportPaletteJson = view.findViewById(R.id.btnExportPaletteJson);
+
 
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
 
@@ -103,10 +111,10 @@ public class PalettesFragment extends Fragment {
         gridViewPalettes.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position <= 4) {
+                if (position <= 5) {
                     Methods.toast(getContext(), "Can't delete a base palette");
                 }
-                if (position > 4) {
+                if (position > 5) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle("Delete palette " + Methods.gbcPalettesList.get(position).getName() + "?");
                     builder.setMessage("Are you sure?");
@@ -163,9 +171,57 @@ public class PalettesFragment extends Fragment {
                 paletteDialog(palette, newPaletteName);
             }
         });
+
+        btnExportPaletteJson.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    jsonCreator();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
         imageAdapter = customGridViewAdapterPalette;
         gridViewPalettes.setAdapter(imageAdapter);
         return view;
+    }
+
+    private void jsonCreator() throws JSONException {
+        JSONObject json = new JSONObject();
+        JSONObject stateObj = new JSONObject();
+        JSONArray palettesArr = new JSONArray();
+        for (GbcPalette palette : Methods.gbcPalettesList) {
+            JSONObject paletteObj = new JSONObject();
+            paletteObj.put("shortName", palette.getName());
+            paletteObj.put("name", palette.getName());
+            JSONArray paletteArr = new JSONArray();
+            for (int color : palette.getPaletteColors()) {
+                String hexColor = "#" + Integer.toHexString(color).substring(2);
+                paletteArr.put(hexColor);
+            }
+            paletteObj.put("palette", paletteArr);
+            paletteObj.put("origin", "GbCamera Android Manager");
+            palettesArr.put(paletteObj);
+        }
+        stateObj.put("palettes", palettesArr);
+        json.put("state", stateObj);
+        System.out.println(json.toString(2));
+
+        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH-mm-ss_dd-MM-yyyy", Locale.getDefault());
+        String fileName = "palettes_" + dateFormat.format(new Date()) + ".json";
+        File file = new File(directory, fileName);
+
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            fileWriter.write(json.toString(2));
+            System.out.println("Saved.");
+            Methods.toast(getContext(),"Palettes Json saved to Download folder.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void paletteDialog(int[] palette, String paletteName) {

@@ -78,11 +78,13 @@ public class MainActivity extends AppCompatActivity {
 
         if (Methods.framesList.size() == 0) {
             StartCreation.addFrames(this.getBaseContext());
-
         }
 
         if (Methods.gbcImagesList.size() == 0) {
-            Methods.extractSavImages(this);
+            try {
+                Methods.extractSavImages(this);
+            } catch (Exception e) {
+            }
         }
 //        Methods.extractHexImages();
 

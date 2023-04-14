@@ -39,25 +39,9 @@ public class Methods {
      */
     public static void extractSavImages(Context context) {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()));
-        LocalDateTime now = LocalDateTime.now();
-        File latestFile = null;
         try {
             File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-
             File savFile = new File(downloadsDirectory + "/gbc.sav");
-            //To extract last dumped file
-//            File[] files = folder.listFiles();
-//            if (files != null && files.length > 0) {
-//                Arrays.sort(files, new Comparator<File>() {
-//                    public int compare(File f1, File f2) {
-//                        return Long.compare(f2.lastModified(), f1.lastModified());
-//                    }
-//                });
-//                latestFile = files[0];
-////                tv.append("\nThe name of the last SAV file is: " + latestFile.getName() + ".\n" +
-////                        "Size: " + latestFile.length() / 1024 + "KB");
-//            }
-//            if (savFile.length() / 1024 == 128) {
 
             //Extract the images
             List<byte[]> listImageBytes = new ArrayList<>();

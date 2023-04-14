@@ -56,7 +56,7 @@ public class StartCreation {
         };
         GbcPalette gbcPalette1 = new GbcPalette();
         gbcPalette1.setPaletteColors(EVEN_DIST_PALETTE);
-        gbcPalette1.setName("Greyscale".toLowerCase(Locale.ROOT));
+        gbcPalette1.setName("bw".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette1);
         GbcPalette gbcPalette2 = new GbcPalette();
         gbcPalette2.setPaletteColors(GAMEBOY_LCD_PALETTE);
@@ -83,10 +83,8 @@ public class StartCreation {
         };
         GbcPalette gbcPalette5 = new GbcPalette();
         gbcPalette5.setPaletteColors(tram_palette);
-        gbcPalette5.setName("Tramonto al Parco".toLowerCase(Locale.ROOT));
+        gbcPalette5.setName("tpa".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette5);
-
-
 
         //My won palettes
         int[] cute_palette = {
@@ -99,5 +97,16 @@ public class StartCreation {
         gbcPalette4.setPaletteColors(cute_palette);
         gbcPalette4.setName("Cute".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette4);
+
+        int[] pinko_palette = {
+                Color.parseColor("#ffa2f3"),
+                Color.parseColor("#ce83c5"),
+                Color.parseColor("#8813ce"),
+                Color.parseColor("#370853")
+        };
+        GbcPalette gbcPalette6 = new GbcPalette();
+        gbcPalette6.setPaletteColors(pinko_palette);
+        gbcPalette6.setName("pinko".toLowerCase(Locale.ROOT));
+        Methods.gbcPalettesList.add(gbcPalette6);
     }
 }

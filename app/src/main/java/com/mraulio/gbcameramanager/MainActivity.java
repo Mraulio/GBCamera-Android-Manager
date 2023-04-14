@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     boolean anyImage = false;
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
+    public static boolean doneLoading = false;
     public static int exportSize = 4;
     public static int imagesPage = 12;
     public static UsbManager manager;
@@ -156,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             // Notifica al Adapter que los datos han cambiado
             GalleryFragment gf = new GalleryFragment();
+            doneLoading = true;
             if (anyImage) {
                 gf.updateFromMain();
             } else {

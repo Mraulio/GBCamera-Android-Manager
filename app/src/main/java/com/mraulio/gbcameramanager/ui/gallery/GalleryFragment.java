@@ -331,7 +331,7 @@ public class GalleryFragment extends Fragment {
                 dialog.show();
             }
         });
-        if (Methods.gbcImagesList.size() > 0) {
+        if (Methods.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
             updateGridView(currentPage, gridView);
             tv.setText("Total of images: " + GbcImage.numImages);
 

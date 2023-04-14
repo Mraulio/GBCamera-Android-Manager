@@ -80,7 +80,6 @@ public class PalettesFragment extends Fragment {
         Button btnAdd = view.findViewById(R.id.btnAdd);
         Button btnExportPaletteJson = view.findViewById(R.id.btnExportPaletteJson);
 
-
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
 
         CustomGridViewAdapterPalette customGridViewAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, true, false);

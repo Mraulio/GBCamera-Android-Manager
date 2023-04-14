@@ -5,25 +5,52 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-public class GbcPalette {
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
-    private int[] paletteColors;
+@Entity
+public class GbcPalette {
+    @PrimaryKey
+    @NonNull
     private String name;
+
+    @ColumnInfo(name = "palette_colors")
+    private String paletteColors;
 
     public GbcPalette() {
     }
 
-    public GbcPalette(int[] paletteColors, String name) {
+    public void setPaletteColors(String paletteColors) {
+        this.paletteColors = paletteColors;
+    }
+    public String getPaletteColors() {
+        return this.paletteColors;
+    }
+    public GbcPalette(String paletteColors, String name) {
         this.paletteColors = paletteColors;
         this.name = name;
     }
 
-    public int[] getPaletteColors() {
-        return paletteColors;
+    public int[] getPaletteColorsInt() {
+        if (paletteColors == null) {
+            return null;
+        }
+        String[] colors = paletteColors.split(",");
+        int[] intColors = new int[colors.length];
+        for (int i = 0; i < colors.length; i++) {
+            intColors[i] = Integer.parseInt(colors[i]);
+        }
+        return intColors;
     }
 
-    public void setPaletteColors(int[] paletteColors) {
-        this.paletteColors = paletteColors;
+    public void setPaletteColors(int[] colors) {
+        StringBuilder builder = new StringBuilder();
+        for (int color : colors) {
+            builder.append(color).append(",");
+        }
+        paletteColors = builder.toString();
     }
 
     public String getName() {
@@ -35,7 +62,7 @@ public class GbcPalette {
     }
 
     public Bitmap paletteViewer() {
-        int[] colors = this.getPaletteColors();
+        int[] colors = this.getPaletteColorsInt();
         // Divide el ancho del ImageView por cuatro para obtener el ancho de cada sección
         int widthHeigh = 100;
         int sectionWidth = widthHeigh / 4;
@@ -58,12 +85,12 @@ public class GbcPalette {
 
     }
 
-    public int getIndex(int rgb) {
-        for (int i = 0; i < paletteColors.length; ++i) {
-            if (paletteColors[i] == rgb) {
-                return i;
-            }
-        }
-        throw new IllegalArgumentException("Specified RGB colour does not exist in the indexed palette");
-    }
+//    public int getIndex(int rgb) {
+//        for (int i = 0; i < paletteColors.length; ++i) {
+//            if (paletteColors[i] == rgb) {
+//                return i;
+//            }
+//        }
+//        throw new IllegalArgumentException("Specified RGB colour does not exist in the indexed palette");
+//    }
 }

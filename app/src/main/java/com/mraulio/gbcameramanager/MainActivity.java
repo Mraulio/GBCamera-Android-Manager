@@ -11,8 +11,10 @@ import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Gallery;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
@@ -25,20 +27,26 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.room.Room;
 
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
+import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
+    private GalleryFragment galleryFragment;
     public static int printIndex = 0;
     private AppBarConfiguration mAppBarConfiguration;
+    boolean anyImage = false;
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static int exportSize = 4;
     public static int imagesPage = 12;
     public static UsbManager manager;
-
+    public static AppDatabase db;
     private static final String ACTION_USB_PERMISSION =
             "com.android.example.USB_PERMISSION";
     private UsbDevice device;
@@ -67,26 +75,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        db = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "Database").build();
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
 
-        if (Methods.gbcPalettesList.size() == 0) {
-            StartCreation.addPalettes();//Before loading gallery fragment
-        }
-
         if (Methods.framesList.size() == 0) {
             StartCreation.addFrames(this.getBaseContext());
         }
 
-        if (Methods.gbcImagesList.size() == 0) {
-            try {
-                Methods.extractSavImages(this);
-            } catch (Exception e) {
-            }
-        }
+
 //        Methods.extractHexImages();
+        new ReadDataAsyncTask().execute();
+
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -118,6 +121,49 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private class ReadDataAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            System.out.println("Entering readASync");
+            PaletteDao paletteDao = db.paletteDao();
+
+            List<GbcPalette> palettes = paletteDao.getAll();
+            System.out.println(palettes.size());
+            if (palettes.size() > 0) {
+                Methods.gbcPalettesList.addAll(palettes);
+            } else {
+                StartCreation.addPalettes();
+                for (GbcPalette gbcPalette : Methods.gbcPalettesList) {
+                    paletteDao.insert(gbcPalette);
+                }
+            }
+            //Now that I have palettes, I can add images:
+            if (Methods.gbcImagesList.size() == 0) {
+                try {
+                    Methods.extractSavImages(getApplicationContext());
+                    if (Methods.gbcImagesList.size() > 0) {
+                        anyImage = true;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error en extractSavImages\n" + e.toString());
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            // Notifica al Adapter que los datos han cambiado
+            GalleryFragment gf = new GalleryFragment();
+            if (anyImage) {
+                gf.updateFromMain();
+            } else {
+                GalleryFragment.tv.setText("No images in the gallery.\nGo to Import tab.");
+            }
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -138,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //    }
 
-//    @Override
+    //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu) {
 //        // Inflate the menu; this adds items to the action bar if it is present.
 //        getMenuInflater().inflate(R.menu.main, menu);

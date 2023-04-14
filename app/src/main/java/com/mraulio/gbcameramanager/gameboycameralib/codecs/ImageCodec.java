@@ -5,17 +5,15 @@ import android.graphics.Canvas;
 
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
-import com.mraulio.gbcameramanager.model.GbcImage;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 
 public class ImageCodec implements Codec {
 
     private final int imageWidth;
     private final int imageHeight;
-    private IndexedPalette palette = new IndexedPalette(Methods.gbcPalettesList.get(1).getPaletteColors());
+    private IndexedPalette palette = new IndexedPalette(Methods.gbcPalettesList.get(1).getPaletteColorsInt());
     private int paletteIndex;
 
     public ImageCodec(IndexedPalette palette, int imageWidth, int imageHeight) {
@@ -34,7 +32,7 @@ public class ImageCodec implements Codec {
     @Override
     public Bitmap decode(byte[] data) {
         Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
-        IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(paletteIndex).getPaletteColors());
+        IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(paletteIndex).getPaletteColorsInt());
         Codec tileCodec = new TileCodec(ip);
         Canvas canvas = new Canvas(image);
         int xPos = 0;
@@ -60,7 +58,7 @@ public class ImageCodec implements Codec {
     @Override
     public Bitmap decodeWithPalette(int[] palette, byte[] data) {
         Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
-        IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(paletteIndex).getPaletteColors());
+        IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(paletteIndex).getPaletteColorsInt());
 
         Codec tileCodec = new TileCodec(ip);
         Canvas canvas = new Canvas(image);
@@ -93,7 +91,7 @@ public class ImageCodec implements Codec {
     public byte[] encodeInternal(Bitmap buf) {
         //I had an error here, need to select the palette index from the actual image.
         //Also need to change the frame palette alongside this so the colors are the same
-        IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors());
+        IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt());
         Codec tileCodec = new TileCodec(ip);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (int y=0; y+TileCodec.TILE_HEIGHT<=buf.getHeight(); y+=TileCodec.TILE_HEIGHT) {

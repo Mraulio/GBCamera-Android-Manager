@@ -22,7 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +37,8 @@ public class Methods {
      * TO READ THE SAV IMAGES
      */
     public static void extractSavImages(Context context) {
-        Extractor extractor = new SaveImageExtractor(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()));
         try {
+        Extractor extractor = new SaveImageExtractor(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()));
             File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             File savFile = new File(downloadsDirectory + "/gbc.sav");
 
@@ -53,8 +52,8 @@ public class Methods {
                 gbcImage.setName("Image " + (GbcImage.numImages));
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 128, 112);
-                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), imageBytes);
+                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 128, 112);
+                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
                     Bitmap framed = framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -68,12 +67,17 @@ public class Methods {
                 gbcImagesList.add(gbcImage);
             }
         } catch (IOException e) {
+            System.out.println("Error aqui");
             e.printStackTrace();
+        }catch (Exception e){
+            System.out.println("Error aqui");
+            e.printStackTrace();
+
         }
     }
 
     public static byte[] encodeImage(Bitmap bitmap) throws IOException {
-        Codec decoder = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, bitmap.getHeight());
+        Codec decoder = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, bitmap.getHeight());
         return decoder.encodeInternal(bitmap);
     }
 
@@ -115,8 +119,8 @@ public class Methods {
             gbcImage.setImageBytes(bytes);
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
-            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), gbcImage.getImageBytes());
+            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
+            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
             completeImageList.add(image);
             gbcImagesList.add(gbcImage);
         }

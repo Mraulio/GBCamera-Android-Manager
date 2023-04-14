@@ -3,19 +3,16 @@ package com.mraulio.gbcameramanager.ui.importFile;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
-import android.os.FileUtils;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +27,7 @@ import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.JsonReader;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.RawToTileData;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -42,8 +40,6 @@ import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
-import org.json.JSONException;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -53,11 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -148,8 +140,8 @@ public class ImportFragment extends Fragment {
                                 GbcFrame gbcFrame = new GbcFrame();
                                 gbcFrame.setFrameName("next frame");
                                 int height = (((String) str).length() + 1) / 120;//To get the real height of the image
-                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
-                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
+                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
+                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
                                 gbcFrame.setFrameBitmap(image);
                                 gbcFramesList.add(gbcFrame);
                             }
@@ -218,6 +210,7 @@ public class ImportFragment extends Fragment {
                         Methods.gbcPalettesList.addAll(newPalettes);
                         Methods.toast(getContext(), "Palettes added.");
                         customAdapterPalette.notifyDataSetChanged();
+                        new SavePaletteAsyncTask(newPalettes).execute();
                         break;
                     case FRAMES:
                         Methods.framesList.addAll(gbcFramesList);
@@ -234,6 +227,25 @@ public class ImportFragment extends Fragment {
         });
         // Inflate the layout for this fragment
         return view;
+    }
+
+    private class SavePaletteAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        //To add the new palette as a parameter
+        private final List<GbcPalette> gbcPaletteList;
+
+        public SavePaletteAsyncTask(List<GbcPalette> gbcPaletteList) {
+            this.gbcPaletteList = gbcPaletteList;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            PaletteDao paletteDao = MainActivity.db.paletteDao();
+            for (GbcPalette gbcPalette : Methods.gbcPalettesList) {
+                paletteDao.insert(gbcPalette);
+            }
+            return null;
+        }
     }
 
     public void chooseFile() {
@@ -346,8 +358,8 @@ public class ImportFragment extends Fragment {
                 gbcImage.setName(nameIndex++ + "-" + fileName);
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 128, 112);
-                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), imageBytes);
+                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 128, 112);
+                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     System.out.println("***********ENTERING ADDING FRAME*************");
                     //I need to use copy because if not it's inmutable bitmap
@@ -465,8 +477,8 @@ public class ImportFragment extends Fragment {
 //                gbcImage.setFrameIndex(0);
 //                gbcImage.setPaletteIndex(0);
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
-            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), gbcImage.getImageBytes());
+            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
+            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
             if (image.getHeight() == 112 && image.getWidth() == 128) {
                 //I need to use copy because if not it's inmutable bitmap
                 Bitmap framed = Methods.framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -492,8 +504,8 @@ public class ImportFragment extends Fragment {
             gbcImage.setImageBytes(bytes);
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
-            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), gbcImage.getImageBytes());
+            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
+            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
             importedImagesBitmaps.add(image);
             importedImagesList.add(gbcImage);
         }

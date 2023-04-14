@@ -1,14 +1,12 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
@@ -27,11 +25,8 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.flask.colorpicker.ColorPickerView;
@@ -39,32 +34,23 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
-import com.mraulio.gbcameramanager.JsonReader;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.PaletteDao;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.StartCreation;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
-import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -88,7 +74,6 @@ public class PalettesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-
         View view = inflater.inflate(R.layout.fragment_palettes, container, false);
         MainActivity.pressBack = false;
 
@@ -102,7 +87,7 @@ public class PalettesFragment extends Fragment {
         gridViewPalettes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                palette = Methods.gbcPalettesList.get(position).getPaletteColors().clone();//Clone so it doesn't overwrite base palette colors.
+                palette = Methods.gbcPalettesList.get(position).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
                 newPaletteName = Methods.gbcPalettesList.get(position).getName();
                 paletteDialog(palette, newPaletteName);
             }
@@ -138,12 +123,13 @@ public class PalettesFragment extends Fragment {
                             for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
                                 if (Methods.gbcImagesList.get(i).getPaletteIndex() == position) {
                                     Methods.gbcImagesList.get(i).setPaletteIndex(0);
-                                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
-                                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), Methods.gbcImagesList.get(i).getImageBytes());
+                                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
+                                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
                                     Methods.completeImageList.set(i, image);
                                 }
                             }
 
+                            new SavePaletteAsyncTask(Methods.gbcPalettesList.get(position), false).execute();
                             Methods.gbcPalettesList.remove(position);
                             imageAdapter.notifyDataSetChanged();
                         }
@@ -167,7 +153,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 newPaletteName = "*Set Palette Name*";
-                palette = Methods.gbcPalettesList.get(0).getPaletteColors().clone();//Clone so it doesn't overwrite base palette colors.
+                palette = Methods.gbcPalettesList.get(0).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
                 paletteDialog(palette, newPaletteName);
             }
         });
@@ -189,6 +175,30 @@ public class PalettesFragment extends Fragment {
         return view;
     }
 
+    private class SavePaletteAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        //To add the new palette as a parameter
+        private final GbcPalette gbcPalette;
+        private final boolean save;
+
+        public SavePaletteAsyncTask(GbcPalette gbcPalette, boolean save) {
+            this.gbcPalette = gbcPalette;
+            this.save = save;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            PaletteDao paletteDao = MainActivity.db.paletteDao();
+            if (save) {
+                paletteDao.insert(gbcPalette);
+            } else {
+                paletteDao.delete(gbcPalette);
+            }
+            return null;
+        }
+    }
+
+
     private void jsonCreator() throws JSONException {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
@@ -198,7 +208,7 @@ public class PalettesFragment extends Fragment {
             paletteObj.put("shortName", palette.getName());
             paletteObj.put("name", palette.getName());
             JSONArray paletteArr = new JSONArray();
-            for (int color : palette.getPaletteColors()) {
+            for (int color : palette.getPaletteColorsInt()) {
                 String hexColor = "#" + Integer.toHexString(color).substring(2);
                 paletteArr.put(hexColor);
             }
@@ -218,7 +228,7 @@ public class PalettesFragment extends Fragment {
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(json.toString(2));
             System.out.println("Saved.");
-            Methods.toast(getContext(),"Palettes Json saved to Download folder.");
+            Methods.toast(getContext(), "Palettes Json saved to Download folder.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -598,6 +608,9 @@ public class PalettesFragment extends Fragment {
                     gridViewPalettes.setAdapter(imageAdapter);
                     Methods.toast(getContext(), "Palette added");
                     dialog.hide();
+                    //To add it to the database
+                    new SavePaletteAsyncTask(newPalette, true).execute();//Adding the new palette to the database
+
                 }
             }
         });

@@ -1,24 +1,17 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
-import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.IMAGE_HEIGHT;
-import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.IMAGE_WIDTH;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -27,7 +20,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
@@ -36,15 +28,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
-import com.mraulio.gbcameramanager.BuildConfig;
 import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
-import com.mraulio.gbcameramanager.StartCreation;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
@@ -60,7 +49,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class GalleryFragment extends Fragment {
 
@@ -74,20 +62,23 @@ public class GalleryFragment extends Fragment {
     static int lastPage = 0;
     boolean crop = false;
     boolean showPalettes = true;
-    TextView tv_page;
+    static TextView tv_page;
     boolean keepFrame = false;
-//    Resources.Theme theme = getActivity().getTheme();//I get the theme
-
-
+    //    Resources.Theme theme = getActivity().getTheme();//I get the theme
+    public static CustomGridViewAdapterImage customGridViewAdapterImage;
+    static List<Bitmap> imagesForPage;
+    static List<GbcImage> gbcImagesForPage;
+    public static TextView tv;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        TextView tv = (TextView) view.findViewById(R.id.text_gallery);
+        tv = (TextView) view.findViewById(R.id.text_gallery);
         gridView = (GridView) view.findViewById(R.id.gridView);
 
+        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage);
         Button btnPrevPage = (Button) view.findViewById(R.id.btnPrevPage);
         Button btnNextPage = (Button) view.findViewById(R.id.btnNextPage);
         tv_page = (TextView) view.findViewById(R.id.tv_page);
@@ -345,7 +336,7 @@ public class GalleryFragment extends Fragment {
             tv.setText("Total of images: " + GbcImage.numImages);
 
         } else {
-            tv.setText("No images in the gallery. Go to Import tab.");
+            tv.setText("Loading...");
         }
         tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
 
@@ -383,11 +374,11 @@ public class GalleryFragment extends Fragment {
 
     //Cambiar paleta
     public Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
-        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
-        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(index).getPaletteColors(), imageBytes);
+        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
+        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(index).getPaletteColorsInt(), imageBytes);
         //If the image is 128x112 (extracted from sav) I apply the frame
         if ((imageBytes.length / 40) == 112) {
-            ImageCodec imageCodec2 = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, 144);
+            ImageCodec imageCodec2 = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, 144);
             //I need to use copy because if not it's inmutable bitmap
             Bitmap framed = Methods.framesList.get(1).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvas = new Canvas(framed);
@@ -402,8 +393,8 @@ public class GalleryFragment extends Fragment {
         int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
         bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-        int[] oldColors = Methods.gbcPalettesList.get(Methods.gbcImagesList.get(imageIndex).getPaletteIndex()).getPaletteColors();
-        int[] newColors = Methods.gbcPalettesList.get(newPaletteIndex).getPaletteColors();
+        int[] oldColors = Methods.gbcPalettesList.get(Methods.gbcImagesList.get(imageIndex).getPaletteIndex()).getPaletteColorsInt();
+        int[] newColors = Methods.gbcPalettesList.get(newPaletteIndex).getPaletteColorsInt();
 
         Map<Integer, Integer> colorIndexMap = new HashMap<>();
         for (int i = 0; i < oldColors.length; i++) {
@@ -480,10 +471,22 @@ public class GalleryFragment extends Fragment {
         }
     }
 
-    private void updateGridView(int page, GridView gridView) {
+    public static void updateFromMain() {
+        if (Methods.gbcImagesList.size() > 0) {
+            updateGridView(currentPage, gridView);
+            tv.setText("Total of images: " + GbcImage.numImages);
+
+        } else {
+            tv.setText("No images in the gallery. Go to Import tab.");
+        }
+        tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
+        System.out.println("Called updateFromMain");
+        updateGridView(currentPage,gridView);
+    }
+
+    public static void updateGridView(int page, GridView gridView) {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
         itemsPerPage = MainActivity.imagesPage;
-
         if (Methods.completeImageList.size() < itemsPerPage) {
             itemsPerPage = Methods.completeImageList.size();
         }
@@ -501,9 +504,10 @@ public class GalleryFragment extends Fragment {
         }
 
         //There will be a better way to do this, but works
-        List<Bitmap> imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
-        List<GbcImage> gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
-        gridView.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage));
+        imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
+        gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
+        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage);
+        gridView.setAdapter(customGridViewAdapterImage);
     }
 
 

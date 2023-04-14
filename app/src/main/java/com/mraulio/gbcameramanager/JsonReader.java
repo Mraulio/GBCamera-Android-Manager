@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DataFormatException;
@@ -161,9 +160,9 @@ public class JsonReader {
                 gbcImage.setName(imageJson.getString("title"));
             } else gbcImage.setName("*No title*");
             int height = ((decodedData).length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
+            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
             try {
-                Bitmap imageBitmap = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColors(), bytes);
+                Bitmap imageBitmap = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
                 System.out.println(imageBitmap.getHeight());
                 try {
                     gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));

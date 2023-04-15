@@ -1,4 +1,4 @@
-package com.mraulio.gbcameramanager;
+package com.mraulio.gbcameramanager.db;
 
 import androidx.room.Dao;
 import androidx.room.Delete;

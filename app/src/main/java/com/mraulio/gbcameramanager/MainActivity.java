@@ -1,9 +1,7 @@
 package com.mraulio.gbcameramanager;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -14,7 +12,6 @@ import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Gallery;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
@@ -31,6 +28,9 @@ import androidx.room.Room;
 
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
+import com.mraulio.gbcameramanager.db.AppDatabase;
+import com.mraulio.gbcameramanager.db.FrameDao;
+import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
@@ -38,7 +38,6 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private GalleryFragment galleryFragment;
     public static int printIndex = 0;
     private AppBarConfiguration mAppBarConfiguration;
     boolean anyImage = false;
@@ -79,14 +78,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
-
+        System.out.println("Done loading: "+doneLoading);
+        System.out.println("Any image: "+anyImage);
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
 
 //        Methods.extractHexImages();
-        new ReadDataAsyncTask().execute();
-
+        if (!doneLoading) {
+            new ReadDataAsyncTask().execute();
+        }
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -160,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("Error en extractSavImages\n" + e.toString());
                 }
             }
+
             return null;
         }
 

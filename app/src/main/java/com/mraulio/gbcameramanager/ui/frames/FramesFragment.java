@@ -126,7 +126,6 @@ public class FramesFragment extends Fragment {
         int notSelectedColor = Color.parseColor("#FFFFFF");
         int selectedColor = Color.parseColor("#8C97B3");
         int lastSelectedPosition = -1; // Inicialmente no hay ningún elemento seleccionado
-        int duplicatedColor = Color.parseColor("#FF0000");
 
 
         public CustomGridViewAdapterFrames(Context context, int layoutResourceId,
@@ -174,7 +173,7 @@ public class FramesFragment extends Fragment {
                     // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
                     if (objeto.getFrameName().equals(name)) {
                         // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
-                        holder.imageItem.setBackgroundColor(duplicatedColor);
+                        holder.imageItem.setBackgroundColor(context.getResources().getColor(R.color.duplicated));
                     }
                 }
             }

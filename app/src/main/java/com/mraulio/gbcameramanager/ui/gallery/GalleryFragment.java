@@ -28,9 +28,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
+import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
@@ -70,8 +71,14 @@ public class GalleryFragment extends Fragment {
     static List<GbcImage> gbcImagesForPage;
     public static TextView tv;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;
         DisplayMetrics displayMetrics = new DisplayMetrics();

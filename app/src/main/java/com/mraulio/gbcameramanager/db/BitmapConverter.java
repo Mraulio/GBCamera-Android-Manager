@@ -1,4 +1,4 @@
-package com.mraulio.gbcameramanager;
+package com.mraulio.gbcameramanager.db;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

@@ -23,12 +23,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
-import com.mraulio.gbcameramanager.FrameDao;
+import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
+import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.JsonReader;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
-import com.mraulio.gbcameramanager.PaletteDao;
+import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.RawToTileData;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -51,7 +51,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 

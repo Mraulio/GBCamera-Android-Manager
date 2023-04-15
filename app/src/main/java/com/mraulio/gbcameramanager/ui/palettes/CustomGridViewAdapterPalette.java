@@ -1,4 +1,4 @@
-package com.mraulio.gbcameramanager;
+package com.mraulio.gbcameramanager.ui.palettes;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 
+import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.util.ArrayList;
@@ -44,7 +46,6 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         RecordHolder holder = null;
         int notSelectedColor = Color.parseColor("#FFFFFF");
         int selectedColor = Color.parseColor("#8C97B3");
-        int duplicatedColor = Color.parseColor("#FF0000");
 
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
@@ -75,7 +76,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
                 // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
                 if (objeto.getName().equals(name)) {
                     // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
-                    holder.imageItem.setBackgroundColor(duplicatedColor);
+                    holder.imageItem.setBackgroundColor(context.getResources().getColor(R.color.duplicated));
                 }
             }
         }

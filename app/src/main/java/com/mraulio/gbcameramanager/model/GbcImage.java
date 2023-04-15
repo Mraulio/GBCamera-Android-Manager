@@ -2,12 +2,15 @@ package com.mraulio.gbcameramanager.model;
 
 import android.graphics.Bitmap;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GbcImage {
 //    private Bitmap bitmap;
     private int paletteIndex;
     private int frameIndex;
     private String name;
-    boolean favorite;
+    private List<String> tags = new ArrayList<>();
     public static int numImages= 0;
     private byte[] imageBytes;
 
@@ -30,6 +33,19 @@ public class GbcImage {
 //        this.bitmap = bitmap;
 //    }
 
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public void addTag(String newTag){
+        this.tags.add(newTag);
+    }
+
     public int getPaletteIndex() {
         return paletteIndex;
     }
@@ -44,14 +60,6 @@ public class GbcImage {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isFavorite() {
-        return favorite;
-    }
-
-    public void setFavorite(boolean favorite) {
-        this.favorite = favorite;
     }
 
     public byte[] getImageBytes() {

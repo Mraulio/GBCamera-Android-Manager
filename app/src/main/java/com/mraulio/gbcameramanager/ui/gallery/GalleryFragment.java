@@ -7,9 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
@@ -155,6 +157,7 @@ public class GalleryFragment extends Fragment {
                 int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
                 imageView.setMaxHeight(maxHeight);
 
+
                 // Configurar el botón de cierre del diálogo
                 Button printButton = dialog.findViewById(R.id.print_button);
                 Button shareButton = dialog.findViewById(R.id.share_button);
@@ -176,6 +179,45 @@ public class GalleryFragment extends Fragment {
                 } else {
                     globalImageIndex = Methods.completeImageList.size() - (itemsPerPage - position);
                 }
+                if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("Favorite")) {
+                    imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+                }
+
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    private int clickCount = 0;
+                    private final Handler handler = new Handler();
+                    private final Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            // Acción a realizar cuando se detecta un clic simple
+                            // después de que expire el temporizador
+//                            palette = Methods.gbcPalettesList.get(clickedPosition).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
+//                            newPaletteName = Methods.gbcPalettesList.get(clickedPosition).getName();
+//                            paletteDialog(palette, newPaletteName);
+                            Methods.toast(getContext(), "Single tap" + globalImageIndex);
+                        }
+                    };
+
+                    @Override
+                    public void onClick(View v) {
+                        clickCount++;
+                        if (clickCount == 1) {
+                            // Iniciar el temporizador para detectar el doble toque
+                            handler.postDelayed(runnable, 300);
+                        } else if (clickCount == 2) {
+                            // Detener el temporizador y realizar la acción para el doble toque
+                            handler.removeCallbacks(runnable);
+                            // Acción a realizar cuando se detecta un doble toque
+                            Methods.gbcImagesList.get(globalImageIndex).addTag("Favorite");
+                            Methods.toast(getContext(), "Set as favorite" + globalImageIndex);
+                            clickCount = 0;
+                            System.out.println(Methods.gbcImagesList.get(globalImageIndex).getTags());
+                            imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+                            updateGridView(currentPage, gridView);
+                        }
+                    }
+
+                });
 
                 paletteFrameSelButton.setText("Show frames.");
                 FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false, false);
@@ -510,7 +552,8 @@ public class GalleryFragment extends Fragment {
             startIndex = page * itemsPerPage;
             endIndex = Math.min(startIndex + itemsPerPage, Methods.completeImageList.size());
         }
-
+        System.out.println(startIndex + " start");
+        System.out.println(endIndex + " end");
         //There will be a better way to do this, but works
         imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
         gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
@@ -541,7 +584,7 @@ public class GalleryFragment extends Fragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             View row = convertView;
             RecordHolder holder = null;
-
+            System.out.println("Adaptando " + position);
             if (row == null) {
                 LayoutInflater inflater = ((Activity) context).getLayoutInflater();
                 row = inflater.inflate(layoutResourceId, parent, false);
@@ -549,17 +592,19 @@ public class GalleryFragment extends Fragment {
                 holder = new RecordHolder();
                 holder.txtTitle = (TextView) row.findViewById(R.id.tvName);
                 holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
+
+
                 row.setTag(holder);
             } else {
                 holder = (RecordHolder) row.getTag();
             }
+
             Bitmap image = images.get(position);
             String name = data.get(position).getName();
+            Boolean fav =data.get(position).getTags().contains("Favorite");
+            holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) : Color.WHITE);
             holder.txtTitle.setText(name);
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
-//            if (image != null && !image.isRecycled()) {
-//                image.recycle();
-//            }
             return row;
         }
 

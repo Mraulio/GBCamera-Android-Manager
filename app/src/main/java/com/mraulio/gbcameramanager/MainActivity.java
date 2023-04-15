@@ -161,7 +161,6 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("Error en extractSavImages\n" + e.toString());
                 }
             }
-
             return null;
         }
 

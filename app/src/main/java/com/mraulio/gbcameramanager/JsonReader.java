@@ -6,6 +6,7 @@ import android.os.Environment;
 
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
@@ -64,25 +65,8 @@ public class JsonReader {
                 }
 
             } else if (stateObject.has("frames")) {
-                //Entering frame json. There are 2 types, old with id, new with hash
-                JSONArray framesArray = stateObject.getJSONArray("frames");
-                if (framesArray.length() == 0) {
-                    System.out.println("No frames.");
-                    return null;
-                }
-                JSONObject frameObject = framesArray.getJSONObject(0);
+                return readerFrames(jsonObject, stateObject);
 
-                //Verify what type of frames.json it is
-                if (frameObject.has("id") && frameObject.has("name") && !frameObject.has("hash") && !frameObject.has("tempId")) {
-                    //Old type
-                    return readerFrames(jsonObject, false);
-
-                } else if (frameObject.has("id") && frameObject.has("name") && frameObject.has("hash") && frameObject.has("tempId")) {
-                    //New type with hash
-                    return readerFrames(jsonObject, true);
-                } else {
-                    System.out.println("Not a valid frames json");
-                }
             } else if (stateObject.has("images")) {
                 //Images json
                 //Entering images json.
@@ -99,48 +83,47 @@ public class JsonReader {
 
                 } else return null;
 
-
             } else {
                 System.out.println("Not a valid json...");
                 return null;
             }
 
-
         } catch (JSONException | IOException e) {
             e.printStackTrace();
+            System.out.println("Error X");
         }
         return null;
     }
 
-    public static List<String> readerFrames(JSONObject jsonObject, boolean newType) throws IOException, JSONException {
-
-        List<String> stringValues = new ArrayList<>();
-        List<String> finalValues = new ArrayList<>();
-
-        // Acceder a los valores del JSON
-        JSONArray frames = jsonObject.getJSONObject("state").getJSONArray("frames");
-
-        if (newType) {//If new type I get the data from the frame-hash
-            for (int i = 0; i < frames.length(); i++) {
-                JSONObject image = frames.getJSONObject(i);
-                String hash = image.getString("hash");
-                stringValues.add(hash);
-            }
-        } else {//If old type I get the data from the frame-id
-            for (int i = 0; i < frames.length(); i++) {
-                JSONObject image = frames.getJSONObject(i);
-                String hash = image.getString("id");
-                stringValues.add(hash);
-            }
-        }
-        for (String value : stringValues) {
-            String hash = jsonObject.getString("frame-" + value);
-            finalValues.add(eachFrame(hash));
-        }
-        ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
-
-        return finalValues;
-    }
+//    public static List<String> readerFrames(JSONObject jsonObject, boolean newType) throws IOException, JSONException {
+//
+//        List<String> stringValues = new ArrayList<>();
+//        List<String> finalValues = new ArrayList<>();
+//
+//        // Acceder a los valores del JSON
+//        JSONArray frames = jsonObject.getJSONObject("state").getJSONArray("frames");
+//
+//        if (newType) {//If new type I get the data from the frame-hash
+//            for (int i = 0; i < frames.length(); i++) {
+//                JSONObject image = frames.getJSONObject(i);
+//                String hash = image.getString("hash");
+//                stringValues.add(hash);
+//            }
+//        } else {//If old type I get the data from the frame-id
+//            for (int i = 0; i < frames.length(); i++) {
+//                JSONObject image = frames.getJSONObject(i);
+//                String hash = image.getString("id");
+//                stringValues.add(hash);
+//            }
+//        }
+//        for (String value : stringValues) {
+//            String hash = jsonObject.getString("frame-" + value);
+//            finalValues.add(eachFrame(hash));
+//        }
+//        ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
+//
+//        return finalValues;
+//    }
 
     public static List<String> readerImages(JSONObject jsonObject) throws IOException, JSONException {
         List<String> stringValues = new ArrayList<>();
@@ -208,6 +191,63 @@ public class JsonReader {
             }
         }
         return paletteList;
+    }
+
+    public static List<GbcFrame> readerFrames(JSONObject jsonObject, JSONObject stateObject) throws JSONException {
+        //Entering frame json. There are 2 types, old with id, new with hash
+        JSONArray framesArray = stateObject.getJSONArray("frames");
+        if (framesArray.length() == 0) {
+            System.out.println("No frames.");
+            return null;
+        }
+        System.out.println("Entering reader frames 2");
+        List<GbcFrame> frameList = new ArrayList<>();
+
+        for (int i = 0; i < framesArray.length(); i++) {
+            JSONObject frameObj = null;
+            try {
+                frameObj = framesArray.getJSONObject(i);
+                //Verify what type of frames.json it is
+                String name;
+                String id;
+                if (frameObj.has("id") && frameObj.has("name") && !frameObj.has("hash") && !frameObj.has("tempId")) {
+                    //Old type
+                    System.out.println("Entering old type");
+                    System.out.println(frameObj);
+                    name = frameObj.getString("id");
+                    id = frameObj.getString("id");
+
+                } else if (frameObj.has("id") && frameObj.has("name") && frameObj.has("hash")) {//tempId sometimes is not present
+                    //New type with hash
+                    System.out.println("Entering new type");
+                    System.out.println(frameObj);
+                    name = frameObj.getString("id");
+                    id = frameObj.getString("hash");
+                } else {
+                    System.out.println("Not a valid frames json");
+                    System.out.println(frameObj);
+                    return null;
+                }
+                GbcFrame gbcFrame = new GbcFrame();
+                gbcFrame.setFrameName(name);
+                String hash = jsonObject.getString("frame-" + id);
+                String decompHash = eachFrame(hash);
+                byte[] bytes = Methods.convertToByteArray(decompHash);
+                int height = (decompHash.length() + 1) / 120;//To get the real height of the image
+                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
+                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
+                gbcFrame.setFrameBitmap(image);
+                frameList.add(gbcFrame);
+                ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
+            } catch (JSONException e) {
+                e.printStackTrace();
+                System.out.println("Error X2");
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error X23");
+            }
+        }
+        return frameList;
     }
 
     public static String reader() throws IOException, JSONException {
@@ -321,7 +361,7 @@ public class JsonReader {
         Inflater inflater = new Inflater();
         inflater.setInput(compressedBytes);
 
-        byte[] outputBytes = new byte[compressedBytes.length * 100];
+        byte[] outputBytes = new byte[compressedBytes.length * 300];
         int length = 0;
         try {
             length = inflater.inflate(outputBytes);

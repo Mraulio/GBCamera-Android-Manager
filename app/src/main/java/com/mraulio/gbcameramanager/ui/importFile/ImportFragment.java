@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
+import com.mraulio.gbcameramanager.FrameDao;
 import com.mraulio.gbcameramanager.JsonReader;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
@@ -50,6 +51,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -127,6 +129,7 @@ public class ImportFragment extends Fragment {
                     }
                     switch (addEnum) {
                         case PALETTES:
+                            btnAddImages.setEnabled(true);
                             customAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true);
                             gridViewImport.setAdapter(customAdapterPalette);
                             btnAddImages.setText("Add palettes");
@@ -134,55 +137,18 @@ public class ImportFragment extends Fragment {
                             break;
 
                         case FRAMES:
-                            gbcFramesList = new ArrayList<>();
-                            for (Object str : receivedList) {
-                                byte[] bytes = convertToByteArray((String) str);
-                                GbcFrame gbcFrame = new GbcFrame();
-                                gbcFrame.setFrameName("next frame");
-                                int height = (((String) str).length() + 1) / 120;//To get the real height of the image
-                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
-                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
-                                gbcFrame.setFrameBitmap(image);
-                                gbcFramesList.add(gbcFrame);
-                            }
+                            btnAddImages.setEnabled(true);
                             btnAddImages.setText("Add frames");
                             btnAddImages.setVisibility(View.VISIBLE);
-                            gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, gbcFramesList, true));
+                            gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true,true));
                             break;
                         case IMAGES:
+                            btnAddImages.setEnabled(true);
                             btnAddImages.setText("Add images");
                             btnAddImages.setVisibility(View.VISIBLE);
                             gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps));
                             break;
                     }
-//                    try {
-//                        List<String> listImagesString = JsonReader.readerImages(fileContent);
-//                        for (String imageString : listImagesString) {
-//                            byte[] imageBytes;
-//                            try {
-//                                imageBytes = convertToByteArray(imageString);
-//                                GbcImage gbcImage = new GbcImage();
-//                                GbcImage.numImages++;
-//                                gbcImage.setName("Image " + (GbcImage.numImages));
-//                                gbcImage.setFrameIndex(0);
-//                                gbcImage.setPaletteIndex(0);
-//                                int height = (imageString.length() + 1) / 120;//To get the real height of the image
-//                                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, height);
-//                                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors(), imageBytes);
-//                                gbcImage.setImageBytes(imageBytes);
-//                                Methods.completeImageList.add(image);
-//                                Methods.gbcImagesList.add(gbcImage);
-//                                importedImagesBitmaps.add(image);
-//                            } catch (Exception e) {
-//                                System.out.println("////////////Exception in convertToByteArray:\n" + e.toString());
-//                            }
-//
-//                        }
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
                 }
 
             }
@@ -192,6 +158,7 @@ public class ImportFragment extends Fragment {
             public void onClick(View v) {
                 switch (addEnum) {
                     case PALETTES:
+                        btnAddImages.setEnabled(false);
                         List<GbcPalette> newPalettes = new ArrayList<>();
                         for (Object palette : receivedList) {
                             boolean alreadyAdded = false;
@@ -207,16 +174,41 @@ public class ImportFragment extends Fragment {
                                 newPalettes.add(gbcp);
                             }
                         }
-                        Methods.gbcPalettesList.addAll(newPalettes);
-                        Methods.toast(getContext(), "Palettes added.");
+                        if (newPalettes.size() > 0) {
+                            Methods.gbcPalettesList.addAll(newPalettes);
+                            Methods.toast(getContext(), "New palettes added.");
+                        } else {
+                            Methods.toast(getContext(), "No new palettes added.");
+                        }
                         customAdapterPalette.notifyDataSetChanged();
-                        new SavePaletteAsyncTask(newPalettes).execute();
+                        new SavePaletteAsyncTask().execute();
                         break;
                     case FRAMES:
-                        Methods.framesList.addAll(gbcFramesList);
-                        Methods.toast(getContext(), "Frames added.");
+                        btnAddImages.setEnabled(false);
+                        List<GbcFrame> newFrames = new ArrayList<>();
+                        for (Object frame : receivedList) {
+                            boolean alreadyAdded = false;
+                            GbcFrame gbcFrame = (GbcFrame) frame;
+                            //If the palette already exists (by the name) it doesn't add it. Same if it's already added
+                            for (GbcFrame objeto : Methods.framesList) {
+                                if (objeto.getFrameName().toLowerCase(Locale.ROOT).equals(gbcFrame.getFrameName())) {
+                                    alreadyAdded = true;
+                                    break;
+                                }
+                            }
+                            if (!alreadyAdded) {
+                                newFrames.add(gbcFrame);
+                            }
+                        }
+                        if (newFrames.size() > 0) {
+                            Methods.framesList.addAll(newFrames);
+                            Methods.toast(getContext(), "New frames added.");
+                        } else Methods.toast(getContext(), "No new frames added.");
+                        new SaveFrameAsyncTask().execute();
                         break;
+
                     case IMAGES:
+                        btnAddImages.setEnabled(false);
                         GbcImage.numImages += importedImagesList.size();
                         Methods.gbcImagesList.addAll(importedImagesList);
                         Methods.completeImageList.addAll(importedImagesBitmaps);
@@ -231,18 +223,23 @@ public class ImportFragment extends Fragment {
 
     private class SavePaletteAsyncTask extends AsyncTask<Void, Void, Void> {
 
-        //To add the new palette as a parameter
-        private final List<GbcPalette> gbcPaletteList;
-
-        public SavePaletteAsyncTask(List<GbcPalette> gbcPaletteList) {
-            this.gbcPaletteList = gbcPaletteList;
-        }
-
         @Override
         protected Void doInBackground(Void... voids) {
             PaletteDao paletteDao = MainActivity.db.paletteDao();
             for (GbcPalette gbcPalette : Methods.gbcPalettesList) {
                 paletteDao.insert(gbcPalette);
+            }
+            return null;
+        }
+    }
+
+    private class SaveFrameAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            FrameDao frameDao = MainActivity.db.frameDao();
+            for (GbcFrame gbcFrame : Methods.framesList) {
+                frameDao.insert(gbcFrame);
             }
             return null;
         }

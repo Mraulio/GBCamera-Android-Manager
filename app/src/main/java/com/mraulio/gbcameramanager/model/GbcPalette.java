@@ -82,15 +82,5 @@ public class GbcPalette {
             canvas.drawRect(rect, paint);
         }
         return bitmap;
-
     }
-
-//    public int getIndex(int rgb) {
-//        for (int i = 0; i < paletteColors.length; ++i) {
-//            if (paletteColors[i] == rgb) {
-//                return i;
-//            }
-//        }
-//        throw new IllegalArgumentException("Specified RGB colour does not exist in the indexed palette");
-//    }
 }

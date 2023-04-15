@@ -50,7 +50,8 @@ public class FramesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
-        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true);
+        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true,false);
+        TextView tvNumFrames = view.findViewById(R.id.tvNumFrames);
 
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -77,23 +78,21 @@ public class FramesFragment extends Fragment {
                         public void onClick(DialogInterface dialog, int which) {
                             // Acción a realizar cuando se presiona el botón "Aceptar"
 
-                            //I change the palette index of the images that have the deleted one to 0
+                            //I change the frame index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
+                            //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
                             for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
                                 if (Methods.gbcImagesList.get(i).getFrameIndex() == position) {
                                     Methods.gbcImagesList.get(i).setFrameIndex(0);
-//                                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteIndex()).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
-//                                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
                                     Bitmap image = null;
                                     try {
-                                        image = GalleryFragment.frameChange(i,0,false);
+                                        image = GalleryFragment.frameChange(i, 0, false);
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
                                     Methods.completeImageList.set(i, image);
                                 }
                             }
-//                            new PalettesFragment.SavePaletteAsyncTask(Methods.gbcPalettesList.get(position), false).execute();
                             Methods.framesList.remove(position);
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }
@@ -115,26 +114,29 @@ public class FramesFragment extends Fragment {
 
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames);
+        tvNumFrames.setText("There are " + Methods.framesList.size() + " frames.");
         return view;
     }
 
     public static class CustomGridViewAdapterFrames extends ArrayAdapter<GbcFrame> {
         Context context;
         int layoutResourceId;
-        private boolean showTextView;
+        private boolean showTextView, checkDuplicate;
         List<GbcFrame> data = new ArrayList<GbcFrame>();
         int notSelectedColor = Color.parseColor("#FFFFFF");
         int selectedColor = Color.parseColor("#8C97B3");
         int lastSelectedPosition = -1; // Inicialmente no hay ningún elemento seleccionado
+        int duplicatedColor = Color.parseColor("#FF0000");
 
 
         public CustomGridViewAdapterFrames(Context context, int layoutResourceId,
-                                           List<GbcFrame> data, boolean showTextView) {
+                                           List<GbcFrame> data, boolean showTextView, boolean checkDuplicate) {
             super(context, layoutResourceId, data);
             this.layoutResourceId = layoutResourceId;
             this.context = context;
             this.data = data;
             this.showTextView = showTextView;
+            this.checkDuplicate = checkDuplicate;
         }
 
         @Override
@@ -166,6 +168,16 @@ public class FramesFragment extends Fragment {
             }
             Bitmap image = data.get(position).getFrameBitmap();
             String name = data.get(position).getFrameName();
+
+            if (checkDuplicate) {
+                for (GbcFrame objeto : Methods.framesList) {
+                    // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
+                    if (objeto.getFrameName().equals(name)) {
+                        // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
+                        holder.imageItem.setBackgroundColor(duplicatedColor);
+                    }
+                }
+            }
             holder.txtTitle.setText(name);
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
 //            if (image != null && !image.isRecycled()) {

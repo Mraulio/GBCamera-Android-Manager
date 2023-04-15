@@ -2,9 +2,19 @@ package com.mraulio.gbcameramanager.model;
 
 import android.graphics.Bitmap;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity
 public class GbcFrame {
-    Bitmap frameBitmap;
+    @PrimaryKey
+    @NonNull
     String frameName;
+
+    @ColumnInfo(name = "frame_bitmap")
+    Bitmap frameBitmap;
 
     public GbcFrame(){}
 

@@ -31,6 +31,7 @@ import androidx.room.Room;
 
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
@@ -83,11 +84,6 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
 
-        if (Methods.framesList.size() == 0) {
-            StartCreation.addFrames(this.getBaseContext());
-        }
-
-
 //        Methods.extractHexImages();
         new ReadDataAsyncTask().execute();
 
@@ -128,9 +124,13 @@ public class MainActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             System.out.println("Entering readASync");
             PaletteDao paletteDao = db.paletteDao();
+            FrameDao frameDao = db.frameDao();
 
             List<GbcPalette> palettes = paletteDao.getAll();
-            System.out.println(palettes.size());
+            List<GbcFrame> frames = frameDao.getAll();
+            System.out.println(palettes.size()+"/////PALETTES SIZE");
+            System.out.println(frames.size()+"/////FRAMES SIZE");
+
             if (palettes.size() > 0) {
                 Methods.gbcPalettesList.addAll(palettes);
             } else {
@@ -139,6 +139,16 @@ public class MainActivity extends AppCompatActivity {
                     paletteDao.insert(gbcPalette);
                 }
             }
+
+            if (frames.size() > 0) {
+                Methods.framesList.addAll(frames);
+            } else {
+                StartCreation.addFrames(getBaseContext());
+                for (GbcFrame gbcFrame : Methods.framesList) {
+                    frameDao.insert(gbcFrame);
+                }
+            }
+
             //Now that I have palettes, I can add images:
             if (Methods.gbcImagesList.size() == 0) {
                 try {

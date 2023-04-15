@@ -69,6 +69,7 @@ public class GalleryFragment extends Fragment {
     static List<Bitmap> imagesForPage;
     static List<GbcImage> gbcImagesForPage;
     public static TextView tv;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
@@ -170,7 +171,7 @@ public class GalleryFragment extends Fragment {
                 }
 
                 paletteFrameSelButton.setText("Show frames.");
-                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false);
+                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false, false);
                 frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                 gridViewFrames.setAdapter(frameAdapter);
 
@@ -481,7 +482,7 @@ public class GalleryFragment extends Fragment {
         }
         tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
         System.out.println("Called updateFromMain");
-        updateGridView(currentPage,gridView);
+        updateGridView(currentPage, gridView);
     }
 
     public static void updateGridView(int page, GridView gridView) {

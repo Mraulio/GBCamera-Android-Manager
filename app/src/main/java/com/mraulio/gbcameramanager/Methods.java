@@ -54,11 +54,6 @@ public class Methods {
                 gbcImage.setName("Image " + (GbcImage.numImages));
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
-                byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                System.out.println("HASH CODE: " + new String(hash));
-                String hashHex = Methods.bytesToHex(hash);
-                System.out.println(hashHex.length()+" HASH CODE TO HEX: "+hashHex);
-                gbcImage.setHashCode(hashHex);
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 128, 112);
                 Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
@@ -135,13 +130,7 @@ public class Methods {
             gbcImagesList.add(gbcImage);
         }
     }
-    public static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-    }
+
     public static byte[] convertToByteArray(String data) {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];

@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -20,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -33,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
@@ -51,6 +54,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -164,8 +168,6 @@ public class GalleryFragment extends Fragment {
                 Button shareButton = dialog.findViewById(R.id.share_button);
 
                 Button saveButton = dialog.findViewById(R.id.save_button);
-//                Button cropButton = dialog.findViewById(R.id.crop_save_button);
-//                Button paletteButton = dialog.findViewById(R.id.btn_palette);
                 Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
                 GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
                 GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
@@ -196,6 +198,8 @@ public class GalleryFragment extends Fragment {
 //                            newPaletteName = Methods.gbcPalettesList.get(clickedPosition).getName();
 //                            paletteDialog(palette, newPaletteName);
                             Methods.toast(getContext(), "Single tap" + globalImageIndex);
+                            showCustomDialog(Methods.completeBitmapList.get(globalImageIndex));
+                            clickCount = 0;
                         }
                     };
 
@@ -206,18 +210,31 @@ public class GalleryFragment extends Fragment {
                             // Iniciar el temporizador para detectar el doble toque
                             handler.postDelayed(runnable, 300);
                         } else if (clickCount == 2) {
+
                             // Detener el temporizador y realizar la acción para el doble toque
                             handler.removeCallbacks(runnable);
-                            // Acción a realizar cuando se detecta un doble toque
-                            Methods.gbcImagesList.get(globalImageIndex).addTag("__filter:favourite__");
-                            Methods.toast(getContext(), "Set as favorite" + globalImageIndex);
+                            if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
+                                List<String> tags = Methods.gbcImagesList.get(globalImageIndex).getTags();
+                                for (Iterator<String> iter = tags.iterator(); iter.hasNext();) {
+                                    String nombre = iter.next();
+                                    if (nombre.equals("__filter:favourite__")) {
+                                        iter.remove();
+                                    }
+                                    Methods.gbcImagesList.get(globalImageIndex).setTags(tags);
+                                    imageView.setBackgroundColor(getContext().getColor(R.color.white));
+                                }
+                                Methods.toast(getContext(), "Removed as favorite" + globalImageIndex);
+                            } else {
+                                Methods.gbcImagesList.get(globalImageIndex).addTag("__filter:favourite__");
+                                Methods.toast(getContext(), "Set as favorite" + globalImageIndex);
+                                imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+                            }
                             clickCount = 0;
                             System.out.println(Methods.gbcImagesList.get(globalImageIndex).getTags());
-                            imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                             updateGridView(currentPage, gridView);
                         }
+                        new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
                     }
-
                 });
 
                 paletteFrameSelButton.setText("Show frames.");
@@ -265,6 +282,7 @@ public class GalleryFragment extends Fragment {
                         Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);
                         frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                         frameAdapter.notifyDataSetChanged();
+                        new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
                         updateGridView(currentPage, gridView);
                     }
                 });
@@ -295,6 +313,7 @@ public class GalleryFragment extends Fragment {
                             }
                         }
                         Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
+                        new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
                         adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
                         adapterPalette.notifyDataSetChanged();
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
@@ -394,6 +413,21 @@ public class GalleryFragment extends Fragment {
         return view;
     }
 
+    private class UpdateImageAsyncTask extends AsyncTask<Void, Void, Void> {
+        private GbcImage gbcImage;
+
+        UpdateImageAsyncTask(GbcImage gbcImage){
+            this.gbcImage = gbcImage;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ImageDao imageDao = MainActivity.db.imageDao();
+            imageDao.update(gbcImage);
+            return null;
+        }
+    }
+
+
     public static Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
         // Obtener la imagen seleccionada
         Bitmap framed = null;
@@ -437,6 +471,43 @@ public class GalleryFragment extends Fragment {
             image = framed;
         }
         return image;
+    }
+
+    private void showCustomDialog(Bitmap bitmap) {
+        // Crear el diálogo personalizado
+        final Dialog dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.single_image_dialog);
+
+        // Configurar el tamaño del diálogo
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        // Obtener el ImageView y configurarlo como desplazable
+        ImageView imageView = dialog.findViewById(R.id.imageView);
+        imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false));
+
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
+            }
+        });
+
+        // Obtener el botón de cerrar y configurar su acción
+        Button closeButton = dialog.findViewById(R.id.button_close);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        // Mostrar el diálogo personalizado
+        dialog.show();
+        dialog.getWindow().setAttributes(lp);
     }
 
     //This one changes pixel by pixel of the bitmap, but works better with the frames

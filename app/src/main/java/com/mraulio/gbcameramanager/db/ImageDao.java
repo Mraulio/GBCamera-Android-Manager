@@ -5,6 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
@@ -24,6 +25,9 @@ public interface ImageDao {
 
     @Insert
     void insertAll(GbcImage... gbcimage);
+
+    @Update
+    void update(GbcImage gbcImage);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(GbcImage gbcimage);

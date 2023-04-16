@@ -15,25 +15,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.mraulio.gbcameramanager.JsonReader;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
-import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
-import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
-import com.mraulio.gbcameramanager.model.GbcImage;
-import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
-import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
-
-import org.json.JSONException;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -90,7 +80,7 @@ public class FramesFragment extends Fragment {
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
-                                    Methods.completeImageList.set(i, image);
+                                    Methods.completeBitmapList.set(i, image);
                                 }
                             }
                             Methods.framesList.remove(position);

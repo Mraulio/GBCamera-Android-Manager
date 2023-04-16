@@ -33,6 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
@@ -88,7 +89,7 @@ public class GalleryFragment extends Fragment {
         tv = (TextView) view.findViewById(R.id.text_gallery);
         gridView = (GridView) view.findViewById(R.id.gridView);
 
-        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage);
+        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage, false);
         Button btnPrevPage = (Button) view.findViewById(R.id.btnPrevPage);
         Button btnNextPage = (Button) view.findViewById(R.id.btnNextPage);
         tv_page = (TextView) view.findViewById(R.id.tv_page);
@@ -142,9 +143,9 @@ public class GalleryFragment extends Fragment {
                 if (currentPage != lastPage) {
                     selectedPosition = position + (currentPage * itemsPerPage);
                 } else {
-                    selectedPosition = Methods.completeImageList.size() - (itemsPerPage - position);
+                    selectedPosition = Methods.completeBitmapList.size() - (itemsPerPage - position);
                 }
-                final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
+                final Bitmap[] selectedImage = {Methods.completeBitmapList.get(selectedPosition)};
                 byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
                 // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
@@ -177,9 +178,9 @@ public class GalleryFragment extends Fragment {
                 if (currentPage != lastPage) {
                     globalImageIndex = position + (currentPage * itemsPerPage);
                 } else {
-                    globalImageIndex = Methods.completeImageList.size() - (itemsPerPage - position);
+                    globalImageIndex = Methods.completeBitmapList.size() - (itemsPerPage - position);
                 }
-                if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("Favorite")) {
+                if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
                     imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                 }
 
@@ -208,7 +209,7 @@ public class GalleryFragment extends Fragment {
                             // Detener el temporizador y realizar la acción para el doble toque
                             handler.removeCallbacks(runnable);
                             // Acción a realizar cuando se detecta un doble toque
-                            Methods.gbcImagesList.get(globalImageIndex).addTag("Favorite");
+                            Methods.gbcImagesList.get(globalImageIndex).addTag("__filter:favourite__");
                             Methods.toast(getContext(), "Set as favorite" + globalImageIndex);
                             clickCount = 0;
                             System.out.println(Methods.gbcImagesList.get(globalImageIndex).getTags());
@@ -260,7 +261,7 @@ public class GalleryFragment extends Fragment {
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
 //                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
                         selectedImage[0] = framed;
-                        Methods.completeImageList.set(globalImageIndex, framed);
+                        Methods.completeBitmapList.set(globalImageIndex, framed);
                         Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);
                         frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                         frameAdapter.notifyDataSetChanged();
@@ -285,7 +286,7 @@ public class GalleryFragment extends Fragment {
                         }
                         Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
 
-                        Methods.completeImageList.set(globalImageIndex, changedImage);
+                        Methods.completeBitmapList.set(globalImageIndex, changedImage);
                         if (keepFrame) {
                             try {
                                 changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
@@ -397,7 +398,7 @@ public class GalleryFragment extends Fragment {
         // Obtener la imagen seleccionada
         Bitmap framed = null;
         Bitmap framedAux;
-        if (Methods.completeImageList.get(globalImageIndex).getHeight() == 144 && Methods.completeImageList.get(globalImageIndex).getWidth() == 160) {
+        if (Methods.completeBitmapList.get(globalImageIndex).getHeight() == 144 && Methods.completeBitmapList.get(globalImageIndex).getWidth() == 160) {
             //I need to use copy because if not it's inmutable bitmap
             framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
@@ -410,9 +411,9 @@ public class GalleryFragment extends Fragment {
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
-            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeImageList.get(globalImageIndex), 16, 16, 128, 112);
+            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeBitmapList.get(globalImageIndex), 16, 16, 128, 112);
             canvas.drawBitmap(croppedBitmap, 16, 16, null);
-            Methods.completeImageList.set(globalImageIndex, framed);
+            Methods.completeBitmapList.set(globalImageIndex, framed);
             try {
                 Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(framedAux));//Use the framedAux because it doesn't a different palette to encode
             } catch (IOException e) {
@@ -537,27 +538,25 @@ public class GalleryFragment extends Fragment {
     public static void updateGridView(int page, GridView gridView) {
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
         itemsPerPage = MainActivity.imagesPage;
-        if (Methods.completeImageList.size() < itemsPerPage) {
-            itemsPerPage = Methods.completeImageList.size();
+        if (Methods.completeBitmapList.size() < itemsPerPage) {
+            itemsPerPage = Methods.completeBitmapList.size();
         }
-        lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
+        lastPage = (Methods.completeBitmapList.size() - 1) / itemsPerPage;
 
         //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
-        if (currentPage == lastPage && (Methods.completeImageList.size() % itemsPerPage) != 0) {
-            itemsPerPage = Methods.completeImageList.size() % itemsPerPage;
-            startIndex = Methods.completeImageList.size() - itemsPerPage;
-            endIndex = Methods.completeImageList.size();
+        if (currentPage == lastPage && (Methods.completeBitmapList.size() % itemsPerPage) != 0) {
+            itemsPerPage = Methods.completeBitmapList.size() % itemsPerPage;
+            startIndex = Methods.completeBitmapList.size() - itemsPerPage;
+            endIndex = Methods.completeBitmapList.size();
 
         } else {
             startIndex = page * itemsPerPage;
-            endIndex = Math.min(startIndex + itemsPerPage, Methods.completeImageList.size());
+            endIndex = Math.min(startIndex + itemsPerPage, Methods.completeBitmapList.size());
         }
-        System.out.println(startIndex + " start");
-        System.out.println(endIndex + " end");
         //There will be a better way to do this, but works
-        imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
+        imagesForPage = Methods.completeBitmapList.subList(startIndex, endIndex);
         gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
-        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage);
+        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage, false);
         gridView.setAdapter(customGridViewAdapterImage);
     }
 
@@ -570,21 +569,22 @@ public class GalleryFragment extends Fragment {
         int layoutResourceId;
         List<GbcImage> data = new ArrayList<GbcImage>();
         private List<Bitmap> images;
+        private boolean checkDuplicate;
 
         public CustomGridViewAdapterImage(Context context, int layoutResourceId,
-                                          List<GbcImage> data, List<Bitmap> images) {
+                                          List<GbcImage> data, List<Bitmap> images, boolean checkDuplicate) {
             super(context, layoutResourceId, data);
             this.layoutResourceId = layoutResourceId;
             this.context = context;
             this.images = images;
             this.data = data;
+            this.checkDuplicate = checkDuplicate;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View row = convertView;
             RecordHolder holder = null;
-            System.out.println("Adaptando " + position);
             if (row == null) {
                 LayoutInflater inflater = ((Activity) context).getLayoutInflater();
                 row = inflater.inflate(layoutResourceId, parent, false);
@@ -601,8 +601,20 @@ public class GalleryFragment extends Fragment {
 
             Bitmap image = images.get(position);
             String name = data.get(position).getName();
-            Boolean fav =data.get(position).getTags().contains("Favorite");
+            String hash = data.get(position).getHashCode();
+            Boolean fav = data.get(position).getTags().contains("__filter:favourite__");
             holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) : Color.WHITE);
+            Boolean dup = false;
+            if (checkDuplicate) {
+                for (GbcImage gbcImage : Methods.gbcImagesList) {
+                    // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
+                    if (gbcImage.getHashCode().equals(hash)) {
+                        // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
+                        dup = true;
+                    }
+                }
+            }
+            holder.txtTitle.setTextColor(dup ? context.getResources().getColor(R.color.duplicated) : Color.BLACK);
             holder.txtTitle.setText(name);
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
             return row;

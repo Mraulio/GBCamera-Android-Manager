@@ -196,7 +196,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             @Override
             public void onClick(View v) {
                 GbcImage.numImages += extractedImagesList.size();
-                Methods.completeImageList.addAll(extractedImagesBitmaps);
+                Methods.completeBitmapList.addAll(extractedImagesBitmaps);
                 Methods.gbcImagesList.addAll(extractedImagesList);
                 Methods.toast(getContext(), "Images added.");
             }

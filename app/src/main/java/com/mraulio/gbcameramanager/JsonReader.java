@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -139,9 +141,21 @@ public class JsonReader {
             String decodedData = eachImage(data);
             byte[] bytes = Methods.convertToByteArray(decodedData);
             GbcImage gbcImage = new GbcImage();
+            gbcImage.setHashCode(hash);
+
             if (!imageJson.getString("title").equals("")) {
                 gbcImage.setName(imageJson.getString("title"));
             } else gbcImage.setName("*No title*");
+            JSONArray tagsArray = imageJson.getJSONArray("tags");
+            if (tagsArray.length() > 0) {
+                List<String> tagsStrings = new ArrayList<>();
+                for (int j = 0; j < tagsArray.length(); j++) {
+                    String str = tagsArray.getString(j);
+                    System.out.println("Tag: " + str);
+                    tagsStrings.add(str);
+                }
+                gbcImage.setTags(tagsStrings);
+            }
             int height = ((decodedData).length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
             try {
@@ -152,12 +166,12 @@ public class JsonReader {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                gbcImage.setFrameIndex(0);
-                gbcImage.setPaletteIndex(0);
+                byte[] hashSha = MessageDigest.getInstance("SHA-256").digest(bytes);
+                String hashHex = Methods.bytesToHex(hashSha);
+                System.out.println(hashHex.length() + " HASH CODE TO HEX: " + hashHex);
+                gbcImage.setHashCode(hashHex);
                 ImportFragment.importedImagesList.add(gbcImage);
                 ImportFragment.importedImagesBitmaps.add(imageBitmap);
-//                ImportFragment.listImportedImageBytes.add(bytes);
-
             } catch (Exception e) {
                 System.out.println("No se puede añadir");//Para las RGB
             }

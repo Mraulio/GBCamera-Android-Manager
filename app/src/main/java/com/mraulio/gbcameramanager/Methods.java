@@ -22,12 +22,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Methods {
 
-    public static List<Bitmap> completeImageList = new ArrayList<>();
+    public static List<Bitmap> completeBitmapList = new ArrayList<>();
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
@@ -52,6 +54,11 @@ public class Methods {
                 gbcImage.setName("Image " + (GbcImage.numImages));
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
+                byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
+                System.out.println("HASH CODE: " + new String(hash));
+                String hashHex = Methods.bytesToHex(hash);
+                System.out.println(hashHex.length()+" HASH CODE TO HEX: "+hashHex);
+                gbcImage.setHashCode(hashHex);
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 128, 112);
                 Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
@@ -63,7 +70,7 @@ public class Methods {
                     imageBytes = encodeImage(image);
                 }
                 gbcImage.setImageBytes(imageBytes);
-                completeImageList.add(image);
+                completeBitmapList.add(image);
                 gbcImagesList.add(gbcImage);
             }
         } catch (IOException e) {
@@ -72,7 +79,6 @@ public class Methods {
         }catch (Exception e){
             System.out.println("Error aqui");
             e.printStackTrace();
-
         }
     }
 
@@ -81,7 +87,7 @@ public class Methods {
         return decoder.encodeInternal(bitmap);
     }
 
-    public static void extractHexImages() {
+    public static void extractHexImages() throws NoSuchAlgorithmException {
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         //*******PARA LEER EL FICHERO HEXDATA
         File ficheroHex = new File(directory, "pano2cabo.txt");
@@ -117,15 +123,25 @@ public class Methods {
             GbcImage gbcImage = new GbcImage();
             GbcImage.numImages++;
             gbcImage.setImageBytes(bytes);
+
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
+            System.out.println("HASH CODE: "+new String(hash));
+
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
             Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
-            completeImageList.add(image);
+            completeBitmapList.add(image);
             gbcImagesList.add(gbcImage);
         }
     }
-
+    public static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
     public static byte[] convertToByteArray(String data) {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];

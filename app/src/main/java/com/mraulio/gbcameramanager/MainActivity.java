@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 
+import android.graphics.Bitmap;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 
@@ -30,8 +31,12 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.db.AppDatabase;
 import com.mraulio.gbcameramanager.db.FrameDao;
+import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.PaletteDao;
+import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
+import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
@@ -78,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
-        System.out.println("Done loading: "+doneLoading);
-        System.out.println("Any image: "+anyImage);
+        System.out.println("Done loading: " + doneLoading);
+        System.out.println("Any image: " + anyImage);
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
@@ -126,11 +131,14 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Entering readASync");
             PaletteDao paletteDao = db.paletteDao();
             FrameDao frameDao = db.frameDao();
+            ImageDao imageDao = db.imageDao();
 
             List<GbcPalette> palettes = paletteDao.getAll();
             List<GbcFrame> frames = frameDao.getAll();
-            System.out.println(palettes.size()+"/////PALETTES SIZE");
-            System.out.println(frames.size()+"/////FRAMES SIZE");
+            List<GbcImage> imagesFromDao = imageDao.getAll();
+            System.out.println(palettes.size() + "/////PALETTES SIZE");
+            System.out.println(frames.size() + "/////FRAMES SIZE");
+            System.out.println(imagesFromDao.size() + "/////IMAGES SIZE");
 
             if (palettes.size() > 0) {
                 Methods.gbcPalettesList.addAll(palettes);
@@ -151,16 +159,22 @@ public class MainActivity extends AppCompatActivity {
             }
 
             //Now that I have palettes, I can add images:
-            if (Methods.gbcImagesList.size() == 0) {
-                try {
-                    Methods.extractSavImages(getApplicationContext());
-                    if (Methods.gbcImagesList.size() > 0) {
-                        anyImage = true;
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error en extractSavImages\n" + e.toString());
+            if (imagesFromDao.size() > 0) {
+                anyImage = true;
+                //I need to add them to the gbcImagesList(GbcImage) and completeBitmapList(Bitmap)
+                Methods.gbcImagesList.addAll(imagesFromDao);
+                for (GbcImage gbcImage : Methods.gbcImagesList) {
+                    int height = (gbcImage.getImageBytes().length + 1) / 40;//To get the real height of the image
+                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
+                    GbcImage.numImages++;
+                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), gbcImage.getImageBytes());
+                    Methods.completeBitmapList.add(image);
                 }
+//                for (GbcImage gbcImage : Methods.gbcImagesList) {
+//                    imageDao.insert(gbcImage);
+//                }
             }
+
             return null;
         }
 

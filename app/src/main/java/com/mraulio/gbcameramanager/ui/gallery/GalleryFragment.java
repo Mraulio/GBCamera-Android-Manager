@@ -150,7 +150,6 @@ public class GalleryFragment extends Fragment {
                     selectedPosition = Methods.completeBitmapList.size() - (itemsPerPage - position);
                 }
                 final Bitmap[] selectedImage = {Methods.completeBitmapList.get(selectedPosition)};
-                byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
                 // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
                 dialog.setContentView(R.layout.custom_dialog);
@@ -161,7 +160,6 @@ public class GalleryFragment extends Fragment {
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
                 int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
                 imageView.setMaxHeight(maxHeight);
-
 
                 // Configurar el botón de cierre del diálogo
                 Button printButton = dialog.findViewById(R.id.print_button);
@@ -184,6 +182,10 @@ public class GalleryFragment extends Fragment {
                 }
                 if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
                     imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+                }
+                if (Methods.gbcImagesList.get(globalImageIndex).isLockFrame()){
+                    System.out.println("is lock frame true");
+                    cbFrameKeep.setChecked(true);
                 }
 
                 imageView.setOnClickListener(new View.OnClickListener() {
@@ -215,7 +217,7 @@ public class GalleryFragment extends Fragment {
                             handler.removeCallbacks(runnable);
                             if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
                                 List<String> tags = Methods.gbcImagesList.get(globalImageIndex).getTags();
-                                for (Iterator<String> iter = tags.iterator(); iter.hasNext();) {
+                                for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
                                     String nombre = iter.next();
                                     if (nombre.equals("__filter:favourite__")) {
                                         iter.remove();
@@ -253,6 +255,17 @@ public class GalleryFragment extends Fragment {
                     public void onClick(View v) {
                         if (keepFrame) keepFrame = false;
                         else keepFrame = true;
+                        try {
+                            frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        GbcImage gbcImage = Methods.gbcImagesList.get(globalImageIndex);
+                        gbcImage.setLockFrame(keepFrame);
+                        new UpdateImageAsyncTask(gbcImage).execute();
+                        Bitmap image = Methods.completeBitmapList.get(globalImageIndex);
+                        imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
+                        updateGridView(currentPage, gridView);
                     }
                 });
                 cbCrop.setOnClickListener(new View.OnClickListener() {
@@ -312,6 +325,7 @@ public class GalleryFragment extends Fragment {
                                 e.printStackTrace();
                             }
                         }
+
                         Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
                         new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
                         adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
@@ -416,9 +430,10 @@ public class GalleryFragment extends Fragment {
     private class UpdateImageAsyncTask extends AsyncTask<Void, Void, Void> {
         private GbcImage gbcImage;
 
-        UpdateImageAsyncTask(GbcImage gbcImage){
+        UpdateImageAsyncTask(GbcImage gbcImage) {
             this.gbcImage = gbcImage;
         }
+
         @Override
         protected Void doInBackground(Void... voids) {
             ImageDao imageDao = MainActivity.db.imageDao();
@@ -432,7 +447,7 @@ public class GalleryFragment extends Fragment {
         // Obtener la imagen seleccionada
         Bitmap framed = null;
         Bitmap framedAux;
-        if (Methods.completeBitmapList.get(globalImageIndex).getHeight() == 144 && Methods.completeBitmapList.get(globalImageIndex).getWidth() == 160) {
+        if ((Methods.gbcImagesList.get(globalImageIndex).getImageBytes().length/40) == 144) {
             //I need to use copy because if not it's inmutable bitmap
             framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);

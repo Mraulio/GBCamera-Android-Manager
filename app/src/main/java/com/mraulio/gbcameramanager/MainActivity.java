@@ -40,6 +40,7 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
+import java.io.IOException;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -163,12 +164,25 @@ public class MainActivity extends AppCompatActivity {
                 anyImage = true;
                 //I need to add them to the gbcImagesList(GbcImage) and completeBitmapList(Bitmap)
                 Methods.gbcImagesList.addAll(imagesFromDao);
+                int index = 0;
                 for (GbcImage gbcImage : Methods.gbcImagesList) {
                     int height = (gbcImage.getImageBytes().length + 1) / 40;//To get the real height of the image
                     ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
                     GbcImage.numImages++;
-                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), gbcImage.getImageBytes());
+                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
+
                     Methods.completeBitmapList.add(image);
+                    if (gbcImage.isLockFrame()) {
+                        System.out.println("Entering lockFrame");
+                        try {
+                            image = GalleryFragment.frameChange(index, Methods.gbcImagesList.get(index).getFrameIndex(), true);
+                            Methods.completeBitmapList.set(index ,image);
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    index++;
                 }
 //                for (GbcImage gbcImage : Methods.gbcImagesList) {
 //                    imageDao.insert(gbcImage);

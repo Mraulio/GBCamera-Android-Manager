@@ -22,6 +22,9 @@ public class GbcImage {
     @ColumnInfo(name = "palette_index")
     private int paletteIndex;
 
+    @ColumnInfo(name = "lock_frame")
+    private boolean lockFrame;
+
     @ColumnInfo(name = "frame_index")
     private int frameIndex;
 
@@ -36,6 +39,7 @@ public class GbcImage {
     public GbcImage(){
         paletteIndex = 0;
         frameIndex = 0;//I set the first palette as the default
+        lockFrame = false;
     }
 
     @NonNull
@@ -61,6 +65,14 @@ public class GbcImage {
 //        this.bitmap = bitmap;
 //    }
 
+
+    public boolean isLockFrame() {
+        return lockFrame;
+    }
+
+    public void setLockFrame(boolean lockFrame) {
+        this.lockFrame = lockFrame;
+    }
 
     public List<String> getTags() {
         return tags;

@@ -77,6 +77,15 @@ public class Methods {
         }
     }
 
+    // Función auxiliar para convertir bytes a una cadena hexadecimal
+    public static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
     public static byte[] encodeImage(Bitmap bitmap) throws IOException {
         Codec decoder = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, bitmap.getHeight());
         return decoder.encodeInternal(bitmap);

@@ -1,7 +1,5 @@
 package com.mraulio.gbcameramanager.model;
 
-import android.graphics.Bitmap;
-
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -15,6 +13,7 @@ public class GbcImage {
     @PrimaryKey
     @NonNull
     private String hashCode;
+
 
     @ColumnInfo(name = "image_name")
     private String name;
@@ -51,7 +50,7 @@ public class GbcImage {
         this.hashCode = hashCode;
     }
 
-    //    public GbcImage(Bitmap bitmap, int paletteIndex, String name) {
+//    public GbcImage(Bitmap bitmap, int paletteIndex, String name) {
 //        this.bitmap = bitmap;
 //        this.paletteIndex = paletteIndex;
 //        this.name = name;

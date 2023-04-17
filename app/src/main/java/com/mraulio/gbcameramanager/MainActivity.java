@@ -32,6 +32,7 @@ import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.db.AppDatabase;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.db.ImageDao;
+import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
@@ -133,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
             PaletteDao paletteDao = db.paletteDao();
             FrameDao frameDao = db.frameDao();
             ImageDao imageDao = db.imageDao();
+            ImageDataDao imageDataDao = db.imageDataDao();
 
             List<GbcPalette> palettes = paletteDao.getAll();
             List<GbcFrame> frames = frameDao.getAll();
@@ -166,13 +168,16 @@ public class MainActivity extends AppCompatActivity {
                 Methods.gbcImagesList.addAll(imagesFromDao);
                 int index = 0;
                 for (GbcImage gbcImage : Methods.gbcImagesList) {
+                    byte[] bytesFromNewDao = imageDataDao.getDataByImageId(gbcImage.getHashCode());
+                    System.out.println(bytesFromNewDao);
+                    System.out.println(index);
                     int height = (gbcImage.getImageBytes().length + 1) / 40;//To get the real height of the image
                     ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
                     GbcImage.numImages++;
                     Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
 
 //                    Methods.completeBitmapList.add(image);
-                    Methods.imageBitmapCache.put(gbcImage.getHashCode(),image);
+                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
 
                     if (gbcImage.isLockFrame()) {
                         System.out.println("Entering lockFrame");
@@ -184,15 +189,11 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
-                    Methods.imageBitmapCache.put(gbcImage.getHashCode(),image);
-                    Methods.imageBytesCache.put(gbcImage.getHashCode(),gbcImage.getImageBytes());
+                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
+                    Methods.imageBytesCache.put(gbcImage.getHashCode(), gbcImage.getImageBytes());
                     index++;
                 }
-//                for (GbcImage gbcImage : Methods.gbcImagesList) {
-//                    imageDao.insert(gbcImage);
-//                }
             }
-
             return null;
         }
 

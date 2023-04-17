@@ -24,6 +24,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mraulio.gbcameramanager.db.ImageDao;
+import com.mraulio.gbcameramanager.db.ImageDataDao;
+import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.JsonReader;
@@ -253,8 +255,14 @@ public class ImportFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             ImageDao imageDao = MainActivity.db.imageDao();
+
+            ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
             for (GbcImage gbcImage : Methods.gbcImagesList) {
+                ImageData imageData = new ImageData();
+                imageData.setImageId(gbcImage.getHashCode());
+                imageData.setData(gbcImage.getImageBytes());
                 imageDao.insert(gbcImage);
+                imageDataDao.insert(imageData);
             }
             return null;
         }
@@ -395,21 +403,17 @@ public class ImportFragment extends Fragment {
                 gbcImage.setFrameIndex(0);
                 gbcImage.setPaletteIndex(0);
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                System.out.println("HASH CODE: " + new String(hash));
                 String hashHex = Methods.bytesToHex(hash);
-                System.out.println(hashHex.length() + " HASH CODE TO HEX: " + hashHex);
                 gbcImage.setHashCode(hashHex);
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 128, 112);
                 Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
-                    System.out.println("***********ENTERING ADDING FRAME*************");
                     //I need to use copy because if not it's inmutable bitmap
                     Bitmap framed = Methods.framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
                     imageBytes = Methods.encodeImage(image);
-                    System.out.println("***********" + image.getHeight() + " " + image.getWidth() + "*************");
                 }
                 gbcImage.setImageBytes(imageBytes);
                 importedImagesBitmaps.add(image);
@@ -498,7 +502,6 @@ public class ImportFragment extends Fragment {
 
         List<byte[]> listaBytes = new ArrayList<>();
         //******FIN DE LEER EL FICHERO
-        System.out.println("La longitud del fichero hex es de : " + fileContent.length());
         List<String> dataList = RawToTileData.separateData(fileContent);
         String data = "";
         for (String string : dataList) {
@@ -534,7 +537,6 @@ public class ImportFragment extends Fragment {
 
     public void extractHexImagesFromFile(String fileContent) throws NoSuchAlgorithmException {
 //        List<byte[]> listaBytes = new ArrayList<>();
-        System.out.println("La longitud del fichero hex es de : " + fileContent.length());
         List<String> dataList = RawToTileData.separateData(fileContent);
         String data = "";
         for (String string : dataList) {
@@ -544,9 +546,7 @@ public class ImportFragment extends Fragment {
             gbcImage.setImageBytes(bytes);
 
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
-            System.out.println("HASH CODE: " + new String(hash));
             String hashHex = Methods.bytesToHex(hash);
-            System.out.println(hashHex.length() + " HASH CODE TO HEX: " + hashHex);
             gbcImage.setHashCode(hashHex);
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image

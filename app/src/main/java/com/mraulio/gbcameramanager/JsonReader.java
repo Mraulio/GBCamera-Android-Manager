@@ -74,11 +74,9 @@ public class JsonReader {
                 //Entering images json.
                 JSONArray imagesArray = stateObject.getJSONArray("images");
                 if (imagesArray.length() == 0) {
-                    System.out.println("No images.");
                     return null;
                 }
                 JSONObject imageObject = imagesArray.getJSONObject(0);
-                System.out.println(imageObject);
                 if (imageObject.has("hash") && imageObject.has("created") && imageObject.has("title") && imageObject.has("lines") && imageObject.has("tags")) {
                     //There are some more values to check, but not all images have those
                     return readerImages(jsonObject);
@@ -86,13 +84,11 @@ public class JsonReader {
                 } else return null;
 
             } else {
-                System.out.println("Not a valid json...");
                 return null;
             }
 
         } catch (JSONException | IOException e) {
             e.printStackTrace();
-            System.out.println("Error X");
         }
         return null;
     }
@@ -151,7 +147,6 @@ public class JsonReader {
                 List<String> tagsStrings = new ArrayList<>();
                 for (int j = 0; j < tagsArray.length(); j++) {
                     String str = tagsArray.getString(j);
-                    System.out.println("Tag: " + str);
                     tagsStrings.add(str);
                 }
                 gbcImage.setTags(tagsStrings);
@@ -160,7 +155,6 @@ public class JsonReader {
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
             try {
                 Bitmap imageBitmap = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
-                System.out.println(imageBitmap.getHeight());
                 try {
                     gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
                 } catch (IOException e) {
@@ -168,7 +162,6 @@ public class JsonReader {
                 }
                 byte[] hashSha = MessageDigest.getInstance("SHA-256").digest(bytes);
                 String hashHex = Methods.bytesToHex(hashSha);
-                System.out.println(hashHex.length() + " HASH CODE TO HEX: " + hashHex);
                 gbcImage.setHashCode(hashHex);
                 ImportFragment.importedImagesList.add(gbcImage);
                 ImportFragment.importedImagesBitmaps.add(imageBitmap);
@@ -211,10 +204,8 @@ public class JsonReader {
         //Entering frame json. There are 2 types, old with id, new with hash
         JSONArray framesArray = stateObject.getJSONArray("frames");
         if (framesArray.length() == 0) {
-            System.out.println("No frames.");
             return null;
         }
-        System.out.println("Entering reader frames 2");
         List<GbcFrame> frameList = new ArrayList<>();
 
         for (int i = 0; i < framesArray.length(); i++) {
@@ -226,20 +217,14 @@ public class JsonReader {
                 String id;
                 if (frameObj.has("id") && frameObj.has("name") && !frameObj.has("hash") && !frameObj.has("tempId")) {
                     //Old type
-                    System.out.println("Entering old type");
-                    System.out.println(frameObj);
                     name = frameObj.getString("id");
                     id = frameObj.getString("id");
 
                 } else if (frameObj.has("id") && frameObj.has("name") && frameObj.has("hash")) {//tempId sometimes is not present
                     //New type with hash
-                    System.out.println("Entering new type");
-                    System.out.println(frameObj);
                     name = frameObj.getString("id");
                     id = frameObj.getString("hash");
                 } else {
-                    System.out.println("Not a valid frames json");
-                    System.out.println(frameObj);
                     return null;
                 }
                 GbcFrame gbcFrame = new GbcFrame();
@@ -282,7 +267,6 @@ public class JsonReader {
             value = jsonObject.getString(hash);
 
         }
-        System.out.println(value + "*******************");
         byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
 
         System.out.println(value);
@@ -306,7 +290,6 @@ public class JsonReader {
             sb.append(outputString.substring(i, i + 2));
             sb.append(" ");
         }
-        System.out.println(outputString);
         String primeraParte = outputString.substring(0, 1280);
         String central = outputString.substring(1280, 3072);//esta parte tiene la informacion de los lados del marco, lo divido en 14, cada una de 128 caracteres
         String[] partes = new String[14];
@@ -320,16 +303,11 @@ public class JsonReader {
             }
             partes[i] = builder.toString();  // Guardar la parte con los '0' agregados en el array
             stringBuilder.append(partes[i]);
-            System.out.println(partes[i].length());
         }
 
         String ultimaParte = outputString.substring(outputString.length() - 1280);
         stringBuilder.append(ultimaParte);
-        System.out.println(primeraParte);
-        System.out.println(central);
-        System.out.println(ultimaParte);
         String terminada = stringBuilder.toString();
-        System.out.println(terminada.length() + ":  " + terminada);
         StringBuilder resultado = new StringBuilder();
 
         for (int i = 0; i < terminada.length(); i += 2) {
@@ -338,8 +316,6 @@ public class JsonReader {
             }
             resultado.append(terminada.substring(i, i + 2));
         }
-
-        System.out.println("Resultado devuelto: " + resultado.toString());
         return resultado.toString();
     }
 

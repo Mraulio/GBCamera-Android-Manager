@@ -183,8 +183,9 @@ public class GalleryFragment extends Fragment {
                 if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
                     imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                 }
-                if (Methods.gbcImagesList.get(globalImageIndex).isLockFrame()){
+                if (Methods.gbcImagesList.get(globalImageIndex).isLockFrame()) {
                     System.out.println("is lock frame true");
+                    keepFrame = true;
                     cbFrameKeep.setChecked(true);
                 }
 
@@ -447,7 +448,7 @@ public class GalleryFragment extends Fragment {
         // Obtener la imagen seleccionada
         Bitmap framed = null;
         Bitmap framedAux;
-        if ((Methods.gbcImagesList.get(globalImageIndex).getImageBytes().length/40) == 144) {
+        if ((Methods.gbcImagesList.get(globalImageIndex).getImageBytes().length / 40) == 144) {
             //I need to use copy because if not it's inmutable bitmap
             framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);

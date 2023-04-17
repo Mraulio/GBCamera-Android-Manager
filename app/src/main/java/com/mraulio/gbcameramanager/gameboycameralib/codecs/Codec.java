@@ -12,8 +12,8 @@ import java.io.IOException;
  */
 public interface Codec {
     Bitmap decode(byte[] data);
-    Bitmap decodeWithPalette(int paletteIndex,byte[] data);//Added
+    Bitmap decodeWithPalette(int[] palette,byte[] data);//Added
     byte[] encode(Bitmap image) throws IOException;
-    byte[] encodeInternal(Bitmap image, GbcImage gbcimage) throws IOException;//Added
+    byte[] encodeInternal(Bitmap image) throws IOException;//Added
 
 }

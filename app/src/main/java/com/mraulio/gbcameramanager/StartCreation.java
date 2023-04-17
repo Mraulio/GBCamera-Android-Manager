@@ -9,6 +9,7 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 public class StartCreation {
     public static void addFrames(Context context) {
@@ -55,11 +56,11 @@ public class StartCreation {
         };
         GbcPalette gbcPalette1 = new GbcPalette();
         gbcPalette1.setPaletteColors(EVEN_DIST_PALETTE);
-        gbcPalette1.setName("Greyscale");
+        gbcPalette1.setName("bw".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette1);
         GbcPalette gbcPalette2 = new GbcPalette();
         gbcPalette2.setPaletteColors(GAMEBOY_LCD_PALETTE);
-        gbcPalette2.setName("DMG");
+        gbcPalette2.setName("DMG".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette2);
 
         //Adding palettes from here https://www.npmjs.com/package/gb-palettes
@@ -71,7 +72,7 @@ public class StartCreation {
         };
         GbcPalette gbcPalette3 = new GbcPalette();
         gbcPalette3.setPaletteColors(cmyk_palette);
-        gbcPalette3.setName("CMYK");
+        gbcPalette3.setName("CMYK".toLowerCase(Locale.ROOT));//Lower case to be compatible with web app
         Methods.gbcPalettesList.add(gbcPalette3);
 
         int[] tram_palette = {
@@ -82,8 +83,9 @@ public class StartCreation {
         };
         GbcPalette gbcPalette5 = new GbcPalette();
         gbcPalette5.setPaletteColors(tram_palette);
-        gbcPalette5.setName("Tramonto al Parco");
+        gbcPalette5.setName("tpa".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette5);
+
         //My won palettes
         int[] cute_palette = {
                 Color.parseColor("#ffc36d"),
@@ -93,7 +95,18 @@ public class StartCreation {
         };
         GbcPalette gbcPalette4 = new GbcPalette();
         gbcPalette4.setPaletteColors(cute_palette);
-        gbcPalette4.setName("Cute");
+        gbcPalette4.setName("Cute".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette4);
+
+        int[] pinko_palette = {
+                Color.parseColor("#ffa2f3"),
+                Color.parseColor("#ce83c5"),
+                Color.parseColor("#8813ce"),
+                Color.parseColor("#370853")
+        };
+        GbcPalette gbcPalette6 = new GbcPalette();
+        gbcPalette6.setPaletteColors(pinko_palette);
+        gbcPalette6.setName("pinko".toLowerCase(Locale.ROOT));
+        Methods.gbcPalettesList.add(gbcPalette6);
     }
 }

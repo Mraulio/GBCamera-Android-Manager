@@ -1,7 +1,9 @@
 package com.mraulio.gbcameramanager.ui.frames;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,24 +13,17 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.mraulio.gbcameramanager.JsonReader;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
-import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
-import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
-import com.mraulio.gbcameramanager.model.GbcImage;
-import com.mraulio.gbcameramanager.model.GbcPalette;
-
-import org.json.JSONException;
-import org.w3c.dom.Text;
+import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,64 +33,85 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class FramesFragment extends Fragment {
-    Button btnImportFrames;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
-        btnImportFrames = view.findViewById(R.id.btnImportFrames);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
-        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList);
-        btnImportFrames.setOnClickListener(new View.OnClickListener() {
+        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true,false);
+        TextView tvNumFrames = view.findViewById(R.id.tvNumFrames);
+
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public void onClick(View view) {
-                List<String> listFramesString = new ArrayList<>();
-                try {
-                    listFramesString = JsonReader.readerFrames();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position <= 2) {
+                    Methods.toast(getContext(), "Can't delete a base frame");
                 }
-                for (String str : listFramesString) {
+                if (position > 2) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Delete frame " + Methods.framesList.get(position).getFrameName() + "?");
+                    builder.setMessage("Are you sure?");
 
-                    byte[] bytes = convertToByteArray(str);
-                    GbcFrame gbcFrame = new GbcFrame();
-                    gbcFrame.setFrameName("next frame");
-                    int height = (str.length() + 1) / 120;//To get the real height of the image
-                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColors()), 160, height);
-                    Bitmap image = imageCodec.decodeWithPalette(0, bytes);
-                    gbcFrame.setFrameBitmap(image);
-                    Methods.framesList.add(gbcFrame);
+                    // Crear un ImageView y establecer la imagen deseada
+                    ImageView imageView = new ImageView(getContext());
+                    imageView.setAdjustViewBounds(true);
+                    imageView.setPadding(30, 10, 30, 10);
+                    imageView.setImageBitmap(Methods.framesList.get(position).getFrameBitmap());
+
+                    // Agregar el ImageView al diseño del diálogo
+                    builder.setView(imageView);
+
+                    builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Acción a realizar cuando se presiona el botón "Aceptar"
+
+                            //I change the frame index of the images that have the deleted one to 0
+                            //Also need to change the bitmap on the completeImageList so it changes on the Gallery
+                            //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
+                            for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
+                                if (Methods.gbcImagesList.get(i).getFrameIndex() == position) {
+                                    Methods.gbcImagesList.get(i).setFrameIndex(0);
+                                    Bitmap image = null;
+                                    try {
+                                        image = GalleryFragment.frameChange(i, 0, false);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Methods.completeBitmapList.set(i, image);
+                                }
+                            }
+                            Methods.framesList.remove(position);
+                            customGridViewAdapterFrames.notifyDataSetChanged();
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Acción a realizar cuando se presiona el botón "Cancelar"
+                        }
+                    });
+                    // Mostrar el diálogo
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 }
-                customGridViewAdapterFrames.notifyDataSetChanged();
-
+                return true;//true so the normal onItemClick doesn't show
             }
-        });
 
+        });
 
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames);
+        tvNumFrames.setText("There are " + Methods.framesList.size() + " frames.");
         return view;
-    }
-
-    //Refactor this on a class
-    private static byte[] convertToByteArray(String data) {
-        String[] byteStrings = data.split(" ");
-        byte[] bytes = new byte[byteStrings.length];
-        for (int i = 0; i < byteStrings.length; i++) {
-            bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
-                    + Character.digit(byteStrings[i].charAt(1), 16));
-        }
-        System.out.println(bytes.length);
-        return bytes;
     }
 
     public static class CustomGridViewAdapterFrames extends ArrayAdapter<GbcFrame> {
         Context context;
         int layoutResourceId;
+        private boolean showTextView, checkDuplicate;
         List<GbcFrame> data = new ArrayList<GbcFrame>();
         int notSelectedColor = Color.parseColor("#FFFFFF");
         int selectedColor = Color.parseColor("#8C97B3");
@@ -103,11 +119,13 @@ public class FramesFragment extends Fragment {
 
 
         public CustomGridViewAdapterFrames(Context context, int layoutResourceId,
-                                           List<GbcFrame> data) {
+                                           List<GbcFrame> data, boolean showTextView, boolean checkDuplicate) {
             super(context, layoutResourceId, data);
             this.layoutResourceId = layoutResourceId;
             this.context = context;
             this.data = data;
+            this.showTextView = showTextView;
+            this.checkDuplicate = checkDuplicate;
         }
 
         @Override
@@ -134,8 +152,21 @@ public class FramesFragment extends Fragment {
                 holder.txtTitle.setBackgroundColor(selectedColor);
                 holder.imageItem.setBackgroundColor(selectedColor);
             }
+            if (!showTextView) {
+                holder.txtTitle.setVisibility(View.GONE);
+            }
             Bitmap image = data.get(position).getFrameBitmap();
             String name = data.get(position).getFrameName();
+
+            if (checkDuplicate) {
+                for (GbcFrame objeto : Methods.framesList) {
+                    // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
+                    if (objeto.getFrameName().equals(name)) {
+                        // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
+                        holder.imageItem.setBackgroundColor(context.getResources().getColor(R.color.duplicated));
+                    }
+                }
+            }
             holder.txtTitle.setText(name);
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
 //            if (image != null && !image.isRecycled()) {

@@ -155,37 +155,17 @@
                 android:textSize="15sp"
                 android:backgroundTint="#804F4F"
                 android:visibility="gone"></Button>
+            <Button
+                android:id="@+id/btnAddImages"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:text="Add images"
+                android:textSize="15sp"
+                android:backgroundTint="#804F4F"
+                android:visibility="gone"></Button>
         </LinearLayout>
 
-
-        <!--        <Button-->
-        <!--            android:id="@+id/btnReadSav"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:text="Read Images"-->
-        <!--            android:layout_margin="5dp"-->
-        <!--            android:textSize="20sp"></Button>-->
-        <!--        <Button-->
-        <!--            android:id="@+id/btnPowerOff"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:text="Power Off"-->
-        <!--            android:layout_margin="5dp"-->
-        <!--            android:textSize="20sp"></Button>-->
-        <!--        <Button-->
-        <!--            android:id="@+id/btnSCT"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:text="SCT"-->
-        <!--            android:layout_margin="5dp"-->
-        <!--            android:textSize="20sp"></Button>-->
-        <!--        <Button-->
-        <!--            android:id="@+id/btnPowerOn"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:text="Power On"-->
-        <!--            android:layout_margin="5dp"-->
-        <!--            android:textSize="20sp"></Button>-->
 
     </LinearLayout>
     <LinearLayout

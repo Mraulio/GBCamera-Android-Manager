@@ -1,33 +1,29 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
-import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.IMAGE_HEIGHT;
-import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.IMAGE_WIDTH;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
@@ -36,13 +32,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.mraulio.gbcameramanager.CustomGridViewAdapterPalette;
+import com.mraulio.gbcameramanager.db.ImageDao;
+import com.mraulio.gbcameramanager.model.GbcFrame;
+import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
-import com.mraulio.gbcameramanager.StartCreation;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
@@ -56,6 +54,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -64,25 +63,37 @@ public class GalleryFragment extends Fragment {
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
 
     public static GridView gridView;
-    private static int itemsPerPage = 12;
+    private static int itemsPerPage = MainActivity.imagesPage;
     static int startIndex = 0;
     static int endIndex = 0;
-    static int currentPage = 0;
+    public static int currentPage = 0;
     static int lastPage = 0;
     boolean crop = false;
     boolean showPalettes = true;
-    TextView tv_page;
+    static TextView tv_page;
     boolean keepFrame = false;
-//    Resources.Theme theme = getActivity().getTheme();//I get the theme
+    //    Resources.Theme theme = getActivity().getTheme();//I get the theme
+    public static CustomGridViewAdapterImage customGridViewAdapterImage;
+    static List<Bitmap> imagesForPage;
+    static List<GbcImage> gbcImagesForPage;
+    public static TextView tv;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;
-        TextView tv = (TextView) view.findViewById(R.id.text_gallery);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        tv = (TextView) view.findViewById(R.id.text_gallery);
         gridView = (GridView) view.findViewById(R.id.gridView);
 
+        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage, false);
         Button btnPrevPage = (Button) view.findViewById(R.id.btnPrevPage);
         Button btnNextPage = (Button) view.findViewById(R.id.btnNextPage);
         tv_page = (TextView) view.findViewById(R.id.tv_page);
@@ -130,17 +141,15 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedPosition = 0;
-                Toast toast = Toast.makeText(getContext(), "Size: " + Methods.listImageBytes, Toast.LENGTH_LONG);
                 crop = false;
                 keepFrame = false;
                 // Obtener la imagen seleccionada
                 if (currentPage != lastPage) {
                     selectedPosition = position + (currentPage * itemsPerPage);
                 } else {
-                    selectedPosition = Methods.completeImageList.size() - (itemsPerPage - position);
+                    selectedPosition = Methods.completeBitmapList.size() - (itemsPerPage - position);
                 }
-                final Bitmap[] selectedImage = {Methods.completeImageList.get(selectedPosition)};
-                byte[] selectedImageBytes = Methods.gbcImagesList.get(selectedPosition).getImageBytes();
+                final Bitmap[] selectedImage = {Methods.completeBitmapList.get(selectedPosition)};
                 // Crear el diálogo personalizado
                 final Dialog dialog = new Dialog(getContext());
                 dialog.setContentView(R.layout.custom_dialog);
@@ -149,14 +158,14 @@ public class GalleryFragment extends Fragment {
                 // Configurar la vista de imagen del diálogo
                 ImageView imageView = dialog.findViewById(R.id.image_view);
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
+                int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
+                imageView.setMaxHeight(maxHeight);
 
                 // Configurar el botón de cierre del diálogo
                 Button printButton = dialog.findViewById(R.id.print_button);
                 Button shareButton = dialog.findViewById(R.id.share_button);
 
                 Button saveButton = dialog.findViewById(R.id.save_button);
-//                Button cropButton = dialog.findViewById(R.id.crop_save_button);
-//                Button paletteButton = dialog.findViewById(R.id.btn_palette);
                 Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
                 GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
                 GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
@@ -169,11 +178,70 @@ public class GalleryFragment extends Fragment {
                 if (currentPage != lastPage) {
                     globalImageIndex = position + (currentPage * itemsPerPage);
                 } else {
-                    globalImageIndex = Methods.completeImageList.size() - (itemsPerPage - position);
+                    globalImageIndex = Methods.completeBitmapList.size() - (itemsPerPage - position);
+                }
+                if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
+                    imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+                }
+                if (Methods.gbcImagesList.get(globalImageIndex).isLockFrame()) {
+                    System.out.println("is lock frame true");
+                    keepFrame = true;
+                    cbFrameKeep.setChecked(true);
                 }
 
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    private int clickCount = 0;
+                    private final Handler handler = new Handler();
+                    private final Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            // Acción a realizar cuando se detecta un clic simple
+                            // después de que expire el temporizador
+//                            palette = Methods.gbcPalettesList.get(clickedPosition).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
+//                            newPaletteName = Methods.gbcPalettesList.get(clickedPosition).getName();
+//                            paletteDialog(palette, newPaletteName);
+                            Methods.toast(getContext(), "Single tap" + globalImageIndex);
+                            showCustomDialog(Methods.completeBitmapList.get(globalImageIndex));
+                            clickCount = 0;
+                        }
+                    };
+
+                    @Override
+                    public void onClick(View v) {
+                        clickCount++;
+                        if (clickCount == 1) {
+                            // Iniciar el temporizador para detectar el doble toque
+                            handler.postDelayed(runnable, 300);
+                        } else if (clickCount == 2) {
+
+                            // Detener el temporizador y realizar la acción para el doble toque
+                            handler.removeCallbacks(runnable);
+                            if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
+                                List<String> tags = Methods.gbcImagesList.get(globalImageIndex).getTags();
+                                for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
+                                    String nombre = iter.next();
+                                    if (nombre.equals("__filter:favourite__")) {
+                                        iter.remove();
+                                    }
+                                    Methods.gbcImagesList.get(globalImageIndex).setTags(tags);
+                                    imageView.setBackgroundColor(getContext().getColor(R.color.white));
+                                }
+                                Methods.toast(getContext(), "Removed as favorite" + globalImageIndex);
+                            } else {
+                                Methods.gbcImagesList.get(globalImageIndex).addTag("__filter:favourite__");
+                                Methods.toast(getContext(), "Set as favorite" + globalImageIndex);
+                                imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+                            }
+                            clickCount = 0;
+                            System.out.println(Methods.gbcImagesList.get(globalImageIndex).getTags());
+                            updateGridView(currentPage, gridView);
+                        }
+                        new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
+                    }
+                });
+
                 paletteFrameSelButton.setText("Show frames.");
-                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList);
+                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false, false);
                 frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                 gridViewFrames.setAdapter(frameAdapter);
 
@@ -188,6 +256,17 @@ public class GalleryFragment extends Fragment {
                     public void onClick(View v) {
                         if (keepFrame) keepFrame = false;
                         else keepFrame = true;
+                        try {
+                            frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        GbcImage gbcImage = Methods.gbcImagesList.get(globalImageIndex);
+                        gbcImage.setLockFrame(keepFrame);
+                        new UpdateImageAsyncTask(gbcImage).execute();
+                        Bitmap image = Methods.completeBitmapList.get(globalImageIndex);
+                        imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
+                        updateGridView(currentPage, gridView);
                     }
                 });
                 cbCrop.setOnClickListener(new View.OnClickListener() {
@@ -213,14 +292,16 @@ public class GalleryFragment extends Fragment {
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
 //                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
                         selectedImage[0] = framed;
-                        Methods.completeImageList.set(globalImageIndex, framed);
+                        Methods.completeBitmapList.set(globalImageIndex, framed);
                         Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);
                         frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                         frameAdapter.notifyDataSetChanged();
+                        new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
                         updateGridView(currentPage, gridView);
                     }
                 });
-                CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList);
+                CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, false, false);
+
                 adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
                 gridViewPalette.setAdapter(adapterPalette);
                 gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -237,7 +318,7 @@ public class GalleryFragment extends Fragment {
                         }
                         Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
 
-                        Methods.completeImageList.set(globalImageIndex, changedImage);
+                        Methods.completeBitmapList.set(globalImageIndex, changedImage);
                         if (keepFrame) {
                             try {
                                 changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
@@ -245,7 +326,9 @@ public class GalleryFragment extends Fragment {
                                 e.printStackTrace();
                             }
                         }
+
                         Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
+                        new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
                         adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
                         adapterPalette.notifyDataSetChanged();
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
@@ -315,8 +398,7 @@ public class GalleryFragment extends Fragment {
 
 
 // Configurar el diálogo para que ocupe el 80% de  la pantalla
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
                 int screenWidth = displayMetrics.widthPixels;
                 int desiredWidth = (int) (screenWidth * 0.8);
                 Window window = dialog.getWindow();
@@ -334,23 +416,39 @@ public class GalleryFragment extends Fragment {
                 dialog.show();
             }
         });
-        if (Methods.gbcImagesList.size() > 0) {
+        if (Methods.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
             updateGridView(currentPage, gridView);
             tv.setText("Total of images: " + GbcImage.numImages);
 
         } else {
-            tv.setText("No images in the gallery. Go to Import tab.");
+            tv.setText("Loading...");
         }
         tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
 
         return view;
     }
 
-    private Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
+    private class UpdateImageAsyncTask extends AsyncTask<Void, Void, Void> {
+        private GbcImage gbcImage;
+
+        UpdateImageAsyncTask(GbcImage gbcImage) {
+            this.gbcImage = gbcImage;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ImageDao imageDao = MainActivity.db.imageDao();
+            imageDao.update(gbcImage);
+            return null;
+        }
+    }
+
+
+    public static Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
         // Obtener la imagen seleccionada
         Bitmap framed = null;
         Bitmap framedAux;
-        if (Methods.completeImageList.get(globalImageIndex).getHeight() == 144 && Methods.completeImageList.get(globalImageIndex).getWidth() == 160) {
+        if ((Methods.gbcImagesList.get(globalImageIndex).getImageBytes().length / 40) == 144) {
             //I need to use copy because if not it's inmutable bitmap
             framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
@@ -359,15 +457,15 @@ public class GalleryFragment extends Fragment {
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), Methods.encodeImage(framed, Methods.gbcImagesList.get(globalImageIndex)), Methods.gbcImagesList.get(globalImageIndex));
+                framed = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), Methods.encodeImage(framed), Methods.gbcImagesList.get(globalImageIndex));
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
-            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeImageList.get(globalImageIndex), 16, 16, 128, 112);
+            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.completeBitmapList.get(globalImageIndex), 16, 16, 128, 112);
             canvas.drawBitmap(croppedBitmap, 16, 16, null);
-            Methods.completeImageList.set(globalImageIndex, framed);
+            Methods.completeBitmapList.set(globalImageIndex, framed);
             try {
-                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(framedAux, Methods.gbcImagesList.get(globalImageIndex)));//Use the framedAux because it doesn't a different palette to encode
+                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(framedAux));//Use the framedAux because it doesn't a different palette to encode
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -376,14 +474,12 @@ public class GalleryFragment extends Fragment {
     }
 
     //Cambiar paleta
-    public Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
-        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
-        System.out.println("************************HEIGHT" + (imageBytes.length / 40) + "++++++++++++++++++++++++++++++");
-        Bitmap image = imageCodec.decodeWithPalette(index, imageBytes);
-
+    public static Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
+        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
+        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(index).getPaletteColorsInt(), imageBytes);
         //If the image is 128x112 (extracted from sav) I apply the frame
         if ((imageBytes.length / 40) == 112) {
-            ImageCodec imageCodec2 = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColors()), 160, 144);
+            ImageCodec imageCodec2 = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, 144);
             //I need to use copy because if not it's inmutable bitmap
             Bitmap framed = Methods.framesList.get(1).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvas = new Canvas(framed);
@@ -393,13 +489,50 @@ public class GalleryFragment extends Fragment {
         return image;
     }
 
+    private void showCustomDialog(Bitmap bitmap) {
+        // Crear el diálogo personalizado
+        final Dialog dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.single_image_dialog);
+
+        // Configurar el tamaño del diálogo
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        // Obtener el ImageView y configurarlo como desplazable
+        ImageView imageView = dialog.findViewById(R.id.imageView);
+        imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false));
+
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
+            }
+        });
+
+        // Obtener el botón de cerrar y configurar su acción
+        Button closeButton = dialog.findViewById(R.id.button_close);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        // Mostrar el diálogo personalizado
+        dialog.show();
+        dialog.getWindow().setAttributes(lp);
+    }
+
     //This one changes pixel by pixel of the bitmap, but works better with the frames
     public Bitmap paletteChanger2(int newPaletteIndex, Bitmap bitmap, int imageIndex) {
         int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
         bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-        int[] oldColors = Methods.gbcPalettesList.get(Methods.gbcImagesList.get(imageIndex).getPaletteIndex()).getPaletteColors();
-        int[] newColors = Methods.gbcPalettesList.get(newPaletteIndex).getPaletteColors();
+        int[] oldColors = Methods.gbcPalettesList.get(Methods.gbcImagesList.get(imageIndex).getPaletteIndex()).getPaletteColorsInt();
+        int[] newColors = Methods.gbcPalettesList.get(newPaletteIndex).getPaletteColorsInt();
 
         Map<Integer, Integer> colorIndexMap = new HashMap<>();
         for (int i = 0; i < oldColors.length; i++) {
@@ -448,6 +581,7 @@ public class GalleryFragment extends Fragment {
         startActivity(Intent.createChooser(intent, "Share"));
     }
 
+
     private void saveImage(Bitmap image, String fileName) {
         if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
             image = Bitmap.createBitmap(image, 16, 16, 128, 112);
@@ -475,30 +609,42 @@ public class GalleryFragment extends Fragment {
         }
     }
 
-    private void updateGridView(int page, GridView gridView) {
-        //Por si la lista de imagenes es mas corta que el tamaño de paginacion
-        itemsPerPage = 12;
+    public static void updateFromMain() {
+        if (Methods.gbcImagesList.size() > 0) {
+            updateGridView(currentPage, gridView);
+            tv.setText("Total of images: " + GbcImage.numImages);
 
-        if (Methods.completeImageList.size() < itemsPerPage) {
-            itemsPerPage = Methods.completeImageList.size();
+        } else {
+            tv.setText("No images in the gallery. Go to Import tab.");
         }
-        lastPage = (Methods.completeImageList.size() - 1) / itemsPerPage;
+        tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
+        System.out.println("Called updateFromMain");
+        updateGridView(currentPage, gridView);
+    }
+
+    public static void updateGridView(int page, GridView gridView) {
+        //Por si la lista de imagenes es mas corta que el tamaño de paginacion
+        itemsPerPage = MainActivity.imagesPage;
+        if (Methods.completeBitmapList.size() < itemsPerPage) {
+            itemsPerPage = Methods.completeBitmapList.size();
+        }
+        lastPage = (Methods.completeBitmapList.size() - 1) / itemsPerPage;
 
         //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
-        if (currentPage == lastPage && (Methods.completeImageList.size() % itemsPerPage) != 0) {
-            itemsPerPage = Methods.completeImageList.size() % itemsPerPage;
-            startIndex = Methods.completeImageList.size() - itemsPerPage;
-            endIndex = Methods.completeImageList.size();
+        if (currentPage == lastPage && (Methods.completeBitmapList.size() % itemsPerPage) != 0) {
+            itemsPerPage = Methods.completeBitmapList.size() % itemsPerPage;
+            startIndex = Methods.completeBitmapList.size() - itemsPerPage;
+            endIndex = Methods.completeBitmapList.size();
 
         } else {
             startIndex = page * itemsPerPage;
-            endIndex = Math.min(startIndex + itemsPerPage, Methods.completeImageList.size());
+            endIndex = Math.min(startIndex + itemsPerPage, Methods.completeBitmapList.size());
         }
-
         //There will be a better way to do this, but works
-        List<Bitmap> imagesForPage = Methods.completeImageList.subList(startIndex, endIndex);
-        List<GbcImage> gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
-        gridView.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage));
+        imagesForPage = Methods.completeBitmapList.subList(startIndex, endIndex);
+        gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
+        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage, false);
+        gridView.setAdapter(customGridViewAdapterImage);
     }
 
 
@@ -510,21 +656,22 @@ public class GalleryFragment extends Fragment {
         int layoutResourceId;
         List<GbcImage> data = new ArrayList<GbcImage>();
         private List<Bitmap> images;
+        private boolean checkDuplicate;
 
         public CustomGridViewAdapterImage(Context context, int layoutResourceId,
-                                          List<GbcImage> data, List<Bitmap> images) {
+                                          List<GbcImage> data, List<Bitmap> images, boolean checkDuplicate) {
             super(context, layoutResourceId, data);
             this.layoutResourceId = layoutResourceId;
             this.context = context;
             this.images = images;
             this.data = data;
+            this.checkDuplicate = checkDuplicate;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View row = convertView;
             RecordHolder holder = null;
-
             if (row == null) {
                 LayoutInflater inflater = ((Activity) context).getLayoutInflater();
                 row = inflater.inflate(layoutResourceId, parent, false);
@@ -532,17 +679,31 @@ public class GalleryFragment extends Fragment {
                 holder = new RecordHolder();
                 holder.txtTitle = (TextView) row.findViewById(R.id.tvName);
                 holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
+
+
                 row.setTag(holder);
             } else {
                 holder = (RecordHolder) row.getTag();
             }
+
             Bitmap image = images.get(position);
             String name = data.get(position).getName();
+            String hash = data.get(position).getHashCode();
+            Boolean fav = data.get(position).getTags().contains("__filter:favourite__");
+            holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) : Color.WHITE);
+            Boolean dup = false;
+            if (checkDuplicate) {
+                for (GbcImage gbcImage : Methods.gbcImagesList) {
+                    // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
+                    if (gbcImage.getHashCode().equals(hash)) {
+                        // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
+                        dup = true;
+                    }
+                }
+            }
+            holder.txtTitle.setTextColor(dup ? context.getResources().getColor(R.color.duplicated) : Color.BLACK);
             holder.txtTitle.setText(name);
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
-//            if (image != null && !image.isRecycled()) {
-//                image.recycle();
-//            }
             return row;
         }
 

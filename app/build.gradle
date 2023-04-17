@@ -11,7 +11,7 @@ android {
         minSdk 26
         targetSdk 33
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,10 +32,18 @@ android {
 }
 
 dependencies {
+    def room_version = "2.5.0"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+
+
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.github.mik3y:usb-serial-for-android:3.5.1'
+    implementation 'com.google.android.material:material:1.5.0-alpha01'
     implementation 'com.github.QuadFlask:colorpicker:0.0.15'
+
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'

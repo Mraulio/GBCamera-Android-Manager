@@ -25,5 +25,21 @@
             android:layout_height="wrap_content"
             tools:ignore="MissingConstraints"></Spinner>
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="30dp"
+        android:layout_gravity="center">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select images per page: "></TextView>
+        <Spinner
+            android:id="@+id/spImagesPage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:ignore="MissingConstraints"></Spinner>
+    </LinearLayout>
 </LinearLayout>

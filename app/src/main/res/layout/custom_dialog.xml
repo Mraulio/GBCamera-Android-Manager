@@ -7,17 +7,12 @@
 
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:scaleType="fitCenter" />
-
-    <!--    <Button-->
-    <!--        android:id="@+id/btn_palette"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_gravity="center_horizontal"-->
-    <!--        android:text="Change palette" />-->
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:scaleType="fitXY" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -45,7 +40,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Crop"></CheckBox>
+            android:text="Crop"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
+            android:textSize="10dp"></CheckBox>
 
         <Button
             android:id="@+id/save_button"
@@ -95,6 +95,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:weightSum="2"
         android:orientation="horizontal">
 
         <CheckBox
@@ -102,14 +103,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:text="Keep frame color"></CheckBox>
+            android:text="Keep frame color"
+            android:layout_weight="1"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
+            android:textSize="10dp"></CheckBox>
 
         <Button
             android:id="@+id/btnPaletteFrame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="5dp"
-            android:text="Show palettes"></Button>
+            android:text="Show palettes"
+            android:layout_weight="1"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="3sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
+            android:textSize="10dp"></Button>
     </LinearLayout>
 
     <GridView
@@ -129,7 +142,7 @@
         android:layout_height="wrap_content"
         android:background="#D5D5D5"
         android:horizontalSpacing="10dp"
-        android:numColumns="5"
+        android:numColumns="3"
         android:scrollbars="horizontal"
         android:stretchMode="columnWidth"
         android:verticalSpacing="10dp"

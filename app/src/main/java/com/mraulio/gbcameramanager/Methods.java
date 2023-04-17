@@ -25,57 +25,61 @@ import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Methods {
 
-    public static List<Bitmap> completeBitmapList = new ArrayList<>();
+//    public static List<Bitmap> completeBitmapList = new ArrayList<>();
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
+    public static HashMap<String, byte[]> imageBytesCache = new HashMap<>();
+    public static HashMap<String,Bitmap> imageBitmapCache = new HashMap<>();
 
-    /**
-     * *******************************************************************
-     * TO READ THE SAV IMAGES
-     */
-    public static void extractSavImages(Context context) {
-        try {
-        Extractor extractor = new SaveImageExtractor(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()));
-            File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File savFile = new File(downloadsDirectory + "/gbc.sav");
 
-            //Extract the images
-            List<byte[]> listImageBytes = new ArrayList<>();
-            listImageBytes = extractor.extractBytes(savFile);
-
-            for (byte[] imageBytes : listImageBytes) {
-                GbcImage gbcImage = new GbcImage();
-                GbcImage.numImages++;
-                gbcImage.setName("Image " + (GbcImage.numImages));
-                gbcImage.setFrameIndex(0);
-                gbcImage.setPaletteIndex(0);
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 128, 112);
-                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
-                if (image.getHeight() == 112 && image.getWidth() == 128) {
-                    //I need to use copy because if not it's inmutable bitmap
-                    Bitmap framed = framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-                    Canvas canvas = new Canvas(framed);
-                    canvas.drawBitmap(image, 16, 16, null);
-                    image = framed;
-                    imageBytes = encodeImage(image);
-                }
-                gbcImage.setImageBytes(imageBytes);
-                completeBitmapList.add(image);
-                gbcImagesList.add(gbcImage);
-            }
-        } catch (IOException e) {
-            System.out.println("Error aqui");
-            e.printStackTrace();
-        }catch (Exception e){
-            System.out.println("Error aqui");
-            e.printStackTrace();
-        }
-    }
+//    /**
+//     * *******************************************************************
+//     * TO READ THE SAV IMAGES
+//     */
+//    public static void extractSavImages(Context context) {
+//        try {
+//        Extractor extractor = new SaveImageExtractor(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()));
+//            File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+//            File savFile = new File(downloadsDirectory + "/gbc.sav");
+//
+//            //Extract the images
+//            List<byte[]> listImageBytes = new ArrayList<>();
+//            listImageBytes = extractor.extractBytes(savFile);
+//
+//            for (byte[] imageBytes : listImageBytes) {
+//                GbcImage gbcImage = new GbcImage();
+//                GbcImage.numImages++;
+//                gbcImage.setName("Image " + (GbcImage.numImages));
+//                gbcImage.setFrameIndex(0);
+//                gbcImage.setPaletteIndex(0);
+//                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 128, 112);
+//                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
+//                if (image.getHeight() == 112 && image.getWidth() == 128) {
+//                    //I need to use copy because if not it's inmutable bitmap
+//                    Bitmap framed = framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+//                    Canvas canvas = new Canvas(framed);
+//                    canvas.drawBitmap(image, 16, 16, null);
+//                    image = framed;
+//                    imageBytes = encodeImage(image);
+//                }
+//                gbcImage.setImageBytes(imageBytes);
+//                completeBitmapList.add(image);
+//                gbcImagesList.add(gbcImage);
+//            }
+//        } catch (IOException e) {
+//            System.out.println("Error aqui");
+//            e.printStackTrace();
+//        }catch (Exception e){
+//            System.out.println("Error aqui");
+//            e.printStackTrace();
+//        }
+//    }
 
     // Función auxiliar para convertir bytes a una cadena hexadecimal
     public static String bytesToHex(byte[] bytes) {
@@ -135,7 +139,7 @@ public class Methods {
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
             Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
-            completeBitmapList.add(image);
+//            completeBitmapList.add(image);
             gbcImagesList.add(gbcImage);
         }
     }

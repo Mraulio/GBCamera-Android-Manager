@@ -80,7 +80,8 @@ public class FramesFragment extends Fragment {
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
-                                    Methods.completeBitmapList.set(i, image);
+                                    Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(),image);
+//                                    Methods.completeBitmapList.set(i, image);
                                 }
                             }
                             Methods.framesList.remove(position);

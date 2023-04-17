@@ -171,17 +171,21 @@ public class MainActivity extends AppCompatActivity {
                     GbcImage.numImages++;
                     Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
 
-                    Methods.completeBitmapList.add(image);
+//                    Methods.completeBitmapList.add(image);
+                    Methods.imageBitmapCache.put(gbcImage.getHashCode(),image);
+
                     if (gbcImage.isLockFrame()) {
                         System.out.println("Entering lockFrame");
                         try {
                             image = GalleryFragment.frameChange(index, Methods.gbcImagesList.get(index).getFrameIndex(), true);
-                            Methods.completeBitmapList.set(index ,image);
+//                            Methods.completeBitmapList.set(index, image);
 
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
+                    Methods.imageBitmapCache.put(gbcImage.getHashCode(),image);
+                    Methods.imageBytesCache.put(gbcImage.getHashCode(),gbcImage.getImageBytes());
                     index++;
                 }
 //                for (GbcImage gbcImage : Methods.gbcImagesList) {

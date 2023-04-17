@@ -54,7 +54,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 
@@ -108,12 +107,12 @@ public class ImportFragment extends Fragment {
                 importedImagesList.clear();
                 importedImagesBitmaps.clear();
                 listImportedImageBytes.clear();
-                gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true)));
+                gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                 if (savFile && !isJson) {
                     btnAddImages.setEnabled(true);
                     extractSavImages(getContext());
                     tvFileName.setText("" + importedImagesList.size());//"" to make it work
-                    gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true)));
+                    gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                     btnAddImages.setText("Add images");
                     btnAddImages.setVisibility(View.VISIBLE);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
@@ -126,7 +125,7 @@ public class ImportFragment extends Fragment {
                         e.printStackTrace();
                     }
                     tvFileName.setText("" + importedImagesList.size());//"" to make it work
-                    gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true)));
+                    gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                     btnAddImages.setText("Add images");
                     btnAddImages.setVisibility(View.VISIBLE);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
@@ -156,7 +155,7 @@ public class ImportFragment extends Fragment {
                             btnAddImages.setEnabled(true);
                             btnAddImages.setText("Add images");
                             btnAddImages.setVisibility(View.VISIBLE);
-                            gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true));
+                            gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true));
                             break;
                     }
                 }
@@ -223,7 +222,7 @@ public class ImportFragment extends Fragment {
                         for (int i = 0; i < importedImagesList.size(); i++) {
                             GbcImage gbcImage = importedImagesList.get(i);
                             boolean alreadyAdded = false;
-                            //If the palette already exists (by the name) it doesn't add it. Same if it's already added
+                            //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
                             for (GbcImage image : Methods.gbcImagesList) {
                                 if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
                                     alreadyAdded = true;
@@ -234,7 +233,9 @@ public class ImportFragment extends Fragment {
                                 GbcImage.numImages++;
                                 numImagesAdded++;
                                 Methods.gbcImagesList.add(gbcImage);
-                                Methods.completeBitmapList.add(importedImagesBitmaps.get(i));
+//                                Methods.completeBitmapList.add(importedImagesBitmaps.get(i));
+                                Methods.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
+                                Methods.imageBytesCache.put(gbcImage.getHashCode(), gbcImage.getImageBytes());
                             }
                         }
                         Methods.toast(getContext(), "Images added: " + numImagesAdded);
@@ -396,7 +397,7 @@ public class ImportFragment extends Fragment {
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                 System.out.println("HASH CODE: " + new String(hash));
                 String hashHex = Methods.bytesToHex(hash);
-                System.out.println(hashHex.length()+" HASH CODE TO HEX: "+hashHex);
+                System.out.println(hashHex.length() + " HASH CODE TO HEX: " + hashHex);
                 gbcImage.setHashCode(hashHex);
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 128, 112);
                 Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
@@ -541,10 +542,11 @@ public class ImportFragment extends Fragment {
             byte[] bytes = convertToByteArray(data);
             GbcImage gbcImage = new GbcImage();
             gbcImage.setImageBytes(bytes);
+
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
             System.out.println("HASH CODE: " + new String(hash));
             String hashHex = Methods.bytesToHex(hash);
-            System.out.println(hashHex.length()+" HASH CODE TO HEX: "+hashHex);
+            System.out.println(hashHex.length() + " HASH CODE TO HEX: " + hashHex);
             gbcImage.setHashCode(hashHex);
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -38,12 +39,14 @@ import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.PrintOverArduino;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
 import com.mraulio.gbcameramanager.gbxcart.PythonToJava;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -196,9 +199,14 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             @Override
             public void onClick(View v) {
                 GbcImage.numImages += extractedImagesList.size();
-                Methods.completeBitmapList.addAll(extractedImagesBitmaps);
+                for (int i = 0; i < extractedImagesList.size(); i++) {
+                    Methods.imageBitmapCache.put(extractedImagesList.get(i).getHashCode(),extractedImagesBitmaps.get(i));
+                    Methods.imageBytesCache.put(extractedImagesList.get(i).getHashCode(),extractedImagesList.get(i).getImageBytes());
+                }
+//                Methods.completeBitmapList.addAll(extractedImagesBitmaps);
                 Methods.gbcImagesList.addAll(extractedImagesList);
                 Methods.toast(getContext(), "Images added.");
+                new SaveImageAsyncTask().execute();
             }
         });
 
@@ -293,6 +301,18 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             }
         });
         return view;
+    }
+
+    private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ImageDao imageDao = MainActivity.db.imageDao();
+            for (GbcImage gbcImage : Methods.gbcImagesList) {
+                imageDao.insert(gbcImage);
+            }
+            return null;
+        }
     }
 
     public static void printOnGallery() throws IOException {

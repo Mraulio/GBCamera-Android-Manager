@@ -121,7 +121,8 @@ public class PalettesFragment extends Fragment {
                                     Methods.gbcImagesList.get(i).setPaletteIndex(0);
                                     ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
                                     Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
-                                    Methods.completeBitmapList.set(i, image);
+//                                    Methods.completeBitmapList.set(i, image);
+                                    Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(),image);
                                 }
                             }
 
@@ -635,7 +636,7 @@ public class PalettesFragment extends Fragment {
             // Divide el ancho del ImageView por cuatro para obtener el ancho de cada sección
             imageBytes = Methods.gbcImagesList.get(0).getImageBytes();
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes);
-            upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Methods.completeBitmapList.get(0).getWidth() * 6, Methods.completeBitmapList.get(0).getHeight() * 6, false);
+            upscaledBitmap = Bitmap.createScaledBitmap(bitmap, 160 * 6, 144 * 6, false);
         }
 
         return upscaledBitmap;

@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Environment;
 
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -9,6 +10,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
 import org.json.JSONArray;
@@ -155,14 +157,19 @@ public class JsonReader {
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
             try {
                 Bitmap imageBitmap = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
-                try {
-                    gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                ImageData imageData = new ImageData();
+
                 byte[] hashSha = MessageDigest.getInstance("SHA-256").digest(bytes);
                 String hashHex = Methods.bytesToHex(hashSha);
                 gbcImage.setHashCode(hashHex);
+                imageData.setImageId(hashHex);
+                try {
+                    imageData.setData(Methods.encodeImage(imageBitmap));
+//                    gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ImportFragment.importedImageDatas.add(imageData);
                 ImportFragment.importedImagesList.add(gbcImage);
                 ImportFragment.importedImagesBitmaps.add(imageBitmap);
             } catch (Exception e) {

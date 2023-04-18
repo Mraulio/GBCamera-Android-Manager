@@ -39,9 +39,11 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
     public static int exportSize = 4;
-    public static int imagesPage = 12;
+    public static int imagesPage = 9;
     public static UsbManager manager;
     public static AppDatabase db;
     private static final String ACTION_USB_PERMISSION =
@@ -139,9 +141,18 @@ public class MainActivity extends AppCompatActivity {
             List<GbcPalette> palettes = paletteDao.getAll();
             List<GbcFrame> frames = frameDao.getAll();
             List<GbcImage> imagesFromDao = imageDao.getAll();
+//            List<ImageData> imageDataFromDao = imageDataDao.getAll();
             System.out.println(palettes.size() + "/////PALETTES SIZE");
             System.out.println(frames.size() + "/////FRAMES SIZE");
             System.out.println(imagesFromDao.size() + "/////IMAGES SIZE");
+//            System.out.println(imageDataFromDao.size() + "/////IMAGES DATA FROM DAO SIZE");
+
+//            for (ImageData imagedata: imageDataFromDao) {
+//                System.out.println(imagedata.getImageId());
+//                System.out.println(imagedata.getId());
+//                System.out.println(imagedata.getData());
+//            }
+
 
             if (palettes.size() > 0) {
                 Methods.gbcPalettesList.addAll(palettes);
@@ -160,39 +171,30 @@ public class MainActivity extends AppCompatActivity {
                     frameDao.insert(gbcFrame);
                 }
             }
-
             //Now that I have palettes, I can add images:
             if (imagesFromDao.size() > 0) {
+                try {
+                    System.out.println("Length" + imagesFromDao.get(0).getImageBytes().length);
+
+                } catch (Exception e){
+                    System.out.println("Length en gbcimage es null");
+                }
                 anyImage = true;
                 //I need to add them to the gbcImagesList(GbcImage) and completeBitmapList(Bitmap)
                 Methods.gbcImagesList.addAll(imagesFromDao);
-                int index = 0;
-                for (GbcImage gbcImage : Methods.gbcImagesList) {
-                    byte[] bytesFromNewDao = imageDataDao.getDataByImageId(gbcImage.getHashCode());
-                    System.out.println(bytesFromNewDao);
-                    System.out.println(index);
-                    int height = (gbcImage.getImageBytes().length + 1) / 40;//To get the real height of the image
-                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
-                    GbcImage.numImages++;
-                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
-
-//                    Methods.completeBitmapList.add(image);
-                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
-
-                    if (gbcImage.isLockFrame()) {
-                        System.out.println("Entering lockFrame");
-                        try {
-                            image = GalleryFragment.frameChange(index, Methods.gbcImagesList.get(index).getFrameIndex(), true);
-//                            Methods.completeBitmapList.set(index, image);
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
-                    Methods.imageBytesCache.put(gbcImage.getHashCode(), gbcImage.getImageBytes());
-                    index++;
-                }
+                GbcImage.numImages+=Methods.gbcImagesList.size();
+                System.out.println("Added");
+//                int index = 0;
+//                for (GbcImage gbcImage : Methods.gbcImagesList) {
+//                    byte[] bytesFromNewDao = imageDataDao.getDataByImageId(gbcImage.getHashCode());
+//                    System.out.println("hashcode "+gbcImage.getHashCode());
+//                    System.out.println("Bytes new dao"+bytesFromNewDao);
+//                    System.out.println(index);
+////                    gbcImage.setImageBytes(imageDataDao.getDataByImageId(gbcImage.getHashCode()));
+//                    GbcImage.numImages++;
+//
+//                    index++;
+//                }
             }
             return null;
         }

@@ -32,7 +32,7 @@ public class GbcImage {
 
     public static int numImages= 0;//Should probably store this on the sharedPreferences
 
-    @ColumnInfo(name = "image_bytes")
+//    @ColumnInfo(name = "image_bytes")
     private byte[] imageBytes;
 
     public GbcImage(){
@@ -63,7 +63,6 @@ public class GbcImage {
 //    public void setBitmap(Bitmap bitmap) {
 //        this.bitmap = bitmap;
 //    }
-
 
     public boolean isLockFrame() {
         return lockFrame;

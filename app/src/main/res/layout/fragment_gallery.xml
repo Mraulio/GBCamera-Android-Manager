@@ -44,26 +44,46 @@
         android:gravity="center"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
+        android:weightSum="5"
         android:id="@+id/layourButtons">
 
         <Button
-            android:id="@+id/btnPrevPage"
-            android:layout_width="wrap_content"
+            android:id="@+id/btnFirstPage"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Prev" />
+            android:layout_weight="1"
+            android:text="1" />
+        <Button
+            android:id="@+id/btnPrevPage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:text="P" />
 
         <TextView
             android:id="@+id/tv_page"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
+            android:layout_weight="1"
+
             android:text="Page X of X"></TextView>
 
         <Button
             android:id="@+id/btnNextPage"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Next" />
+            android:layout_weight="1"
+
+            android:text="N" />
+        <Button
+            android:id="@+id/btnLastPage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:text="L" />
     </LinearLayout>
 
 </LinearLayout>

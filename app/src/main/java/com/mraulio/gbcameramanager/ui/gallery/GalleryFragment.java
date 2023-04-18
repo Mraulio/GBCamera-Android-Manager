@@ -36,6 +36,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.mraulio.gbcameramanager.db.ImageDao;
+import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
@@ -76,6 +77,7 @@ public class GalleryFragment extends Fragment {
     static List<Bitmap> imagesForPage;
     static List<GbcImage> gbcImagesForPage;
     public static TextView tv;
+    static boolean finishedUpdating = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -91,9 +93,12 @@ public class GalleryFragment extends Fragment {
         tv = (TextView) view.findViewById(R.id.text_gallery);
         gridView = (GridView) view.findViewById(R.id.gridView);
 
-        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage, false, false);
+
         Button btnPrevPage = (Button) view.findViewById(R.id.btnPrevPage);
         Button btnNextPage = (Button) view.findViewById(R.id.btnNextPage);
+        Button btnFirstPage = (Button) view.findViewById(R.id.btnFirstPage);
+        Button btnLastPage = (Button) view.findViewById(R.id.btnLastPage);
+
         tv_page = (TextView) view.findViewById(R.id.tv_page);
         view.setOnTouchListener(new OnSwipeTouchListener(getContext()) {
             @Override
@@ -120,7 +125,27 @@ public class GalleryFragment extends Fragment {
                 nextPage();
             }
         });
+        btnFirstPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentPage > 0) {
+                    currentPage = 0;
+                    updateGridView(currentPage, gridView);
+                    tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
+                }
+            }
 
+        });
+        btnLastPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentPage < lastPage) {
+                    currentPage = lastPage;
+                    updateGridView(currentPage, gridView);
+                    tv_page.setText("Page " + (currentPage + 1) + " of " + (lastPage + 1));
+                }
+            }
+        });
         //To swipe over the gridview. Not working properly, selects the first image of the row
 //        gridView.setOnTouchListener(new OnSwipeTouchListener(getContext()) {
 //            @Override
@@ -234,7 +259,7 @@ public class GalleryFragment extends Fragment {
                             System.out.println(Methods.gbcImagesList.get(globalImageIndex).getTags());
                             updateGridView(currentPage, gridView);
                         }
-                        new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
+                        new SaveImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
                     }
                 });
 
@@ -254,15 +279,18 @@ public class GalleryFragment extends Fragment {
                     public void onClick(View v) {
                         if (keepFrame) keepFrame = false;
                         else keepFrame = true;
+                        Bitmap bitmap;
                         try {
-                            frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
+                            bitmap = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                         GbcImage gbcImage = Methods.gbcImagesList.get(globalImageIndex);
                         gbcImage.setLockFrame(keepFrame);
-                        new UpdateImageAsyncTask(gbcImage).execute();
+                        new SaveImageAsyncTask(gbcImage).execute();
                         Bitmap image = Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode());
+                        System.out.println(Methods.gbcImagesList.get(globalImageIndex).getHashCode());
+                        new SaveImageAsyncTask(gbcImage).execute();
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
                         updateGridView(currentPage, gridView);
                     }
@@ -295,7 +323,7 @@ public class GalleryFragment extends Fragment {
                         Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);
                         frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                         frameAdapter.notifyDataSetChanged();
-                        new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
+                        new SaveImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
                         updateGridView(currentPage, gridView);
                     }
                 });
@@ -305,17 +333,14 @@ public class GalleryFragment extends Fragment {
                 gridViewPalette.setAdapter(adapterPalette);
                 gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position2, long id) {
+                    public void onItemClick(AdapterView<?> parent, View view, int palettePosition, long id) {
                         //Action when clicking a palette inside the Dialog
                         Bitmap changedImage;
                         if (!keepFrame) {
                             Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(0);//Need to set this to the palette 0 to then change it with the frame
-                            changedImage = paletteChanger(position2, Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
-
-                        } else {
-                            changedImage = paletteChanger(position2, Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
                         }
-                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
+                        changedImage = paletteChanger(palettePosition, Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
+                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(palettePosition);
 
                         Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
 //                        Methods.completeBitmapList.set(globalImageIndex, changedImage);
@@ -327,8 +352,8 @@ public class GalleryFragment extends Fragment {
                             }
                         }
 
-                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(position2);
-                        new UpdateImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
+                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(palettePosition);
+                        new SaveImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
                         adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
                         adapterPalette.notifyDataSetChanged();
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
@@ -428,10 +453,10 @@ public class GalleryFragment extends Fragment {
         return view;
     }
 
-    private class UpdateImageAsyncTask extends AsyncTask<Void, Void, Void> {
+    private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
         private GbcImage gbcImage;
 
-        UpdateImageAsyncTask(GbcImage gbcImage) {
+        SaveImageAsyncTask(GbcImage gbcImage) {
             this.gbcImage = gbcImage;
         }
 
@@ -457,6 +482,7 @@ public class GalleryFragment extends Fragment {
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
+                System.out.println("Entering !keepFrame");
                 framed = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), Methods.encodeImage(framed), Methods.gbcImagesList.get(globalImageIndex));
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
@@ -466,7 +492,8 @@ public class GalleryFragment extends Fragment {
             Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), framed);
 //            Methods.completeBitmapList.set(globalImageIndex, framed);
             try {
-                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(Methods.encodeImage(framedAux));//Use the framedAux because it doesn't a different palette to encode
+                byte[] imageBytes = Methods.encodeImage(framedAux);
+                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);//Use the framedAux because it doesn't a different palette to encode
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -642,16 +669,75 @@ public class GalleryFragment extends Fragment {
             startIndex = page * itemsPerPage;
             endIndex = Math.min(startIndex + itemsPerPage, Methods.gbcImagesList.size());
         }
-        //There will be a better way to do this, but works
+
         for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
             imagesForPage.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
         }
 //            imagesForPage = Methods.completeBitmapList.subList(startIndex, endIndex);
         gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
-        customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, gbcImagesForPage, imagesForPage, false, false);
-        gridView.setAdapter(customGridViewAdapterImage);
+
+        new UpdateGridViewAsyncTask().execute();
+        finishedUpdating = false;
+//        while (!finishedUpdating)
+//        {//Wait
+//            }
+
     }
 
+    private static class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
+        //        private List<GbcImage> gbcImageList;
+//        SaveImageAsyncTask(List<GbcImage> gbcImageList){
+//            this.gbcImageList = gbcImageList;
+//        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            List<String> currentPageHashes = new ArrayList<>();
+            ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
+            int index = 0;
+            for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
+                currentPageHashes.add(gbcImage.getHashCode());
+                byte[] imageBytes = imageDataDao.getDataByImageId(gbcImage.getHashCode());
+                gbcImage.setImageBytes(imageBytes);
+                Methods.gbcImagesList.get(startIndex + index).setImageBytes(imageBytes);
+                Methods.imageBytesCache.put(gbcImage.getHashCode(), imageBytes);
+                int height = (imageBytes.length + 1) / 40;//To get the real height of the image
+
+                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
+
+                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
+
+//                    Methods.completeBitmapList.add(image);
+                Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
+
+                if (gbcImage.isLockFrame()) {
+                    System.out.println("Entering lockFrame");
+                    try {
+                        image = GalleryFragment.frameChange(startIndex + index, Methods.gbcImagesList.get(startIndex + index).getFrameIndex(), true);
+//                            Methods.completeBitmapList.set(index, image);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
+                index++;
+            }
+            gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
+            List<Bitmap> bitmapList = new ArrayList<>();
+            for (GbcImage gbcImage : gbcImagesForPage) {
+                bitmapList.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
+            }
+            customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, Methods.gbcImagesList.subList(startIndex, endIndex), bitmapList, false, false);
+            finishedUpdating = true;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            // Notifica al Adapter que los datos han cambiado
+            System.out.println("post execute//////////////////////////////////////////////////////////////");
+            gridView.setAdapter(customGridViewAdapterImage);
+        }
+    }
 
     /**
      * Other way to show images on the GridView, with the Text

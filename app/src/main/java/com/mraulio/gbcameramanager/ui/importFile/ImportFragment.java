@@ -64,6 +64,7 @@ public class ImportFragment extends Fragment {
 
     public static List<GbcImage> importedImagesList = new ArrayList<>();
     public static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
+    public static List<ImageData> importedImageDatas = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
     TextView tvFileName;
@@ -257,14 +258,21 @@ public class ImportFragment extends Fragment {
             ImageDao imageDao = MainActivity.db.imageDao();
 
             ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
+            //Need to insert first the gbcImage because of the Foreign Key
             for (GbcImage gbcImage : Methods.gbcImagesList) {
-                ImageData imageData = new ImageData();
-                imageData.setImageId(gbcImage.getHashCode());
-                imageData.setData(gbcImage.getImageBytes());
                 imageDao.insert(gbcImage);
+            }
+            for (ImageData imageData : importedImageDatas) {
                 imageDataDao.insert(imageData);
             }
+
+
             return null;
+        }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            tvFileName.setText("GbcImage size"+Methods.gbcImagesList.size());
+            tvFileName.append("ImageData size"+importedImageDatas.size());
         }
     }
 
@@ -415,7 +423,11 @@ public class ImportFragment extends Fragment {
                     image = framed;
                     imageBytes = Methods.encodeImage(image);
                 }
-                gbcImage.setImageBytes(imageBytes);
+                ImageData imageData = new ImageData();
+                imageData.setImageId(gbcImage.getHashCode());
+                imageData.setData(imageBytes);
+                importedImageDatas.add(imageData);
+//                gbcImage.setImageBytes(imageBytes);
                 importedImagesBitmaps.add(image);
                 importedImagesList.add(gbcImage);
             }
@@ -511,7 +523,12 @@ public class ImportFragment extends Fragment {
         }
         for (byte[] imageBytes : listaBytes) {
             GbcImage gbcImage = new GbcImage();
-            gbcImage.setImageBytes(imageBytes);
+            ImageData imageData = new ImageData();
+            imageData.setImageId(gbcImage.getHashCode());
+            imageData.setData(imageBytes);
+            importedImageDatas.add(imageData);
+
+//            gbcImage.setImageBytes(imageBytes);
 //                if (nameIndex%2==0)
 //                    gbcImage.setImageBytes(cambiarPaleta(imageBytes,1));
 //                else
@@ -543,11 +560,16 @@ public class ImportFragment extends Fragment {
             data = string.replaceAll(System.lineSeparator(), " ");
             byte[] bytes = convertToByteArray(data);
             GbcImage gbcImage = new GbcImage();
+
             gbcImage.setImageBytes(bytes);
 
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
             String hashHex = Methods.bytesToHex(hash);
             gbcImage.setHashCode(hashHex);
+            ImageData imageData = new ImageData();
+            imageData.setImageId(hashHex);
+            imageData.setData(bytes);
+            importedImageDatas.add(imageData);
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);

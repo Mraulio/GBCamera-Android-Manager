@@ -28,7 +28,6 @@ public class ImageData {
         this.id = id;
     }
 
-
     public String getImageId() {
         return imageId;
     }

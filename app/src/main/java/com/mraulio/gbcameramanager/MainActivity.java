@@ -97,11 +97,20 @@ public class MainActivity extends AppCompatActivity {
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
-        // Obtener información del Intent
+
+
+// Obtener información del Intent
         Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
         Uri uri = intent.getData();
 
-
+        if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
+            // Si el Intent contiene la acción ACTION_VIEW y la categoría CATEGORY_DEFAULT y
+            // el tipo es "application/octet-stream" y el URI del Intent termina en ".sav", realizar la acción deseada
+            // Por ejemplo, puedes abrir el archivo en tu aplicación:
+            Methods.toast(this, "Opened from file");
+        }
 //        Methods.extractHexImages();
         if (!doneLoading) {
             new ReadDataAsyncTask().execute();
@@ -221,23 +230,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // Obtener información del Intent
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        String type = intent.getType();
-        Uri uri = intent.getData();
-
-        if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
-            // Si el Intent contiene la acción ACTION_VIEW y la categoría CATEGORY_DEFAULT y
-            // el tipo es "application/octet-stream" y el URI del Intent termina en ".sav", realizar la acción deseada
-            // Por ejemplo, puedes abrir el archivo en tu aplicación:
-            Methods.toast(this, "Opened from file");
-        }
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//
+//
+//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

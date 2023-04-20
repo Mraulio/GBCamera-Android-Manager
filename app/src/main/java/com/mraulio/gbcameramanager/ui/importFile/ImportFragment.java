@@ -73,6 +73,7 @@ public class ImportFragment extends Fragment {
     boolean isJson = false;
     String fileContent = "";
     List<?> receivedList;
+    int numImagesAdded;
     CustomGridViewAdapterPalette customAdapterPalette;
 
     public enum ADD_WHAT {
@@ -220,7 +221,7 @@ public class ImportFragment extends Fragment {
 
                     case IMAGES:
                         btnAddImages.setEnabled(false);
-                        int numImagesAdded = 0;
+                        numImagesAdded = 0;
                         for (int i = 0; i < importedImagesList.size(); i++) {
                             GbcImage gbcImage = importedImagesList.get(i);
                             boolean alreadyAdded = false;
@@ -238,7 +239,6 @@ public class ImportFragment extends Fragment {
                                 Methods.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
                             }
                         }
-                        Methods.toast(getContext(), "Images added: " + numImagesAdded);
                         new SaveImageAsyncTask().execute();
                         break;
                 }
@@ -267,7 +267,8 @@ public class ImportFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-
+            tvFileName.setText("Done adding images!");
+            Methods.toast(getContext(), "Images added: " + numImagesAdded);
         }
     }
 

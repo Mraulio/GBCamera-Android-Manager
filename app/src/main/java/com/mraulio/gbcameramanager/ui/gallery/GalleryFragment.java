@@ -456,8 +456,6 @@ public class GalleryFragment extends Fragment {
     }
 
 
-
-
     public static Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
         // Obtener la imagen seleccionada
         Bitmap framed = null;
@@ -495,6 +493,7 @@ public class GalleryFragment extends Fragment {
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(index).getPaletteColorsInt(), imageBytes);
         new SaveImageAsyncTask(gbcImage).execute();
+
         return image;
     }
 
@@ -659,13 +658,13 @@ public class GalleryFragment extends Fragment {
         //The bitmaps come from the BitmapCache map, using the gbcimage hashcode
         for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
 //            imagesForPage.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
-            if (!Methods.imageBitmapCache.containsKey(gbcImage.getHashCode())){
+            if (!Methods.imageBitmapCache.containsKey(gbcImage.getHashCode())) {
                 doAsync = true;
             }
         }
-        if (doAsync){
+        if (doAsync) {
             new UpdateGridViewAsyncTask().execute();
-        }else{
+        } else {
             List<Bitmap> bitmapList = new ArrayList<>();
             for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
                 bitmapList.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
@@ -719,8 +718,8 @@ public class GalleryFragment extends Fragment {
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height
-                    if (image.getHeight()==144)
-                    image = frameChange(newStartIndex + index, Methods.gbcImagesList.get(newStartIndex + index).getFrameIndex(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
+                    if (image.getHeight() == 144)
+                        image = frameChange(newStartIndex + index, Methods.gbcImagesList.get(newStartIndex + index).getFrameIndex(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

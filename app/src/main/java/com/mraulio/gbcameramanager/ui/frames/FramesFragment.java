@@ -81,7 +81,7 @@ public class FramesFragment extends Fragment {
                                         e.printStackTrace();
                                     }
                                     Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(),image);
-//                                    Methods.completeBitmapList.set(i, image);
+                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
                                 }//ALSO ADD HERE THE DATABASE CHANGE. SAME ON THE PALETTE ONE
                             }
                             Methods.framesList.remove(position);

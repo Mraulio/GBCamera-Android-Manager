@@ -10,13 +10,16 @@ import android.graphics.Bitmap;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
@@ -40,7 +43,9 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.model.ImageData;
+import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
 
 import java.io.IOException;
 import java.sql.SQLOutput;
@@ -92,6 +97,10 @@ public class MainActivity extends AppCompatActivity {
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
+        // Obtener información del Intent
+        Intent intent = getIntent();
+        Uri uri = intent.getData();
+
 
 //        Methods.extractHexImages();
         if (!doneLoading) {
@@ -176,13 +185,13 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     System.out.println("Length" + imagesFromDao.get(0).getImageBytes().length);
 
-                } catch (Exception e){
+                } catch (Exception e) {
                     System.out.println("Length en gbcimage es null");
                 }
                 anyImage = true;
                 //I need to add them to the gbcImagesList(GbcImage) and completeBitmapList(Bitmap)
                 Methods.gbcImagesList.addAll(imagesFromDao);
-                GbcImage.numImages+=Methods.gbcImagesList.size();
+                GbcImage.numImages += Methods.gbcImagesList.size();
                 System.out.println("Added");
 //                int index = 0;
 //                for (GbcImage gbcImage : Methods.gbcImagesList) {
@@ -209,6 +218,24 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 GalleryFragment.tv.setText("No images in the gallery.\nGo to Import tab.");
             }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Obtener información del Intent
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        Uri uri = intent.getData();
+
+        if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
+            // Si el Intent contiene la acción ACTION_VIEW y la categoría CATEGORY_DEFAULT y
+            // el tipo es "application/octet-stream" y el URI del Intent termina en ".sav", realizar la acción deseada
+            // Por ejemplo, puedes abrir el archivo en tu aplicación:
+            Methods.toast(this, "Opened from file");
         }
     }
 

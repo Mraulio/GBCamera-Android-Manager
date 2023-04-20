@@ -455,22 +455,7 @@ public class GalleryFragment extends Fragment {
         return view;
     }
 
-    //Method to save an image to the database in the background
-    private static class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
-        private GbcImage gbcImage;
 
-        //Stores the image passes as parameter in the constructor
-        SaveImageAsyncTask(GbcImage gbcImage) {
-            this.gbcImage = gbcImage;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            ImageDao imageDao = MainActivity.db.imageDao();
-            imageDao.update(gbcImage);
-            return null;
-        }
-    }
 
 
     public static Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
@@ -680,14 +665,28 @@ public class GalleryFragment extends Fragment {
             startIndex = page * itemsPerPage;
             endIndex = Math.min(startIndex + itemsPerPage, Methods.gbcImagesList.size());
         }
+        boolean doAsync = false;
+
         //The bitmaps come from the BitmapCache map, using the gbcimage hashcode
         for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
-            imagesForPage.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
+//            imagesForPage.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
+            if (!Methods.imageBitmapCache.containsKey(gbcImage.getHashCode())){
+                doAsync = true;
+            }
+        }
+        if (doAsync){
+            new UpdateGridViewAsyncTask().execute();
+        }else{
+            List<Bitmap> bitmapList = new ArrayList<>();
+            for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
+                bitmapList.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
+            }
+            customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, Methods.gbcImagesList.subList(startIndex, endIndex), bitmapList, false, false);
+            gridView.setAdapter(customGridViewAdapterImage);
+
         }
 //            imagesForPage = Methods.completeBitmapList.subList(startIndex, endIndex);
 //        gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
-
-        new UpdateGridViewAsyncTask().execute();
     }
 
     private static class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -752,6 +751,23 @@ public class GalleryFragment extends Fragment {
             //Notifies the adapter
             System.out.println("post execute//////////////////////////////////////////////////////////////");
             gridView.setAdapter(customGridViewAdapterImage);
+        }
+    }
+
+    //Method to save an image to the database in the background
+    public static class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
+        private GbcImage gbcImage;
+
+        //Stores the image passes as parameter in the constructor
+        public SaveImageAsyncTask(GbcImage gbcImage) {
+            this.gbcImage = gbcImage;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ImageDao imageDao = MainActivity.db.imageDao();
+            imageDao.update(gbcImage);
+            return null;
         }
     }
 

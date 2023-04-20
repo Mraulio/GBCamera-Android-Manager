@@ -40,6 +40,7 @@ import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -121,7 +122,7 @@ public class PalettesFragment extends Fragment {
                                     Methods.gbcImagesList.get(i).setPaletteIndex(0);
                                     ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
                                     Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
-//                                    Methods.completeBitmapList.set(i, image);
+                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
                                     Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(),image);
                                 }
                             }

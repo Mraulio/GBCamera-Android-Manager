@@ -238,7 +238,7 @@ public class ImportFragment extends Fragment {
                                 Methods.gbcImagesList.add(gbcImage);
 //                                Methods.completeBitmapList.add(importedImagesBitmaps.get(i));
                                 Methods.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
-                                Methods.imageBytesCache.put(gbcImage.getHashCode(), gbcImage.getImageBytes());
+//                                Methods.imageBytesCache.put(gbcImage.getHashCode(), gbcImage.getImageBytes());
                             }
                         }
                         Methods.toast(getContext(), "Images added: " + numImagesAdded);

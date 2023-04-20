@@ -82,7 +82,7 @@ public class FramesFragment extends Fragment {
                                     }
                                     Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(),image);
 //                                    Methods.completeBitmapList.set(i, image);
-                                }
+                                }//ALSO ADD HERE THE DATABASE CHANGE. SAME ON THE PALETTE ONE
                             }
                             Methods.framesList.remove(position);
                             customGridViewAdapterFrames.notifyDataSetChanged();
@@ -100,7 +100,6 @@ public class FramesFragment extends Fragment {
                 }
                 return true;//true so the normal onItemClick doesn't show
             }
-
         });
 
         // Inflate the layout for this fragment

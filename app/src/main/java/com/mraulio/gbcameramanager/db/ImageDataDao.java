@@ -5,6 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
@@ -24,6 +25,9 @@ public interface ImageDataDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(ImageData imageData);
+
+    @Update
+    void update(ImageData imageData);
 
     @Delete
     void delete(ImageData imageData);

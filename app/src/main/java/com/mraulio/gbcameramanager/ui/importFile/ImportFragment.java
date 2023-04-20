@@ -73,7 +73,6 @@ public class ImportFragment extends Fragment {
     boolean isJson = false;
     String fileContent = "";
     List<?> receivedList;
-    List<GbcFrame> gbcFramesList;
     CustomGridViewAdapterPalette customAdapterPalette;
 
     public enum ADD_WHAT {
@@ -114,7 +113,7 @@ public class ImportFragment extends Fragment {
                 if (savFile && !isJson) {
                     btnAddImages.setEnabled(true);
                     extractSavImages(getContext());
-                    tvFileName.setText("" + importedImagesList.size());//"" to make it work
+                    tvFileName.setText("" + importedImagesList.size()+ " images available.");
                     gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                     btnAddImages.setText("Add images");
                     btnAddImages.setVisibility(View.VISIBLE);
@@ -127,7 +126,7 @@ public class ImportFragment extends Fragment {
                     } catch (NoSuchAlgorithmException e) {
                         e.printStackTrace();
                     }
-                    tvFileName.setText("" + importedImagesList.size());//"" to make it work
+                    tvFileName.setText(importedImagesList.size()+ " images available.");
                     gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                     btnAddImages.setText("Add images");
                     btnAddImages.setVisibility(View.VISIBLE);
@@ -236,9 +235,7 @@ public class ImportFragment extends Fragment {
                                 GbcImage.numImages++;
                                 numImagesAdded++;
                                 Methods.gbcImagesList.add(gbcImage);
-//                                Methods.completeBitmapList.add(importedImagesBitmaps.get(i));
                                 Methods.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
-//                                Methods.imageBytesCache.put(gbcImage.getHashCode(), gbcImage.getImageBytes());
                             }
                         }
                         Methods.toast(getContext(), "Images added: " + numImagesAdded);
@@ -265,14 +262,12 @@ public class ImportFragment extends Fragment {
             for (ImageData imageData : importedImageDatas) {
                 imageDataDao.insert(imageData);
             }
-
-
             return null;
         }
+
         @Override
         protected void onPostExecute(Void aVoid) {
-            tvFileName.setText("GbcImage size"+Methods.gbcImagesList.size());
-            tvFileName.append("ImageData size"+importedImageDatas.size());
+
         }
     }
 
@@ -395,6 +390,8 @@ public class ImportFragment extends Fragment {
                     tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
                 } catch (Exception e) {
                 }
+            } else {
+                tvFileName.setText("Not a valid file.");
             }
         }
     }
@@ -482,7 +479,6 @@ public class ImportFragment extends Fragment {
         private class RecordHolder {
             TextView txtTitle;
             ImageView imageItem;
-
         }
     }
 

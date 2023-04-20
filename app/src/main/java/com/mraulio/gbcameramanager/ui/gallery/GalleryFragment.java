@@ -471,7 +471,6 @@ public class GalleryFragment extends Fragment {
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                System.out.println("Entering !keepFrame");
                 framed = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), Methods.encodeImage(framed), Methods.gbcImagesList.get(globalImageIndex));
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
@@ -495,17 +494,7 @@ public class GalleryFragment extends Fragment {
     public static Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(index).getPaletteColorsInt(), imageBytes);
-        //If the image is 128x112 (extracted from sav) I apply the frame
-        if ((imageBytes.length / 40) == 112) {
-            ImageCodec imageCodec2 = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, 144);
-            //I need to use copy because if not it's inmutable bitmap
-            Bitmap framed = Methods.framesList.get(1).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-            Canvas canvas = new Canvas(framed);
-            canvas.drawBitmap(image, 16, 16, null);
-            image = framed;
-        }
         new SaveImageAsyncTask(gbcImage).execute();
-
         return image;
     }
 
@@ -729,6 +718,8 @@ public class GalleryFragment extends Fragment {
 
                 //Do a frameChange to create the Bitmap of the image
                 try {
+                    //Only do frameChange if the image is 144 height
+                    if (image.getHeight()==144)
                     image = frameChange(newStartIndex + index, Methods.gbcImagesList.get(newStartIndex + index).getFrameIndex(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
                 } catch (IOException e) {
                     e.printStackTrace();

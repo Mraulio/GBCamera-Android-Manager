@@ -92,7 +92,6 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         TextView txtTitle;
         CardView cardView;
         ImageView imageItem;
-
     }
 
     // Método para actualizar la última posición seleccionada

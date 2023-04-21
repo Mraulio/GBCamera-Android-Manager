@@ -165,11 +165,11 @@ public class JsonReader {
                 imageData.setImageId(hashHex);
                 try {
                     imageData.setData(Methods.encodeImage(imageBitmap));
-//                    gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
+                    gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                ImportFragment.importedImageDatas.add(imageData);
+//                ImportFragment.importedImageDatas.add(imageData);
                 ImportFragment.importedImagesList.add(gbcImage);
                 ImportFragment.importedImagesBitmaps.add(imageBitmap);
             } catch (Exception e) {

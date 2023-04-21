@@ -11,6 +11,7 @@ public class ImageData {
     @PrimaryKey(autoGenerate = true)
     private int id;
 
+    //This is the hashcode
     @ColumnInfo(name = "image_id")
     @NonNull
     private String imageId;

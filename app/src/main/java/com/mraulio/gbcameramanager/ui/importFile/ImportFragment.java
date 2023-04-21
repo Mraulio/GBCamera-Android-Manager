@@ -114,7 +114,7 @@ public class ImportFragment extends Fragment {
                 if (savFile && !isJson) {
                     btnAddImages.setEnabled(true);
                     extractSavImages(getContext());
-                    tvFileName.setText("" + importedImagesList.size()+ " images available.");
+                    tvFileName.setText("" + importedImagesList.size() + " images available.");
                     gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                     btnAddImages.setText("Add images");
                     btnAddImages.setVisibility(View.VISIBLE);
@@ -127,7 +127,7 @@ public class ImportFragment extends Fragment {
                     } catch (NoSuchAlgorithmException e) {
                         e.printStackTrace();
                     }
-                    tvFileName.setText(importedImagesList.size()+ " images available.");
+                    tvFileName.setText(importedImagesList.size() + " images available.");
                     gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                     btnAddImages.setText("Add images");
                     btnAddImages.setVisibility(View.VISIBLE);
@@ -188,12 +188,12 @@ public class ImportFragment extends Fragment {
                         }
                         if (newPalettes.size() > 0) {
                             Methods.gbcPalettesList.addAll(newPalettes);
-                            Methods.toast(getContext(), "New palettes added.");
+                            new SavePaletteAsyncTask(newPalettes).execute();
                         } else {
                             Methods.toast(getContext(), "No new palettes added.");
+                            tvFileName.setText("No new palettes added.");
                         }
                         customAdapterPalette.notifyDataSetChanged();
-                        new SavePaletteAsyncTask().execute();
                         break;
                     case FRAMES:
                         btnAddImages.setEnabled(false);
@@ -214,14 +214,18 @@ public class ImportFragment extends Fragment {
                         }
                         if (newFrames.size() > 0) {
                             Methods.framesList.addAll(newFrames);
-                            Methods.toast(getContext(), "New frames added.");
-                        } else Methods.toast(getContext(), "No new frames added.");
-                        new SaveFrameAsyncTask().execute();
+                            new SaveFrameAsyncTask(newFrames).execute();//TEST THIS
+                        } else {
+                            Methods.toast(getContext(), "No new frames added.");
+                            tvFileName.setText("No new frames added.");
+                        }
                         break;
 
                     case IMAGES:
                         btnAddImages.setEnabled(false);
                         numImagesAdded = 0;
+                        List<GbcImage> newGbcImages = new ArrayList<>();
+                        List<ImageData> newImageDatas = new ArrayList<>();
                         for (int i = 0; i < importedImagesList.size(); i++) {
                             GbcImage gbcImage = importedImagesList.get(i);
                             boolean alreadyAdded = false;
@@ -235,11 +239,22 @@ public class ImportFragment extends Fragment {
                             if (!alreadyAdded) {
                                 GbcImage.numImages++;
                                 numImagesAdded++;
+                                ImageData imageData = new ImageData();
+                                imageData.setImageId(gbcImage.getHashCode());
+                                imageData.setData(gbcImage.getImageBytes());
+                                newImageDatas.add(imageData);
                                 Methods.gbcImagesList.add(gbcImage);
+                                newGbcImages.add(gbcImage);
                                 Methods.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
                             }
                         }
-                        new SaveImageAsyncTask().execute();
+                        if (newGbcImages.size() > 0) {
+                            new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
+                        } else {
+                            Methods.toast(getContext(), "No new images added.");
+                            tvFileName.setText("No new images added.");
+                        }
+
                         break;
                 }
             }
@@ -249,6 +264,13 @@ public class ImportFragment extends Fragment {
     }
 
     private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
+        List<GbcImage> gbcImagesList;
+        List<ImageData> imageDataList;
+
+        public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<ImageData> imageDataList) {
+            this.gbcImagesList = gbcImagesList;
+            this.imageDataList = imageDataList;
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -256,10 +278,10 @@ public class ImportFragment extends Fragment {
 
             ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
             //Need to insert first the gbcImage because of the Foreign Key
-            for (GbcImage gbcImage : Methods.gbcImagesList) {
+            for (GbcImage gbcImage : gbcImagesList) {
                 imageDao.insert(gbcImage);
             }
-            for (ImageData imageData : importedImageDatas) {
+            for (ImageData imageData : imageDataList) {
                 imageDataDao.insert(imageData);
             }
             return null;
@@ -267,32 +289,54 @@ public class ImportFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            tvFileName.setText("Done adding images!");
+            tvFileName.setText("Done adding " + numImagesAdded + " images!");
             Methods.toast(getContext(), "Images added: " + numImagesAdded);
         }
     }
 
     private class SavePaletteAsyncTask extends AsyncTask<Void, Void, Void> {
+        List<GbcPalette> gbcPalettesList;
+
+        public SavePaletteAsyncTask(List<GbcPalette> gbcPalettesList) {
+            this.gbcPalettesList = gbcPalettesList;
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
             PaletteDao paletteDao = MainActivity.db.paletteDao();
-            for (GbcPalette gbcPalette : Methods.gbcPalettesList) {
+            for (GbcPalette gbcPalette : gbcPalettesList) {
                 paletteDao.insert(gbcPalette);
             }
             return null;
         }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            tvFileName.setText("Done adding palettes!");
+            Methods.toast(getContext(), "Palettes added.");
+        }
     }
 
     private class SaveFrameAsyncTask extends AsyncTask<Void, Void, Void> {
+        List<GbcFrame> gbcFramesList;
+
+        public SaveFrameAsyncTask(List<GbcFrame> gbcFramesList) {
+            this.gbcFramesList = gbcFramesList;
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
             FrameDao frameDao = MainActivity.db.frameDao();
-            for (GbcFrame gbcFrame : Methods.framesList) {
+            for (GbcFrame gbcFrame : gbcFramesList) {
                 frameDao.insert(gbcFrame);
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            tvFileName.setText("Done adding frames!");
+            Methods.toast(getContext(), "Frames added.");
         }
     }
 
@@ -425,7 +469,7 @@ public class ImportFragment extends Fragment {
                 imageData.setImageId(gbcImage.getHashCode());
                 imageData.setData(imageBytes);
                 importedImageDatas.add(imageData);
-//                gbcImage.setImageBytes(imageBytes);
+                gbcImage.setImageBytes(imageBytes);
                 importedImagesBitmaps.add(image);
                 importedImagesList.add(gbcImage);
             }

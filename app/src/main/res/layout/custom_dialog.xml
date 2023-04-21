@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:background="#EAEAEA"
@@ -9,8 +10,8 @@
         android:id="@+id/image_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
         android:layout_gravity="center"
+        android:adjustViewBounds="true"
         android:padding="5dp"
         android:scaleType="fitXY" />
 
@@ -23,7 +24,7 @@
 
         <Button
             android:id="@+id/print_button"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
@@ -31,25 +32,28 @@
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
-            android:maxLines="1"
-            android:text="PRINT"
-            android:textSize="10dp" />
+            android:drawableTint="@color/white"
+            android:gravity="center_horizontal"
+            android:textSize="10dp"
+            app:icon="@drawable/ic_print"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp" />
 
         <CheckBox
             android:id="@+id/cbCrop"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Crop"
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
+            android:text="Crop"
             android:textSize="10dp"></CheckBox>
 
         <Button
             android:id="@+id/save_button"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
@@ -58,36 +62,25 @@
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
             android:backgroundTint="#4E8A50"
-            android:maxLines="1"
-            android:text="save"
-            android:textSize="10dp" />
+            android:textSize="10dp"
+            app:icon="@drawable/ic_download"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp" />
 
-        <!--        <Button-->
-        <!--            android:id="@+id/crop_save_button"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_gravity="center_horizontal"-->
-        <!--            android:layout_marginHorizontal="3dp"-->
-        <!--            android:layout_weight="1"-->
-        <!--            android:autoSizeMaxTextSize="30sp"-->
-        <!--            android:autoSizeMinTextSize="1sp"-->
-        <!--            android:autoSizeTextType="uniform"-->
-        <!--            android:maxLines="1"-->
-        <!--            android:text="Crop &amp; Save"-->
-        <!--            android:textSize="10dp" />-->
 
         <Button
             android:id="@+id/share_button"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
-            android:maxLines="1"
-            android:text="Share"
-            android:textSize="10dp" />
+            android:textSize="10dp"
+            app:icon="@drawable/ic_share"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp" />
     </LinearLayout>
 
 
@@ -95,20 +88,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:weightSum="2"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="2">
 
         <CheckBox
             android:id="@+id/cbFrameKeep"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:text="Keep frame color"
             android:layout_weight="1"
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
+            android:text="Keep frame color"
             android:textSize="10dp"></CheckBox>
 
         <Button
@@ -116,12 +109,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="5dp"
-            android:text="Show palettes"
             android:layout_weight="1"
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="3sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
+            android:text="Show palettes"
             android:textSize="10dp"></Button>
     </LinearLayout>
 

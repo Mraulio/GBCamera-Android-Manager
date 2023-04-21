@@ -53,15 +53,18 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginHorizontal="2dp"
-
-            android:text="1" />
+            android:drawableTint="@color/white"
+            android:drawableRight="@drawable/ic_double_arrow"
+            android:rotation="180" />
         <Button
             android:id="@+id/btnPrevPage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginHorizontal="2dp"
-            android:text="P" />
+            android:drawableRight="@drawable/ic_arrow"
+            android:rotation="180"
+            android:drawableTint="@color/white"/>
 
         <TextView
             android:id="@+id/tv_page"
@@ -77,18 +80,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="2dp"
-
             android:layout_weight="1"
-
-            android:text="N" />
+            android:drawableRight="@drawable/ic_arrow"
+            android:drawableTint="@color/white"/>
         <Button
             android:id="@+id/btnLastPage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginHorizontal="2dp"
-
-            android:text="L" />
+            android:drawableRight="@drawable/ic_double_arrow"
+            android:drawableTint="@color/white"
+            />
     </LinearLayout>
 
 </LinearLayout>

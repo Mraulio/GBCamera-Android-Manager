@@ -129,6 +129,7 @@ public class GalleryFragment extends Fragment {
         btnFirstPage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                tv_page.setTextColor(getContext().getResources().getColor(R.color.duplicated));
                 if (currentPage > 0) {
                     currentPage = 0;
                     updateGridView(currentPage);
@@ -140,6 +141,7 @@ public class GalleryFragment extends Fragment {
         btnLastPage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                tv_page.setTextColor(getContext().getResources().getColor(R.color.duplicated));
                 if (currentPage < lastPage) {
                     currentPage = lastPage;
                     updateGridView(currentPage);
@@ -313,6 +315,8 @@ public class GalleryFragment extends Fragment {
                     public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                         //Action when clicking a frame inside the Dialog
                         Bitmap framed = null;
+                        Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);//Need to set the frame index before changing it because if not it's not added to db
+
                         try {
                             framed = frameChange(globalImageIndex, selectedFrameIndex, keepFrame);
                         } catch (IOException e) {
@@ -323,7 +327,6 @@ public class GalleryFragment extends Fragment {
                         selectedImage[0] = framed;
                         Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), framed);
 //                        Methods.completeBitmapList.set(globalImageIndex, framed);
-                        Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);
                         frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                         frameAdapter.notifyDataSetChanged();
                         updateGridView(currentPage);
@@ -561,6 +564,8 @@ public class GalleryFragment extends Fragment {
     }
 
     private void prevPage() {
+        tv_page.setTextColor(getContext().getResources().getColor(R.color.duplicated));
+
         if (currentPage > 0) {
             currentPage--;
             updateGridView(currentPage);
@@ -569,6 +574,8 @@ public class GalleryFragment extends Fragment {
     }
 
     private void nextPage() {
+        tv_page.setTextColor(getContext().getResources().getColor(R.color.duplicated));
+
         if (currentPage < lastPage) {
             currentPage++;
             updateGridView(currentPage);
@@ -669,6 +676,7 @@ public class GalleryFragment extends Fragment {
             for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
                 bitmapList.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
             }
+            tv_page.setTextColor(gridView.getContext().getResources().getColor(R.color.black));
             customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, Methods.gbcImagesList.subList(startIndex, endIndex), bitmapList, false, false);
             gridView.setAdapter(customGridViewAdapterImage);
 
@@ -739,8 +747,9 @@ public class GalleryFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             //Notifies the adapter
-            System.out.println("post execute//////////////////////////////////////////////////////////////");
             gridView.setAdapter(customGridViewAdapterImage);
+            tv_page.setTextColor(gridView.getContext().getResources().getColor(R.color.black));
+
         }
     }
 

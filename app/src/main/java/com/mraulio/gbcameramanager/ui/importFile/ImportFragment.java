@@ -275,7 +275,6 @@ public class ImportFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             ImageDao imageDao = MainActivity.db.imageDao();
-
             ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
             //Need to insert first the gbcImage because of the Foreign Key
             for (GbcImage gbcImage : gbcImagesList) {

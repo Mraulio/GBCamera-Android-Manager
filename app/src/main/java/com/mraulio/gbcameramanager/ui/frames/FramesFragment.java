@@ -25,6 +25,8 @@ import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.db.PaletteDao;
+import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
+import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
@@ -70,32 +72,46 @@ public class FramesFragment extends Fragment {
                     builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // Acción a realizar cuando se presiona el botón "Aceptar"
-
+                            new DeleteFrameAsyncTask(Methods.framesList.get(position)).execute();
+                            Methods.framesList.remove(position);
                             //I change the frame index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
                             for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
                                 if (Methods.gbcImagesList.get(i).getFrameIndex() == position) {
                                     Methods.gbcImagesList.get(i).setFrameIndex(0);
-                                    Bitmap image = null;
-                                    try {
-                                        image = GalleryFragment.frameChange(i, 0, false);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                                    //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
+                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
+                                        Bitmap image = null;
+                                        try {
+                                            image = GalleryFragment.frameChange(i, 0, Methods.gbcImagesList.get(i).isLockFrame());
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
                                     }
-                                    Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
+                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
+                                } else if (Methods.gbcImagesList.get(i).getFrameIndex() > position) {
+                                    Methods.gbcImagesList.get(i).setFrameIndex(Methods.gbcImagesList.get(i).getFrameIndex() - 1);
+                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
+                                        Bitmap image = null;
+                                        try {
+                                            image = GalleryFragment.frameChange(i, Methods.gbcImagesList.get(i).getFrameIndex(), Methods.gbcImagesList.get(i).isLockFrame());
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
+                                    }
                                     new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
                                 }
                             }
-                            Methods.framesList.remove(position);
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }
                     });
                     builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // Acción a realizar cuando se presiona el botón "Cancelar"
+                            //No action
                         }
                     });
                     // Mostrar el diálogo

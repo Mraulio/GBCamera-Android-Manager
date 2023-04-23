@@ -756,7 +756,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         LocalDateTime now = null;
         DateTimeFormatter dtf = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
+            dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
             now = LocalDateTime.now();
         }
         String fileName = "hex_";

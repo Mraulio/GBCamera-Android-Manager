@@ -229,7 +229,7 @@ public class PalettesFragment extends Fragment {
         System.out.println(json.toString(2));
 
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH-mm-ss_dd-MM-yyyy", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
         String fileName = "palettes_" + dateFormat.format(new Date()) + ".json";
         File file = new File(directory, fileName);
 

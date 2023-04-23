@@ -254,7 +254,6 @@ public class ImportFragment extends Fragment {
                             Methods.toast(getContext(), "No new images added.");
                             tvFileName.setText("No new images added.");
                         }
-
                         break;
                 }
             }

@@ -61,7 +61,7 @@ import java.util.Map;
 
 public class GalleryFragment extends Fragment {
 
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
     public static GridView gridView;
     private static int itemsPerPage = MainActivity.imagesPage;

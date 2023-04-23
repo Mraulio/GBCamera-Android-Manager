@@ -30,7 +30,7 @@ public class PythonToJava {
     //Translated from the code from Lesserkuma
 
     private static final int TIMEOUT = 2000;
-    private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss_dd-MM-yyyy");
+    private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     private static File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
     private static FileOutputStream fos = null;

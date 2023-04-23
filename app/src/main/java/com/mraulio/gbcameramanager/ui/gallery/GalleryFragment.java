@@ -753,7 +753,7 @@ public class GalleryFragment extends Fragment {
         }
     }
 
-    //Method to save an image to the database in the background
+    //Method to update an image to the database in the background
     public static class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
         private GbcImage gbcImage;
 

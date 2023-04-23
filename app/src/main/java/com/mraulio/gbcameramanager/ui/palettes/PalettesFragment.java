@@ -113,7 +113,7 @@ public class PalettesFragment extends Fragment {
                     builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // Acción a realizar cuando se presiona el botón "Aceptar"
+                            Methods.gbcPalettesList.remove(position);
 
                             //I change the palette index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
@@ -123,12 +123,18 @@ public class PalettesFragment extends Fragment {
                                     ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
                                     Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
                                     new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
-                                    Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(),image);
+                                    Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
+                                }
+                                //Also need to change the palette index of the images with a superior index to the deleted one to current index -1
+                                else if (Methods.gbcImagesList.get(i).getPaletteIndex() > position) {
+                                    Methods.gbcImagesList.get(i).setPaletteIndex(Methods.gbcImagesList.get(i).getPaletteIndex() - 1);
+                                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteIndex()).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
+                                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteIndex()).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
+                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
+                                    Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
                                 }
                             }
-
                             new SavePaletteAsyncTask(Methods.gbcPalettesList.get(position), false).execute();
-                            Methods.gbcPalettesList.remove(position);
                             imageAdapter.notifyDataSetChanged();
                         }
                     });

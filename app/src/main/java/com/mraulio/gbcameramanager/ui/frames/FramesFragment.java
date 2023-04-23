@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -22,7 +23,10 @@ import android.widget.TextView;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.db.FrameDao;
+import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.model.GbcFrame;
+import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.io.IOException;
@@ -40,7 +44,7 @@ public class FramesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
-        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true,false);
+        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true, false);
         TextView tvNumFrames = view.findViewById(R.id.tvNumFrames);
 
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -80,9 +84,9 @@ public class FramesFragment extends Fragment {
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
-                                    Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(),image);
+                                    Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
                                     new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
-                                }//ALSO ADD HERE THE DATABASE CHANGE. SAME ON THE PALETTE ONE
+                                }
                             }
                             Methods.framesList.remove(position);
                             customGridViewAdapterFrames.notifyDataSetChanged();
@@ -106,6 +110,23 @@ public class FramesFragment extends Fragment {
         gridView.setAdapter(customGridViewAdapterFrames);
         tvNumFrames.setText("There are " + Methods.framesList.size() + " frames.");
         return view;
+    }
+
+    private class DeleteFrameAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        //To add the new palette as a parameter
+        private final GbcFrame gbcFrame;
+
+        public DeleteFrameAsyncTask(GbcFrame gbcFrame) {
+            this.gbcFrame = gbcFrame;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            FrameDao frameDao = MainActivity.db.frameDao();
+            frameDao.delete(gbcFrame);
+            return null;
+        }
     }
 
     public static class CustomGridViewAdapterFrames extends ArrayAdapter<GbcFrame> {

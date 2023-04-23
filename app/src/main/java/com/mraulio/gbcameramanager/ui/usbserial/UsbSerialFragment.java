@@ -560,11 +560,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     }
 
     private void readRomSavs() {
-        Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         extractedImagesBitmaps.clear();
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            LocalDateTime now = LocalDateTime.now();
-        }
         tv.append("\nThere are: " + fullRomFileList.size() + " sav parts.");
         try {
             for (File file : fullRomFileList) {

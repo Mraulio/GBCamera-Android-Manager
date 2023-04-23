@@ -303,7 +303,7 @@ public class PythonToJava {
                         bytesRead += buffer.length;
                     }
                 }
-                if (i!=0){
+                if (i != 0) {//Because 0 is the actual rom
                     try (InputStream is = new FileInputStream(outputFile)) {
                         byte[] bufferAux = new byte[1024];
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -316,7 +316,7 @@ public class PythonToJava {
 
                         if (!containsFFBytes(fileBytes)) {
                             fileList.add(outputFile);
-                        }else{
+                        } else {
                             outputFile.delete();
                         }
                     } catch (IOException e) {
@@ -330,6 +330,8 @@ public class PythonToJava {
         }
         return fileList;
     }
+
+    //To check if all bytes are FF. If they are, it's not a valid sav
     private static boolean containsFFBytes(byte[] bytes) {
         int length = Math.min(bytes.length, 16); // Solo comprobar los primeros 16 bytes
 
@@ -341,6 +343,7 @@ public class PythonToJava {
 
         return true;
     }
+
     public static void ReadRam(UsbSerialPort port, Context context, TextView tv) {
 
         LocalDateTime now = LocalDateTime.now();

@@ -48,8 +48,10 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 import com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -410,9 +412,11 @@ public class GalleryFragment extends Fragment {
                     public void onClick(View v) {
 //                        crop = false;
                         LocalDateTime now = LocalDateTime.now();
-                        String fileName = "image_";
-                        fileName += dtf.format(now) + ".png";
-                        saveImage(selectedImage[0], fileName);
+                        String fileName = "gbcImage_";
+                        if (MainActivity.exportPng) {
+                            fileName += dtf.format(now) + ".png";
+                        } else fileName += dtf.format(now) + ".txt";
+                        saveImage(Methods.gbcImagesList.get(globalImageIndex), fileName);
                     }
                 });
 //                cropButton.setOnClickListener(new View.OnClickListener() {
@@ -598,10 +602,8 @@ public class GalleryFragment extends Fragment {
     }
 
 
-    private void saveImage(Bitmap image, String fileName) {
-        if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
-            image = Bitmap.createBitmap(image, 16, 16, 128, 112);
-        }
+    private void saveImage(GbcImage gbcImage, String fileName) {
+        Bitmap image = Methods.imageBitmapCache.get(gbcImage.getHashCode());
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File file = new File(directory, fileName);
         try {
@@ -612,17 +614,63 @@ public class GalleryFragment extends Fragment {
         } catch (Exception e) {
             System.out.println(e.toString());
         }
-        try (FileOutputStream out = new FileOutputStream(file)) {
-            Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
+        if (MainActivity.exportPng) {
+            if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
+                image = Bitmap.createBitmap(image, 16, 16, 128, 112);
+            }
+            try (FileOutputStream out = new FileOutputStream(file)) {
+                Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
 
-            scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
-            Toast toast = Toast.makeText(getContext(), "SAVED x" + MainActivity.exportSize, Toast.LENGTH_LONG);
-            toast.show();
-            // PNG is a lossless format, the compression factor (100) is ignored
+                scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+                Toast toast = Toast.makeText(getContext(), "SAVED x" + MainActivity.exportSize, Toast.LENGTH_LONG);
+                toast.show();
+                // PNG is a lossless format, the compression factor (100) is ignored
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            //Saving without cropping it
+            try {
+                //Need to change the palette to bw so the encodeImage method works
+                image = paletteChanger(0, gbcImage.getImageBytes(), Methods.gbcImagesList.get(0));
+                StringBuilder txtBuilder = new StringBuilder();
+                //Appending these commands so the export is compatible with
+                // https://herrzatacke.github.io/gb-printer-web/#/import
+                // and https://mofosyne.github.io/arduino-gameboy-printer-emulator/GameBoyPrinterDecoderJS/gameboy_printer_js_decoder.html
+                txtBuilder.append("{\"command\":\"INIT\"}\n" +
+                        "{\"command\":\"DATA\",\"compressed\":0,\"more\":1}\n");
+                String txt = Methods.bytesToHex(Methods.encodeImage(image));
+                txt = addSpacesAndNewLines(txt).toUpperCase();
+                txtBuilder.append(txt);
+                txtBuilder.append("\n{\"command\":\"DATA\",\"compressed\":0,\"more\":0}\n" +
+                        "{\"command\":\"PRNT\",\"sheets\":1,\"margin_upper\":0,\"margin_lower\":3,\"pallet\":228,\"density\":64 }");
+                FileWriter fileWriter = new FileWriter(file);
+                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write(txtBuilder.toString());
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private String addSpacesAndNewLines(String input) {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (int i = 0; i < input.length(); i++) {
+            if (i > 0 && i % 32 == 0) {  // Agregar salto de línea cada 32 caracteres
+                sb.append("\n");
+                count = 0;
+            }
+            sb.append(input.charAt(i));
+            count++;
+            if (count == 2) {  // Agregar espacio cada 2 caracteres
+                sb.append(" ");
+                count = 0;
+            }
+        }
+        return sb.toString();
     }
 
     public static void updateFromMain() {

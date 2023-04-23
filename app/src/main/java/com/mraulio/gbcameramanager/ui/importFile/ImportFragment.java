@@ -525,83 +525,15 @@ public class ImportFragment extends Fragment {
         }
     }
 
-    public void extractHexImages() {
-        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        //*******PARA LEER EL FICHERO HEXDATA
-        File ficheroHex = new File(directory, "timelapse.txt");
-        StringBuilder stringBuilder = new StringBuilder();
-
-        try {
-            FileInputStream inputStream = new FileInputStream(ficheroHex);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line = bufferedReader.readLine();
-            while (line != null) {
-                stringBuilder.append(line).append('\n');
-                line = bufferedReader.readLine();
-            }
-            bufferedReader.close();
-            inputStream.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String fileContent = stringBuilder.toString();
-
-        List<byte[]> listaBytes = new ArrayList<>();
-        //******FIN DE LEER EL FICHERO
-        List<String> dataList = RawToTileData.separateData(fileContent);
-        String data = "";
-        for (String string : dataList) {
-            data = string.replaceAll(System.lineSeparator(), " ");
-            byte[] bytes = convertToByteArray(data);
-            listaBytes.add(bytes);
-        }
-        for (byte[] imageBytes : listaBytes) {
-            GbcImage gbcImage = new GbcImage();
-            ImageData imageData = new ImageData();
-            imageData.setImageId(gbcImage.getHashCode());
-            imageData.setData(imageBytes);
-            importedImageDatas.add(imageData);
-
-//            gbcImage.setImageBytes(imageBytes);
-//                if (nameIndex%2==0)
-//                    gbcImage.setImageBytes(cambiarPaleta(imageBytes,1));
-//                else
-//                    gbcImage.setBitmap(imageBytes);
-            gbcImage.setName("Image " + (GbcImage.numImages));
-//                gbcImage.setFrameIndex(0);
-//                gbcImage.setPaletteIndex(0);
-            int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
-            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
-            if (image.getHeight() == 112 && image.getWidth() == 128) {
-                //I need to use copy because if not it's inmutable bitmap
-                Bitmap framed = Methods.framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-                Canvas canvas = new Canvas(framed);
-                canvas.drawBitmap(image, 16, 16, null);
-                image = framed;
-            }
-            importedImagesBitmaps.add(image);
-            importedImagesList.add(gbcImage);
-        }
-
-    }
-
     public void extractHexImagesFromFile(String fileContent) throws NoSuchAlgorithmException {
-//        List<byte[]> listaBytes = new ArrayList<>();
         List<String> dataList = RawToTileData.separateData(fileContent);
         String data = "";
+        int index = 1;
         for (String string : dataList) {
             data = string.replaceAll(System.lineSeparator(), " ");
             byte[] bytes = convertToByteArray(data);
             GbcImage gbcImage = new GbcImage();
-
             gbcImage.setImageBytes(bytes);
-
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
             String hashHex = Methods.bytesToHex(hash);
             gbcImage.setHashCode(hashHex);
@@ -609,7 +541,7 @@ public class ImportFragment extends Fragment {
             imageData.setImageId(hashHex);
             imageData.setData(bytes);
             importedImageDatas.add(imageData);
-            gbcImage.setName("Image " + (GbcImage.numImages));
+            gbcImage.setName(index++ + "-" + fileName);
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
             Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
@@ -625,7 +557,6 @@ public class ImportFragment extends Fragment {
             bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
                     + Character.digit(byteStrings[i].charAt(1), 16));
         }
-//        System.out.println(bytes.length);
         return bytes;
     }
 

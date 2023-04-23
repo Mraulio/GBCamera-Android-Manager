@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean doneLoading = false;
     public static int exportSize = 4;
     public static int imagesPage = 12;
+    public static boolean exportPng = true;
     public static UsbManager manager;
     public static AppDatabase db;
     private static final String ACTION_USB_PERMISSION =

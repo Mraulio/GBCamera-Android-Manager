@@ -6,6 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -28,7 +31,52 @@ public class SettingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         Spinner spinnerExport = view.findViewById(R.id.spExportSize);
         Spinner spinnerImages = view.findViewById(R.id.spImagesPage);
+        RadioButton rbPng = view.findViewById(R.id.rbPng);
+        RadioButton rbTxt = view.findViewById(R.id.rbTxt);
+//        RadioGroup rbGroup = view.findViewById(R.id.rbGroup);
+        if (MainActivity.exportPng) {
+            rbPng.setChecked(true);
+            spinnerExport.setEnabled(true);
+        } else {
+            rbTxt.setChecked(true);
+            spinnerExport.setEnabled(false);
+        }
+
+//        rbGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(RadioGroup group, int checkedId) {
+//                RadioButton selectedRadioButton = view.findViewById(checkedId);
+//
+//                if (checkedId == R.id.rbPng) {
+//                    selectedRadioButton.setChecked(true);
+//                } else {
+//                    selectedRadioButton.setChecked(false);
+//                }
+//                if (checkedId == R.id.rbTxt) {
+//                    selectedRadioButton.setChecked(true);
+//                } else {
+//                    selectedRadioButton.setChecked(false);
+//                }
+//            }
+//        });
+
 //        MainActivity.pressBack=false;
+
+        rbPng.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.exportPng = true;
+                spinnerExport.setEnabled(true);
+            }
+        });
+        rbTxt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.exportPng = false;
+                spinnerExport.setEnabled(false);
+            }
+        });
+
         List<Integer> sizesInteger = new ArrayList<>();
         sizesInteger.add(1);
         sizesInteger.add(2);
@@ -39,13 +87,13 @@ public class SettingsFragment extends Fragment {
         sizesInteger.add(10);
 
         List<String> sizes = new ArrayList<>();
-        sizes.add("1");
-        sizes.add("2");
-        sizes.add("4");
-        sizes.add("5");
-        sizes.add("6");
-        sizes.add("8");
-        sizes.add("10");
+        sizes.add("1x");
+        sizes.add("2x");
+        sizes.add("4x");
+        sizes.add("5x");
+        sizes.add("6x");
+        sizes.add("8x");
+        sizes.add("10x");
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, sizes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

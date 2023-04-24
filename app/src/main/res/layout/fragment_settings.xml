@@ -20,13 +20,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:text="Export as TXT." />
+            android:text="@string/export_txt" />
         <RadioButton
             android:id="@+id/rbPng"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:text="Export as PNG." />
+            android:text="@string/export_png" />
 
     </RadioGroup>
 
@@ -39,7 +39,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PNG size: "
+            android:text="@string/png_size"
             android:textColor="@color/black"></TextView>
 
         <Spinner
@@ -58,7 +58,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select images per page: "
+            android:text="@string/images_page"
             android:textColor="@color/black"></TextView>
 
         <Spinner

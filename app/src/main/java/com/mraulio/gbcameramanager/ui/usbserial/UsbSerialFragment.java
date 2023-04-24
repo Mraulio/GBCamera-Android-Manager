@@ -201,7 +201,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     printOverArduino.sendThreadDelay(connection, driver.getDevice(), tv, getContext());
                 } catch (Exception e) {
                     tv.append(e.toString());
-                    Toast toast = Toast.makeText(getContext(), "Error en PRINT IMAGE\n" + e.toString(), Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(getContext(), getString(R.string.error_print_image) + e.toString(), Toast.LENGTH_LONG);
                     toast.show();
                 }
             }
@@ -211,24 +211,24 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Delete sav?");
-                builder.setMessage("Are you sure to delete "+latestFile.getName()+"?");
+                builder.setTitle(getString(R.string.delete_sav_dialog));
+                builder.setMessage(getString(R.string.sure_delete_sav) + latestFile.getName() + "?");
 
-                builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Try to delete the file
                         if (latestFile.delete()) {
-                            Methods.toast(getContext(),".sav Deleted.");
+                            Methods.toast(getContext(), getString(R.string.toast_sav_deleted));
                         } else {
-                            System.out.println("Couldn't delete .sav.");
+                            System.out.println(getString(R.string.toast_couldnt_delete_sav));
                         }
                         btnAddImages.setVisibility(View.GONE);
                         btnDelSav.setVisibility(View.GONE);
-                        tv.setText("Deleted "+latestFile.getName());
+                        tv.setText(getString(R.string.deleted_sav) + latestFile.getName());
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Acción a realizar cuando se presiona el botón "Cancelar"
@@ -272,8 +272,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     if (newGbcImages.size() > 0) {
                         new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
                     } else {
-                        tv.setText("No new images added.");
-                        Methods.toast(getContext(), "No new images added.");
+                        tv.setText(getString(R.string.no_new_images));
+                        Methods.toast(getContext(), getString(R.string.no_new_images));
                     }
                 } catch (Exception e) {
                     tv.setText("Error en btn add\n" + e.toString());
@@ -322,7 +322,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     printOverArduino.sendThreadDelay(connection, driver.getDevice(), tv, getContext());
                 } catch (Exception e) {
                     tv.append(e.toString());
-                    Toast toast = Toast.makeText(getContext(), "Error en PRINT IMAGE\n" + e.toString(), Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(getContext(), getString(R.string.error_print_image) + e.toString(), Toast.LENGTH_LONG);
                     toast.show();
                 }
             }
@@ -411,8 +411,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            tv.setText("Done adding " + numImagesAdded + " images!");
-            Methods.toast(getContext(), "Images added: " + numImagesAdded);
+            tv.setText(numImagesAdded + getString(R.string.done_adding_images));
+            Methods.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
         }
     }
 
@@ -442,7 +442,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         try {
             gbxMode = false;
             tvMode.setVisibility(View.VISIBLE);
-            tvMode.setText("Arduino Printer Emulator MODE");
+            tvMode.setText(getString(R.string.arduino_mode));
             rbGroup.setVisibility(View.GONE);
             btnSave.setVisibility(View.VISIBLE);
             spSleepTime.setVisibility(View.GONE);
@@ -451,10 +451,10 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
             connect();
             usbIoManager.start();
-            tv.append("//Connected\n");
+            tv.append(getString(R.string.tv_connected));
             port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         } catch (Exception e) {
-            Toast toast = Toast.makeText(getContext(), "Error en arduino\n" + e.toString(), Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), getString(R.string.error_arduino) + e.toString(), Toast.LENGTH_LONG);
             toast.show();
         }
     }
@@ -463,7 +463,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         try {
             gbxMode = false;
             tvMode.setVisibility(View.VISIBLE);
-            tvMode.setText("PRINT");
+            tvMode.setText(getString(R.string.print_mode));
             rbGroup.setVisibility(View.GONE);
             btnPrintBanner.setVisibility(View.VISIBLE);
             btnPrintImage.setVisibility(View.VISIBLE);
@@ -472,17 +472,17 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             connect();
             usbIoManager.start();
 //            usbIoManager.stop();
-            tv.append("//Connected\n");
+            tv.append(getString(R.string.tv_connected));
             port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         } catch (Exception e) {
-            Toast toast = Toast.makeText(getContext(), "Error en arduino\n" + e.toString(), Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), getString(R.string.error_arduino) + e.toString(), Toast.LENGTH_LONG);
             toast.show();
         }
     }
 
     private void gbxMode() {
         gbxMode = true;
-        tvMode.setText("GBxCart Reader MODE");
+        tvMode.setText(getString(R.string.gbxcart_mode));
         tvMode.setVisibility(View.VISIBLE);
         rbGroup.setVisibility(View.GONE);
         btnReadRam.setVisibility(View.VISIBLE);
@@ -491,19 +491,19 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         try {
             connect();
         } catch (Exception e) {
-            Toast toast = Toast.makeText(getContext(), "Error en CONNECT\n" + e.toString(), Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), "Error in CONNECT\n" + e.toString(), Toast.LENGTH_LONG);
             toast.show();
         }
         try {
             usbIoManager.stop();
         } catch (Exception e) {
-            Toast toast = Toast.makeText(getContext(), "Error en usbio STOP\n" + e.toString(), Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), "Error in usbio STOP\n" + e.toString(), Toast.LENGTH_LONG);
             toast.show();
         }
         try {
             port.setParameters(1000000, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         } catch (Exception e) {
-            Toast toast = Toast.makeText(getContext(), "Error en gbx\n" + e.toString(), Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), "Error in gbx\n" + e.toString(), Toast.LENGTH_LONG);
             toast.show();
         }
         completeReadRomName();
@@ -518,7 +518,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 List<byte[]> listExtractedImageBytes = new ArrayList<>();
 
                 listExtractedImageBytes = extractor.extractBytes(file);
-                tv.append("\nThe image list has: " + listExtractedImageBytes.size() + " images.");
+                tv.append(getString(R.string.images_list) + listExtractedImageBytes.size());
                 int nameIndex = 1;
 
                 for (byte[] imageBytes : listExtractedImageBytes) {
@@ -548,7 +548,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true);
                 gridView.setAdapter(customGridViewAdapterImage);
             } else {
-                tv.append("\nNOT A GOOD SAVE DUMP.");
+                tv.append(getString(R.string.no_good_dump));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -561,7 +561,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
     private void readRomSavs() {
         extractedImagesBitmaps.clear();
-        tv.append("\nThere are: " + fullRomFileList.size() + " sav parts.");
+        tv.append(getString(R.string.sav_parts) + fullRomFileList.size());
         try {
             for (File file : fullRomFileList) {
                 readSav(file);
@@ -603,7 +603,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             @Override
             public void run() {
                 romName = PythonToJava.ReadRom(port, getContext(), tv);
-                tv.setText("\nThe ROM name is: " + romName);
+                tv.setText(getString(R.string.rom_name) + romName);
             }
         }, 200);
         handler.postDelayed(new Runnable() {
@@ -624,7 +624,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
     private void fullRomDump() {
         tv.setText("");
-        tv.append("\nDumping 1MB ROM, please wait about 40 seconds...\n...");
+        tv.append(getString(R.string.dumping_rom_wait));
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -670,7 +670,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
     private void completeRamDump() {
         tv.setText("");
-        tv.append("\nDumping RAM, please wait...\n...");
+        tv.append(getString(R.string.dumping_ram_wait));
         Handler handlerRam = new Handler();
         handlerRam.postDelayed(new Runnable() {
             @Override
@@ -718,8 +718,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                         }
                     });
                     latestFile = files[0];
-                    tv.append("\nThe name of the last SAV file is: " + latestFile.getName() + ".\n" +
-                            "Size: " + latestFile.length() / 1024 + "KB");
+                    tv.append(getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
+                            getString(R.string.size) + latestFile.length() / 1024 + "KB");
                 }
                 readSav(latestFile);
             }
@@ -772,7 +772,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             }
 
         } catch (Exception e) {
-            Toast toast = Toast.makeText(getContext(), "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(getContext(), getString(R.string.error_file) + e.toString(), Toast.LENGTH_SHORT);
             toast.show();
         }
         //I create the new directory if it doesn't exists
@@ -780,11 +780,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
 
             outputStreamWriter.write(texto);
-            Toast toast = Toast.makeText(getContext(), "Saved to file", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(getContext(), getString(R.string.saved_to_file), Toast.LENGTH_SHORT);
             toast.show();
 
         } catch (Exception e) {
-            Toast toast = Toast.makeText(getContext(), "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(getContext(), getString(R.string.error_file) + e.toString(), Toast.LENGTH_SHORT);
             toast.show();
         }
     }
@@ -810,7 +810,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         } catch (Exception e) {
             System.out.println(e.toString());
             tv.append(e.toString());
-            Toast.makeText(getContext(), "Error en el connect." + e.toString(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Error in connect." + e.toString(), Toast.LENGTH_SHORT).show();
 
         }
 

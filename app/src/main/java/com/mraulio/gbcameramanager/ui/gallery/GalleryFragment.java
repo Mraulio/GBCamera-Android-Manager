@@ -212,7 +212,6 @@ public class GalleryFragment extends Fragment {
                     imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                 }
                 if (Methods.gbcImagesList.get(globalImageIndex).isLockFrame()) {
-                    System.out.println("is lock frame true");
                     keepFrame = true;
                     cbFrameKeep.setChecked(true);
                 }
@@ -228,7 +227,6 @@ public class GalleryFragment extends Fragment {
 //                            palette = Methods.gbcPalettesList.get(clickedPosition).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
 //                            newPaletteName = Methods.gbcPalettesList.get(clickedPosition).getName();
 //                            paletteDialog(palette, newPaletteName);
-                            Methods.toast(getContext(), "Single tap" + globalImageIndex);
                             showCustomDialog(Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()));
                             clickCount = 0;
                         }
@@ -254,10 +252,8 @@ public class GalleryFragment extends Fragment {
                                     Methods.gbcImagesList.get(globalImageIndex).setTags(tags);
                                     imageView.setBackgroundColor(getContext().getColor(R.color.white));
                                 }
-                                Methods.toast(getContext(), "Removed as favorite" + globalImageIndex);
                             } else {
                                 Methods.gbcImagesList.get(globalImageIndex).addTag("__filter:favourite__");
-                                Methods.toast(getContext(), "Set as favorite" + globalImageIndex);
                                 imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                             }
                             clickCount = 0;
@@ -269,7 +265,7 @@ public class GalleryFragment extends Fragment {
                     }
                 });
 
-                paletteFrameSelButton.setText("Show frames.");
+//                paletteFrameSelButton.setText("Show frames.");
                 FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false, false);
                 frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
                 gridViewFrames.setAdapter(frameAdapter);
@@ -350,7 +346,6 @@ public class GalleryFragment extends Fragment {
                         Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(palettePosition);
 
                         Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
-//                        Methods.completeBitmapList.set(globalImageIndex, changedImage);
                         if (keepFrame) {
                             try {
                                 changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
@@ -373,13 +368,13 @@ public class GalleryFragment extends Fragment {
                     public void onClick(View v) {
                         if (showPalettes) {
                             showPalettes = false;
-                            paletteFrameSelButton.setText("Show palettes");
+                            paletteFrameSelButton.setText(getString(R.string.btn_show_palettes));
                             gridViewPalette.setVisibility(View.GONE);
                             gridViewFrames.setVisibility(View.VISIBLE);
 
                         } else {
                             showPalettes = true;
-                            paletteFrameSelButton.setText("Show frames");
+                            paletteFrameSelButton.setText(getString(R.string.btn_show_frames));
                             gridViewFrames.setVisibility(View.GONE);
                             gridViewPalette.setVisibility(View.VISIBLE);
                         }
@@ -392,7 +387,7 @@ public class GalleryFragment extends Fragment {
                         try {
                             MainActivity.printIndex = globalImageIndex;
                             UsbSerialFragment.btnPrintImage.callOnClick();//This works.
-                            Toast toast = Toast.makeText(getContext(), "Printing, please wait...", Toast.LENGTH_LONG);
+                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_printing), Toast.LENGTH_LONG);
                             toast.show();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -452,10 +447,9 @@ public class GalleryFragment extends Fragment {
         });
         if (Methods.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
             updateGridView(currentPage);
-            tv.setText("Total of images: " + GbcImage.numImages);
 
         } else {
-            tv.setText("Loading...");
+            tv.setText(getString(R.string.loading));
         }
         tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
 
@@ -622,7 +616,7 @@ public class GalleryFragment extends Fragment {
                 Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
 
                 scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
-                Toast toast = Toast.makeText(getContext(), "SAVED x" + MainActivity.exportSize, Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + MainActivity.exportSize, Toast.LENGTH_LONG);
                 toast.show();
                 // PNG is a lossless format, the compression factor (100) is ignored
 
@@ -649,6 +643,7 @@ public class GalleryFragment extends Fragment {
                 BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(txtBuilder.toString());
                 bufferedWriter.close();
+                Methods.toast(getContext(),getString(R.string.toast_saved_txt));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -938,5 +933,4 @@ public class GalleryFragment extends Fragment {
             }
         }
     }
-
 }

@@ -10,22 +10,22 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select file"
+        android:text="@string/btn_select_file"
         android:id="@+id/btnSelectFile"></Button>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvFileName"
-        android:text="Select a file to import" />
+        android:text="@string/tv_select_file" />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Extract file"
+        android:text="@string/btn_extract_file"
         android:id="@+id/btnExtractFile"></Button>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add images"
+        android:text="@string/btn_add_images"
         android:id="@+id/btnAddImages"></Button>
 
     <GridView

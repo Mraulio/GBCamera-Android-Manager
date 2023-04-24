@@ -48,7 +48,7 @@
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
-            android:text="Crop"
+            android:text="@string/cb_crop"
             android:textSize="10dp"></CheckBox>
 
         <Button
@@ -101,7 +101,7 @@
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
-            android:text="Keep frame color"
+            android:text="@string/cb_keep_frame"
             android:textSize="10dp"></CheckBox>
 
         <Button
@@ -114,7 +114,7 @@
             android:autoSizeMinTextSize="3sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
-            android:text="Show palettes"
+            android:text="@string/btn_show_frames"
             android:textSize="10dp"></Button>
     </LinearLayout>
 

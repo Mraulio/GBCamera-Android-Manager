@@ -12,8 +12,104 @@
     <string name="menu_frames">Frames</string>
     <string name="menu_import">Import</string>
     <string name="menu_usbserial">USB Serial</string>
-
     <string name="menu_settings">Settings</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--Custom_dialog, Gallery Fragment strings-->
+    <string name="btn_show_palettes">Show palettes</string>
+    <string name="btn_show_frames">Show frames</string>
+    <string name="cb_keep_frame">Keep frame color</string>
+    <string name="cb_crop">Crop</string>
+
+    <string name="toast_printing">Printing, please wait...</string>
+    <string name="toast_saved">SAVED x</string>
+    <string name="toast_saved_txt">Saved as TXT</string>
+
+    <string name="loading">Loading...</string>
+    <string name="total_images">Total of images:\u0020</string>
+
+    <!--Settings fragment xml strings-->
+    <string name="export_txt">Export as TXT.</string>
+    <string name="export_png">Export as PNG.</string>
+    <string name="png_size">PNG size:\u0020</string>
+    <string name="images_page">Select images per page:\u0020</string>
+
+    <!--Frames fragment strings-->
+    <string name="cant_delete_base">Can\'t delete a base frame</string>
+    <string name="delete_dialog">Delete frame\u0020</string>
+    <string name="sure_dialog">Are you sure?</string>
+    <string name="delete">DELETE</string>
+    <string name="cancel">Cancel</string>
+    <string name="frames_total">Total frames:\u0020</string>
+
+    <!--Palettes fragment strings-->
+    <string name="btn_add_palette">Add palette</string>
+    <string name="btn_export_json">Export Json</string>
+    <string name="long_press_delete_palette">Long press to delete</string>
+    <string name="cant_delete_base_palette">Can\'t delete a base palette</string>
+    <string name="toast_palettes_json">Palettes Json saved to Download folder.</string>
+    <string name="set_palette_name">*Set Palette Name*</string>
+    <string name="sure_dialog_palette">Are you sure?\nDoing a Json export is recommended before continuing.</string>
+    <string name="delete_dialog_palette">Delete palette\u0020</string>
+    <string name="choose_color">Choose color</string>
+    <string name="selected_color">Selected Color: #</string>
+    <string name="toast_palettes_error">2 palettes can\'t have the same name.</string>
+    <string name="palette_added">Palette added</string>
+
+    <string name="btn_save">Save</string>
+
+    <!--Import fragment xml strings-->
+    <string name="btn_select_file">Select file</string>
+    <string name="tv_select_file">Select a file to import</string>
+    <string name="btn_extract_file">Extract file</string>
+    <string name="btn_add_images">Add images</string>
+    <string name="btn_add_palettes">Add palettes</string>
+    <string name="btn_add_frames">Add frames</string>
+    <string name="no_valid_list">Not a valid list</string>
+    <string name="images_available">\u0020images available.</string>
+    <string name="no_new_palettes">No new palettes added.</string>
+    <string name="no_new_frames">No new frames added.</string>
+    <string name="no_new_images">No new images added.</string>
+    <string name="images_added">Images added:\u0020</string>
+    <string name="done_adding_images">\u0020images added!</string>
+    <string name="palettes_added">Palettes added.</string>
+    <string name="done_adding_palettes">Done adding palettes!</string>
+    <string name="frames_added">Frames added.</string>
+    <string name="done_adding_frames">Done adding frames!</string>
+    <string name="no_valid_file">Not a valid file.</string>
+
+    <!--Import fragment xml strings-->
+    <string name="rb_print">Print to Arduino - GBP</string>
+    <string name="btn_read_rom_name">Read Rom Name</string>
+    <string name="btn_read_ram">Read and Save Ram</string>
+    <string name="btn_dump_photo">Dump Full PHOTO! ROM</string>
+    <string name="btn_view_rom_images">View ROM images</string>
+    <string name="btn_print_banner">Print test banner</string>
+    <string name="btn_print_image">Print image</string>
+    <string name="btn_delete_sav">Delete SAV</string>
+    <string name="tv_sleep_time">Choose sleep time:\u0020</string>
+    <string name="error_print_image">"Error in PRINT IMAGE</string>
+    <string name="delete_sav_dialog">Delete sav?</string>
+    <string name="sure_delete_sav">Are you sure to delete\u0020</string>
+    <string name="toast_sav_deleted">SAV deleted.</string>
+    <string name="toast_couldnt_delete_sav">Couldn\'t delete SAV.</string>
+    <string name="deleted_sav">Deleted\u0020</string>
+    <string name="tv_connected">//Connected\n</string>
+    <string name="error_arduino">Error in Arduino\n.</string>
+    <string name="arduino_mode">Arduino Printer Emulator MODE</string>
+    <string name="print_mode">PRINT MODE</string>
+    <string name="gbxcart_mode">GBxCart Reader MODE</string>
+    <string name="images_list">\nImages in the list:\u0020</string>
+    <string name="no_good_dump">\nNOT A GOOD SAVE DUMP.</string>
+    <string name="sav_parts">\nSav parts:\u0020</string>
+    <string name="rom_name">\nThe ROM name is:\u0020</string>
+    <string name="dumping_rom_wait">\nDumping 1MB ROM, please wait about 45 seconds...\n...</string>
+    <string name="dumping_ram_wait">\nDumping RAM, please wait...\n...</string>
+    <string name="last_sav_name">\nThe name of the last SAV file is:\u0020</string>
+    <string name="size">Size:\u0020</string>
+    <string name="error_file">Error making file:\u0020</string>
+    <string name="saved_to_file">Saved to file</string>
+
+
+
+
 </resources>

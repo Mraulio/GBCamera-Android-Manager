@@ -53,12 +53,12 @@ public class FramesFragment extends Fragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 if (position <= 2) {
-                    Methods.toast(getContext(), "Can't delete a base frame");
+                    Methods.toast(getContext(), getString(R.string.cant_delete_base));
                 }
                 if (position > 2) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle("Delete frame " + Methods.framesList.get(position).getFrameName() + "?");
-                    builder.setMessage("Are you sure?");
+                    builder.setTitle(getString(R.string.delete_dialog) + Methods.framesList.get(position).getFrameName() + "?");
+                    builder.setMessage(getString(R.string.sure_dialog));
 
                     // Crear un ImageView y establecer la imagen deseada
                     ImageView imageView = new ImageView(getContext());
@@ -69,7 +69,7 @@ public class FramesFragment extends Fragment {
                     // Agregar el ImageView al diseño del diálogo
                     builder.setView(imageView);
 
-                    builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             new DeleteFrameAsyncTask(Methods.framesList.get(position)).execute();
@@ -108,7 +108,7 @@ public class FramesFragment extends Fragment {
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }
                     });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             //No action
@@ -124,7 +124,7 @@ public class FramesFragment extends Fragment {
 
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames);
-        tvNumFrames.setText("There are " + Methods.framesList.size() + " frames.");
+        tvNumFrames.setText(getString(R.string.frames_total) + Methods.framesList.size());
         return view;
     }
 

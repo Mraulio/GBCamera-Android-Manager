@@ -114,9 +114,9 @@ public class ImportFragment extends Fragment {
                 if (savFile && !isJson) {
                     btnAddImages.setEnabled(true);
                     extractSavImages(getContext());
-                    tvFileName.setText("" + importedImagesList.size() + " images available.");
+                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
                     gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
-                    btnAddImages.setText("Add images");
+                    btnAddImages.setText(getString(R.string.btn_add_images));
                     btnAddImages.setVisibility(View.VISIBLE);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
 
@@ -127,16 +127,15 @@ public class ImportFragment extends Fragment {
                     } catch (NoSuchAlgorithmException e) {
                         e.printStackTrace();
                     }
-                    tvFileName.setText(importedImagesList.size() + " images available.");
+                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
                     gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
-                    btnAddImages.setText("Add images");
+                    btnAddImages.setText(getString(R.string.btn_add_images));
                     btnAddImages.setVisibility(View.VISIBLE);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-
                 } else if (!savFile && isJson) {
                     receivedList = JsonReader.jsonCheck(fileContent);
                     if (receivedList == null) {
-                        Methods.toast(getContext(), "Not a valid list");
+                        Methods.toast(getContext(), getString(R.string.no_valid_list));
                         return;
                     }
                     switch (addEnum) {
@@ -144,19 +143,19 @@ public class ImportFragment extends Fragment {
                             btnAddImages.setEnabled(true);
                             customAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true);
                             gridViewImport.setAdapter(customAdapterPalette);
-                            btnAddImages.setText("Add palettes");
+                            btnAddImages.setText(getString(R.string.btn_add_palettes));
                             btnAddImages.setVisibility(View.VISIBLE);
                             break;
 
                         case FRAMES:
                             btnAddImages.setEnabled(true);
-                            btnAddImages.setText("Add frames");
+                            btnAddImages.setText(getString(R.string.btn_add_frames));
                             btnAddImages.setVisibility(View.VISIBLE);
                             gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true));
                             break;
                         case IMAGES:
                             btnAddImages.setEnabled(true);
-                            btnAddImages.setText("Add images");
+                            btnAddImages.setText(getString(R.string.btn_add_images));
                             btnAddImages.setVisibility(View.VISIBLE);
                             gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true));
                             break;
@@ -190,8 +189,8 @@ public class ImportFragment extends Fragment {
                             Methods.gbcPalettesList.addAll(newPalettes);
                             new SavePaletteAsyncTask(newPalettes).execute();
                         } else {
-                            Methods.toast(getContext(), "No new palettes added.");
-                            tvFileName.setText("No new palettes added.");
+                            Methods.toast(getContext(), getString(R.string.no_new_palettes));
+                            tvFileName.setText(getString(R.string.no_new_palettes));
                         }
                         customAdapterPalette.notifyDataSetChanged();
                         break;
@@ -216,8 +215,8 @@ public class ImportFragment extends Fragment {
                             Methods.framesList.addAll(newFrames);
                             new SaveFrameAsyncTask(newFrames).execute();//TEST THIS
                         } else {
-                            Methods.toast(getContext(), "No new frames added.");
-                            tvFileName.setText("No new frames added.");
+                            Methods.toast(getContext(), getString(R.string.no_new_frames));
+                            tvFileName.setText(getString(R.string.no_new_frames));
                         }
                         break;
 
@@ -251,8 +250,8 @@ public class ImportFragment extends Fragment {
                         if (newGbcImages.size() > 0) {
                             new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
                         } else {
-                            Methods.toast(getContext(), "No new images added.");
-                            tvFileName.setText("No new images added.");
+                            Methods.toast(getContext(), getString(R.string.no_new_images));
+                            tvFileName.setText(getString(R.string.no_new_images));
                         }
                         break;
                 }
@@ -287,8 +286,8 @@ public class ImportFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            tvFileName.setText("Done adding " + numImagesAdded + " images!");
-            Methods.toast(getContext(), "Images added: " + numImagesAdded);
+            tvFileName.setText(numImagesAdded + getString(R.string.done_adding_images));
+            Methods.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
         }
     }
 
@@ -310,8 +309,8 @@ public class ImportFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            tvFileName.setText("Done adding palettes!");
-            Methods.toast(getContext(), "Palettes added.");
+            tvFileName.setText(getString(R.string.done_adding_palettes));
+            Methods.toast(getContext(), getString(R.string.palette_added));
         }
     }
 
@@ -333,8 +332,8 @@ public class ImportFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            tvFileName.setText("Done adding frames!");
-            Methods.toast(getContext(), "Frames added.");
+            tvFileName.setText(getString(R.string.done_adding_frames));
+            Methods.toast(getContext(), getString(R.string.frames_added));
         }
     }
 
@@ -342,7 +341,7 @@ public class ImportFragment extends Fragment {
     public void chooseFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");//Any type of file
-        startActivityForResult(Intent.createChooser(intent, "Select File"), 123);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.btn_select_file)), 123);
     }
 
     @Override
@@ -376,7 +375,7 @@ public class ImportFragment extends Fragment {
                 }
                 // Obtener los bytes del archivo como un byte[]
                 fileBytes = byteStream.toByteArray();
-                tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
+                tvFileName.setText("Bytes: " + fileBytes.length + ". Name: " + fileName);
             } else if (uri.getPath().substring(uri.getPath().length() - 3).equals("txt")) {
                 savFile = false;
                 isJson = false;
@@ -403,7 +402,7 @@ public class ImportFragment extends Fragment {
                     }
                     fileContent = stringBuilder.toString();
                     fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
-                    tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
+                    tvFileName.setText("Bytes: " + fileBytes.length + ". Name: " + fileName);
                 } catch (Exception e) {
                 }
             } else if (uri.getPath().substring(uri.getPath().length() - 4).equals("json")) {
@@ -434,7 +433,7 @@ public class ImportFragment extends Fragment {
                 } catch (Exception e) {
                 }
             } else {
-                tvFileName.setText("Not a valid file.");
+                tvFileName.setText(getString(R.string.no_valid_file));
             }
         }
     }

@@ -94,12 +94,12 @@ public class PalettesFragment extends Fragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 if (position <= 5) {
-                    Methods.toast(getContext(), "Can't delete a base palette");
+                    Methods.toast(getContext(), getString(R.string.cant_delete_base_palette));
                 }
                 if (position > 5) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle("Delete palette " + Methods.gbcPalettesList.get(position).getName() + "?");
-                    builder.setMessage("Are you sure? \nDoing a Json export is recommended before continuing.");
+                    builder.setTitle(getString(R.string.delete_dialog_palette) + Methods.gbcPalettesList.get(position).getName() + "?");
+                    builder.setMessage(getString(R.string.sure_dialog_palette));
 
                     // Crear un ImageView y establecer la imagen deseada
                     ImageView imageView = new ImageView(getContext());
@@ -110,7 +110,7 @@ public class PalettesFragment extends Fragment {
                     // Agregar el ImageView al diseño del diálogo
                     builder.setView(imageView);
 
-                    builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             new SavePaletteAsyncTask(Methods.gbcPalettesList.get(position), false).execute();
@@ -143,7 +143,7 @@ public class PalettesFragment extends Fragment {
                             imageAdapter.notifyDataSetChanged();
                         }
                     });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             //No action
@@ -160,7 +160,7 @@ public class PalettesFragment extends Fragment {
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                newPaletteName = "*Set Palette Name*";
+                newPaletteName = getString(R.string.set_palette_name);
                 palette = Methods.gbcPalettesList.get(0).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
                 paletteDialog(palette, newPaletteName);
             }
@@ -236,7 +236,7 @@ public class PalettesFragment extends Fragment {
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(json.toString(2));
             System.out.println("Saved.");
-            Methods.toast(getContext(), "Palettes Json saved to Download folder.");
+            Methods.toast(getContext(), getString(R.string.toast_palettes_json));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -436,7 +436,7 @@ public class PalettesFragment extends Fragment {
             public void onClick(View v) {
                 ColorPickerDialogBuilder
                         .with(getContext())
-                        .setTitle("Choose color")
+                        .setTitle(getString(R.string.choose_color))
                         .initialColor(lastPicked)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
@@ -444,10 +444,10 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
-                        .setPositiveButton("ok", new ColorPickerClickListener() {
+                        .setPositiveButton("OK", new ColorPickerClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                 iv1.setBackgroundColor(selectedColor);
@@ -461,7 +461,7 @@ public class PalettesFragment extends Fragment {
                                 et1.setText("#" + Integer.toHexString(palette[0]).substring(2).toUpperCase());
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -476,7 +476,7 @@ public class PalettesFragment extends Fragment {
             public void onClick(View v) {
                 ColorPickerDialogBuilder
                         .with(getContext())
-                        .setTitle("Choose color")
+                        .setTitle(getString(R.string.choose_color))
                         .initialColor(lastPicked)
                         .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
@@ -484,7 +484,7 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
                         .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -502,7 +502,7 @@ public class PalettesFragment extends Fragment {
 
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -518,7 +518,7 @@ public class PalettesFragment extends Fragment {
             public void onClick(View v) {
                 ColorPickerDialogBuilder
                         .with(getContext())
-                        .setTitle("Choose color")
+                        .setTitle(getString(R.string.choose_color))
                         .initialColor(lastPicked)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
@@ -526,10 +526,10 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
-                        .setPositiveButton("ok", new ColorPickerClickListener() {
+                        .setPositiveButton("OK", new ColorPickerClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                 iv3.setBackgroundColor(selectedColor);
@@ -544,7 +544,7 @@ public class PalettesFragment extends Fragment {
 
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -560,7 +560,7 @@ public class PalettesFragment extends Fragment {
             public void onClick(View v) {
                 ColorPickerDialogBuilder
                         .with(getContext())
-                        .setTitle("Choose color")
+                        .setTitle(getString(R.string.choose_color))
                         .initialColor(lastPicked)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
@@ -568,7 +568,7 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
                         .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -586,7 +586,7 @@ public class PalettesFragment extends Fragment {
 
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -604,7 +604,7 @@ public class PalettesFragment extends Fragment {
                     if (paleta.getName().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {
                         alreadyExists = true;
                         etPaletteName.setBackgroundColor(Color.parseColor("#FF0000"));
-                        Methods.toast(getContext(), "2 palettes can't have the same name.");
+                        Methods.toast(getContext(), getString(R.string.toast_palettes_error));
                         break;
                     }
                 }
@@ -614,7 +614,7 @@ public class PalettesFragment extends Fragment {
                     newPalette.setPaletteColors(palette);
                     Methods.gbcPalettesList.add(newPalette);
                     gridViewPalettes.setAdapter(imageAdapter);
-                    Methods.toast(getContext(), "Palette added");
+                    Methods.toast(getContext(), getString(R.string.palette_added));
                     dialog.hide();
                     //To add it to the database
                     new SavePaletteAsyncTask(newPalette, true).execute();//Adding the new palette to the database

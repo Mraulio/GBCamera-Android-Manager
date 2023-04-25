@@ -68,7 +68,7 @@ public class ImportFragment extends Fragment {
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
     TextView tvFileName;
-    String fileName;
+    static String fileName;
     boolean savFile = false;
     boolean isJson = false;
     String fileContent = "";
@@ -524,7 +524,7 @@ public class ImportFragment extends Fragment {
         }
     }
 
-    public void extractHexImagesFromFile(String fileContent) throws NoSuchAlgorithmException {
+    public static void extractHexImagesFromFile(String fileContent) throws NoSuchAlgorithmException {
         List<String> dataList = RawToTileData.separateData(fileContent);
         String data = "";
         int index = 1;
@@ -549,7 +549,7 @@ public class ImportFragment extends Fragment {
         }
     }
 
-    private static byte[] convertToByteArray(String data) {
+    public static byte[] convertToByteArray(String data) {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];
         for (int i = 0; i < byteStrings.length; i++) {

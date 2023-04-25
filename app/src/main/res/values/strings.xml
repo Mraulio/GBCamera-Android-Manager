@@ -56,6 +56,8 @@
     <string name="palette_added">Palette added</string>
 
     <string name="btn_save">Save</string>
+    <string name="btn_decode">Decode</string>
+
 
     <!--Import fragment xml strings-->
     <string name="btn_select_file">Select file</string>

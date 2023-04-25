@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +43,7 @@ import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.PrintOverArduino;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.RawToTileData;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -63,6 +66,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -75,7 +79,6 @@ import java.util.Locale;
 public class UsbSerialFragment extends Fragment implements SerialInputOutputManager.Listener {
     List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
     List<GbcImage> extractedImagesList = new ArrayList<>();
-
 
     File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
     File latestFile;
@@ -97,7 +100,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     static TextView tv, tvSleepTime;
     ;
     TextView tvMode;
-    public static Button btnReadSav, boton, btnSave, btnShare, btnShowInfo, btnReadRom, btnPowerOff, btnSCT, btnPowerOn, btnReadRam, btnFullRom, btnPrintImage, btnPrintBanner, btnAddImages, btnDelSav;
+    public static Button btnReadSav, boton, btnSave, btnShare, btnShowInfo, btnReadRom, btnPowerOff, btnSCT, btnPowerOn, btnReadRam, btnFullRom, btnPrintImage, btnPrintBanner, btnAddImages, btnDelSav, btnDecode, btnDelete;
     RadioButton rbGbx, rbApe;
     public static RadioButton rbPrint;
     RadioGroup rbGroup;
@@ -128,6 +131,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         btnPrintBanner = (Button) view.findViewById(R.id.btnPrintBanner);
         btnAddImages = (Button) view.findViewById(R.id.btnAddImages);
         btnDelSav = (Button) view.findViewById(R.id.btnDelSav);
+        btnDelete = (Button) view.findViewById(R.id.btnDelete);
+        btnDecode = (Button) view.findViewById(R.id.btnDecode);
 
 
         rbApe = (RadioButton) view.findViewById(R.id.rbApe);
@@ -285,6 +290,31 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             @Override
             public void onClick(View v) {
                 saveTv();
+            }
+        });
+
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tv.setText("");
+            }
+        });
+
+        btnDecode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Method to decode the textview data
+                extractedImagesBitmaps.clear();
+                extractedImagesList.clear();
+                try {
+                    extractHexImages(tv.getText().toString());
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                }
+                GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true);
+                gridView.setAdapter(customGridViewAdapterImage);
+                tv.append(extractedImagesList.size()+" images.");
+                btnAddImages.setVisibility(View.VISIBLE);
             }
         });
         btnFullRom.setOnClickListener(new View.OnClickListener() {
@@ -445,6 +475,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             tvMode.setText(getString(R.string.arduino_mode));
             rbGroup.setVisibility(View.GONE);
             btnSave.setVisibility(View.VISIBLE);
+            btnDelete.setVisibility(View.VISIBLE);
+            btnDecode.setVisibility(View.VISIBLE);
             spSleepTime.setVisibility(View.GONE);
             tvSleepTime.setVisibility(View.GONE);
             btnPrintBanner.setVisibility(View.GONE);
@@ -820,18 +852,36 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 //        tv.append("Conectado");
     }
 
+    //For the Arduino Printer Emulator
     @Override
     public void onNewData(byte[] data) {
-        //USE ON ARDUINO MODE ONLY
-        for (byte b : data) {
-            if (!String.format("%02X ", b).equals("00 ")) {
-                dataCreate.append(String.format("%02X ", b));
-            }
-        }
+//        ArrayDeque<byte[]> datas = new ArrayDeque<>();
+//        datas.add(data);
+//        SpannableStringBuilder spn = new SpannableStringBuilder();
+        String msg;
+
+        msg = new String(data);
+//            spn.append(msg);
+
         getActivity().runOnUiThread(() -> {
-            tv.append(dataCreate.toString());
+            tv.append(msg);
         });
+
     }
+
+    //For de arduino printing function, try using the other
+//    @Override
+//    public void onNewData(byte[] data) {
+//        //USE ON ARDUINO MODE ONLY
+//        for (byte b : data) {
+//            if (!String.format("%02X ", b).equals("00 ")) {
+//                dataCreate.append(String.format("%02X ", b));
+//            }
+//        }
+//        getActivity().runOnUiThread(() -> {
+//            tv.append(dataCreate.toString());
+//        });
+//    }
 
     //    @Override
 //    public void onNewData(byte[] data) {
@@ -850,6 +900,31 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     @Override
     public void onRunError(Exception e) {
 
+    }
+
+    public void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
+        List<String> dataList = RawToTileData.separateData(fileContent);
+        String data = "";
+        int index = 1;
+        for (String string : dataList) {
+            data = string.replaceAll(System.lineSeparator(), " ");
+            byte[] bytes = ImportFragment.convertToByteArray(data);
+            GbcImage gbcImage = new GbcImage();
+            gbcImage.setImageBytes(bytes);
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
+            String hashHex = Methods.bytesToHex(hash);
+            gbcImage.setHashCode(hashHex);
+            ImageData imageData = new ImageData();
+            imageData.setImageId(hashHex);
+            imageData.setData(bytes);
+//            importedImageDatas.add(imageData);
+            gbcImage.setName(index++ + "-" + " arduino");
+            int height = (data.length() + 1) / 120;//To get the real height of the image
+            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
+            Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
+            extractedImagesBitmaps.add(image);
+            extractedImagesList.add(gbcImage);
+        }
     }
 
 }

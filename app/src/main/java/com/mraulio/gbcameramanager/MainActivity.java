@@ -151,27 +151,13 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            System.out.println("Entering readASync");
             PaletteDao paletteDao = db.paletteDao();
             FrameDao frameDao = db.frameDao();
             ImageDao imageDao = db.imageDao();
-            ImageDataDao imageDataDao = db.imageDataDao();
 
             List<GbcPalette> palettes = paletteDao.getAll();
             List<GbcFrame> frames = frameDao.getAll();
             List<GbcImage> imagesFromDao = imageDao.getAll();
-//            List<ImageData> imageDataFromDao = imageDataDao.getAll();
-            System.out.println(palettes.size() + "/////PALETTES SIZE");
-            System.out.println(frames.size() + "/////FRAMES SIZE");
-            System.out.println(imagesFromDao.size() + "/////IMAGES SIZE");
-//            System.out.println(imageDataFromDao.size() + "/////IMAGES DATA FROM DAO SIZE");
-
-//            for (ImageData imagedata: imageDataFromDao) {
-//                System.out.println(imagedata.getImageId());
-//                System.out.println(imagedata.getId());
-//                System.out.println(imagedata.getData());
-//            }
-
 
             if (palettes.size() > 0) {
                 Methods.gbcPalettesList.addAll(palettes);

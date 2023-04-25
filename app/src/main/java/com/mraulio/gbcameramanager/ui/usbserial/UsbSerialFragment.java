@@ -313,7 +313,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 }
                 GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true);
                 gridView.setAdapter(customGridViewAdapterImage);
-                tv.append(extractedImagesList.size()+" images.");
+                tv.append(extractedImagesList.size() + " images.");
                 btnAddImages.setVisibility(View.VISIBLE);
             }
         });
@@ -441,7 +441,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            tv.setText(numImagesAdded + getString(R.string.done_adding_images));
+            tv.append("\n" + numImagesAdded + getString(R.string.done_adding_images));
             Methods.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
         }
     }
@@ -919,6 +919,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             imageData.setData(bytes);
 //            importedImageDatas.add(imageData);
             gbcImage.setName(index++ + "-" + " arduino");
+            gbcImage.setFrameIndex(9999);
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
             Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());

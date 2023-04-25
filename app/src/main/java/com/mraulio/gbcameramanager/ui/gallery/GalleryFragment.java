@@ -82,10 +82,10 @@ public class GalleryFragment extends Fragment {
     public static TextView tv;
     static boolean finishedUpdating = false;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+//    @Override
+//    public void onCreate(@Nullable Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -447,12 +447,18 @@ public class GalleryFragment extends Fragment {
         });
         if (Methods.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
             updateGridView(currentPage);
-
         } else {
             tv.setText(getString(R.string.loading));
         }
         tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+        if (Methods.gbcImagesList.size() > 0) {
+            updateGridView(currentPage);
+            tv.setText("Total of images: " + GbcImage.numImages);
 
+        } else {
+            tv.setText("No images in the gallery. Go to Import tab.");
+        }
+        tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
         return view;
     }
 
@@ -643,7 +649,7 @@ public class GalleryFragment extends Fragment {
                 BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(txtBuilder.toString());
                 bufferedWriter.close();
-                Methods.toast(getContext(),getString(R.string.toast_saved_txt));
+                Methods.toast(getContext(), getString(R.string.toast_saved_txt));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -672,12 +678,10 @@ public class GalleryFragment extends Fragment {
         if (Methods.gbcImagesList.size() > 0) {
             updateGridView(currentPage);
             tv.setText("Total of images: " + GbcImage.numImages);
-
         } else {
             tv.setText("No images in the gallery. Go to Import tab.");
         }
         tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
-        System.out.println("Called updateFromMain");
         updateGridView(currentPage);
     }
 
@@ -768,8 +772,8 @@ public class GalleryFragment extends Fragment {
 
                 //Do a frameChange to create the Bitmap of the image
                 try {
-                    //Only do frameChange if the image is 144 height
-                    if (image.getHeight() == 144)
+                    //Only do frameChange if the image is 144 height AND THE FRAME IS NOT 9999 (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
+                    if (image.getHeight() == 144 && gbcImage.getFrameIndex() != 9999)
                         image = frameChange(newStartIndex + index, Methods.gbcImagesList.get(newStartIndex + index).getFrameIndex(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -792,7 +796,6 @@ public class GalleryFragment extends Fragment {
             //Notifies the adapter
             gridView.setAdapter(customGridViewAdapterImage);
             tv_page.setTextColor(gridView.getContext().getResources().getColor(R.color.black));
-
         }
     }
 

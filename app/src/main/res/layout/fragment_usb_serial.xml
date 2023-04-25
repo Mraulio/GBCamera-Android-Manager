@@ -213,7 +213,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="6"
-        android:weightSum="2"
+        android:weightSum="4"
         android:background="#E3E3E3"
         android:orientation="vertical">
 
@@ -231,7 +231,7 @@
             android:id="@+id/gridView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="3"
             android:layout_margin="10dp"
             android:background="#D5D5D5"
             android:horizontalSpacing="10dp"

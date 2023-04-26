@@ -630,7 +630,7 @@ public class GalleryFragment extends Fragment {
                 e.printStackTrace();
             }
         } else {
-            //Saving without cropping it
+            //Saving txt without cropping it
             try {
                 //Need to change the palette to bw so the encodeImage method works
                 image = paletteChanger(0, gbcImage.getImageBytes(), Methods.gbcImagesList.get(0));
@@ -644,7 +644,7 @@ public class GalleryFragment extends Fragment {
                 txt = addSpacesAndNewLines(txt).toUpperCase();
                 txtBuilder.append(txt);
                 txtBuilder.append("\n{\"command\":\"DATA\",\"compressed\":0,\"more\":0}\n" +
-                        "{\"command\":\"PRNT\",\"sheets\":1,\"margin_upper\":0,\"margin_lower\":3,\"pallet\":228,\"density\":64 }");
+                        "{\"command\":\"PRNT\",\"sheets\":1,\"margin_upper\":1,\"margin_lower\":3,\"pallet\":228,\"density\":64 }");
                 FileWriter fileWriter = new FileWriter(file);
                 BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(txtBuilder.toString());
@@ -663,13 +663,13 @@ public class GalleryFragment extends Fragment {
             if (i > 0 && i % 32 == 0) {  // Agregar salto de línea cada 32 caracteres
                 sb.append("\n");
                 count = 0;
-            }
-            sb.append(input.charAt(i));
-            count++;
-            if (count == 2) {  // Agregar espacio cada 2 caracteres
+            }else if (count == 2) {  // Agregar espacio cada 2 caracteres
                 sb.append(" ");
                 count = 0;
             }
+            sb.append(input.charAt(i));
+            count++;
+
         }
         return sb.toString();
     }

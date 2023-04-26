@@ -12,14 +12,11 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +30,7 @@ import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
-import com.mraulio.gbcameramanager.RawToTileData;
+import com.mraulio.gbcameramanager.HexToTileData;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
@@ -46,8 +43,6 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -119,11 +114,10 @@ public class ImportFragment extends Fragment {
                     btnAddImages.setText(getString(R.string.btn_add_images));
                     btnAddImages.setVisibility(View.VISIBLE);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-
                 } else if (!savFile && !isJson) {
                     btnAddImages.setEnabled(true);
                     try {
-                        extractHexImagesFromFile(fileContent);
+                        extractHexImages(fileContent);
                     } catch (NoSuchAlgorithmException e) {
                         e.printStackTrace();
                     }
@@ -477,55 +471,10 @@ public class ImportFragment extends Fragment {
         }
     }
 
-    /**
-     * Other way to show images on the GridView, with the Text
-     */
-    public static class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
-        Context context;
-        int layoutResourceId;
-        List<GbcImage> data = new ArrayList<GbcImage>();
-        private List<Bitmap> images;
-
-        public CustomGridViewAdapterImage(Context context, int layoutResourceId,
-                                          List<GbcImage> data, List<Bitmap> images) {
-            super(context, layoutResourceId, data);
-            this.layoutResourceId = layoutResourceId;
-            this.context = context;
-            this.images = images;
-            this.data = data;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View row = convertView;
-            ImportFragment.CustomGridViewAdapterImage.RecordHolder holder = null;
-
-            if (row == null) {
-                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-                row = inflater.inflate(layoutResourceId, parent, false);
-
-                holder = new RecordHolder();
-                holder.txtTitle = (TextView) row.findViewById(R.id.tvName);
-                holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
-                row.setTag(holder);
-            } else {
-                holder = (RecordHolder) row.getTag();
-            }
-            Bitmap image = images.get(position);
-            String name = data.get(position).getName();
-            holder.txtTitle.setText(name);
-            holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
-            return row;
-        }
-
-        private class RecordHolder {
-            TextView txtTitle;
-            ImageView imageItem;
-        }
-    }
-
-    public static void extractHexImagesFromFile(String fileContent) throws NoSuchAlgorithmException {
-        List<String> dataList = RawToTileData.separateData(fileContent);
+    public static void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
+        List<String> dataList = HexToTileData.separateData(fileContent);
+        System.out.println(dataList.size()+" tamaño datalist/////////////////////");
+        System.out.println(dataList.get(0));
         String data = "";
         int index = 1;
         for (String string : dataList) {
@@ -552,10 +501,11 @@ public class ImportFragment extends Fragment {
     public static byte[] convertToByteArray(String data) {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];
+        try {
         for (int i = 0; i < byteStrings.length; i++) {
             bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
                     + Character.digit(byteStrings[i].charAt(1), 16));
-        }
+        }}catch (Exception e){}
         return bytes;
     }
 

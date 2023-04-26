@@ -3,15 +3,12 @@ package com.mraulio.gbcameramanager;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.os.Environment;
 import android.widget.Toast;
 
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.Codec;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
-import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
-import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
@@ -34,7 +31,7 @@ public class Methods {
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
     public static HashMap<String, byte[]> imageBytesCache = new HashMap<>();
-    public static HashMap<String,Bitmap> imageBitmapCache = new HashMap<>();
+    public static HashMap<String, Bitmap> imageBitmapCache = new HashMap<>();
 
 //    /**
 //     * *******************************************************************
@@ -121,7 +118,7 @@ public class Methods {
 
         List<byte[]> listaBytes = new ArrayList<>();
         //******FIN DE LEER EL FICHERO
-        List<String> dataList = RawToTileData.separateData(fileContent);
+        List<String> dataList = HexToTileData.separateData(fileContent);
         String data = "";
         for (String string : dataList) {
             data = string.replaceAll(System.lineSeparator(), " ");
@@ -131,7 +128,7 @@ public class Methods {
             gbcImage.setImageBytes(bytes);
 
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
-            System.out.println("HASH CODE: "+new String(hash));
+            System.out.println("HASH CODE: " + new String(hash));
 
             gbcImage.setName("Image " + (GbcImage.numImages));
             int height = (data.length() + 1) / 120;//To get the real height of the image
@@ -147,12 +144,9 @@ public class Methods {
         byte[] bytes = new byte[byteStrings.length];
         System.out.println(data.length());
         for (int i = 0; i < byteStrings.length; i++) {
-            try {
-                bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
-                        + Character.digit(byteStrings[i].charAt(1), 16));
+            bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
+                    + Character.digit(byteStrings[i].charAt(1), 16));
 
-            } catch (Exception e) {
-            }
         }
         System.out.println(bytes.length);
         return bytes;
@@ -161,4 +155,5 @@ public class Methods {
     public static void toast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
+
 }

@@ -16,15 +16,12 @@ import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.SpannableStringBuilder;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -43,7 +40,7 @@ import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.PrintOverArduino;
 import com.mraulio.gbcameramanager.R;
-import com.mraulio.gbcameramanager.RawToTileData;
+import com.mraulio.gbcameramanager.HexToTileData;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -55,7 +52,6 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
-import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,12 +62,10 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * By Mraulio
@@ -373,31 +367,22 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 completeRamDump();
             }
         });
-//        btnReadSav.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                readSav();
-//            }
-//        });
 
         rbApe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                connect();
                 arduinoPrinterMode();
             }
         });
         rbPrint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                connect();
                 printOverArduinoMode();
             }
         });
         rbGbx.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                connect();
                 gbxMode();
             }
         });
@@ -449,7 +434,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     public static void printOnGallery() throws IOException {
 
         //PRINT IMAGE
-//                printOverArduino.sendImage(port, tv);
         try {
             PrintOverArduino printOverArduino = new PrintOverArduino();
             Connecter.connect(tv.getContext(), tv);
@@ -463,8 +447,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             printOverArduino.sendThread(connection, driver.getDevice(), tv);
         } catch (Exception e) {
             tv.append(e.toString());
-//            Toast toast = Toast.makeText(getContext(), "Error en PRINT IMAGE\n" + e.toString(), Toast.LENGTH_LONG);
-//            toast.show();
+
         }
     }
 
@@ -564,14 +547,12 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 128, 112);
                     Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
-//                        System.out.println("***********ENTERING ADDING FRAME*************");
                         //I need to use copy because if not it's inmutable bitmap
                         Bitmap framed = Methods.framesList.get(gbcImage.getFrameIndex()).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                         Canvas canvas = new Canvas(framed);
                         canvas.drawBitmap(image, 16, 16, null);
                         image = framed;
                         imageBytes = Methods.encodeImage(image);
-//                        System.out.println("***********" + image.getHeight() + " " + image.getWidth() + "*************");
                     }
                     gbcImage.setImageBytes(imageBytes);
                     extractedImagesBitmaps.add(image);
@@ -668,7 +649,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             @Override
             public void run() {
                 PythonToJava.setCartType(port, getContext(), tv);
-
             }
         }, 100);
         handler.postDelayed(new Runnable() {
@@ -696,9 +676,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             }
         }, 200);
 //        btnRomImages.setVisibility(View.VISIBLE);
-
     }
-
 
     private void completeRamDump() {
         tv.setText("");
@@ -883,27 +861,12 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 //        });
 //    }
 
-    //    @Override
-//    public void onNewData(byte[] data) {
-//        //USE ON ARDUINO MODE ONLY
-//        getActivity().runOnUiThread(() -> {
-////            tv.append(new String(data));
-//            for (byte b : data) {
-////                tv.append(String.format("%02X ", b));
-//                PrintOverArduino.count++;
-//            }
-////            tv.setText("Sending image..." + df.format((PrintOverArduino.count / PrintOverArduino.percentage) * 100) + "%.");
-//            if (freeTv)
-//                tv.append("PRINTING");
-//        });
-//    }
     @Override
     public void onRunError(Exception e) {
-
     }
 
     public void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
-        List<String> dataList = RawToTileData.separateData(fileContent);
+        List<String> dataList = HexToTileData.separateData(fileContent);
         String data = "";
         int index = 1;
         for (String string : dataList) {

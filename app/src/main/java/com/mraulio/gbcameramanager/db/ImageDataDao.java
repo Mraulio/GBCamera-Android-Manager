@@ -20,6 +20,9 @@ public interface ImageDataDao {
     @Query("SELECT * FROM image_data")
     List<ImageData> getAll();
 
+    @Query("SELECT * FROM image_data WHERE image_id = :imageId")
+    ImageData getImageDataByid(String imageId);
+
     @Query("SELECT data FROM image_data WHERE image_id = :imageId")
     byte[] getDataByImageId(String imageId);
 

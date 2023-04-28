@@ -33,6 +33,7 @@ public class GbcPalette {
         this.name = name;
     }
 
+    //Because the database can't store int[]
     public int[] getPaletteColorsInt() {
         if (paletteColors == null) {
             return null;

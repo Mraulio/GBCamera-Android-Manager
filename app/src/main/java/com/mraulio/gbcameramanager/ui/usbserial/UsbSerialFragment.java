@@ -476,6 +476,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
     private void printOverArduinoMode() {
         try {
+            MainActivity.printingEnabled = true;
             gbxMode = false;
             tvMode.setVisibility(View.VISIBLE);
             tvMode.setText(getString(R.string.print_mode));

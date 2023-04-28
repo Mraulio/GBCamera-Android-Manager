@@ -20,7 +20,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="horizontal"
-        android:weightSum="4">
+        android:weightSum="4"
+        android:gravity="center">
 
         <Button
             android:id="@+id/print_button"
@@ -37,7 +38,8 @@
             android:textSize="10dp"
             app:icon="@drawable/ic_print"
             app:iconGravity="textStart"
-            app:iconPadding="0dp" />
+            app:iconPadding="0dp"
+            android:visibility="gone"/>
 
         <CheckBox
             android:id="@+id/cbCrop"

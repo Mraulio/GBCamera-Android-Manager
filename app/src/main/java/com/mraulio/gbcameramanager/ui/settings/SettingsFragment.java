@@ -42,24 +42,6 @@ public class SettingsFragment extends Fragment {
             spinnerExport.setEnabled(false);
         }
 
-//        rbGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(RadioGroup group, int checkedId) {
-//                RadioButton selectedRadioButton = view.findViewById(checkedId);
-//
-//                if (checkedId == R.id.rbPng) {
-//                    selectedRadioButton.setChecked(true);
-//                } else {
-//                    selectedRadioButton.setChecked(false);
-//                }
-//                if (checkedId == R.id.rbTxt) {
-//                    selectedRadioButton.setChecked(true);
-//                } else {
-//                    selectedRadioButton.setChecked(false);
-//                }
-//            }
-//        });
-
 //        MainActivity.pressBack=false;
 
         rbPng.setOnClickListener(new View.OnClickListener() {

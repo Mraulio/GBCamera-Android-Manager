@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean exportPng = true;
     public static UsbManager manager;
     public static AppDatabase db;
+    public static boolean printingEnabled = false;
     private static final String ACTION_USB_PERMISSION =
             "com.android.example.USB_PERMISSION";
     private UsbDevice device;

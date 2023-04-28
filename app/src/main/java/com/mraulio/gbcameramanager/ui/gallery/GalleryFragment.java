@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,6 +48,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
+import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
 import com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment;
 
 import java.io.BufferedWriter;
@@ -191,6 +194,9 @@ public class GalleryFragment extends Fragment {
 
                 // Configurar el botón de cierre del diálogo
                 Button printButton = dialog.findViewById(R.id.print_button);
+                if (MainActivity.printingEnabled) {
+                    printButton.setVisibility(View.VISIBLE);
+                }
                 Button shareButton = dialog.findViewById(R.id.share_button);
 
                 Button saveButton = dialog.findViewById(R.id.save_button);
@@ -445,6 +451,62 @@ public class GalleryFragment extends Fragment {
                 dialog.show();
             }
         });
+        //LongPress on an image to delete it
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                int globalImageIndex;
+                if (currentPage != lastPage) {
+                    globalImageIndex = position + (currentPage * itemsPerPage);
+                } else {
+                    globalImageIndex = Methods.gbcImagesList.size() - (itemsPerPage - position);
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle(getString(R.string.delete_dialog_gallery) + Methods.gbcImagesList.get(globalImageIndex).getName() + "?");
+                builder.setMessage(getString(R.string.sure_dialog));
+
+                // Crear un ImageView y establecer la imagen deseada
+                ImageView imageView = new ImageView(getContext());
+                imageView.setAdjustViewBounds(true);
+                imageView.setPadding(40, 10, 40, 10);
+                Bitmap bitmap = Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode());
+                int scaler = 6;
+                imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * scaler, bitmap.getHeight() * scaler, false));
+
+                // Agregar el ImageView al diseño del diálogo
+                builder.setView(imageView);
+
+                builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new DeleteImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), globalImageIndex).execute();
+                    }
+                });
+                builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //No action
+                    }
+                });
+                // Mostrar el diálogo
+                AlertDialog dialog = builder.create();
+
+                int screenWidth = displayMetrics.widthPixels;
+                int desiredWidth = (int) (screenWidth * 0.8);
+                // Configurar el tamaño del diálogo
+
+                if (bitmap.getHeight() > 144) {
+                    int screenHeight = displayMetrics.heightPixels;
+                    int desiredHeight = (int) (screenHeight * 0.8);
+                    imageView.setMaxHeight((int) (desiredHeight * 0.5));
+                }
+
+                dialog.show();
+                return true;//true so the normal onItemClick doesn't show
+            }
+        });
+
+
         if (Methods.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
             updateGridView(currentPage);
         } else {
@@ -663,7 +725,7 @@ public class GalleryFragment extends Fragment {
             if (i > 0 && i % 32 == 0) {  // Agregar salto de línea cada 32 caracteres
                 sb.append("\n");
                 count = 0;
-            }else if (count == 2) {  // Agregar espacio cada 2 caracteres
+            } else if (count == 2) {  // Agregar espacio cada 2 caracteres
                 sb.append(" ");
                 count = 0;
             }
@@ -796,6 +858,35 @@ public class GalleryFragment extends Fragment {
             //Notifies the adapter
             gridView.setAdapter(customGridViewAdapterImage);
             tv_page.setTextColor(gridView.getContext().getResources().getColor(R.color.black));
+        }
+    }
+
+    private class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
+        private String hashCode;
+        private int imageIndex;
+
+        public DeleteImageAsyncTask(String hashCode, int imageIndex) {
+            this.hashCode = hashCode;
+            this.imageIndex = imageIndex;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            GbcImage gbcImage = Methods.gbcImagesList.get(imageIndex);
+            ImageDao imageDao = MainActivity.db.imageDao();
+            ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
+            ImageData imageData = imageDataDao.getImageDataByid(hashCode);
+            imageDao.delete(gbcImage);
+            imageDataDao.delete(imageData);
+            Methods.imageBitmapCache.remove(hashCode);
+            Methods.gbcImagesList.remove(imageIndex);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            //Notifies the adapter
+            updateGridView(currentPage);
         }
     }
 

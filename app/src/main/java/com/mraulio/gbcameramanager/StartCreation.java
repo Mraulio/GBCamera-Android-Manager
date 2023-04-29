@@ -10,8 +10,11 @@ import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.util.Arrays;
 import java.util.Locale;
-
 public class StartCreation {
+
+
+
+
     public static void addFrames(Context context) {
         int width = 160;
         int height = 144;

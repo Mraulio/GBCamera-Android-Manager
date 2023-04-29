@@ -1,17 +1,24 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +76,7 @@ public class ImportFragment extends Fragment {
     String fileContent = "";
     List<?> receivedList;
     int numImagesAdded;
+    Button btnExtractFile;
     CustomGridViewAdapterPalette customAdapterPalette;
 
     public enum ADD_WHAT {
@@ -84,7 +92,8 @@ public class ImportFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_import, container, false);
         Button btnSelectFile = view.findViewById(R.id.btnSelectFile);
-        Button btnExtractFile = view.findViewById(R.id.btnExtractFile);
+        btnExtractFile = view.findViewById(R.id.btnExtractFile);
+        btnExtractFile.setVisibility(View.GONE);
         Button btnAddImages = view.findViewById(R.id.btnAddImages);
         btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
@@ -94,8 +103,10 @@ public class ImportFragment extends Fragment {
         btnSelectFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                chooseFile();
+//                chooseFile();
+                openFileDialog(v);
             }
+
         });
         btnExtractFile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -331,106 +342,151 @@ public class ImportFragment extends Fragment {
         }
     }
 
-
     public void chooseFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");//Any type of file
         startActivityForResult(Intent.createChooser(intent, getString(R.string.btn_select_file)), 123);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 123 && resultCode == Activity.RESULT_OK && data != null) {
+    /**
+     *    //https://www.youtube.com/watch?v=4EKlAvjY74U&t=0s
+     * @param view
+     */
+    public void openFileDialog(View view){
+        Intent data = new Intent(Intent.ACTION_GET_CONTENT);
+        data.setType("*/*");
+        data = Intent.createChooser(data,"Choose a file");
+        sActivityResultLauncher.launch(data);
+    }
 
-            Uri uri = data.getData();
-            String[] aux = uri.getPath().split("/");
-            fileName = aux[aux.length - 1];
-            //I check the extension of the file
-            if (uri.getPath().substring(uri.getPath().length() - 3).equals("sav")) {
-                ByteArrayOutputStream byteStream = null;
-                savFile = true;
-                isJson = false;
-
-                try {
-                    InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                    // Crear un ByteArrayOutputStream para copiar el contenido del archivo
-                    byteStream = new ByteArrayOutputStream();
-                    // Leer el contenido del archivo en un buffer de 1KB y copiarlo en el ByteArrayOutputStream
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while ((len = inputStream.read(buffer)) != -1) {
-                        byteStream.write(buffer, 0, len);
-                    }
-                    // Cerrar el InputStream y el ByteArrayOutputStream
-                    byteStream.close();
-                    inputStream.close();
-                } catch (Exception e) {
+    //Method to get the filename, because the uri sometimes ended with a number
+    @SuppressLint("Range")
+    public String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContext().getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
-                // Obtener los bytes del archivo como un byte[]
-                fileBytes = byteStream.toByteArray();
-                tvFileName.setText("Bytes: " + fileBytes.length + ". Name: " + fileName);
-            } else if (uri.getPath().substring(uri.getPath().length() - 3).equals("txt")) {
-                savFile = false;
-                isJson = false;
-
-                try {
-                    InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                    // Crear un ByteArrayOutputStream para copiar el contenido del archivo
-                    StringBuilder stringBuilder = new StringBuilder();
-                    try {
-                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-                        String line = bufferedReader.readLine();
-                        while (line != null) {
-                            stringBuilder.append(line).append('\n');
-                            line = bufferedReader.readLine();
-                        }
-                        bufferedReader.close();
-                        inputStream.close();
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    fileContent = stringBuilder.toString();
-                    fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
-                    tvFileName.setText("Bytes: " + fileBytes.length + ". Name: " + fileName);
-                } catch (Exception e) {
-                }
-            } else if (uri.getPath().substring(uri.getPath().length() - 4).equals("json")) {
-                savFile = false;
-                isJson = true;
-                try {
-                    InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                    // Crear un ByteArrayOutputStream para copiar el contenido del archivo
-                    StringBuilder stringBuilder = new StringBuilder();
-                    try {
-                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                        String line = bufferedReader.readLine();
-                        while (line != null) {
-                            stringBuilder.append(line).append('\n');
-                            line = bufferedReader.readLine();
-                        }
-                        bufferedReader.close();
-                        inputStream.close();
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    fileContent = stringBuilder.toString();
-                    fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
-                    tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
-                } catch (Exception e) {
-                }
-            } else {
-                tvFileName.setText(getString(R.string.no_valid_file));
+            } finally {
+                cursor.close();
             }
         }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
+        ActivityResultLauncher<Intent> sActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK){
+                        Intent data = result.getData();
+                        Uri uri = data.getData();
+                        Methods.toast(getContext(),getFileName(uri));
+//                        String[] aux = uri.getPath().split("/");
+                        fileName = getFileName(uri);
+                        //I check the extension of the file
+                        if (fileName.endsWith("sav")) {
+                            ByteArrayOutputStream byteStream = null;
+                            savFile = true;
+                            isJson = false;
+
+                            try {
+                                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                                // Crear un ByteArrayOutputStream para copiar el contenido del archivo
+                                byteStream = new ByteArrayOutputStream();
+                                // Leer el contenido del archivo en un buffer de 1KB y copiarlo en el ByteArrayOutputStream
+                                byte[] buffer = new byte[1024];
+                                int len;
+                                while ((len = inputStream.read(buffer)) != -1) {
+                                    byteStream.write(buffer, 0, len);
+                                }
+                                // Cerrar el InputStream y el ByteArrayOutputStream
+                                byteStream.close();
+                                inputStream.close();
+                            } catch (Exception e) {
+                            }
+                            // Obtener los bytes del archivo como un byte[]
+                            fileBytes = byteStream.toByteArray();
+                            tvFileName.setText("Bytes: " + fileBytes.length + ". Name: " + fileName);
+                            btnExtractFile.setVisibility(View.VISIBLE);
+                        } else if (fileName.endsWith("txt")) {
+                            savFile = false;
+                            isJson = false;
+
+                            try {
+                                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                                // Crear un ByteArrayOutputStream para copiar el contenido del archivo
+                                StringBuilder stringBuilder = new StringBuilder();
+                                try {
+                                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+                                    String line = bufferedReader.readLine();
+                                    while (line != null) {
+                                        stringBuilder.append(line).append('\n');
+                                        line = bufferedReader.readLine();
+                                    }
+                                    bufferedReader.close();
+                                    inputStream.close();
+
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                fileContent = stringBuilder.toString();
+                                fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
+                                tvFileName.setText("Bytes: " + fileBytes.length + ". Name: " + fileName);
+                                btnExtractFile.setVisibility(View.VISIBLE);
+                            } catch (Exception e) {
+                            }
+                        } else if (fileName.endsWith("json")) {
+                            savFile = false;
+                            isJson = true;
+                            try {
+                                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                                // Crear un ByteArrayOutputStream para copiar el contenido del archivo
+                                StringBuilder stringBuilder = new StringBuilder();
+                                try {
+                                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                                    String line = bufferedReader.readLine();
+                                    while (line != null) {
+                                        stringBuilder.append(line).append('\n');
+                                        line = bufferedReader.readLine();
+                                    }
+                                    bufferedReader.close();
+                                    inputStream.close();
+
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                fileContent = stringBuilder.toString();
+                                fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
+                                tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
+                                btnExtractFile.setVisibility(View.VISIBLE);
+
+                            } catch (Exception e) {
+                            }
+                        } else {
+                            btnExtractFile.setVisibility(View.GONE);
+
+                            tvFileName.setText(getString(R.string.no_valid_file));
+                        }
+                    }
+                }
+            }
+    );
+
 
     public void extractSavImages(Context context) {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));

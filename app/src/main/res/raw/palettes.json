@@ -1,0 +1,633 @@
+{
+  "state": {
+    "palettes": [
+      {
+        "shortName": "bw",
+        "name": "Black & White",
+        "palette": [
+          "#ffffff",
+          "#aaaaaa",
+          "#555555",
+          "#000000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "dmg",
+        "name": "Original Game Boy",
+        "palette": [
+          "#9bbc0f",
+          "#77a112",
+          "#306230",
+          "#0f380f"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "gbpocket",
+        "name": "Game Boy Pocket",
+        "palette": [
+          "#c4cfa1",
+          "#8b956d",
+          "#4d533c",
+          "#1f1f1f"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "bgb",
+        "name": "BGB Emulator",
+        "palette": [
+          "#e0f8d0",
+          "#88c070",
+          "#346856",
+          "#081820"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "gbli",
+        "name": "Game Boy Light",
+        "palette": [
+          "#1ddece",
+          "#19c7b3",
+          "#16a596",
+          "#0b7a6d"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "grafixkidgray",
+        "name": "Grafixkid Gray",
+        "palette": [
+          "#e0dbcd",
+          "#a89f94",
+          "#706b66",
+          "#2b2b26"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "grafixkidgreen",
+        "name": "Grafixkid Green",
+        "palette": [
+          "#dbf4b4",
+          "#abc396",
+          "#7b9278",
+          "#4c625a"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "blackzero",
+        "name": "Game Boy (Black Zero) palette",
+        "palette": [
+          "#7e8416",
+          "#577b46",
+          "#385d49",
+          "#2e463d"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "gbcjp",
+        "name": "Game Boy Color Splash Up (PocketCamera, JP)",
+        "palette": [
+          "#ffffff",
+          "#ffad63",
+          "#833100",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbcua",
+        "name": "Game Boy Color Splash Up+A",
+        "palette": [
+          "#ffffff",
+          "#ff8f84",
+          "#943a3a",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbcub",
+        "name": "Game Boy Color Splash Up+B",
+        "palette": [
+          "#ffe7c5",
+          "#ce9c85",
+          "#846b29",
+          "#5b3109"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbcl",
+        "name": "Game Boy Color Splash Left",
+        "palette": [
+          "#ffffff",
+          "#65a49b",
+          "#0000fe",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbcla",
+        "name": "Game Boy Color Splash Left+A",
+        "palette": [
+          "#ffffff",
+          "#8b8cde",
+          "#53528c",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbclb",
+        "name": "Game Boy Color Splash Left+B",
+        "palette": [
+          "#ffffff",
+          "#a5a5a5",
+          "#525252",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbcd",
+        "name": "Game Boy Color Splash Down",
+        "palette": [
+          "#ffffa5",
+          "#fe9494",
+          "#9394fe",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbcda",
+        "name": "Game Boy Color Splash Down+A",
+        "palette": [
+          "#ffffff",
+          "#ffff00",
+          "#fe0000",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbcdb",
+        "name": "Game Boy Color Splash Down+B",
+        "palette": [
+          "#ffffff",
+          "#ffff00",
+          "#7d4900",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbcr",
+        "name": "Game Boy Color Splash Right",
+        "palette": [
+          "#ffffff",
+          "#51ff00",
+          "#ff4200",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbceuus",
+        "name": "Game Boy Color Splash Right+A (Game Boy Camera, EU/US)",
+        "palette": [
+          "#ffffff",
+          "#7bff30",
+          "#0163c6",
+          "#000000"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "gbcrb",
+        "name": "Game Boy Color Splash Right+B",
+        "palette": [
+          "#000000",
+          "#008486",
+          "#ffde00",
+          "#ffffff"
+        ],
+        "origin": "Wikipedia"
+      },
+      {
+        "shortName": "cybl",
+        "name": "Cyanide Blues",
+        "palette": [
+          "#9efbe3",
+          "#21aff5",
+          "#1e4793",
+          "#0e1e3d"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "aqpp",
+        "name": "Audi Quattro Pikes Peak",
+        "palette": [
+          "#ebeee7",
+          "#868779",
+          "#fa2b25",
+          "#2a201e"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "wtfp",
+        "name": "Waterfront Plaza",
+        "palette": [
+          "#cecece",
+          "#6f9edf",
+          "#42678e",
+          "#102533"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "chig",
+        "name": "Childhood in Greenland",
+        "palette": [
+          "#d0d058",
+          "#a0a840",
+          "#708028",
+          "#405010"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "rcs",
+        "name": "Rusted City Sign",
+        "palette": [
+          "#edb4a1",
+          "#a96868",
+          "#764462",
+          "#2c2137"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "fsil",
+        "name": "Floyd Steinberg in Love",
+        "palette": [
+          "#eaf5fa",
+          "#5fb1f5",
+          "#d23c4e",
+          "#4c1c2d"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "shzol",
+        "name": "Space Haze Overload",
+        "palette": [
+          "#f8e3c4",
+          "#cc3495",
+          "#6b1fb1",
+          "#0b0630"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "tdoyc",
+        "name": "The death of Yung Columbus",
+        "palette": [
+          "#b5ff32",
+          "#ff2261",
+          "#462917",
+          "#1d1414"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "cfp",
+        "name": "Caramel Fudge Paranoia",
+        "palette": [
+          "#cf9255",
+          "#cf7163",
+          "#b01553",
+          "#3f1711"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "sfh",
+        "name": "Sunflower Holidays",
+        "palette": [
+          "#ffff55",
+          "#ff5555",
+          "#881400",
+          "#000000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "dhg",
+        "name": "Deep Haze Green",
+        "palette": [
+          "#a1d909",
+          "#467818",
+          "#27421f",
+          "#000000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "yirl",
+        "name": "Youth Ikarus reloaded",
+        "palette": [
+          "#cef7f7",
+          "#f78e50",
+          "#9e0000",
+          "#1e0000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "cctr",
+        "name": "Candy Cotton Tower Raid",
+        "palette": [
+          "#e6aec4",
+          "#e65790",
+          "#8f0039",
+          "#380016"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "d2kr",
+        "name": "Dune 2000 remastered",
+        "palette": [
+          "#fbf1cd",
+          "#c09e7d",
+          "#725441",
+          "#000000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "shmgy",
+        "name": "Super Hyper Mega Gameboy",
+        "palette": [
+          "#f7e7c6",
+          "#d68e49",
+          "#a63725",
+          "#331e50"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "llawk",
+        "name": "Links late Awakening",
+        "palette": [
+          "#ffffb5",
+          "#7bc67b",
+          "#6b8c42",
+          "#5a3921"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "cga1",
+        "name": "CGA Palette Crush 1",
+        "palette": [
+          "#ffffff",
+          "#55ffff",
+          "#ff55ff",
+          "#000000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "cga2",
+        "name": "CGA Palette Crush 2",
+        "palette": [
+          "#ffffff",
+          "#55ffff",
+          "#ff5555",
+          "#000000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "marmx",
+        "name": "Metroid Aran remixed",
+        "palette": [
+          "#aedf1e",
+          "#047e60",
+          "#b62558",
+          "#2c1700"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "slmem",
+        "name": "Starlit Memories",
+        "palette": [
+          "#869ad9",
+          "#6d53bd",
+          "#6f2096",
+          "#4f133f"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "datn",
+        "name": "Drowning at night",
+        "palette": [
+          "#a9b0b3",
+          "#586164",
+          "#20293f",
+          "#030c22"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "tsk",
+        "name": "The starry knight",
+        "palette": [
+          "#f5db37",
+          "#37cae5",
+          "#0f86b6",
+          "#123f77"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "ppr",
+        "name": "Purple Rain",
+        "palette": [
+          "#adfffc",
+          "#8570b2",
+          "#ff0084",
+          "#68006a"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "cmyk",
+        "name": "CMYKeystone",
+        "palette": [
+          "#ffff00",
+          "#0be8fd",
+          "#fb00fa",
+          "#373737"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "vb85",
+        "name": "Virtual Boy 1985",
+        "palette": [
+          "#ff0000",
+          "#db0000",
+          "#520000",
+          "#000000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "azc",
+        "name": "Azure Clouds",
+        "palette": [
+          "#47ff99",
+          "#32b66d",
+          "#124127",
+          "#000000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "gelc",
+        "name": "Golden Elephant Curry",
+        "palette": [
+          "#ff9c00",
+          "#c27600",
+          "#4f3000",
+          "#000000"
+        ],
+        "origin": ""
+      },
+      {
+        "shortName": "roga",
+        "name": "Romero’s Garden",
+        "palette": [
+          "#ebc4ab",
+          "#649a57",
+          "#574431",
+          "#323727"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "kditw",
+        "name": "Knee-Deep in the Wood",
+        "palette": [
+          "#fffe6e",
+          "#d5690f",
+          "#3c3ca9",
+          "#2c2410"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "dimwm",
+        "name": "Dies ist meine Wassermelone",
+        "palette": [
+          "#ffdbcb",
+          "#f27d7a",
+          "#558429",
+          "#222903"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "spezi",
+        "name": "My Friend from Bavaria",
+        "palette": [
+          "#feda1b",
+          "#df7925",
+          "#b60077",
+          "#382977"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "ffs",
+        "name": "Flowerfeldstraße",
+        "palette": [
+          "#e9d9cc",
+          "#c5c5ce",
+          "#75868f",
+          "#171f62"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "banana",
+        "name": "There’s always money",
+        "palette": [
+          "#fdfe0a",
+          "#fed638",
+          "#977b25",
+          "#221a09"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "hipster",
+        "name": "Artistic Caffeinated Lactose",
+        "palette": [
+          "#fdfef5",
+          "#dea963",
+          "#9e754f",
+          "#241606"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "nc",
+        "name": "Nortorious Comandante",
+        "palette": [
+          "#fcfe54",
+          "#54fefc",
+          "#04aaac",
+          "#0402ac"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "glmo",
+        "name": "Glowing Mountains",
+        "palette": [
+          "#ffbf98",
+          "#a1a8b8",
+          "#514f6c",
+          "#2f1c35"
+        ],
+        "origin": "by HerrZatacke"
+      },
+      {
+        "shortName": "tpa",
+        "name": "Tramonto al Parco degli Acquedotti",
+        "palette": [
+          "#f3c677",
+          "#e64a4e",
+          "#912978",
+          "#0c0a3e"
+        ],
+        "origin": "delma"
+      }
+    ]
+  }
+}

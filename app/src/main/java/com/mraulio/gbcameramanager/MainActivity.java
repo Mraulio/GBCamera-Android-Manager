@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -45,11 +46,21 @@ import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.spec.ECField;
 import java.sql.SQLOutput;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
     public static int printIndex = 0;
@@ -92,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
         System.out.println("Done loading: " + doneLoading);
@@ -163,7 +176,28 @@ public class MainActivity extends AppCompatActivity {
             if (palettes.size() > 0) {
                 Methods.gbcPalettesList.addAll(palettes);
             } else {
-                StartCreation.addPalettes();
+                StringBuilder stringBuilder = new StringBuilder();
+                int resourceId = R.raw.palettes;
+                try {
+                    InputStream inputStream = getResources().openRawResource(resourceId);
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    // Crear un ByteArrayOutputStream para copiar el contenido del archivo
+                    String line = bufferedReader.readLine();
+                    while (line != null) {
+                        stringBuilder.append(line).append('\n');
+                        line = bufferedReader.readLine();
+                    }
+                    bufferedReader.close();
+                    inputStream.close();
+                } catch (Exception e) {
+                    System.out.println(e.toString());
+
+                }
+                String fileContent = stringBuilder.toString();
+                List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
+
+                Methods.gbcPalettesList.addAll(receivedList);
+
                 for (GbcPalette gbcPalette : Methods.gbcPalettesList) {
                     paletteDao.insert(gbcPalette);
                 }

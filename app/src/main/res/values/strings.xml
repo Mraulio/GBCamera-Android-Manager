@@ -78,6 +78,8 @@
     <string name="frames_added">Frames added.</string>
     <string name="done_adding_frames">Done adding frames!</string>
     <string name="no_valid_file">Not a valid file.</string>
+    <string name="cb_last_seen">Last seen.</string>
+    <string name="cb_deleted_images">Deleted images.</string>
 
     <!--Usb serial fragment xml strings-->
     <string name="rb_print">Print to Arduino - GBP</string>

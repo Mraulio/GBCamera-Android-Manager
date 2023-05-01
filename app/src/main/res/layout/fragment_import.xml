@@ -4,34 +4,59 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="5dp"
     tools:context=".ui.importFile.ImportFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <Button
+        android:id="@+id/btnSelectFile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_select_file"
-        android:id="@+id/btnSelectFile"></Button>
+        android:text="@string/btn_select_file"></Button>
+
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/tvFileName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/tv_select_file" />
+
     <Button
+        android:id="@+id/btnExtractFile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_extract_file"
-        android:id="@+id/btnExtractFile"></Button>
+        android:text="@string/btn_extract_file"></Button>
+
     <Button
+        android:id="@+id/btnAddImages"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_add_images"
-        android:id="@+id/btnAddImages"></Button>
+        android:text="@string/btn_add_images"></Button>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/layout_cb"
+        android:visibility="gone">
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cbLastSeen"
+            android:text="@string/cb_last_seen"
+            ></CheckBox>
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cbDeletedImages"
+            android:text="@string/cb_deleted_images"></CheckBox>
+    </LinearLayout>
 
     <GridView
+        android:id="@+id/gridViewImport"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:numColumns="3"
-        android:id="@+id/gridViewImport"></GridView>
+        android:numColumns="3"></GridView>
 
 </LinearLayout>

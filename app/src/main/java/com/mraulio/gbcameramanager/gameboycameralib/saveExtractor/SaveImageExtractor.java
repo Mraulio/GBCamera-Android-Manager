@@ -25,6 +25,7 @@ public class SaveImageExtractor implements Extractor {
     private static final int EMPTY_IMAGE_CHECKSUM = 0;
     private final ImageCodec imageCodec;
     private final ImageCodec smallImageCodec;
+    public static int deletedCount = 0;
 
     public SaveImageExtractor(IndexedPalette palette) {
         this.imageCodec = new ImageCodec(palette, IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -78,7 +79,7 @@ public class SaveImageExtractor implements Extractor {
         final int ACTIVE_PHOTOS_LOCATION = 0x11B2;
         final int ACTIVE_PHOTOS_READ_COUNT = 0x1E;
 //        final int IMAGE_READ_COUNT = 3584;
-
+        deletedCount = 0;
         byte[] activePhotos = new byte[ACTIVE_PHOTOS_READ_COUNT];
         ByteArrayInputStream bais = new ByteArrayInputStream(rawData);
         bais.skip(ACTIVE_PHOTOS_LOCATION);
@@ -86,12 +87,10 @@ public class SaveImageExtractor implements Extractor {
         List<byte[]> deletedImages = new ArrayList<>();
         int howManyActivePhotos = 0;
         for (byte x : activePhotos) {
-            System.out.print(x + " ");
             if (x != (byte) 0xFF) {
                 howManyActivePhotos++;
             }
         }
-        System.out.println(howManyActivePhotos + "////////////howmanyActive");
         ArrayList<byte[]> allImages = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0
         for (int i = 0; i < howManyActivePhotos; i++) {
             allImages.add(null);//Fill it with null so I can later use the "put" method
@@ -104,10 +103,7 @@ public class SaveImageExtractor implements Extractor {
                 // The full size images
                 byte[] image = new byte[IMAGE_LENGTH];
                 System.arraycopy(rawData, i, image, 0, IMAGE_LENGTH);
-//                if (i != 0 && isEmptyImage(image)) {//For the empty images, like when erasing completely a sav
-//                    j++;
-//                    continue;
-//                }
+
                 //The last seen image
                 if (i == 0) {
                     i = NEXT_IMAGE_START_OFFSET;//0 means it's the last seen, then we need to continue on 0x2000(2 * NEXT_IMAGE_START_OFFSET)
@@ -115,32 +111,25 @@ public class SaveImageExtractor implements Extractor {
                 } else {
                     //If it's a deleted photo
                     if (activePhotos[j] == (byte) 0xFF) {
-                        if (!isEmptyImage(image))//In case the image is not FF, because of the isEmptyImage method
+                        if (!isEmptyImage(image)) {//In case the image is not FF, because of the isEmptyImage method
                             deletedImages.add(image);//Can't order it, all are -1 (0xFF)
+                            deletedCount++;
+                        }
                     } else {//If not a deleted photo
-                        // Asegurar que el ArrayList tenga suficiente capacidad
-//                        allImages.ensureCapacity(activePhotos[j] + 1);
-                        // Agregar elementos adicionales si es necesario
-//                        while (allImages.size() < 6) {
-//                            allImages.add(null);
-//                        }
                         allImages.set(activePhotos[j], image);//To set the image in the position as read in activePhotos, from 0 to 29
                     }
                     j++;
                 }
 
-                // The thumbs
-//                byte[] thumbImage = new byte[SMALL_IMAGE_LENGTH];
-//                System.arraycopy(rawData, i + SMALL_IMAGE_START_OFFSET, thumbImage, 0, SMALL_IMAGE_LENGTH);
-//                images.add(smallImageCodec.decode(thumbImage));
             }
             //Append the deleted images after the active images
             System.out.println(allImages.size() + "////////////////////allImages");
 
             System.out.println(deletedImages.size() + "////////////////////deleted");
-            allImages.addAll(deletedImages);
-            //Append the last seen image at the end
+            //Append the last seen image after the active images
             allImages.add(lastSeenImage);
+            //Append the deleted images at the end
+            allImages.addAll(deletedImages);
 
         } catch (Exception e) {
             // Just print the error and continue to return what images we have
@@ -161,6 +150,8 @@ public class SaveImageExtractor implements Extractor {
         return extract(rawData).stream().map(this::imageToBytes).collect(Collectors.toList());
     }
 
+    //Checks if an image is all the same color. Should change it so it checks if it's all white,
+    //as images from an erased camera will be all 00
     private boolean isEmptyImage(byte[] bytes) {
         int checksum = 0;
         for (byte b : bytes) {

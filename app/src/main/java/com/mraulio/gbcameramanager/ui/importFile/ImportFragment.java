@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,7 +25,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,9 +70,20 @@ public class ImportFragment extends Fragment {
 
     public static List<GbcImage> importedImagesList = new ArrayList<>();
     public static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
+    GbcImage lastSeenImage;
+    Bitmap lastSeenBitmap;
+    List<GbcImage> listActiveImages = new ArrayList<>();
+    List<Bitmap> listActiveBitmaps = new ArrayList<>();
+    List<GbcImage> listDeletedImages;
+    List<Bitmap> listDeletedBitmaps;
+    List<Bitmap> listDeletedBitmapsRedStroke;
+    List<GbcImage> finalListImages;
+    List<Bitmap> finalListBitmaps;
     public static List<ImageData> importedImageDatas = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
+
+
     TextView tvFileName;
     static String fileName;
     boolean savFile = false;
@@ -77,7 +92,10 @@ public class ImportFragment extends Fragment {
     List<?> receivedList;
     int numImagesAdded;
     Button btnExtractFile;
+    CheckBox cbLastSeen, cbDeleted;
+    LinearLayout layoutCb;
     CustomGridViewAdapterPalette customAdapterPalette;
+    GridView gridViewImport;
 
     public enum ADD_WHAT {
         PALETTES,
@@ -94,12 +112,15 @@ public class ImportFragment extends Fragment {
         Button btnSelectFile = view.findViewById(R.id.btnSelectFile);
         btnExtractFile = view.findViewById(R.id.btnExtractFile);
         btnExtractFile.setVisibility(View.GONE);
+        cbLastSeen = view.findViewById(R.id.cbLastSeen);
+        cbDeleted = view.findViewById(R.id.cbDeletedImages);
+        layoutCb = view.findViewById(R.id.layout_cb);
         Button btnAddImages = view.findViewById(R.id.btnAddImages);
         btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
 
         tvFileName = view.findViewById(R.id.tvFileName);
-        GridView gridViewImport = view.findViewById(R.id.gridViewImport);
+        gridViewImport = view.findViewById(R.id.gridViewImport);
         btnSelectFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,14 +137,39 @@ public class ImportFragment extends Fragment {
                 importedImagesList.clear();
                 importedImagesBitmaps.clear();
                 listImportedImageBytes.clear();
-                gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
+                cbLastSeen.setChecked(false);
+                cbDeleted.setChecked(false);
+//                gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                 if (savFile && !isJson) {
+
                     btnAddImages.setEnabled(true);
                     extractSavImages(getContext());
+                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - SaveImageExtractor.deletedCount - 1));
+                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - SaveImageExtractor.deletedCount - 1));
+                    lastSeenImage = importedImagesList.get(importedImagesList.size() - SaveImageExtractor.deletedCount - 1);
+                    lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - SaveImageExtractor.deletedCount - 1);
+                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - SaveImageExtractor.deletedCount, importedImagesList.size()));
+                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - SaveImageExtractor.deletedCount, importedImagesBitmaps.size()));
+                    listDeletedBitmapsRedStroke = new ArrayList<>();
+                    Paint paint = new Paint();
+                    paint.setColor(Color.RED);
+                    paint.setStrokeWidth(2);
+                    int startX = 160;
+                    int startY = 0;
+                    int endX = 0;
+                    int endY = 144;
+                    for (Bitmap bitmap : listDeletedBitmaps) {
+                        Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
+                        Canvas canvas = new Canvas(copiedBitmap);
+                        canvas.drawLine(startX, startY, endX, endY, paint);
+                        listDeletedBitmapsRedStroke.add(copiedBitmap);
+                    }
                     tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
-                    gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
+                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
+                    showImages(cbLastSeen, cbDeleted);
                     btnAddImages.setText(getString(R.string.btn_add_images));
                     btnAddImages.setVisibility(View.VISIBLE);
+                    layoutCb.setVisibility(View.VISIBLE);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
                 } else if (!savFile && !isJson) {
                     btnAddImages.setEnabled(true);
@@ -136,6 +182,7 @@ public class ImportFragment extends Fragment {
                     gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                     btnAddImages.setText(getString(R.string.btn_add_images));
                     btnAddImages.setVisibility(View.VISIBLE);
+                    layoutCb.setVisibility(View.VISIBLE);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
                 } else if (!savFile && isJson) {
                     receivedList = JsonReader.jsonCheck(fileContent);
@@ -150,18 +197,21 @@ public class ImportFragment extends Fragment {
                             gridViewImport.setAdapter(customAdapterPalette);
                             btnAddImages.setText(getString(R.string.btn_add_palettes));
                             btnAddImages.setVisibility(View.VISIBLE);
+                            layoutCb.setVisibility(View.VISIBLE);
                             break;
 
                         case FRAMES:
                             btnAddImages.setEnabled(true);
                             btnAddImages.setText(getString(R.string.btn_add_frames));
                             btnAddImages.setVisibility(View.VISIBLE);
+                            layoutCb.setVisibility(View.VISIBLE);
                             gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true));
                             break;
                         case IMAGES:
                             btnAddImages.setEnabled(true);
                             btnAddImages.setText(getString(R.string.btn_add_images));
                             btnAddImages.setVisibility(View.VISIBLE);
+                            layoutCb.setVisibility(View.VISIBLE);
                             gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true));
                             break;
                     }
@@ -169,6 +219,20 @@ public class ImportFragment extends Fragment {
 
             }
         });
+
+        cbLastSeen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showImages(cbLastSeen, cbDeleted);
+            }
+        });
+        cbDeleted.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showImages(cbLastSeen, cbDeleted);
+            }
+        });
+
         btnAddImages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -230,26 +294,51 @@ public class ImportFragment extends Fragment {
                         numImagesAdded = 0;
                         List<GbcImage> newGbcImages = new ArrayList<>();
                         List<ImageData> newImageDatas = new ArrayList<>();
-                        for (int i = 0; i < importedImagesList.size(); i++) {
-                            GbcImage gbcImage = importedImagesList.get(i);
-                            boolean alreadyAdded = false;
-                            //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
-                            for (GbcImage image : Methods.gbcImagesList) {
-                                if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
-                                    alreadyAdded = true;
-                                    break;
+                        if (!savFile) {
+                            for (int i = 0; i < importedImagesList.size(); i++) {
+                                GbcImage gbcImage = importedImagesList.get(i);
+                                boolean alreadyAdded = false;
+                                //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
+                                for (GbcImage image : Methods.gbcImagesList) {
+                                    if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
+                                        alreadyAdded = true;
+                                        break;
+                                    }
+                                }
+                                if (!alreadyAdded) {
+                                    GbcImage.numImages++;
+                                    numImagesAdded++;
+                                    ImageData imageData = new ImageData();
+                                    imageData.setImageId(gbcImage.getHashCode());
+                                    imageData.setData(gbcImage.getImageBytes());
+                                    newImageDatas.add(imageData);
+                                    Methods.gbcImagesList.add(gbcImage);
+                                    newGbcImages.add(gbcImage);
+                                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
                                 }
                             }
-                            if (!alreadyAdded) {
-                                GbcImage.numImages++;
-                                numImagesAdded++;
-                                ImageData imageData = new ImageData();
-                                imageData.setImageId(gbcImage.getHashCode());
-                                imageData.setData(gbcImage.getImageBytes());
-                                newImageDatas.add(imageData);
-                                Methods.gbcImagesList.add(gbcImage);
-                                newGbcImages.add(gbcImage);
-                                Methods.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
+                        } else {
+                            for (int i = 0; i < finalListImages.size(); i++) {
+                                GbcImage gbcImage = finalListImages.get(i);
+                                boolean alreadyAdded = false;
+                                //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
+                                for (GbcImage image : Methods.gbcImagesList) {
+                                    if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
+                                        alreadyAdded = true;
+                                        break;
+                                    }
+                                }
+                                if (!alreadyAdded) {
+                                    GbcImage.numImages++;
+                                    numImagesAdded++;
+                                    ImageData imageData = new ImageData();
+                                    imageData.setImageId(gbcImage.getHashCode());
+                                    imageData.setData(gbcImage.getImageBytes());
+                                    newImageDatas.add(imageData);
+                                    Methods.gbcImagesList.add(gbcImage);
+                                    newGbcImages.add(gbcImage);
+                                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
+                                }
                             }
                         }
                         if (newGbcImages.size() > 0) {
@@ -264,6 +353,39 @@ public class ImportFragment extends Fragment {
         });
         // Inflate the layout for this fragment
         return view;
+    }
+
+    private void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
+        List<Bitmap> bitmapsAdapterList = null;
+        if (!showLastSeen.isChecked() && !showDeleted.isChecked()) {
+            finalListImages = new ArrayList<>(listActiveImages);
+            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+        } else if (showLastSeen.isChecked() && !showDeleted.isChecked()) {
+            finalListImages = new ArrayList<>(listActiveImages);
+            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+            finalListImages.add(lastSeenImage);
+            finalListBitmaps.add(lastSeenBitmap);
+            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+
+        } else if (!showLastSeen.isChecked() && showDeleted.isChecked()) {
+            finalListImages = new ArrayList<>(listActiveImages);
+            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+            finalListImages.addAll(listDeletedImages);
+            finalListBitmaps.addAll(listDeletedBitmaps);
+            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
+        } else if (showLastSeen.isChecked() && showDeleted.isChecked()) {
+            finalListImages = new ArrayList<>(listActiveImages);
+            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+            finalListImages.add(lastSeenImage);
+            finalListImages.addAll(listDeletedImages);
+            finalListBitmaps.add(lastSeenBitmap);
+            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+            finalListBitmaps.addAll(listDeletedBitmaps);
+            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
+        }
+        gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true)));
     }
 
     private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -349,13 +471,14 @@ public class ImportFragment extends Fragment {
     }
 
     /**
-     *    //https://www.youtube.com/watch?v=4EKlAvjY74U&t=0s
+     * //https://www.youtube.com/watch?v=4EKlAvjY74U&t=0s
+     *
      * @param view
      */
-    public void openFileDialog(View view){
+    public void openFileDialog(View view) {
         Intent data = new Intent(Intent.ACTION_GET_CONTENT);
         data.setType("*/*");
-        data = Intent.createChooser(data,"Choose a file");
+        data = Intent.createChooser(data, "Choose a file");
         sActivityResultLauncher.launch(data);
     }
 
@@ -382,15 +505,16 @@ public class ImportFragment extends Fragment {
         }
         return result;
     }
-        ActivityResultLauncher<Intent> sActivityResultLauncher = registerForActivityResult(
+
+    ActivityResultLauncher<Intent> sActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK){
+                    if (result.getResultCode() == Activity.RESULT_OK) {
                         Intent data = result.getData();
                         Uri uri = data.getData();
-                        Methods.toast(getContext(),getFileName(uri));
+                        Methods.toast(getContext(), getFileName(uri));
 //                        String[] aux = uri.getPath().split("/");
                         fileName = getFileName(uri);
                         //I check the extension of the file
@@ -487,7 +611,6 @@ public class ImportFragment extends Fragment {
             }
     );
 
-
     public void extractSavImages(Context context) {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         try {
@@ -529,7 +652,7 @@ public class ImportFragment extends Fragment {
 
     public static void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
         List<String> dataList = HexToTileData.separateData(fileContent);
-        System.out.println(dataList.size()+" tamaño datalist/////////////////////");
+        System.out.println(dataList.size() + " tamaño datalist/////////////////////");
         System.out.println(dataList.get(0));
         String data = "";
         int index = 1;
@@ -558,11 +681,12 @@ public class ImportFragment extends Fragment {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];
         try {
-        for (int i = 0; i < byteStrings.length; i++) {
-            bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
-                    + Character.digit(byteStrings[i].charAt(1), 16));
-        }}catch (Exception e){}
+            for (int i = 0; i < byteStrings.length; i++) {
+                bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
+                        + Character.digit(byteStrings[i].charAt(1), 16));
+            }
+        } catch (Exception e) {
+        }
         return bytes;
     }
-
 }

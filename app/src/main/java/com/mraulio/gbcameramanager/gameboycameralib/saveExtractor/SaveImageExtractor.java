@@ -9,11 +9,13 @@ import android.graphics.Bitmap;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,9 +45,9 @@ public class SaveImageExtractor implements Extractor {
                 // The full size images
                 byte[] image = new byte[IMAGE_LENGTH];
                 System.arraycopy(rawData, i, image, 0, IMAGE_LENGTH);
-////                if (i!=0 && isEmptyImage(image)) {//FOR THE DELETED IMAGES, CHECK THIS
-////                    continue;
-////                }
+                if (i != 0 && isEmptyImage(image)) {//FOR THE DELETED IMAGES, CHECK THIS
+                    continue;
+                }
 //                if (i == 0){
 //                    i += NEXT_IMAGE_START_OFFSET;//0 means it's the last seen, then we need to continue on 0x2000
 //                }
@@ -65,40 +67,88 @@ public class SaveImageExtractor implements Extractor {
     }
 
 
-
     @Override
     public List<byte[]> extractBytes(File file) throws IOException {
         return extractBytes(Files.readAllBytes(file.toPath()));//Modificado
     }
+
     //Added by me
     @Override
     public List<byte[]> extractBytes(byte[] rawData) {
-        List<byte[]> images = new ArrayList<>(30);//31 to get the last seen, but needs tweak
-        try {
-            for (int i = IMAGE_START_LOCATION; i < rawData.length; i += NEXT_IMAGE_START_OFFSET) {
+        final int ACTIVE_PHOTOS_LOCATION = 0x11B2;
+        final int ACTIVE_PHOTOS_READ_COUNT = 0x1E;
+//        final int IMAGE_READ_COUNT = 3584;
 
+        byte[] activePhotos = new byte[ACTIVE_PHOTOS_READ_COUNT];
+        ByteArrayInputStream bais = new ByteArrayInputStream(rawData);
+        bais.skip(ACTIVE_PHOTOS_LOCATION);
+        bais.read(activePhotos, 0, ACTIVE_PHOTOS_READ_COUNT);
+        List<byte[]> deletedImages = new ArrayList<>();
+        int howManyActivePhotos = 0;
+        for (byte x : activePhotos) {
+            System.out.print(x + " ");
+            if (x != (byte) 0xFF) {
+                howManyActivePhotos++;
+            }
+        }
+        System.out.println(howManyActivePhotos + "////////////howmanyActive");
+        ArrayList<byte[]> allImages = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0
+        for (int i = 0; i < howManyActivePhotos; i++) {
+            allImages.add(null);//Fill it with null so I can later use the "put" method
+        }
+        byte[] lastSeenImage = new byte[0];
+
+        try {
+            int j = 0;
+            for (int i = 0; i < rawData.length; i += NEXT_IMAGE_START_OFFSET) {//i=0 to get the last seen. Next image will be at IMAGE_START_LOCATION
                 // The full size images
                 byte[] image = new byte[IMAGE_LENGTH];
                 System.arraycopy(rawData, i, image, 0, IMAGE_LENGTH);
-////                if (i!=0 && isEmptyImage(image)) {//FOR THE DELETED IMAGES, CHECK THIS
-////                    continue;
-////                }
-//                if (i == 0){
-//                    i += NEXT_IMAGE_START_OFFSET;//0 means it's the last seen, then we need to continue on 0x2000
+//                if (i != 0 && isEmptyImage(image)) {//For the empty images, like when erasing completely a sav
+//                    j++;
+//                    continue;
 //                }
-                images.add(image);
+                //The last seen image
+                if (i == 0) {
+                    i = NEXT_IMAGE_START_OFFSET;//0 means it's the last seen, then we need to continue on 0x2000(2 * NEXT_IMAGE_START_OFFSET)
+                    lastSeenImage = image;
+                } else {
+                    //If it's a deleted photo
+                    if (activePhotos[j] == (byte) 0xFF) {
+                        if (!isEmptyImage(image))//In case the image is not FF, because of the isEmptyImage method
+                            deletedImages.add(image);//Can't order it, all are -1 (0xFF)
+                    } else {//If not a deleted photo
+                        // Asegurar que el ArrayList tenga suficiente capacidad
+//                        allImages.ensureCapacity(activePhotos[j] + 1);
+                        // Agregar elementos adicionales si es necesario
+//                        while (allImages.size() < 6) {
+//                            allImages.add(null);
+//                        }
+                        allImages.set(activePhotos[j], image);//To set the image in the position as read in activePhotos, from 0 to 29
+                    }
+                    j++;
+                }
 
                 // The thumbs
 //                byte[] thumbImage = new byte[SMALL_IMAGE_LENGTH];
 //                System.arraycopy(rawData, i + SMALL_IMAGE_START_OFFSET, thumbImage, 0, SMALL_IMAGE_LENGTH);
 //                images.add(smallImageCodec.decode(thumbImage));
             }
+            //Append the deleted images after the active images
+            System.out.println(allImages.size() + "////////////////////allImages");
+
+            System.out.println(deletedImages.size() + "////////////////////deleted");
+            allImages.addAll(deletedImages);
+            //Append the last seen image at the end
+            allImages.add(lastSeenImage);
 
         } catch (Exception e) {
             // Just print the error and continue to return what images we have
             e.printStackTrace();
         }
-        return images;
+
+
+        return allImages;
     }
 
     @Override

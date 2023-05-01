@@ -26,6 +26,12 @@ public class StartCreation {
         nintendoframe.setFrameName("Nintendo Frame");
         nintendoframe.setFrameBitmap(bitmap);
         Methods.framesList.add(nintendoframe);
+//Nintendo frame from drawable-nodpi resource (so it is not automatically scaled to the dpi)
+//        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.gbcamera_manager_frame);
+//        GbcFrame myframe = new GbcFrame();
+//        myframe.setFrameName("GBCManager Frame");
+//        myframe.setFrameBitmap(bitmap);
+//        Methods.framesList.add(myframe);
 
         Arrays.fill(pixels, Color.BLACK);
         bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);

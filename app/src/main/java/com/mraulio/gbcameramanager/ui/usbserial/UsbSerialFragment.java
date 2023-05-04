@@ -534,14 +534,21 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 List<byte[]> listExtractedImageBytes = new ArrayList<>();
 
                 listExtractedImageBytes = extractor.extractBytes(file);
-                tv.append(getString(R.string.images_list) + listExtractedImageBytes.size());
+//                tv.append(getString(R.string.images_list) + listExtractedImageBytes.size());
                 int nameIndex = 1;
-
+                String fileName = file.getName();
                 for (byte[] imageBytes : listExtractedImageBytes) {
                     GbcImage gbcImage = new GbcImage();
-                    gbcImage.setName(nameIndex++ + "-" + file.getName());
-                    gbcImage.setFrameIndex(0);
-                    gbcImage.setPaletteIndex(0);
+                    String formattedIndex = String.format("%02d", nameIndex);
+                    tv.append(""+nameIndex);
+                    if (nameIndex == listExtractedImageBytes.size() - MainActivity.deletedCount) {//Last seen image
+                        gbcImage.setName(fileName + " [last seen]");
+                    } else if (nameIndex > listExtractedImageBytes.size() - MainActivity.deletedCount) {//Deleted images
+                        gbcImage.setName(fileName + " [deleted]");
+                    } else {
+                        gbcImage.setName(fileName + " " + formattedIndex);
+                    }
+                    nameIndex++;
                     byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                     String hashHex = Methods.bytesToHex(hash);
                     gbcImage.setHashCode(hashHex);

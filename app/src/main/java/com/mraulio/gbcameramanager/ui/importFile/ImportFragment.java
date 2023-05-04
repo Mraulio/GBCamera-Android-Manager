@@ -144,12 +144,13 @@ public class ImportFragment extends Fragment {
 
                     btnAddImages.setEnabled(true);
                     extractSavImages(getContext());
-                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - SaveImageExtractor.deletedCount - 1));
-                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - SaveImageExtractor.deletedCount - 1));
-                    lastSeenImage = importedImagesList.get(importedImagesList.size() - SaveImageExtractor.deletedCount - 1);
-                    lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - SaveImageExtractor.deletedCount - 1);
-                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - SaveImageExtractor.deletedCount, importedImagesList.size()));
-                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - SaveImageExtractor.deletedCount, importedImagesBitmaps.size()));
+                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount - 1));
+                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount - 1));
+                    lastSeenImage = importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount - 1);
+                    lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount - 1);
+                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount, importedImagesList.size()));
+
+                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount, importedImagesBitmaps.size()));
                     listDeletedBitmapsRedStroke = new ArrayList<>();
                     Paint paint = new Paint();
                     paint.setColor(Color.RED);
@@ -619,9 +620,15 @@ public class ImportFragment extends Fragment {
             int nameIndex = 1;
             for (byte[] imageBytes : listImportedImageBytes) {
                 GbcImage gbcImage = new GbcImage();
-                gbcImage.setName(nameIndex++ + "-" + fileName);
-                gbcImage.setFrameIndex(0);
-                gbcImage.setPaletteIndex(0);
+                String formattedIndex = String.format("%02d", nameIndex);
+                if (nameIndex == listImportedImageBytes.size() - MainActivity.deletedCount) {//Last seen image
+                    gbcImage.setName(fileName + " [last seen]");
+                } else if (nameIndex > listImportedImageBytes.size() - MainActivity.deletedCount) {//Deleted images
+                    gbcImage.setName(fileName + " [deleted]");
+                } else {
+                    gbcImage.setName(fileName + " " + formattedIndex);
+                }
+                nameIndex++;
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                 String hashHex = Methods.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);
@@ -652,8 +659,6 @@ public class ImportFragment extends Fragment {
 
     public static void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
         List<String> dataList = HexToTileData.separateData(fileContent);
-        System.out.println(dataList.size() + " tamaño datalist/////////////////////");
-        System.out.println(dataList.get(0));
         String data = "";
         int index = 1;
         for (String string : dataList) {
@@ -668,7 +673,8 @@ public class ImportFragment extends Fragment {
             imageData.setImageId(hashHex);
             imageData.setData(bytes);
             importedImageDatas.add(imageData);
-            gbcImage.setName(index++ + "-" + fileName);
+            String formattedIndex = String.format("%02d", index++);
+            gbcImage.setName(fileName + " " + formattedIndex);
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, height);
             Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());

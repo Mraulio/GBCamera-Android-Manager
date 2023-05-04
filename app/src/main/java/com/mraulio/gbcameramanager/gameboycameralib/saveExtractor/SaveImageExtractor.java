@@ -6,6 +6,7 @@ import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageCo
 import android.graphics.Bitmap;
 
 
+import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
@@ -25,7 +26,6 @@ public class SaveImageExtractor implements Extractor {
     private static final int EMPTY_IMAGE_CHECKSUM = 0;
     private final ImageCodec imageCodec;
     private final ImageCodec smallImageCodec;
-    public static int deletedCount = 0;
 
     public SaveImageExtractor(IndexedPalette palette) {
         this.imageCodec = new ImageCodec(palette, IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -76,27 +76,58 @@ public class SaveImageExtractor implements Extractor {
     //Added by me
     @Override
     public List<byte[]> extractBytes(byte[] rawData) {
-        final int ACTIVE_PHOTOS_LOCATION = 0x11B2;
-        final int ACTIVE_PHOTOS_READ_COUNT = 0x1E;
-//        final int IMAGE_READ_COUNT = 3584;
-        deletedCount = 0;
-        byte[] activePhotos = new byte[ACTIVE_PHOTOS_READ_COUNT];
+        final int PHOTOS_LOCATION = 0x11B2;
+        final int PHOTOS_READ_COUNT = 0x1E;
+        MainActivity.deletedCount = 0;
+        byte[] photosPositions = new byte[PHOTOS_READ_COUNT];
         ByteArrayInputStream bais = new ByteArrayInputStream(rawData);
-        bais.skip(ACTIVE_PHOTOS_LOCATION);
-        bais.read(activePhotos, 0, ACTIVE_PHOTOS_READ_COUNT);
+        bais.skip(PHOTOS_LOCATION);
+        bais.read(photosPositions, 0, PHOTOS_READ_COUNT);
         List<byte[]> deletedImages = new ArrayList<>();
-        int howManyActivePhotos = 0;
-        for (byte x : activePhotos) {
+        int activePhotos = 0;
+        StringBuilder sb = new StringBuilder();
+        for (byte x : photosPositions) {
+            sb.append(String.format("%02x", x));
+            sb.append(" ");
             if (x != (byte) 0xFF) {
-                howManyActivePhotos++;
+                activePhotos++;
             }
         }
+        System.out.println(sb.toString());
+        sb.setLength(0);
+        int newSize = 0;
+        int index = 0;
+        for (byte b : photosPositions) {
+            if (b != (byte) 0xFF) {
+                newSize++;
+            }
+        }
+        byte[] noFFarray = new byte[newSize];
+
+        for (byte b : photosPositions) {
+            if (b != (byte) 0xFF) {
+                sb.append(String.format("%02x", b));
+                sb.append(" ");
+                noFFarray[index] = b;
+                index++;
+            }
+        }
+        System.out.println(sb.toString());
         ArrayList<byte[]> allImages = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0
-        for (int i = 0; i < howManyActivePhotos; i++) {
+        for (int i = 0; i < activePhotos; i++) {
             allImages.add(null);//Fill it with null so I can later use the "put" method
         }
         byte[] lastSeenImage = new byte[0];
 
+        Arrays.sort(noFFarray);
+        sb.setLength(0);
+        for (byte b : noFFarray) {
+            if (b != (byte) 0xFF) {
+                sb.append(String.format("%02x", b));
+                sb.append(" ");
+            }
+        }
+        System.out.println(sb.toString() + "////sorted");
         try {
             int j = 0;
             for (int i = 0; i < rawData.length; i += NEXT_IMAGE_START_OFFSET) {//i=0 to get the last seen. Next image will be at IMAGE_START_LOCATION
@@ -110,22 +141,22 @@ public class SaveImageExtractor implements Extractor {
                     lastSeenImage = image;
                 } else {
                     //If it's a deleted photo
-                    if (activePhotos[j] == (byte) 0xFF) {
+                    if (photosPositions[j] == (byte) 0xFF) {
                         if (!isEmptyImage(image)) {//In case the image is not FF, because of the isEmptyImage method
                             deletedImages.add(image);//Can't order it, all are -1 (0xFF)
-                            deletedCount++;
+                            MainActivity.deletedCount++;
                         }
                     } else {//If not a deleted photo
-                        allImages.set(activePhotos[j], image);//To set the image in the position as read in activePhotos, from 0 to 29
+                        //I get the index in the sorted array where the "real" index from the vector is stored
+                        for (int b = 0; b < noFFarray.length; b++) {
+                            if (noFFarray[b] == photosPositions[j]) {
+                                allImages.set(b, image);
+                            }
+                        }
                     }
                     j++;
                 }
-
             }
-            //Append the deleted images after the active images
-            System.out.println(allImages.size() + "////////////////////allImages");
-
-            System.out.println(deletedImages.size() + "////////////////////deleted");
             //Append the last seen image after the active images
             allImages.add(lastSeenImage);
             //Append the deleted images at the end
@@ -135,7 +166,6 @@ public class SaveImageExtractor implements Extractor {
             // Just print the error and continue to return what images we have
             e.printStackTrace();
         }
-
 
         return allImages;
     }

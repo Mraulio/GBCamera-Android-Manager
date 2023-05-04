@@ -73,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
     public static int imagesPage = 12;
     public static boolean exportPng = true;
     public static UsbManager manager;
+    public static int deletedCount = 0;
+
     public static AppDatabase db;
     public static boolean printingEnabled = false;
     private static final String ACTION_USB_PERMISSION =

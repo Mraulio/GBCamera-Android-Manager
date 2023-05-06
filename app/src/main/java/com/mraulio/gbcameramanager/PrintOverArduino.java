@@ -134,7 +134,7 @@ public class PrintOverArduino {
         }
 
         int chunkSize = 640;//each data packet size
-        tv.append("///////////////CHUNKS = " + bytesTileData.length / chunkSize);
+        tv.append("\nCHUNKS = " + bytesTileData.length / chunkSize);
         //I NEED TO CREATE A FULL 9 PACKETS WITH COMMANDS FOR EACH BYTE LIST TO SEND.
         //IF IMAGE IS LARGER THAN THE 9 PACKETS, CREATE ANOTHER BYTE LIST WITH COMMANDS AND THE REST OF THE DATA PACKETS.
 
@@ -147,7 +147,7 @@ public class PrintOverArduino {
             printsNeeded += 1;
         }
 
-        tv.append("///////////////NEEDED PRINTS = " + printsNeeded);
+        tv.append("\nNEEDED PRINTS = " + printsNeeded);
         for (int x = 0; x < printsNeeded; x++) {
             listBytes.add(getCommandBytes(INIT));//listBytes.get(0)
             byte[] splittedArray;
@@ -179,22 +179,22 @@ public class PrintOverArduino {
 
             listOfLists.add(new ArrayList<>(listBytes));
             try {
-                tv.append("///////////////listBytes before clear = " + listBytes.size());
+                tv.append("\nlistBytes before clear = " + listBytes.size());
 
             } catch (Exception e) {
-                tv.append("Error en listbytes size \n" + e.toString());
+                tv.append("\nError en listbytes size \n" + e.toString());
             }
             try {
                 listBytes.clear();
             } catch (Exception e) {
-                tv.append("Error en clear\n" + e.toString());
+                tv.append("\nError en clear\n" + e.toString());
             }
         }
-        try {
-            tv.append("///////////////listBytes inside list of lists after clear = " + listOfLists.get(0).size());
-        } catch (Exception e) {
-            tv.append("Error en get size..\n" + e.toString());
-        }
+//        try {
+//            tv.append("///////////////listBytes inside list of lists after clear = " + listOfLists.get(0).size());
+//        } catch (Exception e) {
+//            tv.append("Error en get size..\n" + e.toString());
+//        }
 
         return listOfLists;
     }
@@ -219,7 +219,7 @@ public class PrintOverArduino {
         }
         UsbEndpoint finalEndpoint = endpoint;
         List<List<byte[]>> listOfBytes = createDataDelay(textView);
-        textView.append("\nThere are this byte[]" + listOfBytes.size());
+        textView.append("\nThere are this byte arrays" + listOfBytes.size()+"\n");
 
         Thread sendThread = new Thread(new Runnable() {
             @Override

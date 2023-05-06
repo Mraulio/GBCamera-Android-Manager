@@ -57,6 +57,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -73,10 +76,13 @@ import java.util.List;
 public class UsbSerialFragment extends Fragment implements SerialInputOutputManager.Listener {
     List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
     List<GbcImage> extractedImagesList = new ArrayList<>();
+    StringBuilder sb = new StringBuilder();
 
     File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
     File latestFile;
+    boolean ape = false;
     static UsbDeviceConnection connection;
+    static UsbSerialPort port = null;
     static UsbManager manager = MainActivity.manager;
     SerialInputOutputManager usbIoManager;
     String romName = "";
@@ -99,7 +105,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     public static RadioButton rbPrint;
     RadioGroup rbGroup;
 
-    static UsbSerialPort port = null;
     Spinner spSleepTime;
 
     @Override
@@ -463,7 +468,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             spSleepTime.setVisibility(View.GONE);
             tvSleepTime.setVisibility(View.GONE);
             btnPrintBanner.setVisibility(View.GONE);
-
+            ape = true;
             connect();
             usbIoManager.start();
             tv.append(getString(R.string.tv_connected));
@@ -478,6 +483,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         try {
             MainActivity.printingEnabled = true;
             gbxMode = false;
+            ape = false;
             tvMode.setVisibility(View.VISIBLE);
             tvMode.setText(getString(R.string.print_mode));
             rbGroup.setVisibility(View.GONE);
@@ -498,6 +504,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
     private void gbxMode() {
         gbxMode = true;
+        ape = false;
         tvMode.setText(getString(R.string.gbxcart_mode));
         tvMode.setVisibility(View.VISIBLE);
         rbGroup.setVisibility(View.GONE);
@@ -540,7 +547,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 for (byte[] imageBytes : listExtractedImageBytes) {
                     GbcImage gbcImage = new GbcImage();
                     String formattedIndex = String.format("%02d", nameIndex);
-                    tv.append(""+nameIndex);
+                    tv.append("" + nameIndex);
                     if (nameIndex == listExtractedImageBytes.size() - MainActivity.deletedCount) {//Last seen image
                         gbcImage.setName(fileName + " [last seen]");
                     } else if (nameIndex > listExtractedImageBytes.size() - MainActivity.deletedCount) {//Deleted images
@@ -829,30 +836,40 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             System.out.println(e.toString());
             tv.append(e.toString());
             Toast.makeText(getContext(), "Error in connect." + e.toString(), Toast.LENGTH_SHORT).show();
-
         }
 
         //USE IN ARDUINO MODE ONLY
         usbIoManager = new SerialInputOutputManager(port, this);
-//        usbIoManager.start();
-//        tv.append("Conectado");
     }
 
-    //For the Arduino Printer Emulator
+    //For the Arduino Printer Emulator or Printing over arduino
     @Override
     public void onNewData(byte[] data) {
-//        ArrayDeque<byte[]> datas = new ArrayDeque<>();
-//        datas.add(data);
-//        SpannableStringBuilder spn = new SpannableStringBuilder();
-        String msg;
+        if (ape) {
+            String msg;
+            msg = new String(data);
 
-        msg = new String(data);
-//            spn.append(msg);
+            getActivity().runOnUiThread(() -> {
+                tv.append(msg);
+            });
+        } else {
+            BigInteger bigInt = new BigInteger(1, data);
+            String hexString = bigInt.toString(16);
+            // Asegurarse de que la cadena tenga una longitud par
+            if (hexString.length() % 2 != 0) {
+                hexString = "0" + hexString;
+            }
 
-        getActivity().runOnUiThread(() -> {
-            tv.append(msg);
-        });
-
+            // Formatear la cadena en bloques de dos caracteres
+            hexString = String.format("%0" + (hexString.length() + hexString.length() % 2) + "X", new BigInteger(hexString, 16));
+            hexString = hexString.replaceAll("..", "$0 ");//To separate with spaces every hex byte
+            String finalHexString = hexString;
+            getActivity().runOnUiThread(() -> {
+                tv.append(finalHexString);
+//                sb.append(finalHexString);
+//                MainActivity.printedResponseBytes = sb.toString();
+            });
+        }
     }
 
     //For de arduino printing function, try using the other

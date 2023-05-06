@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,6 +39,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.hoho.android.usbserial.driver.UsbSerialDriver;
+import com.hoho.android.usbserial.driver.UsbSerialPort;
+import com.hoho.android.usbserial.driver.UsbSerialProber;
+import com.hoho.android.usbserial.util.SerialInputOutputManager;
+import com.mraulio.gbcameramanager.PrintOverArduino;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.ImageData;
@@ -56,6 +63,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -64,16 +72,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class GalleryFragment extends Fragment {
+public class GalleryFragment extends Fragment implements SerialInputOutputManager.Listener {
 
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-
+    static UsbManager manager = MainActivity.manager;
+    SerialInputOutputManager usbIoManager;
+    static UsbDeviceConnection connection;
+    static UsbSerialPort port = null;
     public static GridView gridView;
     private static int itemsPerPage = MainActivity.imagesPage;
     static int startIndex = 0;
     static int endIndex = 0;
     public static int currentPage = 0;
     static int lastPage = 0;
+    public static TextView tvResponseBytes;
     boolean crop = false;
     boolean showPalettes = true;
     static TextView tv_page;
@@ -386,15 +398,57 @@ public class GalleryFragment extends Fragment {
                         }
                     }
                 });
-//                UsbSerialFragment.rbPrint.callOnClick();//Clicking on this on startup to set the printing mode on gallery without entering the other fragment.
                 printButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         try {
                             MainActivity.printIndex = globalImageIndex;
-                            UsbSerialFragment.btnPrintImage.callOnClick();//This works.
-                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_printing), Toast.LENGTH_LONG);
-                            toast.show();
+//                            UsbSerialFragment.btnPrintImage.callOnClick();//This works.
+                            connect();
+                            usbIoManager.start();
+                            port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            View dialogView = getLayoutInflater().inflate(R.layout.print_dialog, null);
+                            tvResponseBytes = dialogView.findViewById(R.id.tvResponseBytes);
+                            builder.setView(dialogView);
+//                            builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//                                    // Acciones a realizar al hacer clic en el botón Aceptar
+//                                }
+//                            });
+                            builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Acciones a realizar al hacer clic en el botón Cancelar
+                                }
+                            });
+
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                            //PRINT IMAGE
+                            PrintOverArduino printOverArduino = new PrintOverArduino();
+
+                            printOverArduino.oneImage = true;
+                            printOverArduino.banner = false;
+//                printOverArduino.sendImage(port, tv);
+                            try {
+                                List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+                                if (availableDrivers.isEmpty()) {
+                                    return;
+                                }
+                                UsbSerialDriver driver = availableDrivers.get(0);
+
+                                printOverArduino.sendThreadDelay(connection, driver.getDevice(), tvResponseBytes, getContext());
+                            } catch (Exception e) {
+                                tv.append(e.toString());
+                                Toast toast = Toast.makeText(getContext(), getString(R.string.error_print_image) + e.toString(), Toast.LENGTH_LONG);
+                                toast.show();
+                            }
+
+//                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_printing), Toast.LENGTH_LONG);
+//                            toast.show();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -523,6 +577,45 @@ public class GalleryFragment extends Fragment {
         tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
         return view;
     }
+
+
+    /**
+     *
+
+     */
+    private void connect() {
+        manager = (UsbManager) getActivity().getSystemService(Context.USB_SERVICE);
+        List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+        if (availableDrivers.isEmpty()) {
+            return;
+        }
+        // Open a connection to the first available driver.
+        UsbSerialDriver driver = availableDrivers.get(0);
+        connection = manager.openDevice(driver.getDevice());
+
+
+        port = driver.getPorts().get(0); // Most devices have just one port (port 0)
+        try {
+            if (port.isOpen()) port.close();
+            port.open(connection);
+            port.setParameters(1000000, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+//            tv.append("Puerto abierto y parametros puestos");
+
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            tv.append(e.toString());
+            Toast.makeText(getContext(), "Error in connect." + e.toString(), Toast.LENGTH_SHORT).show();
+        }
+
+        //USE IN ARDUINO MODE ONLY
+        usbIoManager = new SerialInputOutputManager(port, this);
+    }
+
+
+    /**
+     *
+
+     */
 
 
     public static Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
@@ -792,6 +885,31 @@ public class GalleryFragment extends Fragment {
         }
 //            imagesForPage = Methods.completeBitmapList.subList(startIndex, endIndex);
 //        gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
+    }
+
+    @Override
+    public void onNewData(byte[] data) {
+        BigInteger bigInt = new BigInteger(1, data);
+        String hexString = bigInt.toString(16);
+        // Asegurarse de que la cadena tenga una longitud par
+        if (hexString.length() % 2 != 0) {
+            hexString = "0" + hexString;
+        }
+
+        // Formatear la cadena en bloques de dos caracteres
+        hexString = String.format("%0" + (hexString.length() + hexString.length() % 2) + "X", new BigInteger(hexString, 16));
+        hexString = hexString.replaceAll("..", "$0 ");//To separate with spaces every hex byte
+        String finalHexString = hexString;
+        getActivity().runOnUiThread(() -> {
+            tvResponseBytes.append(finalHexString);
+//            sb.append(finalHexString);
+//            MainActivity.printedResponseBytes = sb.toString();
+        });
+    }
+
+    @Override
+    public void onRunError(Exception e) {
+
     }
 
     private static class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {

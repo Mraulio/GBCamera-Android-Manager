@@ -63,7 +63,7 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
-    public static int printIndex = 0;
+    public static int printIndex = 0;//If there are no images there will be a crash when trying to print
     private AppBarConfiguration mAppBarConfiguration;
     boolean anyImage = false;
     private ActivityMainBinding binding;
@@ -71,10 +71,10 @@ public class MainActivity extends AppCompatActivity {
     public static boolean doneLoading = false;
     public static int exportSize = 4;
     public static int imagesPage = 12;
+    public static String printedResponseBytes;
     public static boolean exportPng = true;
     public static UsbManager manager;
     public static int deletedCount = 0;
-
     public static AppDatabase db;
     public static boolean printingEnabled = false;
     private static final String ACTION_USB_PERMISSION =
@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
             // Por ejemplo, puedes abrir el archivo en tu aplicación:
             Methods.toast(this, "Opened from file");
         }
-//        Methods.extractHexImages();
         if (!doneLoading) {
             new ReadDataAsyncTask().execute();
         }

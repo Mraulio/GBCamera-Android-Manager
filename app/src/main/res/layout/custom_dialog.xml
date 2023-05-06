@@ -39,7 +39,7 @@
             app:icon="@drawable/ic_print"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            android:visibility="gone"/>
+            android:visibility="visible"/>
 
         <CheckBox
             android:id="@+id/cbCrop"

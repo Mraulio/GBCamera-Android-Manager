@@ -165,15 +165,16 @@ public class JsonReader {
                 byte[] hashSha = MessageDigest.getInstance("SHA-256").digest(bytes);
                 String hashHex = Methods.bytesToHex(hashSha);
                 gbcImage.setHashCode(hashHex);
-                if (!imageJson.getString("frame").equals("") && !imageJson.getString("frame").equals("null")) {
-                    System.out.println("Aqui/////////////////////////////");
-                    gbcImage.setFrameId(imageJson.getString("frame"));//To get the frame from the json
+//                if (!imageJson.getString("frame").equals("") && !imageJson.getString("frame").equals("null")) {
+                gbcImage.setFrameId(imageJson.getString("frame"));//To get the frame from the json
+//                }
+                if (imageJson.getString("frame").equals("null"))
+                    gbcImage.setFrameId("");
+                if (!Methods.hashFrames.containsKey(gbcImage.getFrameId())){
+                    gbcImage.setFrameId("Nintendo_Frame");
                 }
-                System.out.println(gbcImage.getFrameId() + "////////////////frameid");
                 imageData.setImageId(hashHex);
                 if (imageBitmap.getHeight() == 144) {
-                    System.out.println(imageBitmap.getHeight() + "////////height");
-                    System.out.println(imageBitmap.getWidth() + "////////width");
                     imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), false);//Need to change the frame to use the one in the json
 
                 }

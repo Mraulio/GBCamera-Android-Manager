@@ -951,7 +951,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT 9999 (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
-                    if (image.getHeight() == 144 && !gbcImage.getFrameId().equals("no_frame_id_9999"))
+                    if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
                         image = frameChange(Methods.gbcImagesList.get(newStartIndex + index), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(newStartIndex + index).getHashCode()),Methods.gbcImagesList.get(newStartIndex + index).getFrameId(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
                 } catch (IOException e) {
                     e.printStackTrace();

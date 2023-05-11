@@ -57,8 +57,6 @@ public class PythonToJava {
             //PowerOn
             command[0] = (byte) 0x2F;//OFW_CART_PWR_ON
             port.write(command, TIMEOUT);
-//            Toast.makeText(context, "Escrito PowerON", Toast.LENGTH_LONG).show();
-
 
         } catch (Exception e) {
             System.out.println("Error en PowerOn\n" + e.toString());
@@ -74,23 +72,14 @@ public class PythonToJava {
             int com = GBxCart.DEVICE_CMD.get("SET_MODE_DMG");
             command[0] = (byte) com; //SET_MODE_DMG
             port.write(command, TIMEOUT);
-//            tv.append("");//REVISAR, ESTO LO PUSE PARA RETRASAR UN POCO
-
 
             com = GBxCart.DEVICE_CMD.get("SET_VOLTAGE_5V");
             command[0] = (byte) com; //SET_VOLTAGE_5V
             port.write(command, TIMEOUT);
-//            tv.append("");//REVISAR, ESTO LO PUSE PARA RETRASAR UN POCO
-
 
             setFwVariable("DMG_READ_METHOD", 1, port, context);
-//            tv.append("");//REVISAR, ESTO LO PUSE PARA RETRASAR UN POCO
 
             setFwVariable("CART_MODE", 1, port, context);
-//            tv.append("");//REVISAR, ESTO LO PUSE PARA RETRASAR UN POCO
-
-
-//            Toast.makeText(context, "Escrito SetCartType", Toast.LENGTH_LONG).show();
 
         } catch (Exception e) {
             System.out.println("Error en setCartType\n" + e.toString());

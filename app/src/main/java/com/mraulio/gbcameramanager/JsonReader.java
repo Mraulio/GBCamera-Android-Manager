@@ -11,6 +11,7 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.model.ImageData;
+import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
 import org.json.JSONArray;
@@ -157,15 +158,28 @@ public class JsonReader {
             ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
             try {
                 Bitmap imageBitmap = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
+                gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
+
                 ImageData imageData = new ImageData();
 
                 byte[] hashSha = MessageDigest.getInstance("SHA-256").digest(bytes);
                 String hashHex = Methods.bytesToHex(hashSha);
                 gbcImage.setHashCode(hashHex);
+                if (!imageJson.getString("frame").equals("") && !imageJson.getString("frame").equals("null")) {
+                    System.out.println("Aqui/////////////////////////////");
+                    gbcImage.setFrameId(imageJson.getString("frame"));//To get the frame from the json
+                }
+                System.out.println(gbcImage.getFrameId() + "////////////////frameid");
                 imageData.setImageId(hashHex);
+                if (imageBitmap.getHeight() == 144) {
+                    System.out.println(imageBitmap.getHeight() + "////////height");
+                    System.out.println(imageBitmap.getWidth() + "////////width");
+                    imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), false);//Need to change the frame to use the one in the json
+
+                }
                 try {
-                    imageData.setData(Methods.encodeImage(imageBitmap));
                     gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
+                    imageData.setData(gbcImage.getImageBytes());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -173,7 +187,8 @@ public class JsonReader {
                 ImportFragment.importedImagesList.add(gbcImage);
                 ImportFragment.importedImagesBitmaps.add(imageBitmap);
             } catch (Exception e) {
-                System.out.println("No se puede añadir");//Para las RGB
+                e.printStackTrace();
+                System.out.println("No se puede añadir\n" + e.toString());//Para las RGB
             }
 
         }
@@ -207,7 +222,8 @@ public class JsonReader {
         return paletteList;
     }
 
-    public static List<GbcFrame> readerFrames(JSONObject jsonObject, JSONObject stateObject) throws JSONException {
+    public static List<GbcFrame> readerFrames(JSONObject jsonObject, JSONObject stateObject) throws
+            JSONException {
         //Entering frame json. There are 2 types, old with id, new with hash
         JSONArray framesArray = stateObject.getJSONArray("frames");
         if (framesArray.length() == 0) {

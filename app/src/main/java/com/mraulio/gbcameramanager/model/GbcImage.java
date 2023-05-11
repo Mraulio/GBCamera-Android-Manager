@@ -25,7 +25,7 @@ public class GbcImage {
     private boolean lockFrame;
 
     @ColumnInfo(name = "frame_index")
-    private int frameIndex;
+    private String frameId;
 
     @ColumnInfo(name = "tags_list")
     private List<String> tags = new ArrayList<>();
@@ -37,7 +37,7 @@ public class GbcImage {
 
     public GbcImage(){
         paletteIndex = 0;
-        frameIndex = 0;//I set the first palette as the default
+        frameId = "Nintendo_Frame";//I set the nintendo frame as the default
         lockFrame = false;
     }
 
@@ -108,12 +108,12 @@ public class GbcImage {
         this.imageBytes = imageBytes;
     }
 
-    public int getFrameIndex() {
-        return frameIndex;
+    public String getFrameId() {
+        return frameId;
     }
 
-    public void setFrameIndex(int frameIndex) {
-        this.frameIndex = frameIndex;
+    public void setFrameId(String frameId) {
+        this.frameId = frameId;
     }
 
     public static int getNumImages() {

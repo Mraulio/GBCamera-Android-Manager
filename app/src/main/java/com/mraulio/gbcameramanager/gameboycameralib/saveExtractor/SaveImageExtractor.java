@@ -127,7 +127,6 @@ public class SaveImageExtractor implements Extractor {
                 sb.append(" ");
             }
         }
-        System.out.println(sb.toString() + "////sorted");
         try {
             int j = 0;
             for (int i = 0; i < rawData.length; i += NEXT_IMAGE_START_OFFSET) {//i=0 to get the last seen. Next image will be at IMAGE_START_LOCATION

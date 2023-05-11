@@ -9,6 +9,7 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
 public class StartCreation {
 
@@ -23,9 +24,11 @@ public class StartCreation {
         //Nintendo frame from drawable-nodpi resource (so it is not automatically scaled to the dpi)
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.nintendo_frame);
         GbcFrame nintendoframe = new GbcFrame();
-        nintendoframe.setFrameName("Nintendo Frame");
+        nintendoframe.setFrameName("Nintendo_Frame");
         nintendoframe.setFrameBitmap(bitmap);
+        Methods.hashFrames.put(nintendoframe.getFrameName(),nintendoframe);
         Methods.framesList.add(nintendoframe);
+
 //Nintendo frame from drawable-nodpi resource (so it is not automatically scaled to the dpi)
 //        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.gbcamera_manager_frame);
 //        GbcFrame myframe = new GbcFrame();
@@ -36,17 +39,21 @@ public class StartCreation {
         Arrays.fill(pixels, Color.BLACK);
         bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
         GbcFrame blackFrame = new GbcFrame();
-        blackFrame.setFrameName("Black Frame");
+        blackFrame.setFrameName("Black_Frame");
         blackFrame.setFrameBitmap(bitmap);
         Methods.framesList.add(blackFrame);
+        Methods.hashFrames.put(blackFrame.getFrameName(),blackFrame);
+
 
         //White frame
         Arrays.fill(pixels, Color.WHITE);
         bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
-        GbcFrame blueFrame = new GbcFrame();
-        blueFrame.setFrameName("White frame");
-        blueFrame.setFrameBitmap(bitmap);
-        Methods.framesList.add(blueFrame);
+        GbcFrame whiteFrame = new GbcFrame();
+        whiteFrame.setFrameName("White_frame");
+        whiteFrame.setFrameBitmap(bitmap);
+        Methods.framesList.add(whiteFrame);
+        Methods.hashFrames.put(whiteFrame.getFrameName(),whiteFrame);
+
     }
 
     public static void addPalettes() {

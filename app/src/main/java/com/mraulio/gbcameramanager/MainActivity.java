@@ -59,6 +59,7 @@ import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
@@ -205,11 +206,19 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (frames.size() > 0) {
+                for (GbcFrame gbcFrame : frames) {
+                    Methods.hashFrames.put(gbcFrame.getFrameName(),gbcFrame);
+                }
                 Methods.framesList.addAll(frames);
             } else {
                 StartCreation.addFrames(getBaseContext());
-                for (GbcFrame gbcFrame : Methods.framesList) {
-                    frameDao.insert(gbcFrame);
+//                for (GbcFrame gbcFrame : Methods.framesList) {
+//                    frameDao.insert(gbcFrame);
+//                }
+                // Recorrer el HashMap con un bucle foreach
+                for (Map.Entry<String, GbcFrame> entry : Methods.hashFrames.entrySet()) {
+                    GbcFrame value = entry.getValue();
+                    frameDao.insert(value);
                 }
             }
             //Now that I have palettes, I can add images:

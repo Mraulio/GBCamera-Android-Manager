@@ -183,7 +183,7 @@ public class ImportFragment extends Fragment {
                     gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                     btnAddImages.setText(getString(R.string.btn_add_images));
                     btnAddImages.setVisibility(View.VISIBLE);
-                    layoutCb.setVisibility(View.VISIBLE);
+                    layoutCb.setVisibility(View.GONE);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
                 } else if (!savFile && isJson) {
                     receivedList = JsonReader.jsonCheck(fileContent);
@@ -198,26 +198,25 @@ public class ImportFragment extends Fragment {
                             gridViewImport.setAdapter(customAdapterPalette);
                             btnAddImages.setText(getString(R.string.btn_add_palettes));
                             btnAddImages.setVisibility(View.VISIBLE);
-                            layoutCb.setVisibility(View.VISIBLE);
+                            layoutCb.setVisibility(View.GONE);
                             break;
 
                         case FRAMES:
                             btnAddImages.setEnabled(true);
                             btnAddImages.setText(getString(R.string.btn_add_frames));
                             btnAddImages.setVisibility(View.VISIBLE);
-                            layoutCb.setVisibility(View.VISIBLE);
+                            layoutCb.setVisibility(View.GONE);
                             gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true));
                             break;
                         case IMAGES:
                             btnAddImages.setEnabled(true);
                             btnAddImages.setText(getString(R.string.btn_add_images));
                             btnAddImages.setVisibility(View.VISIBLE);
-                            layoutCb.setVisibility(View.VISIBLE);
+                            layoutCb.setVisibility(View.GONE);
                             gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true));
                             break;
                     }
                 }
-
             }
         });
 

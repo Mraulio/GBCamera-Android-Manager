@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
@@ -36,7 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
@@ -55,8 +53,6 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
-import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
-import com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -285,7 +281,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
 //                paletteFrameSelButton.setText("Show frames.");
                 FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false, false);
-                frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
+                int frameIndex = 0;
+                for (int i = 0; i < Methods.framesList.size(); i++) {
+                    if (Methods.framesList.get(i).getFrameName() == Methods.gbcImagesList.get(globalImageIndex).getFrameId()) {
+                        frameIndex = i;
+                        break;
+                    }
+                }
+                frameAdapter.setLastSelectedPosition(frameIndex);
                 gridViewFrames.setAdapter(frameAdapter);
 
                 //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
@@ -301,7 +304,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         else keepFrame = true;
                         Bitmap bitmap = null;
                         try {
-                            bitmap = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
+                            bitmap = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()),Methods.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -331,19 +334,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                         //Action when clicking a frame inside the Dialog
                         Bitmap framed = null;
-                        Methods.gbcImagesList.get(globalImageIndex).setFrameIndex(selectedFrameIndex);//Need to set the frame index before changing it because if not it's not added to db
+                        Methods.gbcImagesList.get(globalImageIndex).setFrameId(Methods.framesList.get(selectedFrameIndex).getFrameName());//Need to set the frame index before changing it because if not it's not added to db
 
                         try {
-                            framed = frameChange(globalImageIndex, selectedFrameIndex, keepFrame);
+                            framed = frameChange(Methods.gbcImagesList.get(globalImageIndex),Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()), Methods.framesList.get(selectedFrameIndex).getFrameName(), keepFrame);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
-//                        Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);
                         selectedImage[0] = framed;
                         Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), framed);
-//                        Methods.completeBitmapList.set(globalImageIndex, framed);
-                        frameAdapter.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getFrameIndex());
+                        frameAdapter.setLastSelectedPosition(selectedFrameIndex);
                         frameAdapter.notifyDataSetChanged();
                         updateGridView(currentPage);
                     }
@@ -366,7 +367,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
                         if (keepFrame) {
                             try {
-                                changedImage = frameChange(globalImageIndex, Methods.gbcImagesList.get(globalImageIndex).getFrameIndex(), keepFrame);
+                                changedImage = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()),Methods.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -581,7 +582,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     /**
      *
-
      */
     private void connect() {
         manager = (UsbManager) getActivity().getSystemService(Context.USB_SERVICE);
@@ -612,41 +612,39 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
 
-    /**
-     *
-
-     */
-
-
-    public static Bitmap frameChange(int globalImageIndex, int selectedFrameIndex, boolean keepFrame) throws IOException {
-        // Obtener la imagen seleccionada
+    public static Bitmap frameChange(GbcImage gbcImage,Bitmap bitmap, String selectedFrameId, boolean keepFrame) throws IOException {
         Bitmap framed = null;
         Bitmap framedAux;
-        if ((Methods.gbcImagesList.get(globalImageIndex).getImageBytes().length / 40) == 144) {
+        if ((gbcImage.getImageBytes().length / 40) == 144) {
             //I need to use copy because if not it's inmutable bitmap
-            framed = Methods.framesList.get(selectedFrameIndex).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+            framed = Methods.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
-            Bitmap setToPalette = paletteChanger(0, Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
+            Bitmap setToPalette = paletteChanger(0, gbcImage.getImageBytes(), gbcImage);
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex(), Methods.encodeImage(framed), Methods.gbcImagesList.get(globalImageIndex));
+                framed = paletteChanger(gbcImage.getPaletteIndex(), Methods.encodeImage(framed), gbcImage);
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
-            Bitmap croppedBitmap = Bitmap.createBitmap(Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()), 16, 16, 128, 112);
+            Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, 16, 16, 128, 112);
             canvas.drawBitmap(croppedBitmap, 16, 16, null);
-//            Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), framed);
-//            Methods.completeBitmapList.set(globalImageIndex, framed);
+
             try {
-                byte[] imageBytes = Methods.encodeImage(framedAux);
-                Methods.gbcImagesList.get(globalImageIndex).setImageBytes(imageBytes);//Use the framedAux because it doesn't a different palette to encode
+                byte[] imageBytes = Methods.encodeImage(framedAux);//Use the framedAux because it doesn't a different palette to encode
+                gbcImage.setImageBytes(imageBytes);
+                for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
+                    if (Methods.gbcImagesList.get(i).getHashCode().equals(gbcImage.getHashCode())) {
+                        Methods.gbcImagesList.get(i).setImageBytes(imageBytes);
+                        break;
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        new SaveImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
+        new SaveImageAsyncTask(gbcImage).execute();
         return framed;
     }
 
@@ -953,8 +951,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT 9999 (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
-                    if (image.getHeight() == 144 && gbcImage.getFrameIndex() != 9999)
-                        image = frameChange(newStartIndex + index, Methods.gbcImagesList.get(newStartIndex + index).getFrameIndex(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
+                    if (image.getHeight() == 144 && !gbcImage.getFrameId().equals("no_frame_id_9999"))
+                        image = frameChange(Methods.gbcImagesList.get(newStartIndex + index), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(newStartIndex + index).getHashCode()),Methods.gbcImagesList.get(newStartIndex + index).getFrameId(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

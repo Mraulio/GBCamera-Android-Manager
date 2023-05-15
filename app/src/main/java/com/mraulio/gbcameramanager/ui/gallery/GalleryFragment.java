@@ -350,8 +350,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     }
                 });
                 CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, false, false);
-
-                adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
+                int paletteIndex = 0;
+                for (int i = 0; i < Methods.framesList.size(); i++) {
+                    if (Methods.gbcPalettesList.get(i).getPaletteId() == Methods.gbcImagesList.get(globalImageIndex).getPaletteId()) {
+                        paletteIndex = i;
+                        break;
+                    }
+                }
+                adapterPalette.setLastSelectedPosition(paletteIndex);
                 gridViewPalette.setAdapter(adapterPalette);
                 gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
@@ -359,11 +365,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         //Action when clicking a palette inside the Dialog
                         Bitmap changedImage;
                         if (!keepFrame) {
-                            Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(0);//Need to set this to the palette 0 to then change it with the frame
+                            Methods.gbcImagesList.get(globalImageIndex).setPaletteId("bw");//Need to set this to the palette 0 to then change it with the frame
                         }
-                        changedImage = paletteChanger(palettePosition, Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
-                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(palettePosition);
-
+                        //Set the new palette to the gbcImage
+                        Methods.gbcImagesList.get(globalImageIndex).setPaletteId(Methods.gbcPalettesList.get(palettePosition).getPaletteId());
+                        changedImage = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteId(), Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
                         Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
                         if (keepFrame) {
                             try {
@@ -372,9 +378,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 e.printStackTrace();
                             }
                         }
-                        Methods.gbcImagesList.get(globalImageIndex).setPaletteIndex(palettePosition);
-//                        new SaveImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
-                        adapterPalette.setLastSelectedPosition(Methods.gbcImagesList.get(globalImageIndex).getPaletteIndex());
+                        Methods.gbcImagesList.get(globalImageIndex).setPaletteId(Methods.gbcPalettesList.get(palettePosition).getPaletteId());
+                        adapterPalette.setLastSelectedPosition(palettePosition);
                         adapterPalette.notifyDataSetChanged();
                         Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
@@ -593,7 +598,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         UsbSerialDriver driver = availableDrivers.get(0);
         connection = manager.openDevice(driver.getDevice());
 
-
         port = driver.getPorts().get(0); // Most devices have just one port (port 0)
         try {
             if (port.isOpen()) port.close();
@@ -620,11 +624,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             framed = Methods.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
-            Bitmap setToPalette = paletteChanger(0, gbcImage.getImageBytes(), gbcImage);
+            Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage);
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger(gbcImage.getPaletteIndex(), Methods.encodeImage(framed), gbcImage);
+                framed = paletteChanger(gbcImage.getPaletteId(), Methods.encodeImage(framed), gbcImage);
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
@@ -649,11 +653,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     //Cambiar paleta
-    public static Bitmap paletteChanger(int index, byte[] imageBytes, GbcImage gbcImage) {
-        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
-        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(index).getPaletteColorsInt(), imageBytes);
+    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage) {
+        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
+        Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes);
         new SaveImageAsyncTask(gbcImage).execute();
-
         return image;
     }
 
@@ -700,7 +703,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
         bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-        int[] oldColors = Methods.gbcPalettesList.get(Methods.gbcImagesList.get(imageIndex).getPaletteIndex()).getPaletteColorsInt();
+        int[] oldColors = Methods.hashPalettes.get(Methods.gbcImagesList.get(imageIndex).getPaletteId()).getPaletteColorsInt();
         int[] newColors = Methods.gbcPalettesList.get(newPaletteIndex).getPaletteColorsInt();
 
         Map<Integer, Integer> colorIndexMap = new HashMap<>();
@@ -786,7 +789,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             //Saving txt without cropping it
             try {
                 //Need to change the palette to bw so the encodeImage method works
-                image = paletteChanger(0, gbcImage.getImageBytes(), Methods.gbcImagesList.get(0));
+                image = paletteChanger("bw", gbcImage.getImageBytes(), Methods.gbcImagesList.get(0));
                 StringBuilder txtBuilder = new StringBuilder();
                 //Appending these commands so the export is compatible with
                 // https://herrzatacke.github.io/gb-printer-web/#/import
@@ -935,6 +938,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 //                    System.out.println("Entrando dao"+index);
                 //Get the image bytes from the database for the current gbcImage
                 imageBytes = imageDataDao.getDataByImageId(gbcImage.getHashCode());
+
 //                }
                 //Set the image bytes to the object
                 gbcImage.setImageBytes(imageBytes);
@@ -943,14 +947,15 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 //                Methods.imageBytesCache.put(gbcImage.getHashCode(), imageBytes);
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
+                System.out.println(imageBytes.length+"///////////imagebytes length, hash:"+gbcImage.getHashCode());
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
-                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), imageBytes);
+                Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                 //Add the bitmap to the cache
                 Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
 
                 //Do a frameChange to create the Bitmap of the image
                 try {
-                    //Only do frameChange if the image is 144 height AND THE FRAME IS NOT 9999 (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
+                    //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
                     if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
                         image = frameChange(Methods.gbcImagesList.get(newStartIndex + index), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(newStartIndex + index).getHashCode()),Methods.gbcImagesList.get(newStartIndex + index).getFrameId(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
                 } catch (IOException e) {

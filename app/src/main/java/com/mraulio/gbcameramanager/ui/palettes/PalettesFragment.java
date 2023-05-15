@@ -85,7 +85,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 palette = Methods.gbcPalettesList.get(position).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
-                newPaletteName = Methods.gbcPalettesList.get(position).getName();
+                newPaletteName = Methods.gbcPalettesList.get(position).getPaletteId();
                 paletteDialog(palette, newPaletteName);
             }
         });
@@ -98,7 +98,7 @@ public class PalettesFragment extends Fragment {
                 }
                 if (position > 5) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle(getString(R.string.delete_dialog_palette) + Methods.gbcPalettesList.get(position).getName() + "?");
+                    builder.setTitle(getString(R.string.delete_dialog_palette) + Methods.gbcPalettesList.get(position).getPaletteId() + "?");
                     builder.setMessage(getString(R.string.sure_dialog_palette));
 
                     // Crear un ImageView y establecer la imagen deseada
@@ -114,13 +114,14 @@ public class PalettesFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             new SavePaletteAsyncTask(Methods.gbcPalettesList.get(position), false).execute();
+                            String paletteToDelete = Methods.gbcPalettesList.get(position).getPaletteId();
                             Methods.gbcPalettesList.remove(position);
 
                             //I change the palette index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
-                                if (Methods.gbcImagesList.get(i).getPaletteIndex() == position) {
-                                    Methods.gbcImagesList.get(i).setPaletteIndex(0);
+                                if (Methods.gbcImagesList.get(i).getPaletteId() == paletteToDelete) {
+                                    Methods.gbcImagesList.get(i).setPaletteId("bw");
                                     //If the bitmap cache already has the bitmap, change it.
                                     if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
                                         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
@@ -129,16 +130,16 @@ public class PalettesFragment extends Fragment {
                                     }
                                     new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
                                 }
-                                //Also need to change the palette index of the images with a superior index to the deleted one to current index -1
-                                else if (Methods.gbcImagesList.get(i).getPaletteIndex() > position) {
-                                    Methods.gbcImagesList.get(i).setPaletteIndex(Methods.gbcImagesList.get(i).getPaletteIndex() - 1);
-                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
-                                        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteIndex()).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
-                                        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteIndex()).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
-                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
-                                    }
-                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
-                                }
+//                                //Also need to change the palette index of the images with a superior index to the deleted one to current index -1
+//                                else if (Methods.gbcImagesList.get(i).getPaletteId() > position) {
+//                                    Methods.gbcImagesList.get(i).setPaletteId(Methods.gbcImagesList.get(i).getPaletteId() - 1);
+//                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
+//                                        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteId()).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
+//                                        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteId()).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
+//                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
+//                                    }
+//                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
+//                                }
                             }
                             imageAdapter.notifyDataSetChanged();
                         }
@@ -213,8 +214,8 @@ public class PalettesFragment extends Fragment {
         JSONArray palettesArr = new JSONArray();
         for (GbcPalette palette : Methods.gbcPalettesList) {
             JSONObject paletteObj = new JSONObject();
-            paletteObj.put("shortName", palette.getName());
-            paletteObj.put("name", palette.getName());
+            paletteObj.put("shortName", palette.getPaletteId());
+            paletteObj.put("name", palette.getPaletteId());
             JSONArray paletteArr = new JSONArray();
             for (int color : palette.getPaletteColorsInt()) {
                 String hexColor = "#" + Integer.toHexString(color).substring(2);
@@ -601,7 +602,7 @@ public class PalettesFragment extends Fragment {
                 boolean alreadyExists = false;
                 newPaletteName = etPaletteName.getText().toString();
                 for (GbcPalette paleta : Methods.gbcPalettesList) {
-                    if (paleta.getName().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {
+                    if (paleta.getPaletteId().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {
                         alreadyExists = true;
                         etPaletteName.setBackgroundColor(Color.parseColor("#FF0000"));
                         Methods.toast(getContext(), getString(R.string.toast_palettes_error));
@@ -610,7 +611,7 @@ public class PalettesFragment extends Fragment {
                 }
                 if (!alreadyExists) {
                     GbcPalette newPalette = new GbcPalette();
-                    newPalette.setName(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
+                    newPalette.setPaletteId(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
                     newPalette.setPaletteColors(palette);
                     Methods.gbcPalettesList.add(newPalette);
                     gridViewPalettes.setAdapter(imageAdapter);

@@ -18,13 +18,13 @@ public class GbcImage {
     @ColumnInfo(name = "image_name")
     private String name;
 
-    @ColumnInfo(name = "palette_index")
-    private int paletteIndex;
+    @ColumnInfo(name = "palette_id")
+    private String paletteId;
 
     @ColumnInfo(name = "lock_frame")
     private boolean lockFrame;
 
-    @ColumnInfo(name = "frame_index")
+    @ColumnInfo(name = "frame_id")
     private String frameId;
 
     @ColumnInfo(name = "tags_list")
@@ -32,11 +32,10 @@ public class GbcImage {
 
     public static int numImages= 0;//Should probably store this on the sharedPreferences
 
-//    @ColumnInfo(name = "image_bytes")
     private byte[] imageBytes;
 
     public GbcImage(){
-        paletteIndex = 0;
+        paletteId = "bw";
         frameId = "Nintendo_Frame";//I set the nintendo frame as the default
         lockFrame = false;
     }
@@ -84,12 +83,12 @@ public class GbcImage {
         this.tags.add(newTag);
     }
 
-    public int getPaletteIndex() {
-        return paletteIndex;
+    public String getPaletteId() {
+        return paletteId;
     }
 
-    public void setPaletteIndex(int paletteIndex) {
-        this.paletteIndex = paletteIndex;
+    public void setPaletteId(String paletteId) {
+        this.paletteId = paletteId;
     }
 
     public String getName() {

@@ -14,7 +14,7 @@ import androidx.room.PrimaryKey;
 public class GbcPalette {
     @PrimaryKey
     @NonNull
-    private String name;
+    private String paletteId;
 
     @ColumnInfo(name = "palette_colors")
     private String paletteColors;
@@ -30,7 +30,7 @@ public class GbcPalette {
     }
     public GbcPalette(String paletteColors, String name) {
         this.paletteColors = paletteColors;
-        this.name = name;
+        this.paletteId = name;
     }
 
     //Because the database can't store int[]
@@ -54,12 +54,12 @@ public class GbcPalette {
         paletteColors = builder.toString();
     }
 
-    public String getName() {
-        return name;
+    public String getPaletteId() {
+        return paletteId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPaletteId(String paletteId) {
+        this.paletteId = paletteId;
     }
 
     public Bitmap paletteViewer() {

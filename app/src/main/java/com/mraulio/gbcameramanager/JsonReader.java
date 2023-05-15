@@ -2,7 +2,6 @@ package com.mraulio.gbcameramanager;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.media.Image;
 import android.os.Environment;
 
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -25,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -160,27 +158,33 @@ public class JsonReader {
                 Bitmap imageBitmap = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
                 gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
 
-                ImageData imageData = new ImageData();
+//                ImageData imageData = new ImageData();
 
-                byte[] hashSha = MessageDigest.getInstance("SHA-256").digest(bytes);
-                String hashHex = Methods.bytesToHex(hashSha);
-                gbcImage.setHashCode(hashHex);
+//                byte[] hashSha = MessageDigest.getInstance("SHA-256").digest(bytes);
+//                String hashHex = Methods.bytesToHex(hashSha);
+//                gbcImage.setHashCode(hashHex);
 //                if (!imageJson.getString("frame").equals("") && !imageJson.getString("frame").equals("null")) {
                 gbcImage.setFrameId(imageJson.getString("frame"));//To get the frame from the json
+                gbcImage.setPaletteId(imageJson.getString("palette"));//To get the palette from the json
+
 //                }
                 if (imageJson.getString("frame").equals("null"))
                     gbcImage.setFrameId("");
                 if (!Methods.hashFrames.containsKey(gbcImage.getFrameId())){
                     gbcImage.setFrameId("Nintendo_Frame");
                 }
-                imageData.setImageId(hashHex);
+                if (!Methods.hashPalettes.containsKey(gbcImage.getPaletteId())){
+                    gbcImage.setPaletteId("bw");
+                }
+                //ADD THE LOCKFRAME BOOLEAN ALSO
+//                imageData.setImageId(hashHex);
+                imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(),gbcImage.getImageBytes(),gbcImage);
                 if (imageBitmap.getHeight() == 144) {
                     imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), false);//Need to change the frame to use the one in the json
-
                 }
                 try {
                     gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
-                    imageData.setData(gbcImage.getImageBytes());
+//                    imageData.setData(gbcImage.getImageBytes());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -212,7 +216,7 @@ public class JsonReader {
                     paletteIntArray[j] = Color.parseColor(color);
                 }
                 GbcPalette gbcPalette = new GbcPalette();
-                gbcPalette.setName(shortName);
+                gbcPalette.setPaletteId(shortName);
                 gbcPalette.setPaletteColors(paletteIntArray);
                 paletteList.add(gbcPalette);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.PALETTES;

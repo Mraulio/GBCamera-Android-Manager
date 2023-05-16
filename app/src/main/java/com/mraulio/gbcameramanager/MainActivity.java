@@ -5,22 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.widget.Toast;
-
 import com.google.android.material.navigation.NavigationView;
-
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
@@ -30,38 +22,22 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
-
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.db.AppDatabase;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.db.ImageDao;
-import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.db.PaletteDao;
-import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
-import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
-import com.mraulio.gbcameramanager.model.ImageData;
-import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
-import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
-import com.mraulio.gbcameramanager.ui.palettes.PalettesFragment;
-
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.spec.ECField;
-import java.sql.SQLOutput;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
+
 
 public class MainActivity extends AppCompatActivity {
     public static int printIndex = 0;//If there are no images there will be a crash when trying to print
@@ -176,6 +152,9 @@ public class MainActivity extends AppCompatActivity {
             List<GbcImage> imagesFromDao = imageDao.getAll();
 
             if (palettes.size() > 0) {
+                for (GbcPalette gbcPalette : palettes) {
+                    Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                }
                 Methods.gbcPalettesList.addAll(palettes);
             } else {
                 StringBuilder stringBuilder = new StringBuilder();
@@ -193,13 +172,13 @@ public class MainActivity extends AppCompatActivity {
                     inputStream.close();
                 } catch (Exception e) {
                     System.out.println(e.toString());
-
                 }
                 String fileContent = stringBuilder.toString();
                 List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
-
                 Methods.gbcPalettesList.addAll(receivedList);
-
+                for (GbcPalette gbcPalette : receivedList) {
+                    Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                }
                 for (GbcPalette gbcPalette : Methods.gbcPalettesList) {
                     paletteDao.insert(gbcPalette);
                 }
@@ -207,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (frames.size() > 0) {
                 for (GbcFrame gbcFrame : frames) {
-                    Methods.hashFrames.put(gbcFrame.getFrameName(),gbcFrame);
+                    Methods.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
                 }
                 Methods.framesList.addAll(frames);
             } else {
@@ -224,8 +203,7 @@ public class MainActivity extends AppCompatActivity {
             //Now that I have palettes, I can add images:
             if (imagesFromDao.size() > 0) {
                 try {
-                    System.out.println("Length" + imagesFromDao.get(0).getImageBytes().length);
-
+                    System.out.println("Length " + imagesFromDao.get(0).getImageBytes().length);
                 } catch (Exception e) {
                     System.out.println("Length en gbcimage es null");
                 }

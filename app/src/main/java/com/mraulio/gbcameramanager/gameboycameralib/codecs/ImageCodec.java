@@ -57,6 +57,7 @@ public class ImageCodec implements Codec {
 
     @Override
     public Bitmap decodeWithPalette(int[] palette, byte[] data) {
+        System.out.println("width"+imageWidth+",height:"+imageHeight);
         Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
         IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(paletteIndex).getPaletteColorsInt());
 

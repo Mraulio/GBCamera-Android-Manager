@@ -6,11 +6,16 @@ import android.graphics.BitmapFactory;
 import androidx.room.TypeConverter;
 
 import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class TypeConverters {
+    private static final String FORMAT = "yyyy-MM-dd HH:mm:ss:SSS";
+
     @TypeConverter
     public static byte[] toByteArray(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -39,5 +44,19 @@ public class TypeConverters {
         return new ArrayList<>(Arrays.asList(tags));
     }
 
+    @TypeConverter
+    public static Date toDate(String dateString) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat(FORMAT);
+            return format.parse(dateString);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
 
+    @TypeConverter
+    public static String fromDate(Date date) {
+        SimpleDateFormat format = new SimpleDateFormat(FORMAT);
+        return format.format(date);
+    }
 }

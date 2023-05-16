@@ -17,10 +17,10 @@ public interface PaletteDao {
     @Query("SELECT * FROM gbcpalette")
     List<GbcPalette> getAll();
 
-    @Query("SELECT * FROM gbcpalette WHERE name IN (:paletteIds)")
+    @Query("SELECT * FROM gbcpalette WHERE paletteId IN (:paletteIds)")
     List<GbcPalette> loadAllByIds(int[] paletteIds);
 
-    @Query("SELECT * FROM gbcpalette WHERE name LIKE :first LIMIT 1")
+    @Query("SELECT * FROM gbcpalette WHERE paletteId LIKE :first LIMIT 1")
     GbcPalette findByName(String first);
 
     @Insert

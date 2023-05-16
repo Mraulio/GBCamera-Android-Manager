@@ -282,7 +282,7 @@ public class ImportFragment extends Fragment {
                         if (newFrames.size() > 0) {
                             Methods.framesList.addAll(newFrames);
                             for (GbcFrame gbcFrame : newFrames) {
-                                Methods.hashFrames.put(gbcFrame.getFrameName(),gbcFrame);
+                                Methods.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
                             }
                             new SaveFrameAsyncTask(newFrames).execute();//TEST THIS
                         } else {

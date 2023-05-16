@@ -351,7 +351,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 });
                 CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, false, false);
                 int paletteIndex = 0;
-                for (int i = 0; i < Methods.framesList.size(); i++) {
+                for (int i = 0; i < Methods.gbcPalettesList.size(); i++) {
                     if (Methods.gbcPalettesList.get(i).getPaletteId() == Methods.gbcImagesList.get(globalImageIndex).getPaletteId()) {
                         paletteIndex = i;
                         break;
@@ -929,7 +929,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             //Loop for each gbcImage in a sublist in all gbcImages objects for the current page
             for (GbcImage gbcImage : Methods.gbcImagesList.subList(newStartIndex, newEndIndex)) {
                 //Add the hashcode to the list of current hashes
-                currentPageHashes.add(gbcImage.getHashCode());
+                String imageHash = gbcImage.getHashCode();
+                currentPageHashes.add(imageHash);
                 byte[] imageBytes;
 //                if (Methods.imageBytesCache.containsKey(gbcImage.getHashCode())) {
 //                    System.out.println("Entrando contains"+ index);
@@ -937,7 +938,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 //                } else {
 //                    System.out.println("Entrando dao"+index);
                 //Get the image bytes from the database for the current gbcImage
-                imageBytes = imageDataDao.getDataByImageId(gbcImage.getHashCode());
+                imageBytes = imageDataDao.getDataByImageId(imageHash);
 
 //                }
                 //Set the image bytes to the object
@@ -951,17 +952,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
                 Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                 //Add the bitmap to the cache
-                Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
+                Methods.imageBitmapCache.put(imageHash, image);
 
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
                     if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
                         image = frameChange(Methods.gbcImagesList.get(newStartIndex + index), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(newStartIndex + index).getHashCode()),Methods.gbcImagesList.get(newStartIndex + index).getFrameId(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
+                Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
                 index++;
             }
             gbcImagesForPage = Methods.gbcImagesList.subList(newStartIndex, newEndIndex);

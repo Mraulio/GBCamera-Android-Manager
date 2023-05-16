@@ -23,7 +23,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -94,36 +97,6 @@ public class JsonReader {
         return null;
     }
 
-//    public static List<String> readerFrames(JSONObject jsonObject, boolean newType) throws IOException, JSONException {
-//
-//        List<String> stringValues = new ArrayList<>();
-//        List<String> finalValues = new ArrayList<>();
-//
-//        // Acceder a los valores del JSON
-//        JSONArray frames = jsonObject.getJSONObject("state").getJSONArray("frames");
-//
-//        if (newType) {//If new type I get the data from the frame-hash
-//            for (int i = 0; i < frames.length(); i++) {
-//                JSONObject image = frames.getJSONObject(i);
-//                String hash = image.getString("hash");
-//                stringValues.add(hash);
-//            }
-//        } else {//If old type I get the data from the frame-id
-//            for (int i = 0; i < frames.length(); i++) {
-//                JSONObject image = frames.getJSONObject(i);
-//                String hash = image.getString("id");
-//                stringValues.add(hash);
-//            }
-//        }
-//        for (String value : stringValues) {
-//            String hash = jsonObject.getString("frame-" + value);
-//            finalValues.add(eachFrame(hash));
-//        }
-//        ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
-//
-//        return finalValues;
-//    }
-
     public static List<String> readerImages(JSONObject jsonObject) throws IOException, JSONException {
         List<String> stringValues = new ArrayList<>();
         List<String> finalValues = new ArrayList<>();
@@ -139,6 +112,7 @@ public class JsonReader {
             byte[] bytes = Methods.convertToByteArray(decodedData);
             GbcImage gbcImage = new GbcImage();
             gbcImage.setHashCode(hash);
+            gbcImage.setImageBytes(bytes);
 
             if (!imageJson.getString("title").equals("")) {
                 gbcImage.setName(imageJson.getString("title"));
@@ -152,48 +126,45 @@ public class JsonReader {
                 }
                 gbcImage.setTags(tagsStrings);
             }
-            int height = ((decodedData).length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
             try {
-                Bitmap imageBitmap = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
-                gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
-
-//                ImageData imageData = new ImageData();
-
-//                byte[] hashSha = MessageDigest.getInstance("SHA-256").digest(bytes);
-//                String hashHex = Methods.bytesToHex(hashSha);
-//                gbcImage.setHashCode(hashHex);
-//                if (!imageJson.getString("frame").equals("") && !imageJson.getString("frame").equals("null")) {
                 gbcImage.setFrameId(imageJson.getString("frame"));//To get the frame from the json
                 gbcImage.setPaletteId(imageJson.getString("palette"));//To get the palette from the json
 
-//                }
                 if (imageJson.getString("frame").equals("null"))
                     gbcImage.setFrameId("");
-                if (!Methods.hashFrames.containsKey(gbcImage.getFrameId())){
+                if (!Methods.hashFrames.containsKey(gbcImage.getFrameId())) {
                     gbcImage.setFrameId("Nintendo_Frame");
                 }
-                if (!Methods.hashPalettes.containsKey(gbcImage.getPaletteId())){
+                if (!Methods.hashPalettes.containsKey(gbcImage.getPaletteId())) {
                     gbcImage.setPaletteId("bw");
                 }
-                //ADD THE LOCKFRAME BOOLEAN ALSO
-//                imageData.setImageId(hashHex);
-                imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(),gbcImage.getImageBytes(),gbcImage);
-                if (imageBitmap.getHeight() == 144) {
-                    imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), false);//Need to change the frame to use the one in the json
-                }
+                if (imageJson.has("lockFrame"))
+                    gbcImage.setLockFrame((Boolean) imageJson.get("lockFrame"));
+                else gbcImage.setLockFrame(false);
+
+                if (imageJson.has("invertPalette"))
+                    gbcImage.setInvertPalette((Boolean) imageJson.get("invertPalette"));
+                else gbcImage.setInvertPalette(false);
+                //To set the Date
+                String dateFormat = "yyyy-MM-dd HH:mm:ss:SSS";
+                SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
                 try {
-                    gbcImage.setImageBytes(Methods.encodeImage(imageBitmap));
-//                    imageData.setData(gbcImage.getImageBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    Date creationDate = sdf.parse((String) imageJson.get("created"));
+                    gbcImage.setCreationDate(creationDate);
+                    System.out.println(creationDate+"////creationDate");
+                } catch (ParseException e) {
+                    System.out.println("Error al convertir la fecha: " + e.getMessage());
                 }
-//                ImportFragment.importedImageDatas.add(imageData);
+
+                Bitmap imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(), bytes, gbcImage);
+                if (imageBitmap.getHeight() == 144) {
+                    imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), gbcImage.isLockFrame());//Need to change the frame to use the one in the json
+                }
                 ImportFragment.importedImagesList.add(gbcImage);
                 ImportFragment.importedImagesBitmaps.add(imageBitmap);
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("No se puede añadir\n" + e.toString());//Para las RGB
+                System.out.println("Error. Can't be added.\n" + e.toString());//For RGB pics
             }
 
         }
@@ -205,7 +176,7 @@ public class JsonReader {
         List<GbcPalette> paletteList = new ArrayList<>();
         // Recorre los elementos de palettes y recupera los datos que necesitas
         for (int i = 0; i < palettesArr.length(); i++) {
-            JSONObject paletteObj = null;
+            JSONObject paletteObj;
             try {
                 paletteObj = palettesArr.getJSONObject(i);
                 String shortName = paletteObj.getString("shortName");

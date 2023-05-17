@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.settings;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,7 +34,9 @@ public class SettingsFragment extends Fragment {
         Spinner spinnerImages = view.findViewById(R.id.spImagesPage);
         RadioButton rbPng = view.findViewById(R.id.rbPng);
         RadioButton rbTxt = view.findViewById(R.id.rbTxt);
-//        RadioGroup rbGroup = view.findViewById(R.id.rbGroup);
+
+        SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+
         if (MainActivity.exportPng) {
             rbPng.setChecked(true);
             spinnerExport.setEnabled(true);
@@ -48,6 +51,8 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 MainActivity.exportPng = true;
+                editor.putBoolean("export_as_png", true);
+                editor.apply();
                 spinnerExport.setEnabled(true);
             }
         });
@@ -55,6 +60,8 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 MainActivity.exportPng = false;
+                editor.putBoolean("export_as_png", false);
+                editor.apply();
                 spinnerExport.setEnabled(false);
             }
         });
@@ -87,6 +94,8 @@ public class SettingsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // I set the export size on the Main activity int as the selected one
                 MainActivity.exportSize = sizesInteger.get(position);
+                editor.putInt("export_size", sizesInteger.get(position));
+                editor.apply();
             }
 
             @Override
@@ -121,6 +130,8 @@ public class SettingsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // I set the export size on the Main activity int as the selected one
                 MainActivity.imagesPage = sizesIntegerImages.get(position);
+                editor.putInt("images_per_page", sizesIntegerImages.get(position));
+                editor.apply();
                 GalleryFragment.currentPage = 0;
             }
 

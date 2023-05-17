@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -12,7 +13,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.google.android.material.navigation.NavigationView;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
@@ -22,6 +25,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
+
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.db.AppDatabase;
@@ -32,6 +36,7 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -46,10 +51,15 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
+    public static String printedResponseBytes;
+
+    public static SharedPreferences sharedPreferences;
+
+    //Store in the shared preferences
+    public static boolean exportPng = true;
     public static int exportSize = 4;
     public static int imagesPage = 12;
-    public static String printedResponseBytes;
-    public static boolean exportPng = true;
+
     public static UsbManager manager;
     public static int deletedCount = 0;
     public static AppDatabase db;
@@ -83,6 +93,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+        exportSize = sharedPreferences.getInt("export_size", 4);
+        imagesPage = sharedPreferences.getInt("images_per_page", 12);
+        exportPng = sharedPreferences.getBoolean("export_as_png", true);
 
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();

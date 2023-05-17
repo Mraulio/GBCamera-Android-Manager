@@ -7,7 +7,6 @@
     android:orientation="vertical"
     tools:context=".ui.settings.SettingsFragment">
 
-
     <RadioGroup
         android:id="@+id/rbGroup"
         android:layout_width="match_parent"

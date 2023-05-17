@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
             if (anyImage) {
                 gf.updateFromMain();
             } else {
-                GalleryFragment.tv.setText("No images in the gallery.\nGo to Import tab.");
+                GalleryFragment.tv.setText(GalleryFragment.tv.getContext().getString(R.string.no_images));
             }
         }
     }

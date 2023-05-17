@@ -1,0 +1,120 @@
+<!-- Translation/Übersetzung: Herr_Zatacke @herr_gack -->
+<resources>
+    <string name="app_name">GBCamera Manager</string>
+    <string name="navigation_drawer_open">Navigation öffnen</string>
+    <string name="navigation_drawer_close">Navigation schließen</string>
+    <string name="nav_header_title">GBCamera Manager</string>
+    <string name="nav_header_subtitle">https://github.com/Mraulio</string>
+    <string name="nav_header_desc">Navigation</string>
+    <string name="action_settings">Einstellungen</string>
+
+    <string name="menu_gallery">Galerie</string>
+    <string name="menu_palettes">Paletten</string>
+    <string name="menu_frames">Frames</string>
+    <string name="menu_import">Import</string>
+    <string name="menu_usbserial">USB Serial</string>
+    <string name="menu_settings">Einstellungen</string>
+
+    <!--Custom_dialog, Gallery Fragment strings-->
+    <string name="btn_show_palettes">Palettes anzeigen</string>
+    <string name="btn_show_frames">Frames anzeigen</string>
+    <string name="cb_keep_frame">Framefarbe beibehalten</string>
+    <string name="cb_crop">Beschneiden</string>
+
+    <string name="toast_printing">Drucke, bitte warten...</string>
+    <string name="toast_saved">Gespeichert</string>
+    <string name="toast_saved_txt">TXT gespeichert</string>
+
+    <string name="loading">Lade...</string>
+    <string name="total_images">Anzahl Bilder:\u0020</string>
+    <string name="no_images">Keine Bilder vorhanden. Gehe zum Import</string>
+
+
+    <!--Settings fragment xml strings-->
+    <string name="export_txt">Als TXT exportieren.</string>
+    <string name="export_png">Als PNG exportieren.</string>
+    <string name="png_size">PNG Größe:\u0020</string>
+    <string name="images_page">Bilder pro Seite:\u0020</string>
+
+    <!--Frames fragment strings-->
+    <string name="cant_delete_base">Kann Basisframe nicht löschen</string>
+    <string name="delete_dialog">Frame löschen\u0020</string>
+    <string name="sure_dialog">Sicher?</string>
+    <string name="delete">LÖSCHEN</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="frames_total">Anzahl Frames:\u0020</string>
+
+    <!--Palettes fragment strings-->
+    <string name="btn_add_palette">Neue Palette</string>
+    <string name="btn_export_json">JSON exportieren</string>
+    <string name="long_press_delete_palette">Halten zum löschen</string>
+    <string name="cant_delete_base_palette">Kann Basispalette nicht löschen</string>
+    <string name="toast_palettes_json">Paletten im Download-ordner gespeichert.</string>
+    <string name="set_palette_name">*Palettenname setzen*</string>
+    <string name="sure_dialog_palette">Sicher?\nVor dem Fortsetzen ist ein JSON export empfohlen.</string>
+    <string name="delete_dialog_palette">Palette löschen\u0020</string>
+    <string name="choose_color">Farbe wählen</string>
+    <string name="selected_color">Gewählte Farbe: #</string>
+    <string name="toast_palettes_error">2 Paletten dürden nicht den selben Namen haben.</string>
+    <string name="palette_added">Palette hinzugefügt</string>
+
+    <string name="btn_save">Speichern</string>
+    <string name="btn_decode">Decodieren</string>
+
+
+    <!--Import fragment xml strings-->
+    <string name="btn_select_file">Datei wählen</string>
+    <string name="tv_select_file">Datei zum Import wählen</string>
+    <string name="btn_extract_file">Datei extrahieren</string>
+    <string name="btn_add_images">Bilder hinzufügen</string>
+    <string name="btn_add_palettes">Palettes hinzufügen</string>
+    <string name="btn_add_frames">Frames hinzugügen</string>
+    <string name="no_valid_list">Keine gültige Liste</string>
+    <string name="images_available">\u0020Bilder verfügbar.</string>
+    <string name="no_new_palettes">Keine neuen Paletten hinzugefügt.</string>
+    <string name="no_new_frames">Keine neuen Frames hinzugefügt.</string>
+    <string name="no_new_images">Keine neuen Bilder hinzugefügt.</string>
+    <string name="images_added">Bilder hinzugefügt:\u0020</string>
+    <string name="done_adding_images">\u0020Bilder hinzugefügt!</string>
+    <string name="palettes_added">Paletten hinzugefügt.</string>
+    <string name="done_adding_palettes">Alle Paletten hinzugefügt!</string>
+    <string name="frames_added">Frames hinzugefügt.</string>
+    <string name="done_adding_frames">Alle Frames hinzugefügt!</string>
+    <string name="no_valid_file">Keine gültige Datei.</string>
+    <string name="cb_last_seen">Zuletzt gesehen.</string>
+    <string name="cb_deleted_images">Gelöschte Bilder.</string>
+
+    <!--Usb serial fragment xml strings-->
+    <string name="rb_print">Mit Arduino drucken - GBP</string>
+    <string name="btn_read_rom_name">ROM Namen auslesen</string>
+    <string name="btn_read_ram">RAM lesen uns speichern</string>
+    <string name="btn_dump_photo">Komplettes PHOTO! ROM auslesen</string>
+    <string name="btn_view_rom_images">ROM Bilder anzeigen</string>
+    <string name="btn_print_banner">Testbanner drucken</string>
+    <string name="btn_print_image">Bilde drucken</string>
+    <string name="btn_delete_sav">SAV löschen</string>
+    <string name="tv_sleep_time">Wartezeit:\u0020</string>
+    <string name="error_print_image">"Fehler beim drucken</string>
+    <string name="delete_sav_dialog">SAV löschen?</string>
+    <string name="sure_delete_sav">Wirklich löschen?: \u0020</string>
+    <string name="toast_sav_deleted">SAV gelöscht.</string>
+    <string name="toast_couldnt_delete_sav">Kann SAV nicht löschen.</string>
+    <string name="deleted_sav">Gelöscht\u0020</string>
+    <string name="tv_connected">//Verbunden\n</string>
+    <string name="error_arduino">Fehler vom Arduino\n.</string>
+    <string name="arduino_mode">Arduino Drucker Emulator MODUS</string>
+    <string name="print_mode">DRUCK MODUS</string>
+    <string name="gbxcart_mode">GBxCart Reader MODUS</string>
+    <string name="images_list">\nBilder in Liste:\u0020</string>
+    <string name="no_good_dump">\nSCHLECHTER SAV DUMP.</string>
+    <string name="sav_parts">\nSav teile:\u0020</string>
+    <string name="rom_name">\nDer Name des ROMs ist:\u0020</string>
+    <string name="dumping_rom_wait">\nLese 1MB ROM, das dauert ca. 45 Sekunden...\n...</string>
+    <string name="dumping_ram_wait">\nLese RAM, bitte warten...\n...</string>
+    <string name="last_sav_name">\nDer Name des letzten SAV ist:\u0020</string>
+    <string name="size">Größe:\u0020</string>
+    <string name="error_file">Fehler beim erstellen der Datei:\u0020</string>
+    <string name="saved_to_file">In Datei gespeichert</string>
+
+    <string name="delete_dialog_gallery">Bild Löschen\u0020</string>
+</resources>

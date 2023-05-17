@@ -26,6 +26,8 @@
 
     <string name="loading">Loading...</string>
     <string name="total_images">Total of images:\u0020</string>
+    <string name="no_images">No images in the gallery. Go to Import tab</string>
+
 
     <!--Settings fragment xml strings-->
     <string name="export_txt">Export as TXT.</string>
@@ -91,7 +93,7 @@
     <string name="btn_print_image">Print image</string>
     <string name="btn_delete_sav">Delete SAV</string>
     <string name="tv_sleep_time">Choose sleep time:\u0020</string>
-    <string name="error_print_image">"Error in PRINT IMAGE</string>
+    <string name="error_print_image">Error in PRINT IMAGE</string>
     <string name="delete_sav_dialog">Delete sav?</string>
     <string name="sure_delete_sav">Are you sure to delete\u0020</string>
     <string name="toast_sav_deleted">SAV deleted.</string>

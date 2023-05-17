@@ -575,10 +575,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
         if (Methods.gbcImagesList.size() > 0) {
             updateGridView(currentPage);
-            tv.setText("Total of images: " + GbcImage.numImages);
+            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
 
         } else {
-            tv.setText("No images in the gallery. Go to Import tab.");
+            tv.setText(tv.getContext().getString(R.string.no_images));
         }
         tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
         return view;
@@ -830,12 +830,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         return sb.toString();
     }
 
-    public static void updateFromMain() {
+    public void updateFromMain() {
         if (Methods.gbcImagesList.size() > 0) {
             updateGridView(currentPage);
-            tv.setText("Total of images: " + GbcImage.numImages);
+            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
         } else {
-            tv.setText("No images in the gallery. Go to Import tab.");
+            tv.setText(tv.getContext().getString(R.string.no_images));
         }
         tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
         updateGridView(currentPage);

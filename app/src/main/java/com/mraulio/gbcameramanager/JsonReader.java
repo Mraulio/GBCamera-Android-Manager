@@ -105,63 +105,70 @@ public class JsonReader {
         JSONArray images = jsonObject.getJSONObject("state").getJSONArray("images");
         for (int i = 0; i < images.length(); i++) {
             JSONObject imageJson = images.getJSONObject(i);
-            String hash = imageJson.getString("hash");
-            stringValues.add(hash);
-            String data = jsonObject.getString(hash);
-            String decodedData = eachImage(data);
-            byte[] bytes = Methods.convertToByteArray(decodedData);
-            GbcImage gbcImage = new GbcImage();
-            gbcImage.setHashCode(hash);
-            gbcImage.setImageBytes(bytes);
-
-            if (!imageJson.getString("title").equals("")) {
-                gbcImage.setName(imageJson.getString("title"));
-            } else gbcImage.setName("*No title*");
-            JSONArray tagsArray = imageJson.getJSONArray("tags");
-            if (tagsArray.length() > 0) {
-                List<String> tagsStrings = new ArrayList<>();
-                for (int j = 0; j < tagsArray.length(); j++) {
-                    String str = tagsArray.getString(j);
-                    tagsStrings.add(str);
-                }
-                gbcImage.setTags(tagsStrings);
-            }
             try {
-                gbcImage.setFrameId(imageJson.getString("frame"));//To get the frame from the json
-                gbcImage.setPaletteId(imageJson.getString("palette"));//To get the palette from the json
+                if (!imageJson.has("isRGBN") || (imageJson.has("isRGBN") && imageJson.get("isRGBN").equals(false))) {
+                    String hash = imageJson.getString("hash");
+                    stringValues.add(hash);
+                    System.out.println(hash + "//////////////////hash");
+                    String data = jsonObject.getString(hash);
+                    String decodedData = eachImage(data);
+                    byte[] bytes = Methods.convertToByteArray(decodedData);
+                    GbcImage gbcImage = new GbcImage();
+                    gbcImage.setHashCode(hash);
+                    gbcImage.setImageBytes(bytes);
 
-                if (imageJson.getString("frame").equals("null"))
-                    gbcImage.setFrameId("");
-                if (!Methods.hashFrames.containsKey(gbcImage.getFrameId())) {
-                    gbcImage.setFrameId("Nintendo_Frame");
-                }
-                if (!Methods.hashPalettes.containsKey(gbcImage.getPaletteId())) {
-                    gbcImage.setPaletteId("bw");
-                }
-                if (imageJson.has("lockFrame"))
-                    gbcImage.setLockFrame((Boolean) imageJson.get("lockFrame"));
-                else gbcImage.setLockFrame(false);
+                    if (!imageJson.getString("title").equals("")) {
+                        gbcImage.setName(imageJson.getString("title"));
+                    } else gbcImage.setName("*No title*");
+                    JSONArray tagsArray = imageJson.getJSONArray("tags");
+                    if (tagsArray.length() > 0) {
+                        List<String> tagsStrings = new ArrayList<>();
+                        for (int j = 0; j < tagsArray.length(); j++) {
+                            String str = tagsArray.getString(j);
+                            tagsStrings.add(str);
+                        }
+                        gbcImage.setTags(tagsStrings);
+                    }
+                    if (imageJson.has("palette")) {
+                        if (!Methods.hashPalettes.containsKey(gbcImage.getPaletteId())) {
+                            gbcImage.setPaletteId("bw");
+                        } else
+                            gbcImage.setPaletteId(imageJson.getString("palette"));//To get the palette from the json
 
-                if (imageJson.has("invertPalette"))
-                    gbcImage.setInvertPalette((Boolean) imageJson.get("invertPalette"));
-                else gbcImage.setInvertPalette(false);
-                //To set the Date
-                String dateFormat = "yyyy-MM-dd HH:mm:ss:SSS";
-                SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
-                try {
-                    Date creationDate = sdf.parse((String) imageJson.get("created"));
-                    gbcImage.setCreationDate(creationDate);
-                    System.out.println(creationDate+"////creationDate");
-                } catch (ParseException e) {
-                    System.out.println("Error al convertir la fecha: " + e.getMessage());
-                }
+                    }
+                    if (imageJson.has("frame")) {
+                        if (imageJson.getString("frame").equals("null"))
+                            gbcImage.setFrameId("");
+                        if (!Methods.hashFrames.containsKey(gbcImage.getFrameId())) {
+                            gbcImage.setFrameId("Nintendo_Frame");
+                        }
+                    }
 
-                Bitmap imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(), bytes, gbcImage);
-                if (imageBitmap.getHeight() == 144) {
-                    imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), gbcImage.isLockFrame());//Need to change the frame to use the one in the json
+                    if (imageJson.has("lockFrame"))
+                        gbcImage.setLockFrame((Boolean) imageJson.get("lockFrame"));
+                    else gbcImage.setLockFrame(false);
+
+                    if (imageJson.has("invertPalette"))
+                        gbcImage.setInvertPalette((Boolean) imageJson.get("invertPalette"));
+                    else gbcImage.setInvertPalette(false);
+                    //To set the Date
+                    String dateFormat = "yyyy-MM-dd HH:mm:ss:SSS";
+                    SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+                    try {
+                        Date creationDate = sdf.parse((String) imageJson.get("created"));
+                        gbcImage.setCreationDate(creationDate);
+                        System.out.println(creationDate + "////creationDate");
+                    } catch (ParseException e) {
+                        System.out.println("Error al convertir la fecha: " + e.getMessage());
+                    }
+
+                    Bitmap imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(), bytes, gbcImage);
+                    if (imageBitmap.getHeight() == 144) {
+                        imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), gbcImage.isLockFrame());//Need to change the frame to use the one in the json
+                    }
+                    ImportFragment.importedImagesList.add(gbcImage);
+                    ImportFragment.importedImagesBitmaps.add(imageBitmap);
                 }
-                ImportFragment.importedImagesList.add(gbcImage);
-                ImportFragment.importedImagesBitmaps.add(imageBitmap);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Error. Can't be added.\n" + e.toString());//For RGB pics

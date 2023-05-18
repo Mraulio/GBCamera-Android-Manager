@@ -34,6 +34,8 @@
     <string name="export_png">Export as PNG.</string>
     <string name="png_size">PNG size:\u0020</string>
     <string name="images_page">Select images per page:\u0020</string>
+    <string name="language">Language (needs restart):\u0020</string>
+
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">Can\'t delete a base frame</string>

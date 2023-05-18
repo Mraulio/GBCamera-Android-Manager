@@ -34,6 +34,8 @@
     <string name="export_png">Exportar como PNG.</string>
     <string name="png_size">Tamaño PNG:\u0020</string>
     <string name="images_page">Seleccionar imágenes por página:\u0020</string>
+    <string name="language">Idioma (necesita reinicar):\u0020</string>
+
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">No se puede borrar un marco base.</string>

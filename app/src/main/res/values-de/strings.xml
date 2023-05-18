@@ -35,6 +35,7 @@
     <string name="export_png">Als PNG exportieren.</string>
     <string name="png_size">PNG Größe:\u0020</string>
     <string name="images_page">Bilder pro Seite:\u0020</string>
+    <string name="language">Language (needs restart):\u0020</string>
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">Kann Basisframe nicht löschen</string>

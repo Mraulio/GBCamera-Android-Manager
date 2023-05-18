@@ -27,6 +27,9 @@
     <string name="export_png">Exporter au format PNG.</string>
     <string name="png_size">Taille fichier PNG:\u0020</string>
     <string name="images_page">Images par page:\u0020</string>
+    <string name="language">Langue:\u0020</string>
+
+
     <string name="cant_delete_base">Bordure par défaut. Ne peut être effacée</string>
     <string name="delete_dialog">Effacer bordure\u0020</string>
     <string name="sure_dialog">Confirmer ?</string>
@@ -66,7 +69,7 @@
     <string name="done_adding_frames">Fin d\’ajout des bordures!</string>
     <string name="no_valid_file">Fichier non valide.</string>
     <string name="cb_last_seen">Dernière image vue par le capteur.</string>
-    <string name="cb_deleted_images">Imagées effacées.</string>
+    <string name="cb_deleted_images">Images supprimées.</string>
     <string name="rb_print">Imprimer vers Arduino - GBP</string>
     <string name="btn_read_rom_name">Lire le nom de la ROM</string>
     <string name="btn_read_ram">Lire et sauvegarder la RAM</string>

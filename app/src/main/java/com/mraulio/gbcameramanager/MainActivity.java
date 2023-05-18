@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
@@ -41,6 +43,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean exportPng = true;
     public static int exportSize = 4;
     public static int imagesPage = 12;
+    public static String languageCode = "en";
 
     public static UsbManager manager;
     public static int deletedCount = 0;
@@ -97,6 +101,18 @@ public class MainActivity extends AppCompatActivity {
         exportSize = sharedPreferences.getInt("export_size", 4);
         imagesPage = sharedPreferences.getInt("images_per_page", 12);
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
+        languageCode = sharedPreferences.getString("language", "en");
+
+        // Change language config
+        if (!languageCode.equals("en")) {
+            Locale locale = new Locale(languageCode);
+            Locale.setDefault(locale);
+
+            Resources resources = getResources();
+            Configuration configuration = resources.getConfiguration();
+            configuration.setLocale(locale);
+            resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+        }
 
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
@@ -153,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class ReadDataAsyncTask extends AsyncTask<Void, Void, Void> {
+        private class ReadDataAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {

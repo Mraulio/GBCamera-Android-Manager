@@ -283,11 +283,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false, false);
                 int frameIndex = 0;
                 for (int i = 0; i < Methods.framesList.size(); i++) {
-                    if (Methods.framesList.get(i).getFrameName() == Methods.gbcImagesList.get(globalImageIndex).getFrameId()) {
+                    if (Methods.framesList.get(i).getFrameName().equals(Methods.gbcImagesList.get(globalImageIndex).getFrameId())) {
                         frameIndex = i;
                         break;
                     }
                 }
+
                 frameAdapter.setLastSelectedPosition(frameIndex);
                 gridViewFrames.setAdapter(frameAdapter);
 
@@ -352,7 +353,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, false, false);
                 int paletteIndex = 0;
                 for (int i = 0; i < Methods.gbcPalettesList.size(); i++) {
-                    if (Methods.gbcPalettesList.get(i).getPaletteId() == Methods.gbcImagesList.get(globalImageIndex).getPaletteId()) {
+                    if (Methods.gbcPalettesList.get(i).getPaletteId().equals(Methods.gbcImagesList.get(globalImageIndex).getPaletteId())) {
                         paletteIndex = i;
                         break;
                     }

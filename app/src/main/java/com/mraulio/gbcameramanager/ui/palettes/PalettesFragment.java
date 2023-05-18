@@ -93,10 +93,10 @@ public class PalettesFragment extends Fragment {
         gridViewPalettes.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position <= 5) {
+                if (position <= 56) {
                     Methods.toast(getContext(), getString(R.string.cant_delete_base_palette));
                 }
-                if (position > 5) {
+                if (position > 56) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle(getString(R.string.delete_dialog_palette) + Methods.gbcPalettesList.get(position).getPaletteId() + "?");
                     builder.setMessage(getString(R.string.sure_dialog_palette));

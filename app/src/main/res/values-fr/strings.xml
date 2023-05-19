@@ -27,8 +27,7 @@
     <string name="export_png">Exporter au format PNG.</string>
     <string name="png_size">Taille fichier PNG:\u0020</string>
     <string name="images_page">Images par page:\u0020</string>
-    <string name="language">Langue:\u0020</string>
-
+    <string name="language">Langue (relancer pour activer):\u0020</string>
 
     <string name="cant_delete_base">Bordure par défaut. Ne peut être effacée</string>
     <string name="delete_dialog">Effacer bordure\u0020</string>

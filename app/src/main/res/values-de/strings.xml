@@ -16,7 +16,7 @@
     <string name="menu_settings">Einstellungen</string>
 
     <!--Custom_dialog, Gallery Fragment strings-->
-    <string name="btn_show_palettes">Palettes anzeigen</string>
+    <string name="btn_show_palettes">Paletten anzeigen</string>
     <string name="btn_show_frames">Frames anzeigen</string>
     <string name="cb_keep_frame">Framefarbe beibehalten</string>
     <string name="cb_crop">Beschneiden</string>
@@ -50,13 +50,13 @@
     <string name="btn_export_json">JSON exportieren</string>
     <string name="long_press_delete_palette">Halten zum löschen</string>
     <string name="cant_delete_base_palette">Kann Basispalette nicht löschen</string>
-    <string name="toast_palettes_json">Paletten im Download-ordner gespeichert.</string>
+    <string name="toast_palettes_json">Paletten im Download-Ordner gespeichert.</string>
     <string name="set_palette_name">*Palettenname setzen*</string>
     <string name="sure_dialog_palette">Sicher?\nVor dem Fortsetzen ist ein JSON export empfohlen.</string>
     <string name="delete_dialog_palette">Palette löschen\u0020</string>
     <string name="choose_color">Farbe wählen</string>
     <string name="selected_color">Gewählte Farbe: #</string>
-    <string name="toast_palettes_error">2 Paletten dürden nicht den selben Namen haben.</string>
+    <string name="toast_palettes_error">2 Paletten dürfen nicht den selben Namen haben.</string>
     <string name="palette_added">Palette hinzugefügt</string>
 
     <string name="btn_save">Speichern</string>
@@ -68,7 +68,7 @@
     <string name="tv_select_file">Datei zum Import wählen</string>
     <string name="btn_extract_file">Datei extrahieren</string>
     <string name="btn_add_images">Bilder hinzufügen</string>
-    <string name="btn_add_palettes">Palettes hinzufügen</string>
+    <string name="btn_add_palettes">Paletten hinzufügen</string>
     <string name="btn_add_frames">Frames hinzugügen</string>
     <string name="no_valid_list">Keine gültige Liste</string>
     <string name="images_available">\u0020Bilder verfügbar.</string>
@@ -88,11 +88,11 @@
     <!--Usb serial fragment xml strings-->
     <string name="rb_print">Mit Arduino drucken - GBP</string>
     <string name="btn_read_rom_name">ROM Namen auslesen</string>
-    <string name="btn_read_ram">RAM lesen uns speichern</string>
+    <string name="btn_read_ram">RAM lesen und speichern</string>
     <string name="btn_dump_photo">Komplettes PHOTO! ROM auslesen</string>
     <string name="btn_view_rom_images">ROM Bilder anzeigen</string>
     <string name="btn_print_banner">Testbanner drucken</string>
-    <string name="btn_print_image">Bilde drucken</string>
+    <string name="btn_print_image">Bilder drucken</string>
     <string name="btn_delete_sav">SAV löschen</string>
     <string name="tv_sleep_time">Wartezeit:\u0020</string>
     <string name="error_print_image">"Fehler beim drucken</string>
@@ -114,7 +114,7 @@
     <string name="dumping_ram_wait">\nLese RAM, bitte warten...\n...</string>
     <string name="last_sav_name">\nDer Name des letzten SAV ist:\u0020</string>
     <string name="size">Größe:\u0020</string>
-    <string name="error_file">Fehler beim erstellen der Datei:\u0020</string>
+    <string name="error_file">Fehler beim Erstellen der Datei:\u0020</string>
     <string name="saved_to_file">In Datei gespeichert</string>
 
     <string name="delete_dialog_gallery">Bild Löschen\u0020</string>

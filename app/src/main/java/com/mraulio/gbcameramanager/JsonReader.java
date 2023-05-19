@@ -134,7 +134,6 @@ public class JsonReader {
                             gbcImage.setPaletteId("bw");
                         } else
                             gbcImage.setPaletteId(imageJson.getString("palette"));//To get the palette from the json
-
                     }
                     if (imageJson.has("frame")) {
                         String frameName = imageJson.getString("frame");

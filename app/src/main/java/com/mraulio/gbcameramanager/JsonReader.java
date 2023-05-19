@@ -137,8 +137,10 @@ public class JsonReader {
 
                     }
                     if (imageJson.has("frame")) {
-                        if (imageJson.getString("frame").equals("null"))
+                        String frameName = imageJson.getString("frame");
+                        if (frameName.equals("null"))
                             gbcImage.setFrameId("");
+                        else gbcImage.setFrameId(frameName);
                         if (!Methods.hashFrames.containsKey(gbcImage.getFrameId())) {
                             gbcImage.setFrameId("Nintendo_Frame");
                         }

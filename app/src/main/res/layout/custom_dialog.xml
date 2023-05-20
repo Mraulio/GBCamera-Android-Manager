@@ -39,7 +39,7 @@
             app:icon="@drawable/ic_print"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            android:visibility="visible"/>
+            android:visibility="gone"/>
 
         <CheckBox
             android:id="@+id/cbCrop"
@@ -63,7 +63,7 @@
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
-            android:backgroundTint="#4E8A50"
+            android:backgroundTint="#69BF6C"
             android:textSize="10dp"
             app:icon="@drawable/ic_download"
             app:iconGravity="textStart"

@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Store in the shared preferences
     public static boolean exportPng = true;
+    public static boolean printingEnabled = false;
     public static int exportSize = 4;
     public static int imagesPage = 12;
     public static String languageCode = "en";
@@ -67,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
     public static UsbManager manager;
     public static int deletedCount = 0;
     public static AppDatabase db;
-    public static boolean printingEnabled = false;
     private static final String ACTION_USB_PERMISSION =
             "com.android.example.USB_PERMISSION";
     private UsbDevice device;
@@ -102,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
         imagesPage = sharedPreferences.getInt("images_per_page", 12);
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         languageCode = sharedPreferences.getString("language", "en");
+        printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
+        //getWindow().setNavigationBarColor(getResources().getColor(R.color.favorite));
+        //getWindow().setStatusBarColor(getResources().getColor(R.color.favorite));
 
         // Change language config
         if (!languageCode.equals("en")) {
@@ -169,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-        private class ReadDataAsyncTask extends AsyncTask<Void, Void, Void> {
+    private class ReadDataAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {

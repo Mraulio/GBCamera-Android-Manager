@@ -35,6 +35,7 @@
     <string name="png_size">Tamaño PNG:\u0020</string>
     <string name="images_page">Seleccionar imágenes por página:\u0020</string>
     <string name="language">Idioma (necesita reinicar):\u0020</string>
+    <string name="showPrint">Mostrar botón Imprimir.</string>
 
 
     <!--Frames fragment strings-->

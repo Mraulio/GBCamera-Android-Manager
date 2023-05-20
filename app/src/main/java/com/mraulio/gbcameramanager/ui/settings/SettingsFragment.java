@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 
@@ -26,6 +28,7 @@ import java.util.Locale;
 
 public class SettingsFragment extends Fragment {
     SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
@@ -34,8 +37,22 @@ public class SettingsFragment extends Fragment {
         Spinner spinnerLanguage = view.findViewById(R.id.spLanguage);
         RadioButton rbPng = view.findViewById(R.id.rbPng);
         RadioButton rbTxt = view.findViewById(R.id.rbTxt);
+        CheckBox cbPrint = view.findViewById(R.id.cbPrint);
 
-
+        cbPrint.setChecked(MainActivity.printingEnabled);
+        cbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("print_enabled", true);
+                    MainActivity.printingEnabled = true;
+                } else {
+                    editor.putBoolean("print_enabled", false);
+                    MainActivity.printingEnabled = false;
+                }
+                editor.apply();
+            }
+        });
 
         if (MainActivity.exportPng) {
             rbPng.setChecked(true);
@@ -177,6 +194,7 @@ public class SettingsFragment extends Fragment {
 
         return view;
     }
+
     private void ChangeLanguage(String languageCode) {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);

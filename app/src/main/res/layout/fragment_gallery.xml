@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/background"
     android:padding="10dp"
     tools:context=".ui.gallery.GalleryFragment">
 
@@ -28,7 +29,6 @@
             android:id="@+id/gridView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#D5D5D5"
             android:horizontalSpacing="10dp"
             android:numColumns="3"
             android:scrollbars="horizontal"

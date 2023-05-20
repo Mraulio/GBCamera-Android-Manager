@@ -204,9 +204,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 Button printButton = dialog.findViewById(R.id.print_button);
                 if (MainActivity.printingEnabled) {
                     printButton.setVisibility(View.VISIBLE);
-                }
-                Button shareButton = dialog.findViewById(R.id.share_button);
+                } else printButton.setVisibility(View.GONE);
 
+                Button shareButton = dialog.findViewById(R.id.share_button);
                 Button saveButton = dialog.findViewById(R.id.save_button);
                 Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
                 GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
@@ -305,7 +305,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         else keepFrame = true;
                         Bitmap bitmap = null;
                         try {
-                            bitmap = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()),Methods.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
+                            bitmap = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()), Methods.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -338,7 +338,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         Methods.gbcImagesList.get(globalImageIndex).setFrameId(Methods.framesList.get(selectedFrameIndex).getFrameName());//Need to set the frame index before changing it because if not it's not added to db
 
                         try {
-                            framed = frameChange(Methods.gbcImagesList.get(globalImageIndex),Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()), Methods.framesList.get(selectedFrameIndex).getFrameName(), keepFrame);
+                            framed = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()), Methods.framesList.get(selectedFrameIndex).getFrameName(), keepFrame);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -374,7 +374,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
                         if (keepFrame) {
                             try {
-                                changedImage = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()),Methods.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
+                                changedImage = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()), Methods.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -617,7 +617,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
 
-    public static Bitmap frameChange(GbcImage gbcImage,Bitmap bitmap, String selectedFrameId, boolean keepFrame) throws IOException {
+    public static Bitmap frameChange(GbcImage gbcImage, Bitmap bitmap, String selectedFrameId, boolean keepFrame) throws IOException {
         Bitmap framed = null;
         Bitmap framedAux;
         if ((gbcImage.getImageBytes().length / 40) == 144) {
@@ -949,7 +949,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 //                Methods.imageBytesCache.put(gbcImage.getHashCode(), imageBytes);
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
-                System.out.println(imageBytes.length+"///////////imagebytes length, hash:"+gbcImage.getHashCode());
+                System.out.println(imageBytes.length + "///////////imagebytes length, hash:" + gbcImage.getHashCode());
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
                 Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                 //Add the bitmap to the cache
@@ -959,8 +959,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
                     if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
-                        image = frameChange(Methods.gbcImagesList.get(newStartIndex + index), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(newStartIndex + index).getHashCode()),Methods.gbcImagesList.get(newStartIndex + index).getFrameId(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
-                Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
+                        image = frameChange(Methods.gbcImagesList.get(newStartIndex + index), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(newStartIndex + index).getHashCode()), Methods.gbcImagesList.get(newStartIndex + index).getFrameId(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
+                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

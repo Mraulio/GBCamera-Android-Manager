@@ -35,7 +35,6 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
-import com.mraulio.gbcameramanager.Connecter;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.PrintOverArduino;
@@ -431,26 +430,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         protected void onPostExecute(Void aVoid) {
             tv.append("\n" + numImagesAdded + getString(R.string.done_adding_images));
             Methods.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
-        }
-    }
-
-    public static void printOnGallery() throws IOException {
-
-        //PRINT IMAGE
-        try {
-            PrintOverArduino printOverArduino = new PrintOverArduino();
-            Connecter.connect(tv.getContext(), tv);
-            port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-            List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
-            if (availableDrivers.isEmpty()) {
-                return;
-            }
-            UsbSerialDriver driver = availableDrivers.get(0);
-
-            printOverArduino.sendThread(connection, driver.getDevice(), tv);
-        } catch (Exception e) {
-            tv.append(e.toString());
-
         }
     }
 

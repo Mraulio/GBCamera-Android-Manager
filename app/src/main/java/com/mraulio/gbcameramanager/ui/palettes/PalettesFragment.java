@@ -614,6 +614,7 @@ public class PalettesFragment extends Fragment {
                     newPalette.setPaletteId(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
                     newPalette.setPaletteColors(palette);
                     Methods.gbcPalettesList.add(newPalette);
+                    Methods.hashPalettes.put(newPalette.getPaletteId(),newPalette);
                     gridViewPalettes.setAdapter(imageAdapter);
                     Methods.toast(getContext(), getString(R.string.palette_added));
                     dialog.hide();

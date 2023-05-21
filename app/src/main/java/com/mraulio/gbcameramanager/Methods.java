@@ -33,7 +33,7 @@ public class Methods {
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
     public static HashMap<String, Bitmap> imageBitmapCache = new HashMap<>();
-    public static HashMap<String, GbcImage> hashImages = new HashMap<>();
+    //public static HashMap<String, GbcImage> hashImages = new HashMap<>();
     public static HashMap<String, GbcFrame> hashFrames = new HashMap<>();
     public static HashMap<String,GbcPalette> hashPalettes = new HashMap<>();
 

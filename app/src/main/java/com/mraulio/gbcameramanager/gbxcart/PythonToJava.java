@@ -365,7 +365,7 @@ public class PythonToJava {
                 // Read 8 KiB of SRAM
                 for (int j = 0; j < 128; j++) {
                     CartRead_RAM(j * 64, 64, port, context);
-                    int len = port.read(readLength, TIMEOUT);//Intento leer manualmente
+                    int len = port.read(readLength, TIMEOUT);
                     outputStream.write(Arrays.copyOf(readLength, len));
                     ;//Intento leer manualmente
                 }

@@ -102,7 +102,7 @@
     <string name="toast_sav_deleted">SAV borrado.</string>
     <string name="toast_couldnt_delete_sav">No se pudo borrar SAV.</string>
     <string name="deleted_sav">Borrado\u0020</string>
-    <string name="tv_connected">//Conectadon</string>
+    <string name="tv_connected">//Conectado\n</string>
     <string name="error_arduino">Error en Arduino\n.</string>
     <string name="arduino_mode">MODO Arduino Printer Emulator</string>
     <string name="print_mode">MODO IMPRIMIR</string>
@@ -118,7 +118,7 @@
     <string name="error_file">Error creando archivo:\u0020</string>
     <string name="saved_to_file">Guardado a archivo</string>
 
-    <string name="delete_dialog_gallery">Borrar imágen\u0020</string>
+    <string name="delete_dialog_gallery">Borrar imagen\u0020</string>
 
 
 

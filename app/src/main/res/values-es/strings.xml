@@ -18,7 +18,7 @@
     <!--Custom_dialog, Gallery Fragment strings-->
     <string name="btn_show_palettes">Mostrar paletas</string>
     <string name="btn_show_frames">Mostrar marcos</string>
-    <string name="cb_keep_frame">Keep frame color</string>
+    <string name="cb_keep_frame">Mantener color marco</string>
     <string name="cb_crop">Recortar</string>
 
     <string name="toast_printing">Imprimiendo, por favor espera...</string>

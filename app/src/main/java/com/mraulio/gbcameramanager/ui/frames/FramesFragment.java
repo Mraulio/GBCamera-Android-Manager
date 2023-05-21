@@ -49,10 +49,10 @@ public class FramesFragment extends Fragment {
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position <= 2) {
+                if (position <= 3) {
                     Methods.toast(getContext(), getString(R.string.cant_delete_base));
                 }
-                if (position > 2) {
+                if (position > 3) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle(getString(R.string.delete_dialog) + Methods.framesList.get(position).getFrameName() + "?");
                     builder.setMessage(getString(R.string.sure_dialog));

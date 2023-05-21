@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SaveImageExtractor implements Extractor {
@@ -83,6 +85,8 @@ public class SaveImageExtractor implements Extractor {
         ByteArrayInputStream bais = new ByteArrayInputStream(rawData);
         bais.skip(PHOTOS_LOCATION);
         bais.read(photosPositions, 0, PHOTOS_READ_COUNT);
+        //For the development rom, in which the vector doesn't exist and has repeated bytes.
+        photosPositions = checkDuplicates(photosPositions);
         List<byte[]> deletedImages = new ArrayList<>();
         int activePhotos = 0;
         StringBuilder sb = new StringBuilder();
@@ -167,6 +171,28 @@ public class SaveImageExtractor implements Extractor {
         }
 
         return allImages;
+    }
+
+    private byte[] checkDuplicates(byte[] array) {
+        byte[] basicArray = new byte[30];
+        Set<Byte> uniqueBytes = new HashSet<>();
+        boolean hasDuplicates = false;
+        for (byte b : array) {
+            //If it is repeated or it's not FF like in the dev rom
+            if (uniqueBytes.contains(b) && (int) b != -1) {
+                hasDuplicates = true;
+                break;
+            } else {
+                uniqueBytes.add(b);
+            }
+        }
+        if (hasDuplicates) {
+            for (int i = 0; i < basicArray.length; i++) {
+                basicArray[i] = (byte) i;
+            }
+            array = basicArray;
+        }
+        return array;
     }
 
     @Override

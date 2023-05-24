@@ -12,9 +12,6 @@ import java.util.Arrays;
 import java.util.Locale;
 public class StartCreation {
 
-
-
-
     public static void addFrames(Context context) {
         int width = 160;
         int height = 144;
@@ -31,7 +28,7 @@ public class StartCreation {
         //Own frame from drawable-nodpi resource (so it is not automatically scaled to the dpi)
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.gbcamera_manager_frame);
         GbcFrame myframe = new GbcFrame();
-        myframe.setFrameName("GBCManager Frame");
+        myframe.setFrameName("GBCManager_Frame");
         myframe.setFrameBitmap(bitmap);
         Methods.hashFrames.put(myframe.getFrameName(),myframe);
         Methods.framesList.add(myframe);

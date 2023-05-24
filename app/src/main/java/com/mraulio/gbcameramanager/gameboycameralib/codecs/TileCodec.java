@@ -30,10 +30,6 @@ public class TileCodec implements Codec {
     public TileCodec(IndexedPalette palette) {
         this.palette = palette;
     }
-    //Added by Mraulio
-    public TileCodec(int paletteIndex) {
-        this.paletteIndex = paletteIndex;
-    }
 
     @Override
     public Bitmap decode(byte[] tileData) {

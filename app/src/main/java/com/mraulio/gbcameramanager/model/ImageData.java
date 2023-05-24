@@ -19,8 +19,6 @@ public class ImageData {
     @ColumnInfo(name = "data")
     private byte[] data;
 
-    // constructor, getters y setters
-
     public int getId() {
         return id;
     }

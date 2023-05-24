@@ -42,7 +42,6 @@ public class PythonToJava {
         command[0] = (byte) com; //POWER OFF
         try {
             port.write(command, TIMEOUT);//VER LO DE LOS TIMEOUTS
-//            Toast.makeText(context, "Escrito PowerOFF", Toast.LENGTH_LONG).show();
 
         } catch (Exception e) {
             System.out.println("Error en PowerOff\n" + e.toString());
@@ -54,7 +53,6 @@ public class PythonToJava {
     public static void powerOn(UsbSerialPort port, Context context) {
         byte[] command = new byte[1];
         try {
-            //PowerOn
             command[0] = (byte) 0x2F;//OFW_CART_PWR_ON
             port.write(command, TIMEOUT);
 
@@ -68,7 +66,6 @@ public class PythonToJava {
         byte[] command = new byte[1];
 
         try {
-
             int com = GBxCart.DEVICE_CMD.get("SET_MODE_DMG");
             command[0] = (byte) com; //SET_MODE_DMG
             port.write(command, TIMEOUT);
@@ -105,9 +102,6 @@ public class PythonToJava {
                 break;
             }
         }
-        if (size == 0) {
-            System.out.println("Excepcion size == 0");
-        }
         int temp = GBxCart.DEVICE_CMD.get("SET_VARIABLE");
         ByteBuffer bb = ByteBuffer.allocate(13);
         bb.order(ByteOrder.BIG_ENDIAN);
@@ -131,7 +125,6 @@ public class PythonToJava {
         }
         byte[] buffer = new byte[num * length];
         setFwVariable("TRANSFER_SIZE", length, port, context);
-
         setFwVariable("ADDRESS", address, port, context);
         setFwVariable("DMG_ACCESS_MODE", 1, port, context); // MODE_ROM_READ
 
@@ -141,18 +134,14 @@ public class PythonToJava {
 
         try {
             for (int i = 0; i < num; i++) {
-//                tv.append("");
                 int x = GBxCart.DEVICE_CMD.get(command);
                 commandByte[0] = (byte) x;
                 port.write(commandByte, TIMEOUT);
             }
-//            tv.append("");
-
         } catch (Exception e) {
             System.out.println("Error en PowerOn\n" + e.toString());
             Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
-//        tv.append("");
         return buffer;
     }
 
@@ -215,11 +204,8 @@ public class PythonToJava {
 
     }
 
-
     public static List<File> ReadFullRom(UsbSerialPort port, Context context, TextView tv) {
         //DUMP 1 MB ROM file
-//        byte[] readLength = new byte[0x10];
-//        byte[] receivedData = new byte[0x10];
         LocalDateTime now = LocalDateTime.now();
         String fileName = "PhotoFullRom_";
         String folderName = "PhotoFullRom_" + dtf.format(now);
@@ -235,7 +221,7 @@ public class PythonToJava {
             toast.show();
         }
         File file = new File(parentFile, fileName);
-// create the new file inside the directory
+        // create the new file inside the directory
         try {
             if (!file.createNewFile()) {
                 throw new IllegalStateException("Couldn't create file: " + file);
@@ -261,7 +247,6 @@ public class PythonToJava {
                     }
                     int len = port.read(readLength, TIMEOUT);//Intento leer manualmente
                     byte[] receivedData = (Arrays.copyOf(readLength, len));
-                    ;//Intento leer manualmente
                     bos.write(receivedData);
                 }
             }
@@ -273,7 +258,7 @@ public class PythonToJava {
         }
         //Now I divide the 1MB file into 8. First will be the gbc rom, next 7 ram files
         int fileSize = (int) file.length();
-        int partSize = fileSize / 8; // divide el archivo en 8 partes de igual tamaño
+        int partSize = fileSize / 8; // Divides the file in 8 parts
         byte[] buffer = new byte[partSize];
 
         List<File> fileList = new ArrayList<>();
@@ -309,7 +294,7 @@ public class PythonToJava {
                             outputFile.delete();
                         }
                     } catch (IOException e) {
-                        // Manejo de la excepción
+                        e.printStackTrace();
                     }
                 }
 
@@ -329,7 +314,6 @@ public class PythonToJava {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -350,10 +334,11 @@ public class PythonToJava {
         } catch (Exception e) {
             Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
             toast.show();
-        }        //# Enable SRAM access
+        }
+        //# Enable SRAM access
         Cart_write(0x6000, 0x01, port, context);
         Cart_write(0x0000, 0x0A, port, context);
-//
+
         try {
             fos = new FileOutputStream(file);
             bos = new BufferedOutputStream(fos);
@@ -367,7 +352,6 @@ public class PythonToJava {
                     CartRead_RAM(j * 64, 64, port, context);
                     int len = port.read(readLength, TIMEOUT);
                     outputStream.write(Arrays.copyOf(readLength, len));
-                    ;//Intento leer manualmente
                 }
             }
             bos.write(outputStream.toByteArray());

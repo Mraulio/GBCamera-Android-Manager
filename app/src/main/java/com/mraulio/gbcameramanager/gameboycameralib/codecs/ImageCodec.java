@@ -22,13 +22,6 @@ public class ImageCodec implements Codec {
         this.imageHeight = imageHeight;
     }
 
-    //Added by Mraulio
-//    public ImageCodec(int paletteIndex, int imageWidth, int imageHeight) {
-//        this.paletteIndex = paletteIndex;
-//        this.imageWidth = imageWidth;
-//        this.imageHeight = imageHeight;
-//    }
-
     @Override
     public Bitmap decode(byte[] data) {
         Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);

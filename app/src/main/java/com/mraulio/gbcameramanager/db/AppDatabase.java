@@ -10,7 +10,6 @@ import com.mraulio.gbcameramanager.model.ImageData;
 
 @Database(entities = {GbcImage.class, GbcPalette.class, GbcFrame.class, ImageData.class}, version = 1)
 @androidx.room.TypeConverters(TypeConverters.class)
-//To convert the bitmap to byte[] to be able to store it in the database
 public abstract class AppDatabase extends RoomDatabase {
     public abstract PaletteDao paletteDao();
     public abstract FrameDao frameDao();

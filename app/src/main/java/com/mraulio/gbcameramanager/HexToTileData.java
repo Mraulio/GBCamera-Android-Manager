@@ -9,7 +9,7 @@ import java.util.List;
 public class HexToTileData {
     public static List<String> separateData(String data) {
         List<String> dataList = new ArrayList<String>();
-        String tileData = "";
+        String tileData;
         StringBuilder outputString = new StringBuilder();
         if (data.startsWith("{\"command\":\"INIT\"}")) {//Regular data
             String dataWithoutCommands = deleteLines(data);
@@ -44,15 +44,16 @@ public class HexToTileData {
                                 }
                             } catch (Exception e) {
                                 // DIFFERENT EMPTY DATA PACKAGE??
+                                e.printStackTrace();
                             }
                         }
                     } else if (line.startsWith("88 33 02")) {
                         // PRINT command
-                        // Fin de imagen, se guarda en la lista y se borra para empezar de 0 para la siguiente
                         if (line.startsWith("88 33 02 00 04 00 01 10") || line.startsWith("88 33 02 00 04 00 01 00")) {
                             // 0 margins, I just continue adding data to the outputString after deleting last \n
                             outputString.deleteCharAt(outputString.length() - 1);//To delete the last added \n
                         } else {
+                            // End of image. It's stored in the list and set to length 0 to start fresh with the next image
                             // DIFFERENT MARGIN
                             dataList.add(outputString.toString());
                             outputString.setLength(0);
@@ -64,15 +65,13 @@ public class HexToTileData {
                     }
                 }
             } catch (IOException e) {
-                // Handle exception
+                e.printStackTrace();
             }
         }
-        System.out.println("CANTIDAD DE IMAGENES: " + dataList.size());
-//        System.out.println(dataList.get(0) + dataList.get(1) + dataList.get(2));
         return dataList;
     }
 
-    //To delete lines that begin with {
+    //To delete lines that begin with
     public static String deleteLines(String texto) {
         String[] lineas = texto.split("\n");
         StringBuilder sb = new StringBuilder();

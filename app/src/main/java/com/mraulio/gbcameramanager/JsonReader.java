@@ -2,14 +2,12 @@ package com.mraulio.gbcameramanager;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.Environment;
 
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
-import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
@@ -17,12 +15,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,16 +45,13 @@ public class JsonReader {
                 }
                 JSONObject paletteObject = palettesArray.getJSONObject(0);
 
-                // Verificar que las claves y valores existan en el objeto de paleta
+                // Verify that the keys and values exist in the palette
                 if (paletteObject.has("shortName") && paletteObject.has("name") && paletteObject.has("palette") && paletteObject.has("origin")) {
-//                    String shortName = paletteObject.getString("shortName");
-//                    String name = paletteObject.getString("name");
                     JSONArray paletteArray = paletteObject.getJSONArray("palette");
-//                    String origin = paletteObject.getString("origin");
 
                     // Verificar que la matriz de paletas tenga cuatro elementos
                     if (paletteArray.length() == 4) {
-                        System.out.println("El JSON tiene el formato esperado.");
+                        System.out.println("JSON has the expected format.");
                     } else {
                         System.out.println("Not a 4 element palette.");
                         return null;
@@ -75,7 +66,6 @@ public class JsonReader {
 
             } else if (stateObject.has("images")) {
                 //Images json
-                //Entering images json.
                 JSONArray imagesArray = stateObject.getJSONArray("images");
                 if (imagesArray.length() == 0) {
                     return null;
@@ -84,13 +74,10 @@ public class JsonReader {
                 if (imageObject.has("hash") && imageObject.has("created") && imageObject.has("title") && imageObject.has("lines") && imageObject.has("tags")) {
                     //There are some more values to check, but not all images have those
                     return readerImages(jsonObject);
-
                 } else return null;
-
             } else {
                 return null;
             }
-
         } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
@@ -101,7 +88,7 @@ public class JsonReader {
         List<String> stringValues = new ArrayList<>();
         List<String> finalValues = new ArrayList<>();
 
-        // Acceder a los valores del JSON
+        // Acces JSON values
         JSONArray images = jsonObject.getJSONObject("state").getJSONArray("images");
         for (int i = 0; i < images.length(); i++) {
             JSONObject imageJson = images.getJSONObject(i);
@@ -109,9 +96,8 @@ public class JsonReader {
                 if (!imageJson.has("isRGBN") || (imageJson.has("isRGBN") && imageJson.get("isRGBN").equals(false))) {
                     String hash = imageJson.getString("hash");
                     stringValues.add(hash);
-                    System.out.println(hash + "//////////////////hash");
                     String data = jsonObject.getString(hash);
-                    String decodedData = eachImage(data);
+                    String decodedData = decodeData(data);
                     byte[] bytes = Methods.convertToByteArray(decodedData);
                     GbcImage gbcImage = new GbcImage();
                     gbcImage.setHashCode(hash);
@@ -158,9 +144,8 @@ public class JsonReader {
                     try {
                         Date creationDate = sdf.parse((String) imageJson.get("created"));
                         gbcImage.setCreationDate(creationDate);
-                        System.out.println(creationDate + "////creationDate");
                     } catch (ParseException e) {
-                        System.out.println("Error al convertir la fecha: " + e.getMessage());
+                        e.printStackTrace();
                     }
 
                     Bitmap imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(), bytes, gbcImage);
@@ -182,7 +167,6 @@ public class JsonReader {
 
     public static List<GbcPalette> readerPalettes(JSONArray palettesArr) {
         List<GbcPalette> paletteList = new ArrayList<>();
-        // Recorre los elementos de palettes y recupera los datos que necesitas
         for (int i = 0; i < palettesArr.length(); i++) {
             JSONObject paletteObj;
             try {
@@ -237,7 +221,7 @@ public class JsonReader {
                 GbcFrame gbcFrame = new GbcFrame();
                 gbcFrame.setFrameName(name);
                 String hash = jsonObject.getString("frame-" + id);
-                String decompHash = eachFrame(hash);
+                String decompHash = recreateFrame(hash);
                 byte[] bytes = Methods.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
@@ -247,86 +231,15 @@ public class JsonReader {
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
             } catch (JSONException e) {
                 e.printStackTrace();
-                System.out.println("Error X2");
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("Error X23");
             }
         }
         return frameList;
     }
 
-    public static String reader() throws IOException, JSONException {
-        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String jsonString = new String(Files.readAllBytes(Paths.get(downloadsDirectory + "/frames.json")), StandardCharsets.UTF_8);
-        boolean frame = true;
 
-        // Crear un objeto JSONObject a partir del String JSON
-        JSONObject jsonObject = new JSONObject(jsonString);
-        String value = "";
-        // Acceder a los valores del JSON
-        if (!frame) {
-            String hash = jsonObject.getJSONObject("state").getJSONArray("images").getJSONObject(0).getString("hash");
-            value = jsonObject.getString(hash);
-
-        } else {
-            String hash = "frame-" + jsonObject.getJSONObject("state").getJSONArray("frames").getJSONObject(22).getString("hash");
-            value = jsonObject.getString(hash);
-
-        }
-        byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
-
-        System.out.println(value);
-        Inflater inflater = new Inflater();
-        inflater.setInput(compressedBytes);
-
-        byte[] outputBytes = new byte[compressedBytes.length * 200];//Because the compressed is much smaller
-        int length = 0;
-        try {
-            length = inflater.inflate(outputBytes);
-            inflater.end();
-        } catch (DataFormatException e) {
-            System.out.println("Error al descomprimir los datos: " + e.getMessage());
-        }
-
-        String uncompressedData = new String(outputBytes, 0, length, StandardCharsets.UTF_8);
-        System.out.println(uncompressedData);
-        String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < outputString.length(); i += 2) {
-            sb.append(outputString.substring(i, i + 2));
-            sb.append(" ");
-        }
-        String primeraParte = outputString.substring(0, 1280);
-        String central = outputString.substring(1280, 3072);//esta parte tiene la informacion de los lados del marco, lo divido en 14, cada una de 128 caracteres
-        String[] partes = new String[14];
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(primeraParte);
-        for (int i = 0; i < 14; i++) {
-            String parte = central.substring(i * 128, (i + 1) * 128);  // Obtener la parte de 128 caracteres
-            StringBuilder builder = new StringBuilder(parte);  // Crear un StringBuilder a partir de la parte
-            for (int j = 0; j < 512; j++) {
-                builder.insert(64, '0');  // Insertar el caracter '0' en la posicion 64
-            }
-            partes[i] = builder.toString();  // Guardar la parte con los '0' agregados en el array
-            stringBuilder.append(partes[i]);
-        }
-
-        String ultimaParte = outputString.substring(outputString.length() - 1280);
-        stringBuilder.append(ultimaParte);
-        String terminada = stringBuilder.toString();
-        StringBuilder resultado = new StringBuilder();
-
-        for (int i = 0; i < terminada.length(); i += 2) {
-            if (i > 0) {
-                resultado.append(" "); // añade un espacio cada dos caracteres
-            }
-            resultado.append(terminada.substring(i, i + 2));
-        }
-        return resultado.toString();
-    }
-
-    public static String eachImage(String value) {
+    public static String decodeData(String value) {
         byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
         Inflater inflater = new Inflater();
         inflater.setInput(compressedBytes);
@@ -336,13 +249,13 @@ public class JsonReader {
             length = inflater.inflate(outputBytes);
             inflater.end();
         } catch (DataFormatException e) {
-            System.out.println("Error al descomprimir los datos: " + e.getMessage());
+            e.printStackTrace();
         }
         String uncompressedData = new String(outputBytes, 0, length, StandardCharsets.UTF_8);
         String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < outputString.length(); i += 2) {
-            try {//Esto lo pongo para el marco en blanco por ejemplo que da StringIndexOutOfBoundsException, hay que arreglarlo (Creo que esta arreglado con el *300
+            try {
                 sb.append(outputString.substring(i, i + 2));
                 sb.append(" ");
             } catch (Exception e) {
@@ -351,66 +264,57 @@ public class JsonReader {
         return sb.toString();
     }
 
-    public static String eachFrame(String value) {
+    //The frame json only has the actual frame, top, bottom and sides, so I create a String of the hex data of an image with the frame filled with white color
+    public static String recreateFrame(String value) {
         byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
-
-//        System.out.println(value);
         Inflater inflater = new Inflater();
         inflater.setInput(compressedBytes);
-
-        byte[] outputBytes = new byte[compressedBytes.length * 300];
+        byte[] outputBytes = new byte[compressedBytes.length * 300];//*300 to make sure the array is big enough
         int length = 0;
         try {
             length = inflater.inflate(outputBytes);
             inflater.end();
         } catch (DataFormatException e) {
-            System.out.println("Error al descomprimir los datos: " + e.getMessage());
+            e.printStackTrace();
         }
-
         String uncompressedData = new String(outputBytes, 0, length, StandardCharsets.UTF_8);
-//        System.out.println(uncompressedData);
         String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < outputString.length(); i += 2) {
-            try {//Esto lo pongo para el marco en blanco por ejemplo que da StringIndexOutOfBoundsException, hay que arreglarlo
+            try {
                 sb.append(outputString.substring(i, i + 2));
                 sb.append(" ");
             } catch (Exception e) {
             }
         }
-
-//        System.out.println(outputString);
-        String primeraParte = outputString.substring(0, 1280);
-        String central = outputString.substring(1280, 3072);//esta parte tiene la informacion de los lados del marco, lo divido en 14, cada una de 128 caracteres
-        String[] partes = new String[14];
+        String firstPart = outputString.substring(0, 1280);
+        String central = outputString.substring(1280, 3072);//Info of the frame sides. Split it in 14 parts, 128 characters each
+        String[] parts = new String[14];
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(primeraParte);
+        stringBuilder.append(firstPart);
         for (int i = 0; i < 14; i++) {
-            String parte = central.substring(i * 128, (i + 1) * 128);  // Obtener la parte de 128 caracteres
-            StringBuilder builder = new StringBuilder(parte);  // Crear un StringBuilder a partir de la parte
+            String part = central.substring(i * 128, (i + 1) * 128);  //Obtain the 128 characters part
+            StringBuilder builder = new StringBuilder(part);
             for (int j = 0; j < 512; j++) {
-                builder.insert(64, '0');  // Insertar el caracter '0' en la posicion 64
+                builder.insert(64, '0');  //Insert '0' 512 times, for 16 tiles of white, starting in position 64 (after second frame tile)
             }
-            partes[i] = builder.toString();  // Guardar la parte con los '0' agregados en el array
-            stringBuilder.append(partes[i]);
-//            System.out.println(partes[i].length());
+            parts[i] = builder.toString();  // Save the part with the added '0' into the array
+            stringBuilder.append(parts[i]);
         }
-        String ultimaParte = outputString.substring(outputString.length() - 1280);
-        stringBuilder.append(ultimaParte);
+        String lastPart = outputString.substring(outputString.length() - 1280);
+        stringBuilder.append(lastPart);
 
-        String terminada = stringBuilder.toString();
-//        System.out.println(terminada.length()+":  "+terminada);
-        StringBuilder resultado = new StringBuilder();
+        String finished = stringBuilder.toString();
+        StringBuilder result = new StringBuilder();
 
-        for (int i = 0; i < terminada.length(); i += 2) {
+        for (int i = 0; i < finished.length(); i += 2) {
             if (i > 0) {
-                resultado.append(" "); // añade un espacio cada dos caracteres
+                result.append(" "); // Add a space each 2 characters
             }
-            resultado.append(terminada.substring(i, i + 2));
+            result.append(finished.substring(i, i + 2));
         }
-
-        return resultado.toString();
+        return result.toString();
     }
 
 }

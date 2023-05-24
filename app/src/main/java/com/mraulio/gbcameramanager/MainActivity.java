@@ -54,10 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
-    public static String printedResponseBytes;
 
     public static SharedPreferences sharedPreferences;
-
     //Store in the shared preferences
     public static boolean exportPng = true;
     public static boolean printingEnabled = false;
@@ -65,11 +63,11 @@ public class MainActivity extends AppCompatActivity {
     public static int imagesPage = 12;
     public static String languageCode = "en";
 
+    private boolean openedSav = false;
     public static UsbManager manager;
     public static int deletedCount = 0;
     public static AppDatabase db;
-    private static final String ACTION_USB_PERMISSION =
-            "com.android.example.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
     private UsbDevice device;
     private UsbManager usbManager;
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
@@ -126,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(usbReceiver, filter);
 
 
-// Obtener información del Intent
+        // Obtener información del Intent
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -137,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
             // el tipo es "application/octet-stream" y el URI del Intent termina en ".sav", realizar la acción deseada
             // Por ejemplo, puedes abrir el archivo en tu aplicación:
             Methods.toast(this, "Opened from file");
+            openedSav = true;
         }
         if (!doneLoading) {
             new ReadDataAsyncTask().execute();
@@ -149,6 +148,8 @@ public class MainActivity extends AppCompatActivity {
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+        if (openedSav) navigationView.setCheckedItem(R.id.nav_import);
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(

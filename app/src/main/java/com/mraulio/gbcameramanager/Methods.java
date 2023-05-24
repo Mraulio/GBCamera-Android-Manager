@@ -3,7 +3,6 @@ package com.mraulio.gbcameramanager;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Environment;
 import android.widget.Toast;
 
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.Codec;
@@ -13,31 +12,26 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Class with puclic static variables and methods that are shared alongside the app
+ */
 public class Methods {
 
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
     public static HashMap<String, Bitmap> imageBitmapCache = new HashMap<>();
-    //public static HashMap<String, GbcImage> hashImages = new HashMap<>();
     public static HashMap<String, GbcFrame> hashFrames = new HashMap<>();
     public static HashMap<String,GbcPalette> hashPalettes = new HashMap<>();
 
-    // Función auxiliar para convertir bytes a una cadena hexadecimal
+    //Auxiliar method to convert byte[] to hexadecimal String
     public static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
@@ -47,7 +41,7 @@ public class Methods {
     }
 
     public static byte[] encodeImage(Bitmap bitmap) throws IOException {
-        Codec decoder = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, bitmap.getHeight());
+        Codec decoder = new ImageCodec(new IndexedPalette(hashPalettes.get("bw").getPaletteColorsInt()), 160, bitmap.getHeight());
         return decoder.encodeInternal(bitmap);
     }
 
@@ -58,11 +52,11 @@ public class Methods {
         for (int i = 0; i < byteStrings.length; i++) {
             bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
                     + Character.digit(byteStrings[i].charAt(1), 16));
-
         }
         System.out.println(bytes.length);
         return bytes;
     }
+
 
     public static void toast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();

@@ -622,6 +622,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         Bitmap framedAux;
         if ((gbcImage.getImageBytes().length / 40) == 144) {
             //I need to use copy because if not it's inmutable bitmap
+            System.out.println(selectedFrameId+"/////selected frame<");
             framed = Methods.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
@@ -868,7 +869,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
         //The bitmaps come from the BitmapCache map, using the gbcimage hashcode
         for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
-//            imagesForPage.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
             if (!Methods.imageBitmapCache.containsKey(gbcImage.getHashCode())) {
                 doAsync = true;
             }
@@ -885,8 +885,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             gridView.setAdapter(customGridViewAdapterImage);
 
         }
-//            imagesForPage = Methods.completeBitmapList.subList(startIndex, endIndex);
-//        gbcImagesForPage = Methods.gbcImagesList.subList(startIndex, endIndex);
     }
 
     @Override
@@ -1079,9 +1077,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             Boolean dup = false;
             if (checkDuplicate) {
                 for (GbcImage gbcImage : Methods.gbcImagesList) {
-                    // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
+                    //Compare the hash value with the value of the new image hash
                     if (gbcImage.getHashCode().equals(hash)) {
-                        // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
+                        //If hash is equals means the image already exists
                         dup = true;
                     }
                 }

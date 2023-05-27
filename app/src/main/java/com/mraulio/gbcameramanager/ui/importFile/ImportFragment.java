@@ -255,6 +255,9 @@ public class ImportFragment extends Fragment {
                         }
                         if (newPalettes.size() > 0) {
                             Methods.gbcPalettesList.addAll(newPalettes);
+                            for (GbcPalette gbcPalette : newPalettes) {
+                                Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                            }
                             new SavePaletteAsyncTask(newPalettes).execute();
                         } else {
                             Methods.toast(getContext(), getString(R.string.no_new_palettes));

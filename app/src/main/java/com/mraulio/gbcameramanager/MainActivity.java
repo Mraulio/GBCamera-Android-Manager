@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     InputStream inputStream = getResources().openRawResource(resourceId);
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    // Crear un ByteArrayOutputStream para copiar el contenido del archivo
+
                     String line = bufferedReader.readLine();
                     while (line != null) {
                         stringBuilder.append(line).append('\n');
@@ -224,11 +224,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 Methods.framesList.addAll(frames);
             } else {
+                //First time add it to the database
                 StartCreation.addFrames(getBaseContext());
-//                for (GbcFrame gbcFrame : Methods.framesList) {
-//                    frameDao.insert(gbcFrame);
-//                }
-                // Recorrer el HashMap con un bucle foreach
                 for (Map.Entry<String, GbcFrame> entry : Methods.hashFrames.entrySet()) {
                     GbcFrame value = entry.getValue();
                     frameDao.insert(value);
@@ -246,17 +243,6 @@ public class MainActivity extends AppCompatActivity {
                 Methods.gbcImagesList.addAll(imagesFromDao);
                 GbcImage.numImages += Methods.gbcImagesList.size();
                 System.out.println("Added");
-//                int index = 0;
-//                for (GbcImage gbcImage : Methods.gbcImagesList) {
-//                    byte[] bytesFromNewDao = imageDataDao.getDataByImageId(gbcImage.getHashCode());
-//                    System.out.println("hashcode "+gbcImage.getHashCode());
-//                    System.out.println("Bytes new dao"+bytesFromNewDao);
-//                    System.out.println(index);
-////                    gbcImage.setImageBytes(imageDataDao.getDataByImageId(gbcImage.getHashCode()));
-//                    GbcImage.numImages++;
-//
-//                    index++;
-//                }
             }
             return null;
         }

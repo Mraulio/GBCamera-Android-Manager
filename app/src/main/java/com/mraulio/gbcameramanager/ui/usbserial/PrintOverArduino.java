@@ -1,4 +1,4 @@
-package com.mraulio.gbcameramanager;
+package com.mraulio.gbcameramanager.ui.usbserial;
 
 import android.content.Context;
 import android.hardware.usb.UsbConstants;
@@ -7,6 +7,9 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.widget.TextView;
+
+import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.aux.Methods;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -25,8 +28,7 @@ public class PrintOverArduino {
     private final String EMPTY_DATA = "88 33 04 00 00 00 04 00 00 00";
     private final String END_DATA = "00 00";
     private final String START_CHECKSUM = "04 00 80 02";//First part of the checksum, next will be the data
-    public static double count = 0;
-    public static double percentage = 0;
+
     //DATA at the bottom of the Class
     private final int TIMEOUT_SEND = 0;//0 so there is no TIMEOUT       120 working for INIT, PRINT, EMPTY
     private final int TIMEOUT_READ = 100;
@@ -55,49 +57,6 @@ public class PrintOverArduino {
         checksumBytes[1] = (byte) ((checksum >> 8) & 0xff);
 
         return checksumBytes;
-    }
-
-    private byte[] createDataWithImageBytes(TextView tv, byte[] imageBytes) {
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-            outputStream.write(getCommandBytes(INIT));
-        } catch (Exception e) {
-        }
-        if (banner) {
-            imageBytes = getCommandBytes(TEST_BANNER);
-        }
-//        List<byte[]> chunkList = new ArrayList<>();
-//        String data_nospace = onlyTileData.replaceAll(System.lineSeparator(), " ").replaceAll(" ", "");
-//        int len2 = data_nospace.length();
-//        byte[] bytesTileData = new byte[len2 / 2];
-//        for (int i = 0; i < len2; i += 2) {
-//            bytesTileData[i / 2] = (byte) ((Character.digit(data_nospace.charAt(i), 16) << 4)
-//                    + Character.digit(data_nospace.charAt(i + 1), 16));
-//        }
-        int chunkSize = 640;//each data packet size, 640 + 4 from the start checksum
-        for (int i = 0; i < imageBytes.length; i += chunkSize) {
-            int chunkLength = Math.min(chunkSize, imageBytes.length - i);
-            byte[] chunk = Arrays.copyOfRange(imageBytes, i, i + chunkLength);
-            try {
-                outputStream.write(getCommandBytes(DATA_COMMAND));
-                outputStream.write(chunk);//I write the 640 bytes
-                outputStream.write(checksumCalc(chunk)); //I write the Checksum, need to calculate it with start_checksum+data
-                outputStream.write(getCommandBytes(END_DATA));//The last 2 bytes
-
-            } catch (Exception e) {
-                tv.append(e.toString());
-            }
-       }
-
-        try {
-            outputStream.write(getCommandBytes(EMPTY_DATA));
-            outputStream.write(getCommandBytes(PRINT_NO_MARGIN));
-        } catch (Exception e) {
-            tv.append("Error EMPTY, PRINT" + e.toString());
-        }
-        tv.append("" + outputStream.toByteArray().length);
-        return outputStream.toByteArray();
     }
 
     private byte[] getCommandBytes(String data2) {

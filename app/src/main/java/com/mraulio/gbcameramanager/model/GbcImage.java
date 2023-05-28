@@ -37,7 +37,7 @@ public class GbcImage {
     @ColumnInfo(name = "tags_list")
     private List<String> tags = new ArrayList<>();
 
-    public static int numImages = 0;//Should probably store this on the sharedPreferences
+    public static int numImages = 0;
 
     private byte[] imageBytes;
 

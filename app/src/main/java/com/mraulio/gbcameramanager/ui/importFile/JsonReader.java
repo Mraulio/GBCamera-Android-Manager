@@ -1,15 +1,15 @@
-package com.mraulio.gbcameramanager;
+package com.mraulio.gbcameramanager.ui.importFile;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
+import com.mraulio.gbcameramanager.aux.Methods;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
-import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;

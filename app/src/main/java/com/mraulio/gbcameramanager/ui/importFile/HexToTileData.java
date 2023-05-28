@@ -1,4 +1,4 @@
-package com.mraulio.gbcameramanager;
+package com.mraulio.gbcameramanager.ui.importFile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class HexToTileData {
         return dataList;
     }
 
-    //To delete lines that begin with
+    //To delete lines that begin with {
     public static String deleteLines(String texto) {
         String[] lineas = texto.split("\n");
         StringBuilder sb = new StringBuilder();

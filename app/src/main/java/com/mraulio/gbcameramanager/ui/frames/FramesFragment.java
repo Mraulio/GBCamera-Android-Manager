@@ -21,7 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.aux.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -90,19 +90,6 @@ public class FramesFragment extends Fragment {
                                     }
                                     new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
                                 }
-//                                else if (Methods.gbcImagesList.get(i).getFrameId() > position) {
-//                                    Methods.gbcImagesList.get(i).setFrameId(Methods.gbcImagesList.get(i).getFrameId() - 1);
-//                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
-//                                        Bitmap image = null;
-//                                        try {
-//                                            image = GalleryFragment.frameChange(i, Methods.gbcImagesList.get(i).getFrameId(), Methods.gbcImagesList.get(i).isLockFrame());
-//                                        } catch (IOException e) {
-//                                            e.printStackTrace();
-//                                        }
-//                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
-//                                    }
-//                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
-//                                }
                             }
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }
@@ -113,7 +100,6 @@ public class FramesFragment extends Fragment {
                             //No action
                         }
                     });
-                    // Mostrar el diálogo
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 }
@@ -205,9 +191,6 @@ public class FramesFragment extends Fragment {
             }
             holder.txtTitle.setText(name);
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
-//            if (image != null && !image.isRecycled()) {
-//                image.recycle();
-//            }
             return row;
         }
 

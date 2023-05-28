@@ -25,11 +25,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!--To open the app selecting the extensionhttps://stackoverflow.com/questions/66714927/android-register-app-to-open-a-custom-extension-file-also-sharing-it-->
+            <!--To open the app selecting the extension https://stackoverflow.com/questions/66714927/android-register-app-to-open-a-custom-extension-file-also-sharing-it-->
             <!-- this is needed for apps like explorer -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.OPENABLE" />

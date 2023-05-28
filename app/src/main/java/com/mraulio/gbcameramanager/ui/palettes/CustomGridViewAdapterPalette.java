@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 
-import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.aux.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 

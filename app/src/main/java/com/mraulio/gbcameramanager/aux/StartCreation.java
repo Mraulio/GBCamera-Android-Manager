@@ -1,10 +1,11 @@
-package com.mraulio.gbcameramanager;
+package com.mraulio.gbcameramanager.aux;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 
+import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
@@ -53,6 +54,7 @@ public class StartCreation {
 
     }
 
+    //Not used right now
     public static void addPalettes() {
         //Palette GAMEBOY_LCD_PALETTE
         int[] GAMEBOY_LCD_PALETTE = {

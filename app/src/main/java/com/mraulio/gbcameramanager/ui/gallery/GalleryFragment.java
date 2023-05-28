@@ -41,13 +41,13 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
-import com.mraulio.gbcameramanager.PrintOverArduino;
+import com.mraulio.gbcameramanager.ui.usbserial.PrintOverArduino;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.aux.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
@@ -86,17 +86,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     boolean showPalettes = true;
     static TextView tv_page;
     boolean keepFrame = false;
-    //    Resources.Theme theme = getActivity().getTheme();//I get the theme
     public static CustomGridViewAdapterImage customGridViewAdapterImage;
     static List<Bitmap> imagesForPage;
     static List<GbcImage> gbcImagesForPage;
     public static TextView tv;
-    static boolean finishedUpdating = false;
-
-//    @Override
-//    public void onCreate(@Nullable Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -162,17 +155,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 }
             }
         });
-        //To swipe over the gridview. Not working properly, selects the first image of the row
-//        gridView.setOnTouchListener(new OnSwipeTouchListener(getContext()) {
-//            @Override
-//            public void onSwipeLeft() {
-//                nextPage();
-//            }
-//            @Override
-//            public void onSwipeRight() {
-//                prevPage();
-//            }
-//        });
+
         /**
          * Dialog when clicking an image
          */
@@ -182,25 +165,23 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 int selectedPosition = 0;
                 crop = false;
                 keepFrame = false;
-                // Obtener la imagen seleccionada
+                // Obtain selected image
                 if (currentPage != lastPage) {
                     selectedPosition = position + (currentPage * itemsPerPage);
                 } else {
                     selectedPosition = Methods.gbcImagesList.size() - (itemsPerPage - position);
                 }
                 final Bitmap[] selectedImage = {Methods.imageBitmapCache.get(Methods.gbcImagesList.get(selectedPosition).getHashCode())};
-                // Crear el diálogo personalizado
+                // Create custom dialog
                 final Dialog dialog = new Dialog(getContext());
                 dialog.setContentView(R.layout.custom_dialog);
                 dialog.setCancelable(true);//So it closes when clicking outside or back button
 
-                // Configurar la vista de imagen del diálogo
                 ImageView imageView = dialog.findViewById(R.id.image_view);
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
                 int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
                 imageView.setMaxHeight(maxHeight);
 
-                // Configurar el botón de cierre del diálogo
                 Button printButton = dialog.findViewById(R.id.print_button);
                 if (MainActivity.printingEnabled) {
                     printButton.setVisibility(View.VISIBLE);
@@ -236,11 +217,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     private final Runnable runnable = new Runnable() {
                         @Override
                         public void run() {
-                            // Acción a realizar cuando se detecta un clic simple
-                            // después de que expire el temporizador
-//                            palette = Methods.gbcPalettesList.get(clickedPosition).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
-//                            newPaletteName = Methods.gbcPalettesList.get(clickedPosition).getName();
-//                            paletteDialog(palette, newPaletteName);
+                            //Single tap action
                             showCustomDialog(Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()));
                             clickCount = 0;
                         }
@@ -250,11 +227,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     public void onClick(View v) {
                         clickCount++;
                         if (clickCount == 1) {
-                            // Iniciar el temporizador para detectar el doble toque
+                            // Start timer to detect the double tap
                             handler.postDelayed(runnable, 300);
                         } else if (clickCount == 2) {
 
-                            // Detener el temporizador y realizar la acción para el doble toque
+                            // Stop timer and make double tap action
                             handler.removeCallbacks(runnable);
                             if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
                                 List<String> tags = Methods.gbcImagesList.get(globalImageIndex).getTags();
@@ -279,7 +256,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     }
                 });
 
-//                paletteFrameSelButton.setText("Show frames.");
                 FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false, false);
                 int frameIndex = 0;
                 for (int i = 0; i < Methods.framesList.size(); i++) {
@@ -622,7 +598,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         Bitmap framedAux;
         if ((gbcImage.getImageBytes().length / 40) == 144) {
             //I need to use copy because if not it's inmutable bitmap
-            System.out.println(selectedFrameId+"/////selected frame<");
+            System.out.println(selectedFrameId + "/////selected frame<");
             framed = Methods.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
@@ -902,8 +878,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         String finalHexString = hexString;
         getActivity().runOnUiThread(() -> {
             tvResponseBytes.append(finalHexString);
-//            sb.append(finalHexString);
-//            MainActivity.printedResponseBytes = sb.toString();
+
         });
     }
 
@@ -931,23 +906,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 String imageHash = gbcImage.getHashCode();
                 currentPageHashes.add(imageHash);
                 byte[] imageBytes;
-//                if (Methods.imageBytesCache.containsKey(gbcImage.getHashCode())) {
-//                    System.out.println("Entrando contains"+ index);
-//                    imageBytes = Methods.imageBytesCache.get(gbcImage.getHashCode());
-//                } else {
-//                    System.out.println("Entrando dao"+index);
+
                 //Get the image bytes from the database for the current gbcImage
                 imageBytes = imageDataDao.getDataByImageId(imageHash);
-
-//                }
                 //Set the image bytes to the object
                 gbcImage.setImageBytes(imageBytes);
-//                Methods.gbcImagesList.get(newStartIndex + index).setImageBytes(imageBytes);
-                //Also put the image bytes in the cache map
-//                Methods.imageBytesCache.put(gbcImage.getHashCode(), imageBytes);
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
-                System.out.println(imageBytes.length + "///////////imagebytes length, hash:" + gbcImage.getHashCode());
                 ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
                 Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                 //Add the bitmap to the cache

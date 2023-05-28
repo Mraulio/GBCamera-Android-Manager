@@ -75,7 +75,7 @@ public class SaveImageExtractor implements Extractor {
         return extractBytes(Files.readAllBytes(file.toPath()));//Modificado
     }
 
-    //Added by me
+    //Added by Mraulio
     @Override
     public List<byte[]> extractBytes(byte[] rawData) {
         final int PHOTOS_LOCATION = 0x11B2;

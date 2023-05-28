@@ -183,7 +183,6 @@ public class PythonToJava {
             length = max_length;
         }
         setFwVariable("TRANSFER_SIZE", length, port, context);
-
         setFwVariable("ADDRESS", 0xA000 + address, port, context);
         setFwVariable("DMG_ACCESS_MODE", 3, port, context); // MODE_ROM_READ
         setFwVariable("DMG_READ_CS_PULSE", 1, port, context);

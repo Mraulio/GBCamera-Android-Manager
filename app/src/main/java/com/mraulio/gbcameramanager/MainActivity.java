@@ -28,7 +28,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
-import com.hoho.android.usbserial.util.SerialInputOutputManager;
+import com.mraulio.gbcameramanager.aux.Methods;
+import com.mraulio.gbcameramanager.aux.StartCreation;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.db.AppDatabase;
 import com.mraulio.gbcameramanager.db.FrameDao;
@@ -38,6 +39,7 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -89,8 +91,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    SerialInputOutputManager usbIoManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,8 +101,6 @@ public class MainActivity extends AppCompatActivity {
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
-        //getWindow().setNavigationBarColor(getResources().getColor(R.color.favorite));
-        //getWindow().setStatusBarColor(getResources().getColor(R.color.favorite));
 
         // Change language config
         if (!languageCode.equals("en")) {
@@ -192,9 +190,9 @@ public class MainActivity extends AppCompatActivity {
                 Methods.gbcPalettesList.addAll(palettes);
             } else {
                 StringBuilder stringBuilder = new StringBuilder();
-                int resourceId = R.raw.palettes;
+                int resourcePalettes = R.raw.palettes;
                 try {
-                    InputStream inputStream = getResources().openRawResource(resourceId);
+                    InputStream inputStream = getResources().openRawResource(resourcePalettes);
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
                     String line = bufferedReader.readLine();
@@ -205,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                     bufferedReader.close();
                     inputStream.close();
                 } catch (Exception e) {
-                    System.out.println(e.toString());
+                    e.printStackTrace();
                 }
                 String fileContent = stringBuilder.toString();
                 List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
@@ -231,18 +229,12 @@ public class MainActivity extends AppCompatActivity {
                     frameDao.insert(value);
                 }
             }
-            //Now that I have palettes, I can add images:
+            //Now that I have palettes and frames, I can add images:
             if (imagesFromDao.size() > 0) {
-                try {
-                    System.out.println("Length " + imagesFromDao.get(0).getImageBytes().length);
-                } catch (Exception e) {
-                    System.out.println("Length en gbcimage es null");
-                }
                 anyImage = true;
-                //I need to add them to the gbcImagesList(GbcImage) and completeBitmapList(Bitmap)
+                //I need to add them to the gbcImagesList(GbcImage)
                 Methods.gbcImagesList.addAll(imagesFromDao);
                 GbcImage.numImages += Methods.gbcImagesList.size();
-                System.out.println("Added");
             }
             return null;
         }
@@ -260,39 +252,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//
-//
-//    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            System.out.println("PERMISION GRANTED*********************");            //resume tasks needing this permission
+            //resume tasks needing this permission
             Toast toast = Toast.makeText(this, "Granted permissions.", Toast.LENGTH_LONG);
             toast.show();
         }
     }
-
-    //This makes the app not get closed when pressing back
-//    @Override
-//    public void onBackPressed() {
-//        if (pressBack) {
-//            super.onBackPressed();
-//            //additional code
-//            moveTaskToBack(true);
-//        }
-//    }
-
-    //    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.main, menu);
-//        return true;
-//    }
 
     @Override
     public boolean onSupportNavigateUp() {

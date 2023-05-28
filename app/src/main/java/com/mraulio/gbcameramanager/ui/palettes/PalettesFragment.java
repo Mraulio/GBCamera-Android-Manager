@@ -34,7 +34,7 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.aux.Methods;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -635,8 +635,6 @@ public class PalettesFragment extends Fragment {
     }
 
     private Bitmap paletteMaker(int[] palette) throws IOException {
-//        DisplayMetrics displayMetrics = new DisplayMetrics();
-//        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(palette), 160, 144);//imageBytes.length/40 to get the height of the image
         Bitmap bitmap;
         Bitmap upscaledBitmap;
@@ -646,7 +644,7 @@ public class PalettesFragment extends Fragment {
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Methods.framesList.get(0).getFrameBitmap().getWidth() * 6, Methods.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {
-            // Divide el ancho del ImageView por cuatro para obtener el ancho de cada sección
+            //Shows first image
             imageBytes = Methods.gbcImagesList.get(0).getImageBytes();
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, 160 * 6, 144 * 6, false);

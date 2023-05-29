@@ -2,9 +2,7 @@ package com.mraulio.gbcameramanager.gameboycameralib.codecs;
 
 import android.graphics.Bitmap;
 
-import com.mraulio.gbcameramanager.Methods;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
-import com.mraulio.gbcameramanager.model.GbcImage;
 
 import java.io.IOException;
 
@@ -12,10 +10,9 @@ import java.io.IOException;
 /**
  * Codec para decodificar y codificar una imagen de mosaico de 8x8 píxeles
  * a un conjunto de datos de bytes y viceversa.
- *
+ * <p>
  * Este codec utiliza una paleta de colores indexados para decodificar
  * y codificar los datos de mosaico.
- *
  */
 public class TileCodec implements Codec {
 
@@ -29,10 +26,6 @@ public class TileCodec implements Codec {
 
     public TileCodec(IndexedPalette palette) {
         this.palette = palette;
-    }
-    //Added by Mraulio
-    public TileCodec(int paletteIndex) {
-        this.paletteIndex = paletteIndex;
     }
 
     @Override
@@ -52,27 +45,28 @@ public class TileCodec implements Codec {
     @Override
     public Bitmap decodeWithPalette(int[] palette, byte[] tileData) {
         Bitmap buf = Bitmap.createBitmap(TILE_WIDTH, TILE_HEIGHT, Bitmap.Config.ARGB_8888);
-        for (int y=0; y<TILE_HEIGHT; y++) {
-            byte lowByte = reverseBitEndianess(tileData[y*ROW_BYTES]);
-            byte highByte = reverseBitEndianess(tileData[y*ROW_BYTES+1]);
-            for (int x=0; x<TILE_WIDTH; x++) {
+        for (int y = 0; y < TILE_HEIGHT; y++) {
+            byte lowByte = reverseBitEndianess(tileData[y * ROW_BYTES]);
+            byte highByte = reverseBitEndianess(tileData[y * ROW_BYTES + 1]);
+            for (int x = 0; x < TILE_WIDTH; x++) {
                 int paletteIndexx = getPaletteIndex(getBit(lowByte, x), getBit(highByte, x));
                 buf.setPixel(x, y, palette[paletteIndexx]);
             }
         }
-        return buf;    }
+        return buf;
+    }
 
     @Override
     public byte[] encode(Bitmap buf) {
         byte[] result = new byte[TILE_BYTES_LENGTH];
-        for (int y=0; y<TILE_HEIGHT; y++) {
-            byte lowByte = (byte)0;
-            byte highByte = (byte)0;
-            for (int x=0; x<TILE_WIDTH; x++) {
-                int rgb = buf.getPixel(x,y);
+        for (int y = 0; y < TILE_HEIGHT; y++) {
+            byte lowByte = (byte) 0;
+            byte highByte = (byte) 0;
+            for (int x = 0; x < TILE_WIDTH; x++) {
+                int rgb = buf.getPixel(x, y);
                 int index = palette.getIndex(rgb);
-                byte lowBit = getBit((byte)index,0);
-                byte highBit = getBit((byte)index,1);
+                byte lowBit = getBit((byte) index, 0);
+                byte highBit = getBit((byte) index, 1);
                 if (lowBit == 1) {
                     lowByte = setBit(lowByte, x);
                 }
@@ -82,8 +76,8 @@ public class TileCodec implements Codec {
             }
             lowByte = reverseBitEndianess(lowByte);
             highByte = reverseBitEndianess(highByte);
-            result[y*ROW_BYTES] = lowByte;
-            result[y*ROW_BYTES+1] = highByte;
+            result[y * ROW_BYTES] = lowByte;
+            result[y * ROW_BYTES + 1] = highByte;
         }
         return result;
     }
@@ -99,7 +93,7 @@ public class TileCodec implements Codec {
     }
 
     public byte getBit(byte b, int position) {
-        return (byte)((b >> position) & 1);
+        return (byte) ((b >> position) & 1);
     }
 
     public int getPaletteIndex(byte lowBit, byte highBit) {
@@ -109,13 +103,8 @@ public class TileCodec implements Codec {
         return index;
     }
 
-
-
-
     /**
-     * Los datos transmitidos en GB (dump de memoria o impresora) tienen bits con endianness invertido
-     * @param byteToReverse
-     * @return byte con bits invertidos
+     * Inverts the byte bits
      */
     public static byte reverseBitEndianess(byte byteToReverse) {
         byte b = 0;

@@ -1,17 +1,18 @@
-package com.mraulio.gbcameramanager;
+package com.mraulio.gbcameramanager.aux;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 
+import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.util.Arrays;
 import java.util.Locale;
-
 public class StartCreation {
+
     public static void addFrames(Context context) {
         int width = 160;
         int height = 144;
@@ -20,26 +21,40 @@ public class StartCreation {
         //Nintendo frame from drawable-nodpi resource (so it is not automatically scaled to the dpi)
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.nintendo_frame);
         GbcFrame nintendoframe = new GbcFrame();
-        nintendoframe.setFrameName("Nintendo Frame");
+        nintendoframe.setFrameName("Nintendo_Frame");
         nintendoframe.setFrameBitmap(bitmap);
+        Methods.hashFrames.put(nintendoframe.getFrameName(),nintendoframe);
         Methods.framesList.add(nintendoframe);
+
+        //Own frame from drawable-nodpi resource (so it is not automatically scaled to the dpi)
+        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.gbcamera_manager_frame);
+        GbcFrame myframe = new GbcFrame();
+        myframe.setFrameName("GBCManager_Frame");
+        myframe.setFrameBitmap(bitmap);
+        Methods.hashFrames.put(myframe.getFrameName(),myframe);
+        Methods.framesList.add(myframe);
 
         Arrays.fill(pixels, Color.BLACK);
         bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
         GbcFrame blackFrame = new GbcFrame();
-        blackFrame.setFrameName("Black Frame");
+        blackFrame.setFrameName("Black_Frame");
         blackFrame.setFrameBitmap(bitmap);
         Methods.framesList.add(blackFrame);
+        Methods.hashFrames.put(blackFrame.getFrameName(),blackFrame);
+
 
         //White frame
         Arrays.fill(pixels, Color.WHITE);
         bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
-        GbcFrame blueFrame = new GbcFrame();
-        blueFrame.setFrameName("White frame");
-        blueFrame.setFrameBitmap(bitmap);
-        Methods.framesList.add(blueFrame);
+        GbcFrame whiteFrame = new GbcFrame();
+        whiteFrame.setFrameName("White_frame");
+        whiteFrame.setFrameBitmap(bitmap);
+        Methods.framesList.add(whiteFrame);
+        Methods.hashFrames.put(whiteFrame.getFrameName(),whiteFrame);
+
     }
 
+    //Not used right now
     public static void addPalettes() {
         //Palette GAMEBOY_LCD_PALETTE
         int[] GAMEBOY_LCD_PALETTE = {
@@ -56,11 +71,11 @@ public class StartCreation {
         };
         GbcPalette gbcPalette1 = new GbcPalette();
         gbcPalette1.setPaletteColors(EVEN_DIST_PALETTE);
-        gbcPalette1.setName("bw".toLowerCase(Locale.ROOT));
+        gbcPalette1.setPaletteId("bw".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette1);
         GbcPalette gbcPalette2 = new GbcPalette();
         gbcPalette2.setPaletteColors(GAMEBOY_LCD_PALETTE);
-        gbcPalette2.setName("DMG".toLowerCase(Locale.ROOT));
+        gbcPalette2.setPaletteId("DMG".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette2);
 
         //Adding palettes from here https://www.npmjs.com/package/gb-palettes
@@ -72,7 +87,7 @@ public class StartCreation {
         };
         GbcPalette gbcPalette3 = new GbcPalette();
         gbcPalette3.setPaletteColors(cmyk_palette);
-        gbcPalette3.setName("CMYK".toLowerCase(Locale.ROOT));//Lower case to be compatible with web app
+        gbcPalette3.setPaletteId("CMYK".toLowerCase(Locale.ROOT));//Lower case to be compatible with web app
         Methods.gbcPalettesList.add(gbcPalette3);
 
         int[] tram_palette = {
@@ -83,7 +98,7 @@ public class StartCreation {
         };
         GbcPalette gbcPalette5 = new GbcPalette();
         gbcPalette5.setPaletteColors(tram_palette);
-        gbcPalette5.setName("tpa".toLowerCase(Locale.ROOT));
+        gbcPalette5.setPaletteId("tpa".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette5);
 
         //My won palettes
@@ -95,7 +110,7 @@ public class StartCreation {
         };
         GbcPalette gbcPalette4 = new GbcPalette();
         gbcPalette4.setPaletteColors(cute_palette);
-        gbcPalette4.setName("Cute".toLowerCase(Locale.ROOT));
+        gbcPalette4.setPaletteId("Cute".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette4);
 
         int[] pinko_palette = {
@@ -106,7 +121,7 @@ public class StartCreation {
         };
         GbcPalette gbcPalette6 = new GbcPalette();
         gbcPalette6.setPaletteColors(pinko_palette);
-        gbcPalette6.setName("pinko".toLowerCase(Locale.ROOT));
+        gbcPalette6.setPaletteId("pinko".toLowerCase(Locale.ROOT));
         Methods.gbcPalettesList.add(gbcPalette6);
     }
 }

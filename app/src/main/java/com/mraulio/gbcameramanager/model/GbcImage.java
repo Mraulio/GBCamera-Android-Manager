@@ -1,14 +1,14 @@
 package com.mraulio.gbcameramanager.model;
 
-import android.graphics.Bitmap;
-
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
 @Entity
 public class GbcImage {
 
@@ -19,27 +19,34 @@ public class GbcImage {
     @ColumnInfo(name = "image_name")
     private String name;
 
-    @ColumnInfo(name = "palette_index")
-    private int paletteIndex;
+    @ColumnInfo(name = "palette_id")
+    private String paletteId;
 
     @ColumnInfo(name = "lock_frame")
     private boolean lockFrame;
 
-    @ColumnInfo(name = "frame_index")
-    private int frameIndex;
+    @ColumnInfo(name = "invert_palette")
+    private boolean invertPalette;
+
+    @ColumnInfo(name = "frame_id")
+    private String frameId;
+
+    @ColumnInfo(name = "creation_date")
+    private Date creationDate;
 
     @ColumnInfo(name = "tags_list")
     private List<String> tags = new ArrayList<>();
 
-    public static int numImages= 0;//Should probably store this on the sharedPreferences
+    public static int numImages = 0;
 
-    @ColumnInfo(name = "image_bytes")
     private byte[] imageBytes;
 
-    public GbcImage(){
-        paletteIndex = 0;
-        frameIndex = 0;//I set the first palette as the default
-        lockFrame = false;
+    public GbcImage() {
+        this.paletteId = "bw";
+        this.frameId = "Nintendo_Frame";//I set the nintendo frame as the default
+        this.lockFrame = false;
+        this.invertPalette = false;
+        this.creationDate = new Date(System.currentTimeMillis());;
     }
 
     @NonNull
@@ -51,20 +58,21 @@ public class GbcImage {
         this.hashCode = hashCode;
     }
 
-    //    public GbcImage(Bitmap bitmap, int paletteIndex, String name) {
-//        this.bitmap = bitmap;
-//        this.paletteIndex = paletteIndex;
-//        this.name = name;
-//    }
+    public Date getCreationDate() {
+        return creationDate;
+    }
 
-//    public Bitmap getBitmap() {
-//        return bitmap;
-//    }
-//
-//    public void setBitmap(Bitmap bitmap) {
-//        this.bitmap = bitmap;
-//    }
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
 
+    public boolean isInvertPalette() {
+        return invertPalette;
+    }
+
+    public void setInvertPalette(boolean invertPalette) {
+        this.invertPalette = invertPalette;
+    }
 
     public boolean isLockFrame() {
         return lockFrame;
@@ -82,16 +90,16 @@ public class GbcImage {
         this.tags = tags;
     }
 
-    public void addTag(String newTag){
+    public void addTag(String newTag) {
         this.tags.add(newTag);
     }
 
-    public int getPaletteIndex() {
-        return paletteIndex;
+    public String getPaletteId() {
+        return paletteId;
     }
 
-    public void setPaletteIndex(int paletteIndex) {
-        this.paletteIndex = paletteIndex;
+    public void setPaletteId(String paletteId) {
+        this.paletteId = paletteId;
     }
 
     public String getName() {
@@ -110,12 +118,12 @@ public class GbcImage {
         this.imageBytes = imageBytes;
     }
 
-    public int getFrameIndex() {
-        return frameIndex;
+    public String getFrameId() {
+        return frameId;
     }
 
-    public void setFrameIndex(int frameIndex) {
-        this.frameIndex = frameIndex;
+    public void setFrameId(String frameId) {
+        this.frameId = frameId;
     }
 
     public static int getNumImages() {

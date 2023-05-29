@@ -3,7 +3,7 @@ package com.mraulio.gbcameramanager.gameboycameralib.codecs;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.aux.Methods;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
 import java.io.ByteArrayOutputStream;
@@ -21,13 +21,6 @@ public class ImageCodec implements Codec {
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
     }
-
-    //Added by Mraulio
-//    public ImageCodec(int paletteIndex, int imageWidth, int imageHeight) {
-//        this.paletteIndex = paletteIndex;
-//        this.imageWidth = imageWidth;
-//        this.imageHeight = imageHeight;
-//    }
 
     @Override
     public Bitmap decode(byte[] data) {
@@ -57,6 +50,7 @@ public class ImageCodec implements Codec {
 
     @Override
     public Bitmap decodeWithPalette(int[] palette, byte[] data) {
+        System.out.println("width"+imageWidth+",height:"+imageHeight);
         Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
         IndexedPalette ip = new IndexedPalette(Methods.gbcPalettesList.get(paletteIndex).getPaletteColorsInt());
 

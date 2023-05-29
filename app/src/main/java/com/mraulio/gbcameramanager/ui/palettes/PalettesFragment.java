@@ -34,12 +34,13 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.aux.Methods;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,7 +85,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 palette = Methods.gbcPalettesList.get(position).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
-                newPaletteName = Methods.gbcPalettesList.get(position).getName();
+                newPaletteName = Methods.gbcPalettesList.get(position).getPaletteId();
                 paletteDialog(palette, newPaletteName);
             }
         });
@@ -92,13 +93,13 @@ public class PalettesFragment extends Fragment {
         gridViewPalettes.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position <= 5) {
-                    Methods.toast(getContext(), "Can't delete a base palette");
+                if (position <= 56) {
+                    Methods.toast(getContext(), getString(R.string.cant_delete_base_palette));
                 }
-                if (position > 5) {
+                if (position > 56) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle("Delete palette " + Methods.gbcPalettesList.get(position).getName() + "?");
-                    builder.setMessage("Are you sure? \nDoing a Json export is recommended before continuing.");
+                    builder.setTitle(getString(R.string.delete_dialog_palette) + Methods.gbcPalettesList.get(position).getPaletteId() + "?");
+                    builder.setMessage(getString(R.string.sure_dialog_palette));
 
                     // Crear un ImageView y establecer la imagen deseada
                     ImageView imageView = new ImageView(getContext());
@@ -109,31 +110,44 @@ public class PalettesFragment extends Fragment {
                     // Agregar el ImageView al diseño del diálogo
                     builder.setView(imageView);
 
-                    builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // Acción a realizar cuando se presiona el botón "Aceptar"
+                            new SavePaletteAsyncTask(Methods.gbcPalettesList.get(position), false).execute();
+                            String paletteToDelete = Methods.gbcPalettesList.get(position).getPaletteId();
+                            Methods.gbcPalettesList.remove(position);
 
                             //I change the palette index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
-                                if (Methods.gbcImagesList.get(i).getPaletteIndex() == position) {
-                                    Methods.gbcImagesList.get(i).setPaletteIndex(0);
-                                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
-                                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
-                                    Methods.completeBitmapList.set(i, image);
+                                if (Methods.gbcImagesList.get(i).getPaletteId() == paletteToDelete) {
+                                    Methods.gbcImagesList.get(i).setPaletteId("bw");
+                                    //If the bitmap cache already has the bitmap, change it.
+                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
+                                        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
+                                        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
+                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
+                                    }
+                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
                                 }
+//                                //Also need to change the palette index of the images with a superior index to the deleted one to current index -1
+//                                else if (Methods.gbcImagesList.get(i).getPaletteId() > position) {
+//                                    Methods.gbcImagesList.get(i).setPaletteId(Methods.gbcImagesList.get(i).getPaletteId() - 1);
+//                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
+//                                        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteId()).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
+//                                        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteId()).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
+//                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
+//                                    }
+//                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
+//                                }
                             }
-
-                            new SavePaletteAsyncTask(Methods.gbcPalettesList.get(position), false).execute();
-                            Methods.gbcPalettesList.remove(position);
                             imageAdapter.notifyDataSetChanged();
                         }
                     });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // Acción a realizar cuando se presiona el botón "Cancelar"
+                            //No action
                         }
                     });
                     // Mostrar el diálogo
@@ -142,13 +156,12 @@ public class PalettesFragment extends Fragment {
                 }
                 return true;//true so the normal onItemClick doesn't show
             }
-
         });
 
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                newPaletteName = "*Set Palette Name*";
+                newPaletteName = getString(R.string.set_palette_name);
                 palette = Methods.gbcPalettesList.get(0).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
                 paletteDialog(palette, newPaletteName);
             }
@@ -201,8 +214,8 @@ public class PalettesFragment extends Fragment {
         JSONArray palettesArr = new JSONArray();
         for (GbcPalette palette : Methods.gbcPalettesList) {
             JSONObject paletteObj = new JSONObject();
-            paletteObj.put("shortName", palette.getName());
-            paletteObj.put("name", palette.getName());
+            paletteObj.put("shortName", palette.getPaletteId());
+            paletteObj.put("name", palette.getPaletteId());
             JSONArray paletteArr = new JSONArray();
             for (int color : palette.getPaletteColorsInt()) {
                 String hexColor = "#" + Integer.toHexString(color).substring(2);
@@ -217,14 +230,14 @@ public class PalettesFragment extends Fragment {
         System.out.println(json.toString(2));
 
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH-mm-ss_dd-MM-yyyy", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
         String fileName = "palettes_" + dateFormat.format(new Date()) + ".json";
         File file = new File(directory, fileName);
 
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(json.toString(2));
             System.out.println("Saved.");
-            Methods.toast(getContext(), "Palettes Json saved to Download folder.");
+            Methods.toast(getContext(), getString(R.string.toast_palettes_json));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -424,7 +437,7 @@ public class PalettesFragment extends Fragment {
             public void onClick(View v) {
                 ColorPickerDialogBuilder
                         .with(getContext())
-                        .setTitle("Choose color")
+                        .setTitle(getString(R.string.choose_color))
                         .initialColor(lastPicked)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
@@ -432,10 +445,10 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
-                        .setPositiveButton("ok", new ColorPickerClickListener() {
+                        .setPositiveButton("OK", new ColorPickerClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                 iv1.setBackgroundColor(selectedColor);
@@ -449,7 +462,7 @@ public class PalettesFragment extends Fragment {
                                 et1.setText("#" + Integer.toHexString(palette[0]).substring(2).toUpperCase());
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -464,7 +477,7 @@ public class PalettesFragment extends Fragment {
             public void onClick(View v) {
                 ColorPickerDialogBuilder
                         .with(getContext())
-                        .setTitle("Choose color")
+                        .setTitle(getString(R.string.choose_color))
                         .initialColor(lastPicked)
                         .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
@@ -472,7 +485,7 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
                         .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -490,7 +503,7 @@ public class PalettesFragment extends Fragment {
 
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -506,7 +519,7 @@ public class PalettesFragment extends Fragment {
             public void onClick(View v) {
                 ColorPickerDialogBuilder
                         .with(getContext())
-                        .setTitle("Choose color")
+                        .setTitle(getString(R.string.choose_color))
                         .initialColor(lastPicked)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
@@ -514,10 +527,10 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
-                        .setPositiveButton("ok", new ColorPickerClickListener() {
+                        .setPositiveButton("OK", new ColorPickerClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                 iv3.setBackgroundColor(selectedColor);
@@ -532,7 +545,7 @@ public class PalettesFragment extends Fragment {
 
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -548,7 +561,7 @@ public class PalettesFragment extends Fragment {
             public void onClick(View v) {
                 ColorPickerDialogBuilder
                         .with(getContext())
-                        .setTitle("Choose color")
+                        .setTitle(getString(R.string.choose_color))
                         .initialColor(lastPicked)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
@@ -556,7 +569,7 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), "Selected Color: #" + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
                         .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -574,7 +587,7 @@ public class PalettesFragment extends Fragment {
 
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -589,20 +602,21 @@ public class PalettesFragment extends Fragment {
                 boolean alreadyExists = false;
                 newPaletteName = etPaletteName.getText().toString();
                 for (GbcPalette paleta : Methods.gbcPalettesList) {
-                    if (paleta.getName().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {
+                    if (paleta.getPaletteId().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {
                         alreadyExists = true;
                         etPaletteName.setBackgroundColor(Color.parseColor("#FF0000"));
-                        Methods.toast(getContext(), "2 palettes can't have the same name.");
+                        Methods.toast(getContext(), getString(R.string.toast_palettes_error));
                         break;
                     }
                 }
                 if (!alreadyExists) {
                     GbcPalette newPalette = new GbcPalette();
-                    newPalette.setName(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
+                    newPalette.setPaletteId(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
                     newPalette.setPaletteColors(palette);
                     Methods.gbcPalettesList.add(newPalette);
+                    Methods.hashPalettes.put(newPalette.getPaletteId(),newPalette);
                     gridViewPalettes.setAdapter(imageAdapter);
-                    Methods.toast(getContext(), "Palette added");
+                    Methods.toast(getContext(), getString(R.string.palette_added));
                     dialog.hide();
                     //To add it to the database
                     new SavePaletteAsyncTask(newPalette, true).execute();//Adding the new palette to the database
@@ -621,8 +635,6 @@ public class PalettesFragment extends Fragment {
     }
 
     private Bitmap paletteMaker(int[] palette) throws IOException {
-//        DisplayMetrics displayMetrics = new DisplayMetrics();
-//        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(palette), 160, 144);//imageBytes.length/40 to get the height of the image
         Bitmap bitmap;
         Bitmap upscaledBitmap;
@@ -632,10 +644,10 @@ public class PalettesFragment extends Fragment {
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Methods.framesList.get(0).getFrameBitmap().getWidth() * 6, Methods.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {
-            // Divide el ancho del ImageView por cuatro para obtener el ancho de cada sección
+            //Shows first image
             imageBytes = Methods.gbcImagesList.get(0).getImageBytes();
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes);
-            upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Methods.completeBitmapList.get(0).getWidth() * 6, Methods.completeBitmapList.get(0).getHeight() * 6, false);
+            upscaledBitmap = Bitmap.createScaledBitmap(bitmap, 160 * 6, 144 * 6, false);
         }
 
         return upscaledBitmap;

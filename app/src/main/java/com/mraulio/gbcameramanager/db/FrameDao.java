@@ -7,8 +7,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import com.mraulio.gbcameramanager.model.GbcFrame;
-import com.mraulio.gbcameramanager.model.GbcPalette;
-
 import java.util.List;
 
 @Dao

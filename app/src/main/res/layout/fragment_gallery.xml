@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/background"
     android:padding="10dp"
     tools:context=".ui.gallery.GalleryFragment">
 
@@ -28,7 +29,6 @@
             android:id="@+id/gridView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#D5D5D5"
             android:horizontalSpacing="10dp"
             android:numColumns="3"
             android:scrollbars="horizontal"
@@ -44,26 +44,54 @@
         android:gravity="center"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
+        android:weightSum="5"
         android:id="@+id/layourButtons">
 
         <Button
-            android:id="@+id/btnPrevPage"
-            android:layout_width="wrap_content"
+            android:id="@+id/btnFirstPage"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Prev" />
+            android:layout_weight="1"
+            android:layout_marginHorizontal="2dp"
+            android:drawableTint="@color/white"
+            android:drawableRight="@drawable/ic_double_arrow"
+            android:rotation="180" />
+        <Button
+            android:id="@+id/btnPrevPage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="2dp"
+            android:drawableRight="@drawable/ic_arrow"
+            android:rotation="180"
+            android:drawableTint="@color/white"/>
 
         <TextView
             android:id="@+id/tv_page"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:text="Page X of X"></TextView>
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="X of X"></TextView>
 
         <Button
             android:id="@+id/btnNextPage"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Next" />
+            android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
+            android:drawableRight="@drawable/ic_arrow"
+            android:drawableTint="@color/white"/>
+        <Button
+            android:id="@+id/btnLastPage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="2dp"
+            android:drawableRight="@drawable/ic_double_arrow"
+            android:drawableTint="@color/white"
+            />
     </LinearLayout>
 
 </LinearLayout>

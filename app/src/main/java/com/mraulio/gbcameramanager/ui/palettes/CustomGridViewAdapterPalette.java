@@ -1,6 +1,5 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,7 +13,7 @@ import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 
-import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.aux.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
@@ -70,11 +69,11 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
             holder.txtTitle.setVisibility(View.GONE);
         }
         Bitmap image = data.get(position).paletteViewer();
-        String name = data.get(position).getName();
+        String name = data.get(position).getPaletteId();
         if (checkDuplicate) {
             for (GbcPalette objeto : Methods.gbcPalettesList) {
                 // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
-                if (objeto.getName().equals(name)) {
+                if (objeto.getPaletteId().equals(name)) {
                     // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
                     holder.imageItem.setBackgroundColor(context.getResources().getColor(R.color.duplicated));
                 }
@@ -92,7 +91,6 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         TextView txtTitle;
         CardView cardView;
         ImageView imageItem;
-
     }
 
     // Método para actualizar la última posición seleccionada

@@ -7,8 +7,8 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.model.ImageData;
 
 import java.util.List;
 
@@ -37,4 +37,10 @@ public interface ImageDao {
 
     @Query("DELETE FROM gbcimage")
     void deleteAll();
+
+    @Query("SELECT * FROM image_data WHERE image_id = :imageId")
+    ImageData getImageData(int imageId);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertImageData(ImageData imageData);
 }

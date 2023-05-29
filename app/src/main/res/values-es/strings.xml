@@ -1,0 +1,125 @@
+<!-- Translation/traducción: Mraulio @gbcameroid -->
+<resources>
+    <string name="app_name">GBCamera Manager</string>
+    <string name="navigation_drawer_open">Abrir cajón de navegación</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">GBCamera Manager</string>
+    <string name="nav_header_subtitle">https://github.com/Mraulio</string>
+    <string name="nav_header_desc">Cabecera de navegación</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_gallery">Galería</string>
+    <string name="menu_palettes">Paletas</string>
+    <string name="menu_frames">Marcos</string>
+    <string name="menu_import">Importar</string>
+    <string name="menu_usbserial">USB Serial</string>
+    <string name="menu_settings">Ajustes</string>
+
+    <!--Custom_dialog, Gallery Fragment strings-->
+    <string name="btn_show_palettes">Mostrar paletas</string>
+    <string name="btn_show_frames">Mostrar marcos</string>
+    <string name="cb_keep_frame">Mantener color marco</string>
+    <string name="cb_crop">Recortar</string>
+
+    <string name="toast_printing">Imprimiendo, por favor espera...</string>
+    <string name="toast_saved">GUARDADA x</string>
+    <string name="toast_saved_txt">Guardada como TXT</string>
+
+    <string name="loading">Cargando...</string>
+    <string name="total_images">Total de imágenes:\u0020</string>
+    <string name="no_images">No hay imágenes en la galería. Ve a la pestaña Importar</string>
+
+    <!--Settings fragment xml strings-->
+    <string name="export_txt">Exportar como TXT.</string>
+    <string name="export_png">Exportar como PNG.</string>
+    <string name="png_size">Tamaño PNG:\u0020</string>
+    <string name="images_page">Seleccionar imágenes por página:\u0020</string>
+    <string name="language">Idioma (necesita reinicar):\u0020</string>
+    <string name="showPrint">Mostrar botón Imprimir.</string>
+
+
+    <!--Frames fragment strings-->
+    <string name="cant_delete_base">No se puede borrar un marco base.</string>
+    <string name="delete_dialog">Borrar marco\u0020</string>
+    <string name="sure_dialog">¿Estás seguro?</string>
+    <string name="delete">BORRAR</string>
+    <string name="cancel">Cancelar</string>
+    <string name="frames_total">Total de marcos:\u0020</string>
+
+    <!--Palettes fragment strings-->
+    <string name="btn_add_palette">Añadir paleta</string>
+    <string name="btn_export_json">Exportar Json</string>
+    <string name="long_press_delete_palette">Pulsación larga para borrar</string>
+    <string name="cant_delete_base_palette">No se puede borrar una paleta base.</string>
+    <string name="toast_palettes_json">Json de paletas guardado en directorio Descargasr.</string>
+    <string name="set_palette_name">*Set Palette Name*</string>
+    <string name="sure_dialog_palette">¿Estás seguro? Es recomendado exportar un Json antes de continuar.</string>
+    <string name="delete_dialog_palette">Borrar paleta\u0020</string>
+    <string name="choose_color">Elige color</string>
+    <string name="selected_color">Color seleccionado: #</string>
+    <string name="toast_palettes_error">2 paletas no pueden tener el mismo nombre.</string>
+    <string name="palette_added">Paleta añadida.</string>
+
+    <string name="btn_save">Guardar</string>
+    <string name="btn_decode">Decodificar</string>
+
+
+    <!--Import fragment xml strings-->
+    <string name="btn_select_file">Seleciona archivo</string>
+    <string name="tv_select_file">Selecciona un archivo para importar</string>
+    <string name="btn_extract_file">Extraer archivo.</string>
+    <string name="btn_add_images">Añadir imágenes</string>
+    <string name="btn_add_palettes">Añadir paletas</string>
+    <string name="btn_add_frames">Añadir marcos</string>
+    <string name="no_valid_list">No es una lista válida</string>
+    <string name="images_available">\u0020imágenes disponibles.</string>
+    <string name="no_new_palettes">Ninguna paleta nueva añadida.</string>
+    <string name="no_new_frames">Ningún marco nuevo añadido.</string>
+    <string name="no_new_images">Ninguna imágen nueva añadida.</string>
+    <string name="images_added">Imágenes añadidas:\u0020</string>
+    <string name="done_adding_images">\u0020imágenes añadidas!</string>
+    <string name="palettes_added">Paletas añadidas.</string>
+    <string name="done_adding_palettes">¡Terminado de añadir paletas!</string>
+    <string name="frames_added">Marcos añadidos.</string>
+    <string name="done_adding_frames">¡Terminado de añadir marcos!</string>
+    <string name="no_valid_file">No es un archivo válido.</string>
+    <string name="cb_last_seen">Última vista.</string>
+    <string name="cb_deleted_images">Imágenes borradas.</string>
+
+    <!--Usb serial fragment xml strings-->
+    <string name="rb_print">Imprimir a Arduino - GBP</string>
+    <string name="btn_read_rom_name">Leer nombre de ROM</string>
+    <string name="btn_read_ram">Leer y Guardar Ram</string>
+    <string name="btn_dump_photo">Volcar PHOTO! ROM completa</string>
+    <string name="btn_view_rom_images">Ver ROM imágenes</string>
+    <string name="btn_print_banner">Imprimir TEST banner</string>
+    <string name="btn_print_image">Imprimir imágen</string>
+    <string name="btn_delete_sav">Borrar SAV</string>
+    <string name="tv_sleep_time">Elegir tiempo de dormir:\u0020</string>
+    <string name="error_print_image">Error en IMPRIMIR IMAGEN</string>
+    <string name="delete_sav_dialog">¿Borrar sav?</string>
+    <string name="sure_delete_sav">¿Estás segur@ de borrar\u0020</string>
+    <string name="toast_sav_deleted">SAV borrado.</string>
+    <string name="toast_couldnt_delete_sav">No se pudo borrar SAV.</string>
+    <string name="deleted_sav">Borrado\u0020</string>
+    <string name="tv_connected">//Conectado\n</string>
+    <string name="error_arduino">Error en Arduino\n.</string>
+    <string name="arduino_mode">MODO Arduino Printer Emulator</string>
+    <string name="print_mode">MODO IMPRIMIR</string>
+    <string name="gbxcart_mode">MODO GBxCart</string>
+    <string name="images_list">\nImágenes en la lista:\u0020</string>
+    <string name="no_good_dump">\nNO ES UN BUEN VOlCADO DE SAV.</string>
+    <string name="sav_parts">\nPartes del sav:\u0020</string>
+    <string name="rom_name">\nEl nombre de la ROM es:\u0020</string>
+    <string name="dumping_rom_wait">\Volcando 1MB ROM, por favor espera unos 45 segundos...\n...</string>
+    <string name="dumping_ram_wait">\nVolcando RAM, Por favor espera...\n...</string>
+    <string name="last_sav_name">\nEl nombre del último archivo SAV es:\u0020</string>
+    <string name="size">Tamaño:\u0020</string>
+    <string name="error_file">Error creando archivo:\u0020</string>
+    <string name="saved_to_file">Guardado a archivo</string>
+
+    <string name="delete_dialog_gallery">Borrar imagen\u0020</string>
+
+
+
+</resources>

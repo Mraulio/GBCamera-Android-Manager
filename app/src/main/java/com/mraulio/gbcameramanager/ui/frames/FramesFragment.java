@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -20,9 +21,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.Methods;
+import com.mraulio.gbcameramanager.aux.Methods;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.model.GbcFrame;
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.io.IOException;
@@ -40,19 +43,19 @@ public class FramesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
-        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true,false);
+        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true, false);
         TextView tvNumFrames = view.findViewById(R.id.tvNumFrames);
 
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position <= 2) {
-                    Methods.toast(getContext(), "Can't delete a base frame");
+                if (position <= 3) {
+                    Methods.toast(getContext(), getString(R.string.cant_delete_base));
                 }
-                if (position > 2) {
+                if (position > 3) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle("Delete frame " + Methods.framesList.get(position).getFrameName() + "?");
-                    builder.setMessage("Are you sure?");
+                    builder.setTitle(getString(R.string.delete_dialog) + Methods.framesList.get(position).getFrameName() + "?");
+                    builder.setMessage(getString(R.string.sure_dialog));
 
                     // Crear un ImageView y establecer la imagen deseada
                     ImageView imageView = new ImageView(getContext());
@@ -63,49 +66,68 @@ public class FramesFragment extends Fragment {
                     // Agregar el ImageView al diseño del diálogo
                     builder.setView(imageView);
 
-                    builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // Acción a realizar cuando se presiona el botón "Aceptar"
-
+                            new DeleteFrameAsyncTask(Methods.framesList.get(position)).execute();
+                            Methods.framesList.remove(position);
                             //I change the frame index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
                             for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
-                                if (Methods.gbcImagesList.get(i).getFrameIndex() == position) {
-                                    Methods.gbcImagesList.get(i).setFrameIndex(0);
-                                    Bitmap image = null;
-                                    try {
-                                        image = GalleryFragment.frameChange(i, 0, false);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                                if (Methods.gbcImagesList.get(i).getFrameId().equals(Methods.hashFrames.get(Methods.framesList.get(position).getFrameName()).getFrameName())) {
+                                    Methods.gbcImagesList.get(i).setFrameId("Nintendo_Frame");
+                                    //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
+                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
+                                        Bitmap image = null;
+                                        try {
+                                            GbcImage gbcImage = Methods.gbcImagesList.get(i);
+                                            image = GalleryFragment.frameChange(gbcImage,Methods.imageBitmapCache.get(gbcImage.getHashCode()), Methods.framesList.get(0).getFrameName(), Methods.gbcImagesList.get(i).isLockFrame());
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
                                     }
-                                    Methods.completeBitmapList.set(i, image);
+                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
                                 }
                             }
-                            Methods.framesList.remove(position);
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }
                     });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // Acción a realizar cuando se presiona el botón "Cancelar"
+                            //No action
                         }
                     });
-                    // Mostrar el diálogo
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 }
                 return true;//true so the normal onItemClick doesn't show
             }
-
         });
 
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames);
-        tvNumFrames.setText("There are " + Methods.framesList.size() + " frames.");
+        tvNumFrames.setText(getString(R.string.frames_total) + Methods.framesList.size());
         return view;
+    }
+
+    private class DeleteFrameAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        //To add the new palette as a parameter
+        private final GbcFrame gbcFrame;
+
+        public DeleteFrameAsyncTask(GbcFrame gbcFrame) {
+            this.gbcFrame = gbcFrame;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            FrameDao frameDao = MainActivity.db.frameDao();
+            frameDao.delete(gbcFrame);
+            return null;
+        }
     }
 
     public static class CustomGridViewAdapterFrames extends ArrayAdapter<GbcFrame> {
@@ -169,9 +191,6 @@ public class FramesFragment extends Fragment {
             }
             holder.txtTitle.setText(name);
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
-//            if (image != null && !image.isRecycled()) {
-//                image.recycle();
-//            }
             return row;
         }
 

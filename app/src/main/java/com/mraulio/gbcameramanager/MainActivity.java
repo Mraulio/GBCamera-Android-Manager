@@ -4,12 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-
-import android.graphics.Bitmap;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,35 +28,48 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
-import com.hoho.android.usbserial.util.SerialInputOutputManager;
+import com.mraulio.gbcameramanager.aux.Methods;
+import com.mraulio.gbcameramanager.aux.StartCreation;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.db.AppDatabase;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.PaletteDao;
-import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
-import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 
 public class MainActivity extends AppCompatActivity {
-    public static int printIndex = 0;
+    public static int printIndex = 0;//If there are no images there will be a crash when trying to print
     private AppBarConfiguration mAppBarConfiguration;
     boolean anyImage = false;
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
+
+    public static SharedPreferences sharedPreferences;
+    //Store in the shared preferences
+    public static boolean exportPng = true;
+    public static boolean printingEnabled = false;
     public static int exportSize = 4;
     public static int imagesPage = 12;
+    public static String languageCode = "en";
+
+    private boolean openedSav = false;
     public static UsbManager manager;
+    public static int deletedCount = 0;
     public static AppDatabase db;
-    private static final String ACTION_USB_PERMISSION =
-            "com.android.example.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
     private UsbDevice device;
     private UsbManager usbManager;
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
@@ -77,11 +91,28 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    SerialInputOutputManager usbIoManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+        exportSize = sharedPreferences.getInt("export_size", 4);
+        imagesPage = sharedPreferences.getInt("images_per_page", 12);
+        exportPng = sharedPreferences.getBoolean("export_as_png", true);
+        languageCode = sharedPreferences.getString("language", "en");
+        printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
+
+        // Change language config
+        if (!languageCode.equals("en")) {
+            Locale locale = new Locale(languageCode);
+            Locale.setDefault(locale);
+
+            Resources resources = getResources();
+            Configuration configuration = resources.getConfiguration();
+            configuration.setLocale(locale);
+            resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+        }
+
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
         System.out.println("Done loading: " + doneLoading);
@@ -90,7 +121,20 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
 
-//        Methods.extractHexImages();
+
+        // Obtener información del Intent
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        Uri uri = intent.getData();
+
+        if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
+            // Si el Intent contiene la acción ACTION_VIEW y la categoría CATEGORY_DEFAULT y
+            // el tipo es "application/octet-stream" y el URI del Intent termina en ".sav", realizar la acción deseada
+            // Por ejemplo, puedes abrir el archivo en tu aplicación:
+            Methods.toast(this, "Opened from file");
+            openedSav = true;
+        }
         if (!doneLoading) {
             new ReadDataAsyncTask().execute();
         }
@@ -102,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+        if (openedSav) navigationView.setCheckedItem(R.id.nav_import);
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -129,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            System.out.println("Entering readASync");
             PaletteDao paletteDao = db.paletteDao();
             FrameDao frameDao = db.frameDao();
             ImageDao imageDao = db.imageDao();
@@ -137,58 +182,60 @@ public class MainActivity extends AppCompatActivity {
             List<GbcPalette> palettes = paletteDao.getAll();
             List<GbcFrame> frames = frameDao.getAll();
             List<GbcImage> imagesFromDao = imageDao.getAll();
-            System.out.println(palettes.size() + "/////PALETTES SIZE");
-            System.out.println(frames.size() + "/////FRAMES SIZE");
-            System.out.println(imagesFromDao.size() + "/////IMAGES SIZE");
 
             if (palettes.size() > 0) {
+                for (GbcPalette gbcPalette : palettes) {
+                    Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                }
                 Methods.gbcPalettesList.addAll(palettes);
             } else {
-                StartCreation.addPalettes();
+                StringBuilder stringBuilder = new StringBuilder();
+                int resourcePalettes = R.raw.palettes;
+                try {
+                    InputStream inputStream = getResources().openRawResource(resourcePalettes);
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+                    String line = bufferedReader.readLine();
+                    while (line != null) {
+                        stringBuilder.append(line).append('\n');
+                        line = bufferedReader.readLine();
+                    }
+                    bufferedReader.close();
+                    inputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                String fileContent = stringBuilder.toString();
+                List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
+                Methods.gbcPalettesList.addAll(receivedList);
+                for (GbcPalette gbcPalette : receivedList) {
+                    Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                }
                 for (GbcPalette gbcPalette : Methods.gbcPalettesList) {
                     paletteDao.insert(gbcPalette);
                 }
             }
 
             if (frames.size() > 0) {
+                for (GbcFrame gbcFrame : frames) {
+                    Methods.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
+                }
                 Methods.framesList.addAll(frames);
             } else {
+                //First time add it to the database
                 StartCreation.addFrames(getBaseContext());
-                for (GbcFrame gbcFrame : Methods.framesList) {
-                    frameDao.insert(gbcFrame);
+                for (Map.Entry<String, GbcFrame> entry : Methods.hashFrames.entrySet()) {
+                    GbcFrame value = entry.getValue();
+                    frameDao.insert(value);
                 }
             }
-
-            //Now that I have palettes, I can add images:
+            //Now that I have palettes and frames, I can add images:
             if (imagesFromDao.size() > 0) {
                 anyImage = true;
-                //I need to add them to the gbcImagesList(GbcImage) and completeBitmapList(Bitmap)
+                //I need to add them to the gbcImagesList(GbcImage)
                 Methods.gbcImagesList.addAll(imagesFromDao);
-                int index = 0;
-                for (GbcImage gbcImage : Methods.gbcImagesList) {
-                    int height = (gbcImage.getImageBytes().length + 1) / 40;//To get the real height of the image
-                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
-                    GbcImage.numImages++;
-                    Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(gbcImage.getPaletteIndex()).getPaletteColorsInt(), gbcImage.getImageBytes());
-
-                    Methods.completeBitmapList.add(image);
-                    if (gbcImage.isLockFrame()) {
-                        System.out.println("Entering lockFrame");
-                        try {
-                            image = GalleryFragment.frameChange(index, Methods.gbcImagesList.get(index).getFrameIndex(), true);
-                            Methods.completeBitmapList.set(index ,image);
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    index++;
-                }
-//                for (GbcImage gbcImage : Methods.gbcImagesList) {
-//                    imageDao.insert(gbcImage);
-//                }
+                GbcImage.numImages += Methods.gbcImagesList.size();
             }
-
             return null;
         }
 
@@ -200,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
             if (anyImage) {
                 gf.updateFromMain();
             } else {
-                GalleryFragment.tv.setText("No images in the gallery.\nGo to Import tab.");
+                GalleryFragment.tv.setText(GalleryFragment.tv.getContext().getString(R.string.no_images));
             }
         }
     }
@@ -209,28 +256,11 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            System.out.println("PERMISION GRANTED*********************");            //resume tasks needing this permission
+            //resume tasks needing this permission
             Toast toast = Toast.makeText(this, "Granted permissions.", Toast.LENGTH_LONG);
             toast.show();
         }
     }
-
-    //This makes the app not get closed when pressing back
-//    @Override
-//    public void onBackPressed() {
-//        if (pressBack) {
-//            super.onBackPressed();
-//            //additional code
-//            moveTaskToBack(true);
-//        }
-//    }
-
-    //    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.main, menu);
-//        return true;
-//    }
 
     @Override
     public boolean onSupportNavigateUp() {

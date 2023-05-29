@@ -1,17 +1,21 @@
 package com.mraulio.gbcameramanager.ui.settings;
 
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.RadioButton;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
@@ -19,16 +23,66 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class SettingsFragment extends Fragment {
+    SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         Spinner spinnerExport = view.findViewById(R.id.spExportSize);
         Spinner spinnerImages = view.findViewById(R.id.spImagesPage);
+        Spinner spinnerLanguage = view.findViewById(R.id.spLanguage);
+        RadioButton rbPng = view.findViewById(R.id.rbPng);
+        RadioButton rbTxt = view.findViewById(R.id.rbTxt);
+        CheckBox cbPrint = view.findViewById(R.id.cbPrint);
+
+        cbPrint.setChecked(MainActivity.printingEnabled);
+        cbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("print_enabled", true);
+                    MainActivity.printingEnabled = true;
+                } else {
+                    editor.putBoolean("print_enabled", false);
+                    MainActivity.printingEnabled = false;
+                }
+                editor.apply();
+            }
+        });
+
+        if (MainActivity.exportPng) {
+            rbPng.setChecked(true);
+            spinnerExport.setEnabled(true);
+        } else {
+            rbTxt.setChecked(true);
+            spinnerExport.setEnabled(false);
+        }
+
 //        MainActivity.pressBack=false;
+
+        rbPng.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.exportPng = true;
+                editor.putBoolean("export_as_png", true);
+                editor.apply();
+                spinnerExport.setEnabled(true);
+            }
+        });
+        rbTxt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.exportPng = false;
+                editor.putBoolean("export_as_png", false);
+                editor.apply();
+                spinnerExport.setEnabled(false);
+            }
+        });
+
         List<Integer> sizesInteger = new ArrayList<>();
         sizesInteger.add(1);
         sizesInteger.add(2);
@@ -39,13 +93,13 @@ public class SettingsFragment extends Fragment {
         sizesInteger.add(10);
 
         List<String> sizes = new ArrayList<>();
-        sizes.add("1");
-        sizes.add("2");
-        sizes.add("4");
-        sizes.add("5");
-        sizes.add("6");
-        sizes.add("8");
-        sizes.add("10");
+        sizes.add("1x");
+        sizes.add("2x");
+        sizes.add("4x");
+        sizes.add("5x");
+        sizes.add("6x");
+        sizes.add("8x");
+        sizes.add("10x");
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, sizes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -57,6 +111,8 @@ public class SettingsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // I set the export size on the Main activity int as the selected one
                 MainActivity.exportSize = sizesInteger.get(position);
+                editor.putInt("export_size", sizesInteger.get(position));
+                editor.apply();
             }
 
             @Override
@@ -91,6 +147,8 @@ public class SettingsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // I set the export size on the Main activity int as the selected one
                 MainActivity.imagesPage = sizesIntegerImages.get(position);
+                editor.putInt("images_per_page", sizesIntegerImages.get(position));
+                editor.apply();
                 GalleryFragment.currentPage = 0;
             }
 
@@ -100,8 +158,53 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+
+        List<String> langs = new ArrayList<>();
+        langs.add("en");
+        langs.add("es");
+        langs.add("de");
+        langs.add("fr");
+
+        List<String> languages = new ArrayList<>();
+        languages.add("English (default)");
+        languages.add("Español");
+        languages.add("Deutsch");
+        languages.add("Français");
+
+        ArrayAdapter<String> adapterLanguage = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, languages);
+        adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinnerLanguage.setAdapter(adapterLanguage);
+        spinnerLanguage.setSelection(langs.indexOf(MainActivity.languageCode));
+        spinnerLanguage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // I set the export size on the Main activity int as the selected one
+                MainActivity.languageCode = langs.get(position);
+                ChangeLanguage(langs.get(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Acción que quieres hacer cuando no se selecciona ningún elemento en el Spinner
+            }
+        });
+
+
         return view;
     }
 
+    private void ChangeLanguage(String languageCode) {
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+        Configuration configuration = new Configuration();
+        configuration.locale = locale;
+        Resources resources = getResources();
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+        editor.putString("language", languageCode);
+        editor.apply();
+
+    }
 
 }

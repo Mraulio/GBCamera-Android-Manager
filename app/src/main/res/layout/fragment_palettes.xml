@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     android:orientation="vertical"
     android:padding="10dp"
     tools:context=".ui.palettes.PalettesFragment">
@@ -13,36 +14,37 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="2">
+
         <Button
             android:id="@+id/btnExportPaletteJson"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Export Json"
+            android:layout_marginEnd="30dp"
+            android:layout_weight="1"
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
-            android:layout_weight="1"
-            android:layout_marginEnd="30dp"></Button>
+            android:text="@string/btn_export_json"></Button>
+
         <Button
             android:id="@+id/btnAdd"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
+            android:backgroundTint="@color/teal_700"
             android:maxLines="1"
-            android:layout_weight="1"
-
-            android:text="Add palette"
-            android:backgroundTint="@color/teal_700"></Button>
+            android:text="@string/btn_add_palette"></Button>
 
     </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Long press to delete"
+        android:text="@string/long_press_delete_palette"
         android:textSize="15sp"
         android:textStyle="italic" />
 
@@ -51,7 +53,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:background="#D5D5D5"
         android:horizontalSpacing="10dp"
         android:numColumns="3"
         android:padding="10dp"

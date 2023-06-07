@@ -1,4 +1,4 @@
-package com.mraulio.gbcameramanager.aux;
+package com.mraulio.gbcameramanager.methods;
 
 
 import android.content.Context;

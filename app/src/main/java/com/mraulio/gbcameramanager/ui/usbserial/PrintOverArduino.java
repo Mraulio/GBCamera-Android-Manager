@@ -9,7 +9,7 @@ import android.hardware.usb.UsbInterface;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.aux.Methods;
+import com.mraulio.gbcameramanager.methods.Methods;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;

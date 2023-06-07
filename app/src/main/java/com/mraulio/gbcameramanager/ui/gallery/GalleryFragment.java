@@ -47,7 +47,7 @@ import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.aux.Methods;
+import com.mraulio.gbcameramanager.methods.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
@@ -457,19 +457,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         saveImage(Methods.gbcImagesList.get(globalImageIndex), fileName);
                     }
                 });
-//                cropButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-////                        crop = true;
-//                        LocalDateTime now = LocalDateTime.now();
-//                        String fileName = "image_";
-//                        fileName += dtf.format(now) + ".png";
-//                        saveImage(selectedImage[0], fileName);
-//                    }
-//                });
 
-
-// Configurar el diálogo para que ocupe el 80% de  la pantalla
+                // Configurar el diálogo para que ocupe el 80% de  la pantalla
 
                 int screenWidth = displayMetrics.widthPixels;
                 int desiredWidth = (int) (screenWidth * 0.8);
@@ -561,10 +550,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         return view;
     }
 
-
-    /**
-     *
-     */
     private void connect() {
         manager = (UsbManager) getActivity().getSystemService(Context.USB_SERVICE);
         List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
@@ -580,7 +565,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             if (port.isOpen()) port.close();
             port.open(connection);
             port.setParameters(1000000, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-//            tv.append("Puerto abierto y parametros puestos");
 
         } catch (Exception e) {
             System.out.println(e.toString());
@@ -588,7 +572,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             Toast.makeText(getContext(), "Error in connect." + e.toString(), Toast.LENGTH_SHORT).show();
         }
 
-        //USE IN ARDUINO MODE ONLY
         usbIoManager = new SerialInputOutputManager(port, this);
     }
 
@@ -598,7 +581,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         Bitmap framedAux;
         if ((gbcImage.getImageBytes().length / 40) == 144) {
             //I need to use copy because if not it's inmutable bitmap
-            System.out.println(selectedFrameId + "/////selected frame<");
             framed = Methods.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
@@ -809,12 +791,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     public void updateFromMain() {
-        if (Methods.gbcImagesList.size() > 0) {
-            updateGridView(currentPage);
-            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
-        } else {
-            tv.setText(tv.getContext().getString(R.string.no_images));
-        }
+//        if (Methods.gbcImagesList.size() > 0) {
+//            updateGridView(currentPage);
+//            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
+//        } else {
+//            tv.setText(tv.getContext().getString(R.string.no_images));
+//        }
         tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
         updateGridView(currentPage);
     }
@@ -823,7 +805,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static void updateGridView(int page) {
         //Bitmap list to store current page bitmaps
         imagesForPage = new ArrayList<>();
-
         itemsPerPage = MainActivity.imagesPage;
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
         if (Methods.gbcImagesList.size() < itemsPerPage) {
@@ -859,7 +840,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             tv_page.setTextColor(gridView.getContext().getResources().getColor(R.color.black));
             customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, Methods.gbcImagesList.subList(startIndex, endIndex), bitmapList, false, false);
             gridView.setAdapter(customGridViewAdapterImage);
-
         }
     }
 

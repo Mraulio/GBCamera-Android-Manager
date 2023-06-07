@@ -36,7 +36,7 @@ import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.aux.Methods;
+import com.mraulio.gbcameramanager.methods.Methods;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -694,6 +694,7 @@ public class ImportFragment extends Fragment {
                         + Character.digit(byteStrings[i].charAt(1), 16));
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return bytes;
     }

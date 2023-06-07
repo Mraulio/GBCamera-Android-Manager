@@ -36,7 +36,7 @@ import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.aux.Methods;
+import com.mraulio.gbcameramanager.methods.Methods;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.ui.importFile.HexToTileData;
 import com.mraulio.gbcameramanager.db.ImageDao;

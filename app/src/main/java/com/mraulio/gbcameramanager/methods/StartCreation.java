@@ -1,4 +1,4 @@
-package com.mraulio.gbcameramanager.aux;
+package com.mraulio.gbcameramanager.methods;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -33,6 +33,7 @@ public class StartCreation {
         myframe.setFrameBitmap(bitmap);
         Methods.hashFrames.put(myframe.getFrameName(),myframe);
         Methods.framesList.add(myframe);
+
 
         Arrays.fill(pixels, Color.BLACK);
         bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);

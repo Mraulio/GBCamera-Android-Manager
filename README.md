@@ -1,7 +1,7 @@
-# GBCamera Android Manager
+# GBCamera Android Manager (---README under construction---)
 Android app to manage a Game Boy Camera gallery and communicate via usb serial with Arduino Printer Emulator and GBxCart to get images.
 
-## Some useful information
+## Some useful information and resources used
   * [Gameboy 2BPP Graphics Format](https://www.huderlem.com/demos/gameboy2bpp.html) info.
   * [Arduino Printer Emulator](https://mofosyne.github.io/arduino-gameboy-printer-emulator/), and an online [decoder](https://mofosyne.github.io/arduino-gameboy-printer-emulator/GameBoyPrinterDecoderJS/gameboy_printer_js_raw_decoder.html)
   * [GBxCart communication protocol](https://github.com/lesserkuma/FlashGBX/blob/master/FlashGBX/hw_GBxCartRW.py), with the help of [Lesserkuma](https://github.com/lesserkuma).

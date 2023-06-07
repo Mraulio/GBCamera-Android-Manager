@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         //Keep only the Light Theme
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         exportSize = sharedPreferences.getInt("export_size", 4);
@@ -105,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
+        System.out.println(getResources().getConfiguration().locale+"///////////////////////locale");
+
 
         // Change language config
         if (!languageCode.equals("en")) {

@@ -34,7 +34,7 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.aux.Methods;
+import com.mraulio.gbcameramanager.methods.Methods;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;

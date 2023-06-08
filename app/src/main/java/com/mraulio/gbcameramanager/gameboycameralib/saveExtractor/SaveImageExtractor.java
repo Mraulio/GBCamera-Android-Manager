@@ -123,6 +123,8 @@ public class SaveImageExtractor implements Extractor {
         }
         byte[] lastSeenImage = new byte[0];
 
+        //Sort the  noFFarray
+
         Arrays.sort(noFFarray);
         sb.setLength(0);
         for (byte b : noFFarray) {

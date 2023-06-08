@@ -10,6 +10,7 @@ Android app to manage a Game Boy Camera gallery and communicate via usb serial w
   * Library used for serial communication: [https://github.com/mik3y/usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android).
   * Using this as a [color picker library](https://github.com/QuadFlask/colorpicker)
   * Base palettes are taken from [here](https://www.npmjs.com/package/gb-palettes).
+  * Flash [this](https://github.com/Mraulio/GBCamera-Android-Manager/blob/improv/resourcesGithub/Printer_interface.ino) into your Arduino board to use the Print to Arduino - GBP feature. Thanks to [Raphael Boichot](https://github.com/Raphael-Boichot).
   * Personal Game Boy Camera Instagram account: [@gbcameroid](https://www.instagram.com/gbcameroid/).
   * Some info on the deleted images [here](https://www.insidegadgets.com/2017/07/11/learning-about-gameboy-camera-saves-and-converting-stored-images-to-bitmap/).
   * More info on deleted images and order in the sav [here](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves#part-1-injecting-custom-pictures-into-the-save).

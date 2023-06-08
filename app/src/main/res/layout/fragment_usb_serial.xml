@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     android:orientation="vertical"
     android:weightSum="6"
-    android:background="@color/background"
     tools:context=".MainActivity">
 
 
@@ -69,33 +69,53 @@
                 android:textSize="25sp"
                 android:textStyle="bold"
                 android:visibility="gone"></TextView>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:gravity="center">
+
                 <Button
                     android:id="@+id/btnDelete"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="@string/delete"
+                    android:layout_weight="1"
+                    android:autoSizeMaxTextSize="30sp"
+                    android:autoSizeMinTextSize="5sp"
+                    android:autoSizeTextType="uniform"
                     android:backgroundTint="#D64141"
+                    android:maxLines="1"
+                    android:text="@string/delete"
                     android:textSize="15sp"
                     android:visibility="gone"></Button>
+
                 <Button
                     android:id="@+id/btnSave"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:autoSizeMaxTextSize="30sp"
+                    android:autoSizeMinTextSize="5sp"
+                    android:autoSizeTextType="uniform"
+                    android:maxLines="1"
                     android:text="@string/btn_save"
                     android:textSize="15sp"
                     android:visibility="gone"></Button>
+
                 <Button
                     android:id="@+id/btnDecode"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:autoSizeMaxTextSize="30sp"
+                    android:autoSizeMinTextSize="5sp"
+                    android:autoSizeTextType="uniform"
                     android:backgroundTint="#008C4F"
+                    android:maxLines="1"
                     android:text="@string/btn_decode"
                     android:textSize="15sp"
                     android:visibility="gone"></Button>
@@ -149,15 +169,15 @@
                 android:textSize="15sp"
                 android:visibility="gone"></Button>
 
-            <Button
-                android:id="@+id/btnPrintImage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:backgroundTint="#804F4F"
-                android:text="@string/btn_print_image"
-                android:textSize="15sp"
-                android:visibility="gone"></Button>
+            <!--            <Button-->
+            <!--                android:id="@+id/btnPrintImage"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginHorizontal="5dp"-->
+            <!--                android:backgroundTint="#804F4F"-->
+            <!--                android:text="@string/btn_print_image"-->
+            <!--                android:textSize="15sp"-->
+            <!--                android:visibility="gone"></Button>-->
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -190,41 +210,41 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="10dp">
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:orientation="horizontal"-->
+    <!--        android:padding="10dp">-->
 
-        <TextView
-            android:id="@+id/tvSleepTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/tv_sleep_time"
-            android:visibility="gone"></TextView>
+    <!--        <TextView-->
+    <!--            android:id="@+id/tvSleepTime"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:text="@string/tv_sleep_time"-->
+    <!--            android:visibility="gone"></TextView>-->
 
-        <Spinner
-            android:id="@+id/spSleepTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"></Spinner>
-    </LinearLayout>
+    <!--        <Spinner-->
+    <!--            android:id="@+id/spSleepTime"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:visibility="gone"></Spinner>-->
+    <!--    </LinearLayout>-->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="6"
-        android:weightSum="4"
         android:background="#E3E3E3"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:weightSum="4">
 
         <TextView
             android:id="@+id/textV"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_margin="10dp"
-            android:gravity="bottom"
             android:layout_weight="1"
+            android:gravity="bottom"
             android:scrollbars="vertical"
             android:textSize="15sp" />
 
@@ -232,8 +252,8 @@
             android:id="@+id/gridView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="3"
             android:layout_margin="10dp"
+            android:layout_weight="3"
             android:background="#D5D5D5"
             android:horizontalSpacing="10dp"
             android:numColumns="3"

@@ -75,7 +75,7 @@
     <string name="images_available">\u0020imágenes disponibles.</string>
     <string name="no_new_palettes">Ninguna paleta nueva añadida.</string>
     <string name="no_new_frames">Ningún marco nuevo añadido.</string>
-    <string name="no_new_images">Ninguna imágen nueva añadida.</string>
+    <string name="no_new_images">Ninguna imagen nueva añadida.</string>
     <string name="images_added">Imágenes añadidas:\u0020</string>
     <string name="done_adding_images">\u0020imágenes añadidas!</string>
     <string name="palettes_added">Paletas añadidas.</string>
@@ -93,7 +93,7 @@
     <string name="btn_dump_photo">Volcar PHOTO! ROM completa</string>
     <string name="btn_view_rom_images">Ver ROM imágenes</string>
     <string name="btn_print_banner">Imprimir TEST banner</string>
-    <string name="btn_print_image">Imprimir imágen</string>
+    <string name="btn_print_image">Imprimir imagen</string>
     <string name="btn_delete_sav">Borrar SAV</string>
     <string name="tv_sleep_time">Elegir tiempo de dormir:\u0020</string>
     <string name="error_print_image">Error en IMPRIMIR IMAGEN</string>

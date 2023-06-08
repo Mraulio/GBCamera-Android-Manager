@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
@@ -28,8 +29,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
-import com.mraulio.gbcameramanager.aux.Methods;
-import com.mraulio.gbcameramanager.aux.StartCreation;
+import com.mraulio.gbcameramanager.methods.Methods;
+import com.mraulio.gbcameramanager.methods.StartCreation;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.db.AppDatabase;
 import com.mraulio.gbcameramanager.db.FrameDao;
@@ -95,12 +96,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //Keep only the Light Theme
+//        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
         sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         exportSize = sharedPreferences.getInt("export_size", 4);
         imagesPage = sharedPreferences.getInt("images_per_page", 12);
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
+        System.out.println(getResources().getConfiguration().locale+"///////////////////////locale");
+
 
         // Change language config
         if (!languageCode.equals("en")) {
@@ -121,8 +127,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
 
-
-        // Obtener información del Intent
+        // Obtain Intent information
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -131,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
         if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
             // Si el Intent contiene la acción ACTION_VIEW y la categoría CATEGORY_DEFAULT y
             // el tipo es "application/octet-stream" y el URI del Intent termina en ".sav", realizar la acción deseada
-            // Por ejemplo, puedes abrir el archivo en tu aplicación:
             Methods.toast(this, "Opened from file");
             openedSav = true;
         }

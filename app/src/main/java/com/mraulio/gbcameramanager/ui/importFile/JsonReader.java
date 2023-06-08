@@ -3,7 +3,7 @@ package com.mraulio.gbcameramanager.ui.importFile;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
-import com.mraulio.gbcameramanager.aux.Methods;
+import com.mraulio.gbcameramanager.methods.Methods;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;

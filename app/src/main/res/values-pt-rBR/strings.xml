@@ -22,7 +22,7 @@
     <string name="cb_crop">Cortar</string>
 
     <string name="toast_printing">Imprimindo, aguarde...</string>
-    <string name="toast_saved">x SALVO</string>
+    <string name="toast_saved">Salvo x</string>
     <string name="toast_saved_txt">Salvo como TXT</string>
 
     <string name="loading">Carregando...</string>
@@ -61,13 +61,13 @@
     <string name="palette_added">Paleta adicionada</string>
 
     <string name="btn_save">Salvar</string>
-    <string name="btn_decode">Decodificar</string>
+    <string name="btn_decode">Gerar imagem</string>
 
 
     <!--Import fragment xml strings-->
     <string name="btn_select_file">Selecionar arquivo</string>
     <string name="tv_select_file">Selecione um arquivo para importar</string>
-    <string name="btn_extract_file">Extrair arquivo</string>
+    <string name="btn_extract_file">Importar arquivo</string>
     <string name="btn_add_images">Adicionar imagens</string>
     <string name="btn_add_palettes">Adicionar paletas</string>
     <string name="btn_add_frames">Acidionar molduras</string>
@@ -118,7 +118,7 @@
     <string name="error_file">Erro ao gerar arquivo:\u0020</string>
     <string name="saved_to_file">Salvo no arquivo</string>
 
-    <string name="delete_dialog_gallery">Apagar imagen\u0020</string>
+    <string name="delete_dialog_gallery">Apagar imagem\u0020</string>
 
 
 

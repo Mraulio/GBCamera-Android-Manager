@@ -190,7 +190,6 @@ public class SettingsFragment extends Fragment {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Acción que quieres hacer cuando no se selecciona ningún elemento en el Spinner
             }
         });
 

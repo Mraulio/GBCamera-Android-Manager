@@ -4,17 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/background"
     tools:context=".ui.frames.FramesFragment">
 
-<!--<Button-->
-<!--    android:layout_width="wrap_content"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:id="@+id/btnImportFrames"-->
-<!--    android:layout_gravity="center"-->
-<!--    android:text="Import Frames from JSON">-->
-
-<!--</Button>-->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

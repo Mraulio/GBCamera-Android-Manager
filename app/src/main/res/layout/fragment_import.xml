@@ -5,8 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="5dp"
-    android:background="@color/background"
-
     tools:context=".ui.importFile.ImportFragment">
 
     <!-- TODO: Update blank fragment layout -->

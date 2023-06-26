@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:layout_margin="1dp"
     android:padding="2dp"
-    app:cardBackgroundColor="#fff"
     app:cardCornerRadius="4dp"
     app:cardElevation="4dp">
 
@@ -38,15 +37,6 @@
                 android:layout_below="@+id/imageView"
                 android:layout_centerHorizontal="true"
                 android:text="Name" />
-
-
-            <!--            <Button-->
-            <!--                android:layout_width="wrap_content"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:text="Palette"-->
-            <!--                android:textSize="9sp"-->
-            <!--                android:id="@+id/paletteButton"></Button>-->
-
 
         </LinearLayout>
 

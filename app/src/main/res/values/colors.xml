@@ -9,7 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="duplicated">#FA483B</color>
     <color name="favorite">#FF5389</color>
-    <color name="background">#F7F6E7</color>
-
+    <color name="background_light">#F7F6E7</color>
+    <color name="background_dark">#292929</color>
 
 </resources>

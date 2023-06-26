@@ -105,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
-        System.out.println(getResources().getConfiguration().locale+"///////////////////////locale");
 
 
         // Change language config
@@ -121,8 +120,6 @@ public class MainActivity extends AppCompatActivity {
 
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
-        System.out.println("Done loading: " + doneLoading);
-        System.out.println("Any image: " + anyImage);
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);

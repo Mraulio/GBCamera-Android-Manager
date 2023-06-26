@@ -174,7 +174,7 @@ public class FramesFragment extends Fragment {
                 holder.txtTitle.setBackgroundColor(selectedColor);
                 holder.imageItem.setBackgroundColor(selectedColor);
             }
-            if (!showTextView) {
+        if (!showTextView) {
                 holder.txtTitle.setVisibility(View.GONE);
             }
             Bitmap image = data.get(position).getFrameBitmap();
@@ -197,10 +197,9 @@ public class FramesFragment extends Fragment {
         private class RecordHolder {
             TextView txtTitle;
             ImageView imageItem;
-
         }
 
-        // Método para actualizar la última posición seleccionada
+        // Method to update the last selected position
         public void setLastSelectedPosition(int position) {
             lastSelectedPosition = position;
         }

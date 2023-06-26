@@ -44,7 +44,6 @@ public class PythonToJava {
             port.write(command, TIMEOUT);//VER LO DE LOS TIMEOUTS
 
         } catch (Exception e) {
-            System.out.println("Error en PowerOff\n" + e.toString());
             Toast.makeText(context, "Error en PowerOff\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
@@ -57,12 +56,11 @@ public class PythonToJava {
             port.write(command, TIMEOUT);
 
         } catch (Exception e) {
-            System.out.println("Error en PowerOn\n" + e.toString());
             Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
-    public static void setCartType(UsbSerialPort port, Context context, TextView tv) {
+    public static void setCartType(UsbSerialPort port, Context context) {
         byte[] command = new byte[1];
 
         try {
@@ -79,7 +77,6 @@ public class PythonToJava {
             setFwVariable("CART_MODE", 1, port, context);
 
         } catch (Exception e) {
-            System.out.println("Error en setCartType\n" + e.toString());
             Toast.makeText(context, "Error en SetCartType\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
@@ -139,7 +136,6 @@ public class PythonToJava {
                 port.write(commandByte, TIMEOUT);
             }
         } catch (Exception e) {
-            System.out.println("Error en PowerOn\n" + e.toString());
             Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
         return buffer;
@@ -155,7 +151,6 @@ public class PythonToJava {
             receivedData = (Arrays.copyOf(readLength, len));
 
         } catch (Exception e) {
-            System.out.println("Error en PowerOn\n" + e.toString());
             Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
         return new String(receivedData);
@@ -197,7 +192,6 @@ public class PythonToJava {
             port.write(commandByte, TIMEOUT);
 
         } catch (Exception e) {
-            System.out.println("Error en PowerOn\n" + e.toString());
             Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
 
@@ -244,7 +238,7 @@ public class PythonToJava {
                     } else {
                         CartRead_ROM((j * 64) + 0x4000, 64, port, context, tv);
                     }
-                    int len = port.read(readLength, TIMEOUT);//Intento leer manualmente
+                    int len = port.read(readLength, TIMEOUT);
                     byte[] receivedData = (Arrays.copyOf(readLength, len));
                     bos.write(receivedData);
                 }

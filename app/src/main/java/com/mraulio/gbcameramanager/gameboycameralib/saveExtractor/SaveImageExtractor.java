@@ -97,7 +97,6 @@ public class SaveImageExtractor implements Extractor {
                 activePhotos++;
             }
         }
-        System.out.println(sb.toString());
         sb.setLength(0);
         int newSize = 0;
         int index = 0;
@@ -116,15 +115,13 @@ public class SaveImageExtractor implements Extractor {
                 index++;
             }
         }
-        System.out.println(sb.toString());
         ArrayList<byte[]> allImages = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0
         for (int i = 0; i < activePhotos; i++) {
             allImages.add(null);//Fill it with null so I can later use the "put" method
         }
         byte[] lastSeenImage = new byte[0];
 
-        //Sort the  noFFarray
-
+        //Sort the noFFarray
         Arrays.sort(noFFarray);
         sb.setLength(0);
         for (byte b : noFFarray) {
@@ -171,7 +168,6 @@ public class SaveImageExtractor implements Extractor {
             // Just print the error and continue to return what images we have
             e.printStackTrace();
         }
-
         return allImages;
     }
 

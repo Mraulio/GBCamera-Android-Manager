@@ -80,7 +80,6 @@ public class ImportFragment extends Fragment {
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
 
-
     TextView tvFileName;
     static String fileName;
     boolean savFile = false;
@@ -136,11 +135,10 @@ public class ImportFragment extends Fragment {
                 listImportedImageBytes.clear();
                 cbLastSeen.setChecked(false);
                 cbDeleted.setChecked(false);
-//                gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
                 if (savFile && !isJson) {
 
                     btnAddImages.setEnabled(true);
-                    extractSavImages(getContext());
+                    extractSavImages();
                     listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount - 1));
                     listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount - 1));
                     lastSeenImage = importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount - 1);
@@ -358,6 +356,7 @@ public class ImportFragment extends Fragment {
         return view;
     }
 
+    //Refactor, also on UsbSerialFragment
     private void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
         List<Bitmap> bitmapsAdapterList = null;
         if (!showLastSeen.isChecked() && !showDeleted.isChecked()) {
@@ -614,7 +613,7 @@ public class ImportFragment extends Fragment {
             }
     );
 
-    public void extractSavImages(Context context) {
+    public void extractSavImages() {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         try {
             //Extract the images
@@ -653,8 +652,7 @@ public class ImportFragment extends Fragment {
                 importedImagesList.add(gbcImage);
             }
         } catch (Exception e) {
-            Toast toast = Toast.makeText(context, "Error\n" + e.toString(), Toast.LENGTH_LONG);
-            toast.show();
+            Methods.toast(getContext(),"Error\n" + e.toString());
             e.printStackTrace();
         }
     }

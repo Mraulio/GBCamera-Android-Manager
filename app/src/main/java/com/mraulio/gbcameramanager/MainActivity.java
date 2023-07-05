@@ -43,6 +43,7 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -105,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
-
 
         // Change language config
         if (!languageCode.equals("en")) {

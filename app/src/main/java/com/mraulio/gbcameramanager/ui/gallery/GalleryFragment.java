@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
@@ -703,21 +704,51 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         }
     }
 
-    //The shared image is stored in Pictures and compressed, then shared. This needs to change.
+//    //The shared image is stored in Pictures and compressed, then shared. This needs to change.
+//    private void shareImage(Bitmap bitmap) {
+//        if ((bitmap.getHeight() / MainActivity.exportSize) == 144 && (bitmap.getWidth() / MainActivity.exportSize) == 160 && crop) {
+//            bitmap = Bitmap.createBitmap(bitmap, 16 * MainActivity.exportSize, 16 * MainActivity.exportSize, 128 * MainActivity.exportSize, 112 * MainActivity.exportSize);
+//        }
+//        String bitmapPath = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), bitmap, "image", "share image");
+//        Uri bitmapUri = Uri.parse(bitmapPath);
+//
+//        Intent intent = new Intent(Intent.ACTION_SEND);
+//        intent.setType("image/png");
+//        intent.putExtra(Intent.EXTRA_STREAM, bitmapUri);
+//        startActivity(Intent.createChooser(intent, "Share"));
+//    }
+
     private void shareImage(Bitmap bitmap) {
         if ((bitmap.getHeight() / MainActivity.exportSize) == 144 && (bitmap.getWidth() / MainActivity.exportSize) == 160 && crop) {
             bitmap = Bitmap.createBitmap(bitmap, 16 * MainActivity.exportSize, 16 * MainActivity.exportSize, 128 * MainActivity.exportSize, 112 * MainActivity.exportSize);
         }
-        String bitmapPath = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), bitmap, "image", "share image");
-        Uri bitmapUri = Uri.parse(bitmapPath);
 
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("image/png");
-        intent.putExtra(Intent.EXTRA_STREAM, bitmapUri);
-        startActivity(Intent.createChooser(intent, "Share"));
+        File file = new File(getActivity().getExternalCacheDir(), "shared_image.png");
+        FileOutputStream fileOutputStream = null;
+
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+            fileOutputStream.flush();
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("image/png");
+            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(getActivity(), getActivity().getPackageName() + ".fileprovider", file));
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, "Share"));
+        } catch (Exception e) {
+            Methods.toast(getContext(),"Exception");
+            e.printStackTrace();
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
-
-
     private void saveImage(GbcImage gbcImage, String fileName) {
         Bitmap image = Methods.imageBitmapCache.get(gbcImage.getHashCode());
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);

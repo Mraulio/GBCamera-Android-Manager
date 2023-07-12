@@ -11,12 +11,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -48,7 +46,7 @@ import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.methods.Methods;
+import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
@@ -77,6 +75,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static UsbDeviceConnection connection;
     static UsbSerialPort port = null;
     public static GridView gridView;
+    private static AlertDialog loadingDialog;
+
     private static int itemsPerPage = MainActivity.imagesPage;
     static int startIndex = 0;
     static int endIndex = 0;
@@ -100,6 +100,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         tv = (TextView) view.findViewById(R.id.text_gallery);
         gridView = (GridView) view.findViewById(R.id.gridView);
+        loadingDialog = Utils.loadingDialog(getContext());
 
 
         Button btnPrevPage = (Button) view.findViewById(R.id.btnPrevPage);
@@ -136,7 +137,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         btnFirstPage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                tv_page.setTextColor(getContext().getResources().getColor(R.color.duplicated));
                 if (currentPage > 0) {
                     currentPage = 0;
                     updateGridView(currentPage);
@@ -148,7 +148,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         btnLastPage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                tv_page.setTextColor(getContext().getResources().getColor(R.color.duplicated));
                 if (currentPage < lastPage) {
                     currentPage = lastPage;
                     updateGridView(currentPage);
@@ -170,9 +169,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 if (currentPage != lastPage) {
                     selectedPosition = position + (currentPage * itemsPerPage);
                 } else {
-                    selectedPosition = Methods.gbcImagesList.size() - (itemsPerPage - position);
+                    selectedPosition = Utils.gbcImagesList.size() - (itemsPerPage - position);
                 }
-                final Bitmap[] selectedImage = {Methods.imageBitmapCache.get(Methods.gbcImagesList.get(selectedPosition).getHashCode())};
+                final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(Utils.gbcImagesList.get(selectedPosition).getHashCode())};
                 // Create custom dialog
                 final Dialog dialog = new Dialog(getContext());
                 dialog.setContentView(R.layout.custom_dialog);
@@ -202,12 +201,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 if (currentPage != lastPage) {
                     globalImageIndex = position + (currentPage * itemsPerPage);
                 } else {
-                    globalImageIndex = Methods.gbcImagesList.size() - (itemsPerPage - position);
+                    globalImageIndex = Utils.gbcImagesList.size() - (itemsPerPage - position);
                 }
-                if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
+                if (Utils.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
                     imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                 }
-                if (Methods.gbcImagesList.get(globalImageIndex).isLockFrame()) {
+                if (Utils.gbcImagesList.get(globalImageIndex).isLockFrame()) {
                     keepFrame = true;
                     cbFrameKeep.setChecked(true);
                 }
@@ -219,7 +218,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         @Override
                         public void run() {
                             //Single tap action
-                            showCustomDialog(Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()));
+                            showCustomDialog(Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()));
                             clickCount = 0;
                         }
                     };
@@ -234,33 +233,33 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             // Stop timer and make double tap action
                             handler.removeCallbacks(runnable);
-                            if (Methods.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
-                                List<String> tags = Methods.gbcImagesList.get(globalImageIndex).getTags();
+                            if (Utils.gbcImagesList.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
+                                List<String> tags = Utils.gbcImagesList.get(globalImageIndex).getTags();
                                 for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
                                     String nombre = iter.next();
                                     if (nombre.equals("__filter:favourite__")) {
                                         iter.remove();
                                     }
-                                    Methods.gbcImagesList.get(globalImageIndex).setTags(tags);
+                                    Utils.gbcImagesList.get(globalImageIndex).setTags(tags);
                                     imageView.setBackgroundColor(getContext().getColor(R.color.white));
                                 }
                             } else {
-                                Methods.gbcImagesList.get(globalImageIndex).addTag("__filter:favourite__");
+                                Utils.gbcImagesList.get(globalImageIndex).addTag("__filter:favourite__");
                                 imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                             }
                             clickCount = 0;
-                            System.out.println(Methods.gbcImagesList.get(globalImageIndex).getTags());
+                            System.out.println(Utils.gbcImagesList.get(globalImageIndex).getTags());
                             updateGridView(currentPage);
                         }
                         //To save the image with the favorite tag to the database
-                        new SaveImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex)).execute();
+                        new SaveImageAsyncTask(Utils.gbcImagesList.get(globalImageIndex)).execute();
                     }
                 });
 
-                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, false, false);
+                FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Utils.framesList, false, false);
                 int frameIndex = 0;
-                for (int i = 0; i < Methods.framesList.size(); i++) {
-                    if (Methods.framesList.get(i).getFrameName().equals(Methods.gbcImagesList.get(globalImageIndex).getFrameId())) {
+                for (int i = 0; i < Utils.framesList.size(); i++) {
+                    if (Utils.framesList.get(i).getFrameName().equals(Utils.gbcImagesList.get(globalImageIndex).getFrameId())) {
                         frameIndex = i;
                         break;
                     }
@@ -282,15 +281,15 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         else keepFrame = true;
                         Bitmap bitmap = null;
                         try {
-                            bitmap = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()), Methods.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
+                            bitmap = frameChange(Utils.gbcImagesList.get(globalImageIndex), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()), Utils.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        GbcImage gbcImage = Methods.gbcImagesList.get(globalImageIndex);
+                        GbcImage gbcImage = Utils.gbcImagesList.get(globalImageIndex);
                         gbcImage.setLockFrame(keepFrame);
-                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), bitmap);
+                        Utils.imageBitmapCache.put(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), bitmap);
 //                        Bitmap image = Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode());
-                        System.out.println(Methods.gbcImagesList.get(globalImageIndex).getHashCode());
+                        System.out.println(Utils.gbcImagesList.get(globalImageIndex).getHashCode());
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                         new SaveImageAsyncTask(gbcImage).execute();
                         updateGridView(currentPage);
@@ -312,25 +311,25 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                         //Action when clicking a frame inside the Dialog
                         Bitmap framed = null;
-                        Methods.gbcImagesList.get(globalImageIndex).setFrameId(Methods.framesList.get(selectedFrameIndex).getFrameName());//Need to set the frame index before changing it because if not it's not added to db
+                        Utils.gbcImagesList.get(globalImageIndex).setFrameId(Utils.framesList.get(selectedFrameIndex).getFrameName());//Need to set the frame index before changing it because if not it's not added to db
 
                         try {
-                            framed = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()), Methods.framesList.get(selectedFrameIndex).getFrameName(), keepFrame);
+                            framed = frameChange(Utils.gbcImagesList.get(globalImageIndex), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()), Utils.framesList.get(selectedFrameIndex).getFrameName(), keepFrame);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
                         selectedImage[0] = framed;
-                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), framed);
+                        Utils.imageBitmapCache.put(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), framed);
                         frameAdapter.setLastSelectedPosition(selectedFrameIndex);
                         frameAdapter.notifyDataSetChanged();
                         updateGridView(currentPage);
                     }
                 });
-                CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, false, false);
+                CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, false, false);
                 int paletteIndex = 0;
-                for (int i = 0; i < Methods.gbcPalettesList.size(); i++) {
-                    if (Methods.gbcPalettesList.get(i).getPaletteId().equals(Methods.gbcImagesList.get(globalImageIndex).getPaletteId())) {
+                for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
+                    if (Utils.gbcPalettesList.get(i).getPaletteId().equals(Utils.gbcImagesList.get(globalImageIndex).getPaletteId())) {
                         paletteIndex = i;
                         break;
                     }
@@ -343,23 +342,23 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         //Action when clicking a palette inside the Dialog
                         Bitmap changedImage;
                         if (!keepFrame) {
-                            Methods.gbcImagesList.get(globalImageIndex).setPaletteId("bw");//Need to set this to the palette 0 to then change it with the frame
+                            Utils.gbcImagesList.get(globalImageIndex).setPaletteId("bw");//Need to set this to the palette 0 to then change it with the frame
                         }
                         //Set the new palette to the gbcImage
-                        Methods.gbcImagesList.get(globalImageIndex).setPaletteId(Methods.gbcPalettesList.get(palettePosition).getPaletteId());
-                        changedImage = paletteChanger(Methods.gbcImagesList.get(globalImageIndex).getPaletteId(), Methods.gbcImagesList.get(globalImageIndex).getImageBytes(), Methods.gbcImagesList.get(globalImageIndex));
-                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
+                        Utils.gbcImagesList.get(globalImageIndex).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
+                        changedImage = paletteChanger(Utils.gbcImagesList.get(globalImageIndex).getPaletteId(), Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex));
+                        Utils.imageBitmapCache.put(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
                         if (keepFrame) {
                             try {
-                                changedImage = frameChange(Methods.gbcImagesList.get(globalImageIndex), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode()), Methods.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
+                                changedImage = frameChange(Utils.gbcImagesList.get(globalImageIndex), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()), Utils.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }
-                        Methods.gbcImagesList.get(globalImageIndex).setPaletteId(Methods.gbcPalettesList.get(palettePosition).getPaletteId());
+                        Utils.gbcImagesList.get(globalImageIndex).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
                         adapterPalette.setLastSelectedPosition(palettePosition);
                         adapterPalette.notifyDataSetChanged();
-                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
+                        Utils.imageBitmapCache.put(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
                         selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
                         updateGridView(currentPage);
@@ -455,7 +454,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         if (MainActivity.exportPng) {
                             fileName += dtf.format(now) + ".png";
                         } else fileName += dtf.format(now) + ".txt";
-                        saveImage(Methods.gbcImagesList.get(globalImageIndex), fileName);
+                        saveImage(Utils.gbcImagesList.get(globalImageIndex), fileName);
                     }
                 });
 
@@ -486,17 +485,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 if (currentPage != lastPage) {
                     globalImageIndex = position + (currentPage * itemsPerPage);
                 } else {
-                    globalImageIndex = Methods.gbcImagesList.size() - (itemsPerPage - position);
+                    globalImageIndex = Utils.gbcImagesList.size() - (itemsPerPage - position);
                 }
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle(getString(R.string.delete_dialog_gallery) + Methods.gbcImagesList.get(globalImageIndex).getName() + "?");
+                builder.setTitle(getString(R.string.delete_dialog_gallery) + Utils.gbcImagesList.get(globalImageIndex).getName() + "?");
                 builder.setMessage(getString(R.string.sure_dialog));
 
                 // Crear un ImageView y establecer la imagen deseada
                 ImageView imageView = new ImageView(getContext());
                 imageView.setAdjustViewBounds(true);
                 imageView.setPadding(40, 10, 40, 10);
-                Bitmap bitmap = Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode());
+                Bitmap bitmap = Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode());
                 int scaler = 6;
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * scaler, bitmap.getHeight() * scaler, false));
 
@@ -506,7 +505,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        new DeleteImageAsyncTask(Methods.gbcImagesList.get(globalImageIndex).getHashCode(), globalImageIndex).execute();
+                        new DeleteImageAsyncTask(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), globalImageIndex).execute();
                     }
                 });
                 builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -534,13 +533,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         });
 
 
-        if (Methods.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
+        if (Utils.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
             updateGridView(currentPage);
         } else {
             tv.setText(getString(R.string.loading));
         }
         tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
-        if (Methods.gbcImagesList.size() > 0) {
+        if (Utils.gbcImagesList.size() > 0) {
             updateGridView(currentPage);
             tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
 
@@ -582,14 +581,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         Bitmap framedAux;
         if ((gbcImage.getImageBytes().length / 40) == 144) {
             //I need to use copy because if not it's inmutable bitmap
-            framed = Methods.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+            framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
             Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage);
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger(gbcImage.getPaletteId(), Methods.encodeImage(framed), gbcImage);
+                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed), gbcImage);
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
@@ -597,11 +596,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             canvas.drawBitmap(croppedBitmap, 16, 16, null);
 
             try {
-                byte[] imageBytes = Methods.encodeImage(framedAux);//Use the framedAux because it doesn't a different palette to encode
+                byte[] imageBytes = Utils.encodeImage(framedAux);//Use the framedAux because it doesn't a different palette to encode
                 gbcImage.setImageBytes(imageBytes);
-                for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
-                    if (Methods.gbcImagesList.get(i).getHashCode().equals(gbcImage.getHashCode())) {
-                        Methods.gbcImagesList.get(i).setImageBytes(imageBytes);
+                for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
+                    if (Utils.gbcImagesList.get(i).getHashCode().equals(gbcImage.getHashCode())) {
+                        Utils.gbcImagesList.get(i).setImageBytes(imageBytes);
                         break;
                     }
                 }
@@ -615,8 +614,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     //Cambiar paleta
     public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage) {
-        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
-        Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes);
+        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
+        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes);
         new SaveImageAsyncTask(gbcImage).execute();
         return image;
     }
@@ -664,8 +663,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
         bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-        int[] oldColors = Methods.hashPalettes.get(Methods.gbcImagesList.get(imageIndex).getPaletteId()).getPaletteColorsInt();
-        int[] newColors = Methods.gbcPalettesList.get(newPaletteIndex).getPaletteColorsInt();
+        int[] oldColors = Utils.hashPalettes.get(Utils.gbcImagesList.get(imageIndex).getPaletteId()).getPaletteColorsInt();
+        int[] newColors = Utils.gbcPalettesList.get(newPaletteIndex).getPaletteColorsInt();
 
         Map<Integer, Integer> colorIndexMap = new HashMap<>();
         for (int i = 0; i < oldColors.length; i++) {
@@ -685,7 +684,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     private void prevPage() {
-        tv_page.setTextColor(getContext().getResources().getColor(R.color.duplicated));
 
         if (currentPage > 0) {
             currentPage--;
@@ -695,7 +693,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     private void nextPage() {
-        tv_page.setTextColor(getContext().getResources().getColor(R.color.duplicated));
 
         if (currentPage < lastPage) {
             currentPage++;
@@ -737,7 +734,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(Intent.createChooser(intent, "Share"));
         } catch (Exception e) {
-            Methods.toast(getContext(),"Exception");
+            Utils.toast(getContext(),"Exception");
             e.printStackTrace();
         } finally {
             if (fileOutputStream != null) {
@@ -750,7 +747,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         }
     }
     private void saveImage(GbcImage gbcImage, String fileName) {
-        Bitmap image = Methods.imageBitmapCache.get(gbcImage.getHashCode());
+        Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File file = new File(directory, fileName);
         try {
@@ -780,14 +777,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             //Saving txt without cropping it
             try {
                 //Need to change the palette to bw so the encodeImage method works
-                image = paletteChanger("bw", gbcImage.getImageBytes(), Methods.gbcImagesList.get(0));
+                image = paletteChanger("bw", gbcImage.getImageBytes(), Utils.gbcImagesList.get(0));
                 StringBuilder txtBuilder = new StringBuilder();
                 //Appending these commands so the export is compatible with
                 // https://herrzatacke.github.io/gb-printer-web/#/import
                 // and https://mofosyne.github.io/arduino-gameboy-printer-emulator/GameBoyPrinterDecoderJS/gameboy_printer_js_decoder.html
                 txtBuilder.append("{\"command\":\"INIT\"}\n" +
                         "{\"command\":\"DATA\",\"compressed\":0,\"more\":1}\n");
-                String txt = Methods.bytesToHex(Methods.encodeImage(image));
+                String txt = Utils.bytesToHex(Utils.encodeImage(image));
                 txt = addSpacesAndNewLines(txt).toUpperCase();
                 txtBuilder.append(txt);
                 txtBuilder.append("\n{\"command\":\"DATA\",\"compressed\":0,\"more\":0}\n" +
@@ -796,7 +793,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(txtBuilder.toString());
                 bufferedWriter.close();
-                Methods.toast(getContext(), getString(R.string.toast_saved_txt));
+                Utils.toast(getContext(), getString(R.string.toast_saved_txt));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -838,38 +835,38 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         imagesForPage = new ArrayList<>();
         itemsPerPage = MainActivity.imagesPage;
         //Por si la lista de imagenes es mas corta que el tamaño de paginacion
-        if (Methods.gbcImagesList.size() < itemsPerPage) {
-            itemsPerPage = Methods.gbcImagesList.size();
+        if (Utils.gbcImagesList.size() < itemsPerPage) {
+            itemsPerPage = Utils.gbcImagesList.size();
         }
-        lastPage = (Methods.gbcImagesList.size() - 1) / itemsPerPage;
+        lastPage = (Utils.gbcImagesList.size() - 1) / itemsPerPage;
 
         //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
-        if (currentPage == lastPage && (Methods.gbcImagesList.size() % itemsPerPage) != 0) {
-            itemsPerPage = Methods.gbcImagesList.size() % itemsPerPage;
-            startIndex = Methods.gbcImagesList.size() - itemsPerPage;
-            endIndex = Methods.gbcImagesList.size();
+        if (currentPage == lastPage && (Utils.gbcImagesList.size() % itemsPerPage) != 0) {
+            itemsPerPage = Utils.gbcImagesList.size() % itemsPerPage;
+            startIndex = Utils.gbcImagesList.size() - itemsPerPage;
+            endIndex = Utils.gbcImagesList.size();
 
         } else {
             startIndex = page * itemsPerPage;
-            endIndex = Math.min(startIndex + itemsPerPage, Methods.gbcImagesList.size());
+            endIndex = Math.min(startIndex + itemsPerPage, Utils.gbcImagesList.size());
         }
         boolean doAsync = false;
 
         //The bitmaps come from the BitmapCache map, using the gbcimage hashcode
-        for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
-            if (!Methods.imageBitmapCache.containsKey(gbcImage.getHashCode())) {
+        for (GbcImage gbcImage : Utils.gbcImagesList.subList(startIndex, endIndex)) {
+            if (!Utils.imageBitmapCache.containsKey(gbcImage.getHashCode())) {
                 doAsync = true;
             }
         }
         if (doAsync) {
+            loadingDialog.show();
             new UpdateGridViewAsyncTask().execute();
         } else {
             List<Bitmap> bitmapList = new ArrayList<>();
-            for (GbcImage gbcImage : Methods.gbcImagesList.subList(startIndex, endIndex)) {
-                bitmapList.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
+            for (GbcImage gbcImage : Utils.gbcImagesList.subList(startIndex, endIndex)) {
+                bitmapList.add(Utils.imageBitmapCache.get(gbcImage.getHashCode()));
             }
-            tv_page.setTextColor(gridView.getContext().getResources().getColor(R.color.black));
-            customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, Methods.gbcImagesList.subList(startIndex, endIndex), bitmapList, false, false);
+            customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, Utils.gbcImagesList.subList(startIndex, endIndex), bitmapList, false, false);
             gridView.setAdapter(customGridViewAdapterImage);
         }
     }
@@ -912,7 +909,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             //foreach index
             int index = 0;
             //Loop for each gbcImage in a sublist in all gbcImages objects for the current page
-            for (GbcImage gbcImage : Methods.gbcImagesList.subList(newStartIndex, newEndIndex)) {
+            for (GbcImage gbcImage : Utils.gbcImagesList.subList(newStartIndex, newEndIndex)) {
                 //Add the hashcode to the list of current hashes
                 String imageHash = gbcImage.getHashCode();
                 currentPageHashes.add(imageHash);
@@ -924,29 +921,29 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 gbcImage.setImageBytes(imageBytes);
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
-                Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
+                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
+                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                 //Add the bitmap to the cache
-                Methods.imageBitmapCache.put(imageHash, image);
+                Utils.imageBitmapCache.put(imageHash, image);
 
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
                     if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
-                        image = frameChange(Methods.gbcImagesList.get(newStartIndex + index), Methods.imageBitmapCache.get(Methods.gbcImagesList.get(newStartIndex + index).getHashCode()), Methods.gbcImagesList.get(newStartIndex + index).getFrameId(), Methods.gbcImagesList.get(newStartIndex + index).isLockFrame());
-                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), image);
+                        image = frameChange(Utils.gbcImagesList.get(newStartIndex + index), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(newStartIndex + index).getHashCode()), Utils.gbcImagesList.get(newStartIndex + index).getFrameId(), Utils.gbcImagesList.get(newStartIndex + index).isLockFrame());
+                    Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 index++;
             }
-            gbcImagesForPage = Methods.gbcImagesList.subList(newStartIndex, newEndIndex);
+            gbcImagesForPage = Utils.gbcImagesList.subList(newStartIndex, newEndIndex);
             //Create a list of bitmaps to use in the adapter, getting the bitmaps from the cache map for each image in the current page
             List<Bitmap> bitmapList = new ArrayList<>();
             for (GbcImage gbcImage : gbcImagesForPage) {
-                bitmapList.add(Methods.imageBitmapCache.get(gbcImage.getHashCode()));
+                bitmapList.add(Utils.imageBitmapCache.get(gbcImage.getHashCode()));
             }
-            customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, Methods.gbcImagesList.subList(newStartIndex, newEndIndex), bitmapList, false, false);
+            customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, Utils.gbcImagesList.subList(newStartIndex, newEndIndex), bitmapList, false, false);
             return null;
         }
 
@@ -954,7 +951,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         protected void onPostExecute(Void aVoid) {
             //Notifies the adapter
             gridView.setAdapter(customGridViewAdapterImage);
-            tv_page.setTextColor(gridView.getContext().getResources().getColor(R.color.black));
+            loadingDialog.hide();
         }
     }
 
@@ -969,14 +966,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
         @Override
         protected Void doInBackground(Void... voids) {
-            GbcImage gbcImage = Methods.gbcImagesList.get(imageIndex);
+            GbcImage gbcImage = Utils.gbcImagesList.get(imageIndex);
             ImageDao imageDao = MainActivity.db.imageDao();
             ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
             ImageData imageData = imageDataDao.getImageDataByid(hashCode);
             imageDao.delete(gbcImage);
             imageDataDao.delete(imageData);
-            Methods.imageBitmapCache.remove(hashCode);
-            Methods.gbcImagesList.remove(imageIndex);
+            Utils.imageBitmapCache.remove(hashCode);
+            Utils.gbcImagesList.remove(imageIndex);
             return null;
         }
 
@@ -1052,7 +1049,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) : Color.WHITE);
             Boolean dup = false;
             if (checkDuplicate) {
-                for (GbcImage gbcImage : Methods.gbcImagesList) {
+                for (GbcImage gbcImage : Utils.gbcImagesList) {
                     //Compare the hash value with the value of the new image hash
                     if (gbcImage.getHashCode().equals(hash)) {
                         //If hash is equals means the image already exists

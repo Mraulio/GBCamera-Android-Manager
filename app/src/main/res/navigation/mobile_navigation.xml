@@ -31,6 +31,11 @@
         android:label="@string/menu_usbserial"
         tools:layout="@layout/fragment_usb_serial" />
     <fragment
+        android:id="@+id/nav_savmanager"
+        android:name="com.mraulio.gbcameramanager.ui.savemanager.SaveManagerFragment"
+        android:label="@string/menu_savmanager"
+        tools:layout="@layout/fragment_save_manager" />
+    <fragment
         android:id="@+id/nav_settings"
         android:name="com.mraulio.gbcameramanager.ui.settings.SettingsFragment"
         android:label="@string/menu_settings"

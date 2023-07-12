@@ -31,7 +31,7 @@
     <string name="showPrint">Show Print button.</string>
 
     <string name="cant_delete_base">Bordure par défaut. Ne peut être effacée</string>
-    <string name="delete_dialog">Effacer bordure\u0020</string>
+    <string name="delete_frame_dialog">Effacer bordure\u0020</string>
     <string name="sure_dialog">Confirmer ?</string>
     <string name="delete">EFFACER</string>
     <string name="cancel">Annuler</string>

@@ -40,7 +40,7 @@
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">No se puede borrar un marco base.</string>
-    <string name="delete_dialog">Borrar marco\u0020</string>
+    <string name="delete_frame_dialog">Borrar marco\u0020</string>
     <string name="sure_dialog">¿Estás seguro?</string>
     <string name="delete">BORRAR</string>
     <string name="cancel">Cancelar</string>

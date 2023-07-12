@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
@@ -29,8 +28,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
-import com.mraulio.gbcameramanager.methods.Methods;
-import com.mraulio.gbcameramanager.methods.StartCreation;
+import com.mraulio.gbcameramanager.utils.Utils;
+import com.mraulio.gbcameramanager.utils.StartCreation;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.db.AppDatabase;
 import com.mraulio.gbcameramanager.db.FrameDao;
@@ -43,7 +42,6 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -107,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
         languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
 
+        Utils.makeDirs();
+
         // Change language config
         if (!languageCode.equals("en")) {
             Locale locale = new Locale(languageCode);
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
             // Si el Intent contiene la acción ACTION_VIEW y la categoría CATEGORY_DEFAULT y
             // el tipo es "application/octet-stream" y el URI del Intent termina en ".sav", realizar la acción deseada
-            Methods.toast(this, "Opened from file");
+            Utils.toast(this, "Opened from file");
             openedSav = true;
         }
         if (!doneLoading) {
@@ -186,9 +186,9 @@ public class MainActivity extends AppCompatActivity {
 
             if (palettes.size() > 0) {
                 for (GbcPalette gbcPalette : palettes) {
-                    Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                    Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
-                Methods.gbcPalettesList.addAll(palettes);
+                Utils.gbcPalettesList.addAll(palettes);
             } else {
                 StringBuilder stringBuilder = new StringBuilder();
                 int resourcePalettes = R.raw.palettes;
@@ -208,24 +208,24 @@ public class MainActivity extends AppCompatActivity {
                 }
                 String fileContent = stringBuilder.toString();
                 List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
-                Methods.gbcPalettesList.addAll(receivedList);
+                Utils.gbcPalettesList.addAll(receivedList);
                 for (GbcPalette gbcPalette : receivedList) {
-                    Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                    Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
-                for (GbcPalette gbcPalette : Methods.gbcPalettesList) {
+                for (GbcPalette gbcPalette : Utils.gbcPalettesList) {
                     paletteDao.insert(gbcPalette);
                 }
             }
 
             if (frames.size() > 0) {
                 for (GbcFrame gbcFrame : frames) {
-                    Methods.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
+                    Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
                 }
-                Methods.framesList.addAll(frames);
+                Utils.framesList.addAll(frames);
             } else {
                 //First time add it to the database
                 StartCreation.addFrames(getBaseContext());
-                for (Map.Entry<String, GbcFrame> entry : Methods.hashFrames.entrySet()) {
+                for (Map.Entry<String, GbcFrame> entry : Utils.hashFrames.entrySet()) {
                     GbcFrame value = entry.getValue();
                     frameDao.insert(value);
                 }
@@ -234,8 +234,8 @@ public class MainActivity extends AppCompatActivity {
             if (imagesFromDao.size() > 0) {
                 anyImage = true;
                 //I need to add them to the gbcImagesList(GbcImage)
-                Methods.gbcImagesList.addAll(imagesFromDao);
-                GbcImage.numImages += Methods.gbcImagesList.size();
+                Utils.gbcImagesList.addAll(imagesFromDao);
+                GbcImage.numImages += Utils.gbcImagesList.size();
             }
             return null;
         }

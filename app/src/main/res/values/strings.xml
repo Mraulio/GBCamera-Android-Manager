@@ -12,6 +12,8 @@
     <string name="menu_frames">Frames</string>
     <string name="menu_import">Import</string>
     <string name="menu_usbserial">USB Serial</string>
+    <string name="menu_savmanager" translatable="false">Save manager</string>
+
     <string name="menu_settings">Settings</string>
 
     <!--Custom_dialog, Gallery Fragment strings-->
@@ -39,7 +41,7 @@
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">Can\'t delete a base frame</string>
-    <string name="delete_dialog">Delete frame\u0020</string>
+    <string name="delete_frame_dialog">Delete frame\u0020</string>
     <string name="sure_dialog">Are you sure?</string>
     <string name="delete">DELETE</string>
     <string name="cancel">Cancel</string>
@@ -118,7 +120,6 @@
     <string name="saved_to_file">Saved to file</string>
 
     <string name="delete_dialog_gallery">Delete image\u0020</string>
-
 
 
 </resources>

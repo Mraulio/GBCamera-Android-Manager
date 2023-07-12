@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 
-import com.mraulio.gbcameramanager.methods.Methods;
+import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
@@ -71,7 +71,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         Bitmap image = data.get(position).paletteViewer();
         String name = data.get(position).getPaletteId();
         if (checkDuplicate) {
-            for (GbcPalette objeto : Methods.gbcPalettesList) {
+            for (GbcPalette objeto : Utils.gbcPalettesList) {
                 // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
                 if (objeto.getPaletteId().equals(name)) {
                     // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista

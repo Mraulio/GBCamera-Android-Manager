@@ -3,7 +3,7 @@ package com.mraulio.gbcameramanager.ui.importFile;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
-import com.mraulio.gbcameramanager.methods.Methods;
+import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -98,7 +98,7 @@ public class JsonReader {
                     stringValues.add(hash);
                     String data = jsonObject.getString(hash);
                     String decodedData = decodeData(data);
-                    byte[] bytes = Methods.convertToByteArray(decodedData);
+                    byte[] bytes = Utils.convertToByteArray(decodedData);
                     GbcImage gbcImage = new GbcImage();
                     gbcImage.setHashCode(hash);
                     gbcImage.setImageBytes(bytes);
@@ -116,7 +116,7 @@ public class JsonReader {
                         gbcImage.setTags(tagsStrings);
                     }
                     if (imageJson.has("palette")) {
-                        if (!Methods.hashPalettes.containsKey(gbcImage.getPaletteId())) {
+                        if (!Utils.hashPalettes.containsKey(gbcImage.getPaletteId())) {
                             gbcImage.setPaletteId("bw");
                         } else
                             gbcImage.setPaletteId(imageJson.getString("palette"));//To get the palette from the json
@@ -126,7 +126,7 @@ public class JsonReader {
                         if (frameName.equals("null"))
                             gbcImage.setFrameId("");
                         else gbcImage.setFrameId(frameName);
-                        if (!Methods.hashFrames.containsKey(gbcImage.getFrameId())) {
+                        if (!Utils.hashFrames.containsKey(gbcImage.getFrameId())) {
                             gbcImage.setFrameId("Nintendo_Frame");
                         }
                     }
@@ -222,10 +222,10 @@ public class JsonReader {
                 gbcFrame.setFrameName(name);
                 String hash = jsonObject.getString("frame-" + id);
                 String decompHash = recreateFrame(hash);
-                byte[] bytes = Methods.convertToByteArray(decompHash);
+                byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
-                Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
+                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
+                Bitmap image = imageCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
                 gbcFrame.setFrameBitmap(image);
                 frameList.add(gbcFrame);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;

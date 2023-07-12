@@ -22,7 +22,6 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -31,7 +30,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +38,7 @@ import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.methods.Methods;
+import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.ui.importFile.HexToTileData;
 import com.mraulio.gbcameramanager.db.ImageDao;
@@ -116,7 +114,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     List<Bitmap> finalListBitmaps;
     GbcImage lastSeenImage;
     Bitmap lastSeenBitmap;
-
 
 
     @Override
@@ -232,7 +229,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     public void onClick(DialogInterface dialog, int which) {
                         //Try to delete the file
                         if (latestFile.delete()) {
-                            Methods.toast(getContext(), getString(R.string.toast_sav_deleted));
+                            Utils.toast(getContext(), getString(R.string.toast_sav_deleted));
                         } else {
                             System.out.println(getString(R.string.toast_couldnt_delete_sav));
                         }
@@ -253,123 +250,81 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             }
         });
 
-        btnAddImages.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    numImagesAdded = 0;
-                    List<GbcImage> newGbcImages = new ArrayList<>();
-                    List<ImageData> newImageDatas = new ArrayList<>();
-                    for (int i = 0; i < finalListImages.size(); i++) {
-                        GbcImage gbcImage = finalListImages.get(i);
-                        boolean alreadyAdded = false;
-                        //If the image already exists (by the hash) it doesn't add it. Same if it's already added
-                        for (GbcImage image : Methods.gbcImagesList) {
-                            if (image.getHashCode().equals(gbcImage.getHashCode())) {
-                                alreadyAdded = true;
-                                break;
-                            }
-                        }
-                        if (!alreadyAdded) {
-                            GbcImage.numImages++;
-                            numImagesAdded++;
-                            ImageData imageData = new ImageData();
-                            imageData.setImageId(gbcImage.getHashCode());
-                            imageData.setData(gbcImage.getImageBytes());
-                            newImageDatas.add(imageData);
-                            newGbcImages.add(gbcImage);
-                            Methods.gbcImagesList.add(gbcImage);
-                            Methods.imageBitmapCache.put(gbcImage.getHashCode(), extractedImagesBitmaps.get(i));
+        btnAddImages.setOnClickListener(v -> {
+            try {
+                numImagesAdded = 0;
+                List<GbcImage> newGbcImages = new ArrayList<>();
+                List<ImageData> newImageDatas = new ArrayList<>();
+                for (int i = 0; i < finalListImages.size(); i++) {
+                    GbcImage gbcImage = finalListImages.get(i);
+                    boolean alreadyAdded = false;
+                    //If the image already exists (by the hash) it doesn't add it. Same if it's already added
+                    for (GbcImage image : Utils.gbcImagesList) {
+                        if (image.getHashCode().equals(gbcImage.getHashCode())) {
+                            alreadyAdded = true;
+                            break;
                         }
                     }
-                    if (newGbcImages.size() > 0) {
-                        new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
-                    } else {
-                        tv.setText(getString(R.string.no_new_images));
-                        Methods.toast(getContext(), getString(R.string.no_new_images));
+                    if (!alreadyAdded) {
+                        GbcImage.numImages++;
+                        numImagesAdded++;
+                        ImageData imageData = new ImageData();
+                        imageData.setImageId(gbcImage.getHashCode());
+                        imageData.setData(gbcImage.getImageBytes());
+                        newImageDatas.add(imageData);
+                        newGbcImages.add(gbcImage);
+                        Utils.gbcImagesList.add(gbcImage);
+                        Utils.imageBitmapCache.put(gbcImage.getHashCode(), extractedImagesBitmaps.get(i));
                     }
-                } catch (Exception e) {
-                    tv.setText("Error en btn add\n" + e.toString());
                 }
-            }
-        });
-
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveTv();
-            }
-        });
-
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tv.setText("");
-            }
-        });
-
-        btnDecode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Method to decode the textview data
-                extractedImagesBitmaps.clear();
-                extractedImagesList.clear();
-                try {
-                    extractHexImages(tv.getText().toString());
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
+                if (newGbcImages.size() > 0) {
+                    new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
+                } else {
+                    tv.setText(getString(R.string.no_new_images));
+                    Utils.toast(getContext(), getString(R.string.no_new_images));
                 }
-                GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true);
-                gridView.setAdapter(customGridViewAdapterImage);
-                tv.append(extractedImagesList.size() + " images.");
-                btnAddImages.setVisibility(View.VISIBLE);
-            }
-        });
-        btnFullRom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnAddImages.setVisibility(View.GONE);
-                extractedImagesList.clear();
-                extractedImagesBitmaps.clear();
-                fullRomDump();
+            } catch (Exception e) {
+                tv.setText("Error en btn add\n" + e.toString());
             }
         });
 
-        btnReadRom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                completeReadRomName();
+        btnSave.setOnClickListener(v -> saveTv());
+
+        btnDelete.setOnClickListener(v -> tv.setText(""));
+
+        btnDecode.setOnClickListener(v -> {
+            //Method to decode the textview data
+            extractedImagesBitmaps.clear();
+            extractedImagesList.clear();
+            try {
+                extractHexImages(tv.getText().toString());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
             }
+            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true);
+            gridView.setAdapter(customGridViewAdapterImage);
+            tv.append(extractedImagesList.size() + " images.");
+            btnAddImages.setVisibility(View.VISIBLE);
+        });
+        btnFullRom.setOnClickListener(v -> {
+            btnAddImages.setVisibility(View.GONE);
+            extractedImagesList.clear();
+            extractedImagesBitmaps.clear();
+            fullRomDump();
         });
 
-        btnReadRam.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnAddImages.setVisibility(View.GONE);
-                extractedImagesList.clear();
-                extractedImagesBitmaps.clear();
-                completeRamDump();
-            }
+        btnReadRom.setOnClickListener(v -> completeReadRomName());
+
+        btnReadRam.setOnClickListener(v -> {
+            btnAddImages.setVisibility(View.GONE);
+            extractedImagesList.clear();
+            extractedImagesBitmaps.clear();
+            completeRamDump();
         });
 
-        rbApe.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                arduinoPrinterMode();
-            }
-        });
-        rbPrint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                printOverArduinoMode();
-            }
-        });
-        rbGbx.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gbxMode();
-            }
-        });
+        rbApe.setOnClickListener(v -> arduinoPrinterMode());
+        rbPrint.setOnClickListener(v -> printOverArduinoMode());
+        rbGbx.setOnClickListener(v -> gbxMode());
         return view;
     }
 
@@ -411,7 +366,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         @Override
         protected void onPostExecute(Void aVoid) {
             tv.append("\n" + numImagesAdded + getString(R.string.done_adding_images));
-            Methods.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
+            Utils.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
         }
     }
 
@@ -507,17 +462,17 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     }
                     nameIndex++;
                     byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                    String hashHex = Methods.bytesToHex(hash);
+                    String hashHex = Utils.bytesToHex(hash);
                     gbcImage.setHashCode(hashHex);
-                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 128, 112);
-                    Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
+                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 128, 112);
+                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         //I need to use copy because if not it's inmutable bitmap
-                        Bitmap framed = Methods.hashFrames.get((gbcImage.getFrameId())).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                        Bitmap framed = Utils.hashFrames.get((gbcImage.getFrameId())).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                         Canvas canvas = new Canvas(framed);
                         canvas.drawBitmap(image, 16, 16, null);
                         image = framed;
-                        imageBytes = Methods.encodeImage(image);
+                        imageBytes = Utils.encodeImage(image);
                     }
                     gbcImage.setImageBytes(imageBytes);
                     extractedImagesBitmaps.add(image);
@@ -546,7 +501,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 }
                 GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true);
                 gridView.setAdapter(customGridViewAdapterImage);
-                showImages(cbLastSeen,cbDeleted);
+                showImages(cbLastSeen, cbDeleted);
             } else {
                 tv.append(getString(R.string.no_good_dump));
             }
@@ -574,7 +529,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 //            }
         } catch (Exception e) {
             e.printStackTrace();
-            Methods.toast(getContext(), "Error: " + e.toString());
+            Utils.toast(getContext(), "Error: " + e.toString());
         }
         btnAddImages.setVisibility(View.VISIBLE);
     }
@@ -879,7 +834,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             GbcImage gbcImage = new GbcImage();
             gbcImage.setImageBytes(bytes);
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
-            String hashHex = Methods.bytesToHex(hash);
+            String hashHex = Utils.bytesToHex(hash);
             gbcImage.setHashCode(hashHex);
             ImageData imageData = new ImageData();
             imageData.setImageId(hashHex);
@@ -887,8 +842,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             gbcImage.setName(index++ + "-" + " arduino");
             gbcImage.setFrameId("GBCManager_Frame");//Could just leave it blank
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, height);
-            Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes());
+            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, height);
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes());
             extractedImagesBitmaps.add(image);
             extractedImagesList.add(gbcImage);
         }

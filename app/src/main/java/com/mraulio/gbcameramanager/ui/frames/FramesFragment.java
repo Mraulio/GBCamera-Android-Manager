@@ -21,7 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.methods.Methods;
+import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -43,25 +43,25 @@ public class FramesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
-        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Methods.framesList, true, false);
+        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Utils.framesList, true, false);
         TextView tvNumFrames = view.findViewById(R.id.tvNumFrames);
 
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 if (position <= 3) {
-                    Methods.toast(getContext(), getString(R.string.cant_delete_base));
+                    Utils.toast(getContext(), getString(R.string.cant_delete_base));
                 }
                 if (position > 3) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle(getString(R.string.delete_dialog) + Methods.framesList.get(position).getFrameName() + "?");
+                    builder.setTitle(getString(R.string.delete_frame_dialog) + Utils.framesList.get(position).getFrameName() + "?");
                     builder.setMessage(getString(R.string.sure_dialog));
 
                     // Crear un ImageView y establecer la imagen deseada
                     ImageView imageView = new ImageView(getContext());
                     imageView.setAdjustViewBounds(true);
                     imageView.setPadding(30, 10, 30, 10);
-                    imageView.setImageBitmap(Methods.framesList.get(position).getFrameBitmap());
+                    imageView.setImageBitmap(Utils.framesList.get(position).getFrameBitmap());
 
                     // Agregar el ImageView al diseño del diálogo
                     builder.setView(imageView);
@@ -69,26 +69,26 @@ public class FramesFragment extends Fragment {
                     builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            new DeleteFrameAsyncTask(Methods.framesList.get(position)).execute();
-                            Methods.framesList.remove(position);
+                            new DeleteFrameAsyncTask(Utils.framesList.get(position)).execute();
+                            Utils.framesList.remove(position);
                             //I change the frame index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
-                            for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
-                                if (Methods.gbcImagesList.get(i).getFrameId().equals(Methods.hashFrames.get(Methods.framesList.get(position).getFrameName()).getFrameName())) {
-                                    Methods.gbcImagesList.get(i).setFrameId("Nintendo_Frame");
+                            for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
+                                if (Utils.gbcImagesList.get(i).getFrameId().equals(Utils.hashFrames.get(Utils.framesList.get(position).getFrameName()).getFrameName())) {
+                                    Utils.gbcImagesList.get(i).setFrameId("Nintendo_Frame");
                                     //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
-                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
+                                    if (Utils.imageBitmapCache.containsKey(Utils.gbcImagesList.get(i).getHashCode())) {
                                         Bitmap image = null;
                                         try {
-                                            GbcImage gbcImage = Methods.gbcImagesList.get(i);
-                                            image = GalleryFragment.frameChange(gbcImage,Methods.imageBitmapCache.get(gbcImage.getHashCode()), Methods.framesList.get(0).getFrameName(), Methods.gbcImagesList.get(i).isLockFrame());
+                                            GbcImage gbcImage = Utils.gbcImagesList.get(i);
+                                            image = GalleryFragment.frameChange(gbcImage, Utils.imageBitmapCache.get(gbcImage.getHashCode()), Utils.framesList.get(0).getFrameName(), Utils.gbcImagesList.get(i).isLockFrame());
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
-                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
+                                        Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                     }
-                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
+                                    new GalleryFragment.SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
                             }
                             customGridViewAdapterFrames.notifyDataSetChanged();
@@ -109,7 +109,7 @@ public class FramesFragment extends Fragment {
 
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames);
-        tvNumFrames.setText(getString(R.string.frames_total) + Methods.framesList.size());
+        tvNumFrames.setText(getString(R.string.frames_total) + Utils.framesList.size());
         return view;
     }
 
@@ -181,7 +181,7 @@ public class FramesFragment extends Fragment {
             String name = data.get(position).getFrameName();
 
             if (checkDuplicate) {
-                for (GbcFrame objeto : Methods.framesList) {
+                for (GbcFrame objeto : Utils.framesList) {
                     // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
                     if (objeto.getFrameName().equals(name)) {
                         // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista

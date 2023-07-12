@@ -40,7 +40,7 @@
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">Não é possível deletar a moldura padrão</string>
-    <string name="delete_dialog">Deletar moldura\u0020</string>
+    <string name="delete_frame_dialog">Deletar moldura\u0020</string>
     <string name="sure_dialog">Você tem certeza?</string>
     <string name="delete">DELETAR</string>
     <string name="cancel">Cancelar</string>

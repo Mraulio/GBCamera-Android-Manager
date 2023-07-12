@@ -2,7 +2,6 @@ package com.mraulio.gbcameramanager.ui.importFile;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -28,7 +27,6 @@ import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
@@ -36,7 +34,7 @@ import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.methods.Methods;
+import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -183,7 +181,7 @@ public class ImportFragment extends Fragment {
                 } else if (!savFile && isJson) {
                     receivedList = JsonReader.jsonCheck(fileContent);
                     if (receivedList == null) {
-                        Methods.toast(getContext(), getString(R.string.no_valid_list));
+                        Utils.toast(getContext(), getString(R.string.no_valid_list));
                         return;
                     }
                     switch (addEnum) {
@@ -239,7 +237,7 @@ public class ImportFragment extends Fragment {
                             boolean alreadyAdded = false;
                             GbcPalette gbcp = (GbcPalette) palette;
                             //If the palette already exists (by the name) it doesn't add it. Same if it's already added
-                            for (GbcPalette objeto : Methods.gbcPalettesList) {
+                            for (GbcPalette objeto : Utils.gbcPalettesList) {
                                 if (objeto.getPaletteId().toLowerCase(Locale.ROOT).equals(gbcp.getPaletteId())) {
                                     alreadyAdded = true;
                                     break;
@@ -250,13 +248,13 @@ public class ImportFragment extends Fragment {
                             }
                         }
                         if (newPalettes.size() > 0) {
-                            Methods.gbcPalettesList.addAll(newPalettes);
+                            Utils.gbcPalettesList.addAll(newPalettes);
                             for (GbcPalette gbcPalette : newPalettes) {
-                                Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                                Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                             }
                             new SavePaletteAsyncTask(newPalettes).execute();
                         } else {
-                            Methods.toast(getContext(), getString(R.string.no_new_palettes));
+                            Utils.toast(getContext(), getString(R.string.no_new_palettes));
                             tvFileName.setText(getString(R.string.no_new_palettes));
                         }
                         customAdapterPalette.notifyDataSetChanged();
@@ -268,7 +266,7 @@ public class ImportFragment extends Fragment {
                             boolean alreadyAdded = false;
                             GbcFrame gbcFrame = (GbcFrame) frame;
                             //If the palette already exists (by the name) it doesn't add it. Same if it's already added
-                            for (GbcFrame objeto : Methods.framesList) {
+                            for (GbcFrame objeto : Utils.framesList) {
                                 if (objeto.getFrameName().toLowerCase(Locale.ROOT).equals(gbcFrame.getFrameName())) {
                                     alreadyAdded = true;
                                     break;
@@ -279,13 +277,13 @@ public class ImportFragment extends Fragment {
                             }
                         }
                         if (newFrames.size() > 0) {
-                            Methods.framesList.addAll(newFrames);
+                            Utils.framesList.addAll(newFrames);
                             for (GbcFrame gbcFrame : newFrames) {
-                                Methods.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
+                                Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
                             }
                             new SaveFrameAsyncTask(newFrames).execute();//TEST THIS
                         } else {
-                            Methods.toast(getContext(), getString(R.string.no_new_frames));
+                            Utils.toast(getContext(), getString(R.string.no_new_frames));
                             tvFileName.setText(getString(R.string.no_new_frames));
                         }
                         break;
@@ -300,7 +298,7 @@ public class ImportFragment extends Fragment {
                                 GbcImage gbcImage = importedImagesList.get(i);
                                 boolean alreadyAdded = false;
                                 //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
-                                for (GbcImage image : Methods.gbcImagesList) {
+                                for (GbcImage image : Utils.gbcImagesList) {
                                     if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
                                         alreadyAdded = true;
                                         break;
@@ -313,9 +311,9 @@ public class ImportFragment extends Fragment {
                                     imageData.setImageId(gbcImage.getHashCode());
                                     imageData.setData(gbcImage.getImageBytes());
                                     newImageDatas.add(imageData);
-                                    Methods.gbcImagesList.add(gbcImage);
+                                    Utils.gbcImagesList.add(gbcImage);
                                     newGbcImages.add(gbcImage);
-                                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
+                                    Utils.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
                                 }
                             }
                         } else {
@@ -323,7 +321,7 @@ public class ImportFragment extends Fragment {
                                 GbcImage gbcImage = finalListImages.get(i);
                                 boolean alreadyAdded = false;
                                 //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
-                                for (GbcImage image : Methods.gbcImagesList) {
+                                for (GbcImage image : Utils.gbcImagesList) {
                                     if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
                                         alreadyAdded = true;
                                         break;
@@ -336,16 +334,16 @@ public class ImportFragment extends Fragment {
                                     imageData.setImageId(gbcImage.getHashCode());
                                     imageData.setData(gbcImage.getImageBytes());
                                     newImageDatas.add(imageData);
-                                    Methods.gbcImagesList.add(gbcImage);
+                                    Utils.gbcImagesList.add(gbcImage);
                                     newGbcImages.add(gbcImage);
-                                    Methods.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
+                                    Utils.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
                                 }
                             }
                         }
                         if (newGbcImages.size() > 0) {
                             new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
                         } else {
-                            Methods.toast(getContext(), getString(R.string.no_new_images));
+                            Utils.toast(getContext(), getString(R.string.no_new_images));
                             tvFileName.setText(getString(R.string.no_new_images));
                         }
                         break;
@@ -416,7 +414,7 @@ public class ImportFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             tvFileName.setText(numImagesAdded + getString(R.string.done_adding_images));
-            Methods.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
+            Utils.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
         }
     }
 
@@ -439,7 +437,7 @@ public class ImportFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             tvFileName.setText(getString(R.string.done_adding_palettes));
-            Methods.toast(getContext(), getString(R.string.palette_added));
+            Utils.toast(getContext(), getString(R.string.palette_added));
         }
     }
 
@@ -462,7 +460,7 @@ public class ImportFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             tvFileName.setText(getString(R.string.done_adding_frames));
-            Methods.toast(getContext(), getString(R.string.frames_added));
+            Utils.toast(getContext(), getString(R.string.frames_added));
         }
     }
 
@@ -516,7 +514,7 @@ public class ImportFragment extends Fragment {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Intent data = result.getData();
                         Uri uri = data.getData();
-                        Methods.toast(getContext(), getFileName(uri));
+                        Utils.toast(getContext(), getFileName(uri));
 //                        String[] aux = uri.getPath().split("/");
                         fileName = getFileName(uri);
                         //I check the extension of the file
@@ -631,17 +629,17 @@ public class ImportFragment extends Fragment {
                 }
                 nameIndex++;
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                String hashHex = Methods.bytesToHex(hash);
+                String hashHex = Utils.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 128, 112);
-                Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
+                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 128, 112);
+                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
-                    Bitmap framed = Methods.framesList.get(0).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    Bitmap framed = Utils.framesList.get(0).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
-                    imageBytes = Methods.encodeImage(image);
+                    imageBytes = Utils.encodeImage(image);
                 }
                 ImageData imageData = new ImageData();
                 imageData.setImageId(gbcImage.getHashCode());
@@ -652,7 +650,7 @@ public class ImportFragment extends Fragment {
                 importedImagesList.add(gbcImage);
             }
         } catch (Exception e) {
-            Methods.toast(getContext(),"Error\n" + e.toString());
+            Utils.toast(getContext(),"Error\n" + e.toString());
             e.printStackTrace();
         }
     }
@@ -667,7 +665,7 @@ public class ImportFragment extends Fragment {
             GbcImage gbcImage = new GbcImage();
             gbcImage.setImageBytes(bytes);
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
-            String hashHex = Methods.bytesToHex(hash);
+            String hashHex = Utils.bytesToHex(hash);
             gbcImage.setHashCode(hashHex);
             ImageData imageData = new ImageData();
             imageData.setImageId(hashHex);
@@ -676,8 +674,8 @@ public class ImportFragment extends Fragment {
             String formattedIndex = String.format("%02d", index++);
             gbcImage.setName(fileName + " " + formattedIndex);
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, height);
-            Bitmap image = imageCodec.decodeWithPalette(Methods.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes());
+            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, height);
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes());
             importedImagesBitmaps.add(image);
             importedImagesList.add(gbcImage);
         }

@@ -40,7 +40,7 @@
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">Kann Basisframe nicht löschen</string>
-    <string name="delete_dialog">Frame löschen\u0020</string>
+    <string name="delete_frame_dialog">Frame löschen\u0020</string>
     <string name="sure_dialog">Sicher?</string>
     <string name="delete">LÖSCHEN</string>
     <string name="cancel">Abbrechen</string>

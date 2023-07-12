@@ -34,7 +34,7 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.methods.Methods;
+import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -80,12 +80,12 @@ public class PalettesFragment extends Fragment {
 
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
 
-        CustomGridViewAdapterPalette customGridViewAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Methods.gbcPalettesList, true, false);
+        CustomGridViewAdapterPalette customGridViewAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, true, false);
         gridViewPalettes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                palette = Methods.gbcPalettesList.get(position).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
-                newPaletteName = Methods.gbcPalettesList.get(position).getPaletteId();
+                palette = Utils.gbcPalettesList.get(position).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
+                newPaletteName = Utils.gbcPalettesList.get(position).getPaletteId();
                 paletteDialog(palette, newPaletteName);
             }
         });
@@ -94,18 +94,18 @@ public class PalettesFragment extends Fragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 if (position <= 56) {
-                    Methods.toast(getContext(), getString(R.string.cant_delete_base_palette));
+                    Utils.toast(getContext(), getString(R.string.cant_delete_base_palette));
                 }
                 if (position > 56) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle(getString(R.string.delete_dialog_palette) + Methods.gbcPalettesList.get(position).getPaletteId() + "?");
+                    builder.setTitle(getString(R.string.delete_dialog_palette) + Utils.gbcPalettesList.get(position).getPaletteId() + "?");
                     builder.setMessage(getString(R.string.sure_dialog_palette));
 
                     // Crear un ImageView y establecer la imagen deseada
                     ImageView imageView = new ImageView(getContext());
                     imageView.setAdjustViewBounds(true);
                     imageView.setPadding(30, 10, 30, 10);
-                    imageView.setImageBitmap(Methods.gbcPalettesList.get(position).paletteViewer());
+                    imageView.setImageBitmap(Utils.gbcPalettesList.get(position).paletteViewer());
 
                     // Agregar el ImageView al diseño del diálogo
                     builder.setView(imageView);
@@ -113,22 +113,22 @@ public class PalettesFragment extends Fragment {
                     builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            new SavePaletteAsyncTask(Methods.gbcPalettesList.get(position), false).execute();
-                            String paletteToDelete = Methods.gbcPalettesList.get(position).getPaletteId();
-                            Methods.gbcPalettesList.remove(position);
+                            new SavePaletteAsyncTask(Utils.gbcPalettesList.get(position), false).execute();
+                            String paletteToDelete = Utils.gbcPalettesList.get(position).getPaletteId();
+                            Utils.gbcPalettesList.remove(position);
 
                             //I change the palette index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
-                            for (int i = 0; i < Methods.gbcImagesList.size(); i++) {
-                                if (Methods.gbcImagesList.get(i).getPaletteId() == paletteToDelete) {
-                                    Methods.gbcImagesList.get(i).setPaletteId("bw");
+                            for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
+                                if (Utils.gbcImagesList.get(i).getPaletteId() == paletteToDelete) {
+                                    Utils.gbcImagesList.get(i).setPaletteId("bw");
                                     //If the bitmap cache already has the bitmap, change it.
-                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
-                                        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
-                                        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(0).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
-                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
+                                    if (Utils.imageBitmapCache.containsKey(Utils.gbcImagesList.get(i).getHashCode())) {
+                                        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Utils.gbcImagesList.get(i).getImageBytes().length / 40);
+                                        Bitmap image = imageCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), Utils.gbcImagesList.get(i).getImageBytes());
+                                        Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                     }
-                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
+                                    new GalleryFragment.SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
 //                                //Also need to change the palette index of the images with a superior index to the deleted one to current index -1
 //                                else if (Methods.gbcImagesList.get(i).getPaletteId() > position) {
@@ -162,7 +162,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 newPaletteName = getString(R.string.set_palette_name);
-                palette = Methods.gbcPalettesList.get(0).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
+                palette = Utils.gbcPalettesList.get(0).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
                 paletteDialog(palette, newPaletteName);
             }
         });
@@ -212,7 +212,7 @@ public class PalettesFragment extends Fragment {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
         JSONArray palettesArr = new JSONArray();
-        for (GbcPalette palette : Methods.gbcPalettesList) {
+        for (GbcPalette palette : Utils.gbcPalettesList) {
             JSONObject paletteObj = new JSONObject();
             paletteObj.put("shortName", palette.getPaletteId());
             paletteObj.put("name", palette.getPaletteId());
@@ -232,12 +232,12 @@ public class PalettesFragment extends Fragment {
         File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
         String fileName = "palettes_" + dateFormat.format(new Date()) + ".json";
-        File file = new File(directory, fileName);
+        File file = new File(Utils.PALETTES_FOLDER, fileName);
 
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(json.toString(2));
             System.out.println("Saved.");
-            Methods.toast(getContext(), getString(R.string.toast_palettes_json));
+            Utils.toast(getContext(), getString(R.string.toast_palettes_json));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -445,7 +445,7 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Utils.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
                         .setPositiveButton("OK", new ColorPickerClickListener() {
@@ -485,7 +485,7 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Utils.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
                         .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -527,7 +527,7 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Utils.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
                         .setPositiveButton("OK", new ColorPickerClickListener() {
@@ -569,7 +569,7 @@ public class PalettesFragment extends Fragment {
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
-                                Methods.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                Utils.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
                             }
                         })
                         .setPositiveButton("ok", new ColorPickerClickListener() {
@@ -601,11 +601,11 @@ public class PalettesFragment extends Fragment {
             public void onClick(View v) {
                 boolean alreadyExists = false;
                 newPaletteName = etPaletteName.getText().toString();
-                for (GbcPalette paleta : Methods.gbcPalettesList) {
+                for (GbcPalette paleta : Utils.gbcPalettesList) {
                     if (paleta.getPaletteId().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {
                         alreadyExists = true;
                         etPaletteName.setBackgroundColor(Color.parseColor("#FF0000"));
-                        Methods.toast(getContext(), getString(R.string.toast_palettes_error));
+                        Utils.toast(getContext(), getString(R.string.toast_palettes_error));
                         break;
                     }
                 }
@@ -613,10 +613,10 @@ public class PalettesFragment extends Fragment {
                     GbcPalette newPalette = new GbcPalette();
                     newPalette.setPaletteId(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
                     newPalette.setPaletteColors(palette);
-                    Methods.gbcPalettesList.add(newPalette);
-                    Methods.hashPalettes.put(newPalette.getPaletteId(),newPalette);
+                    Utils.gbcPalettesList.add(newPalette);
+                    Utils.hashPalettes.put(newPalette.getPaletteId(),newPalette);
                     gridViewPalettes.setAdapter(imageAdapter);
-                    Methods.toast(getContext(), getString(R.string.palette_added));
+                    Utils.toast(getContext(), getString(R.string.palette_added));
                     dialog.hide();
                     //To add it to the database
                     new SavePaletteAsyncTask(newPalette, true).execute();//Adding the new palette to the database
@@ -639,13 +639,13 @@ public class PalettesFragment extends Fragment {
         Bitmap bitmap;
         Bitmap upscaledBitmap;
         byte[] imageBytes;
-        if (Methods.gbcImagesList.size() == 0 || (Methods.gbcImagesList.get(0).getImageBytes().length / 40 != 144)) {//If there are no images, or they are not 144 height
-            imageBytes = Methods.encodeImage(Methods.framesList.get(0).getFrameBitmap());
+        if (Utils.gbcImagesList.size() == 0 || (Utils.gbcImagesList.get(0).getImageBytes().length / 40 != 144)) {//If there are no images, or they are not 144 height
+            imageBytes = Utils.encodeImage(Utils.framesList.get(0).getFrameBitmap());
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes);
-            upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Methods.framesList.get(0).getFrameBitmap().getWidth() * 6, Methods.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
+            upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Utils.framesList.get(0).getFrameBitmap().getWidth() * 6, Utils.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {
             //Shows first image
-            imageBytes = Methods.gbcImagesList.get(0).getImageBytes();
+            imageBytes = Utils.gbcImagesList.get(0).getImageBytes();
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, 160 * 6, 144 * 6, false);
         }

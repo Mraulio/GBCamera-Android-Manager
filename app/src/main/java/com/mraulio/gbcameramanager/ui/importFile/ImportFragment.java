@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.importFile;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -22,10 +23,12 @@ import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.db.ImageDao;
@@ -34,6 +37,7 @@ import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.ui.savemanager.SaveManagerFragment;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
@@ -77,6 +81,9 @@ public class ImportFragment extends Fragment {
     public static List<ImageData> importedImageDatas = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
+    private AlertDialog loadingDialog;
+    private Adapter adapter;
+
 
     TextView tvFileName;
     static String fileName;
@@ -85,7 +92,7 @@ public class ImportFragment extends Fragment {
     String fileContent = "";
     List<?> receivedList;
     int numImagesAdded;
-    Button btnExtractFile;
+    Button btnExtractFile, btnAddImages;
     CheckBox cbLastSeen, cbDeleted;
     LinearLayout layoutCb;
     CustomGridViewAdapterPalette customAdapterPalette;
@@ -109,16 +116,16 @@ public class ImportFragment extends Fragment {
         cbLastSeen = view.findViewById(R.id.cbLastSeen);
         cbDeleted = view.findViewById(R.id.cbDeletedImages);
         layoutCb = view.findViewById(R.id.layout_cb);
-        Button btnAddImages = view.findViewById(R.id.btnAddImages);
+        btnAddImages = view.findViewById(R.id.btnAddImages);
         btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
+        loadingDialog = Utils.loadingDialog(getContext());
 
         tvFileName = view.findViewById(R.id.tvFileName);
         gridViewImport = view.findViewById(R.id.gridViewImport);
         btnSelectFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                chooseFile();
                 openFileDialog(v);
             }
 
@@ -126,90 +133,8 @@ public class ImportFragment extends Fragment {
         btnExtractFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //I clear the lists in case I choose several files without leaving
-                importedImagesList.clear();
-                importedImagesBitmaps.clear();
-                listImportedImageBytes.clear();
-                cbLastSeen.setChecked(false);
-                cbDeleted.setChecked(false);
-                if (savFile && !isJson) {
-
-                    btnAddImages.setEnabled(true);
-                    extractSavImages();
-                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount - 1));
-                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount - 1));
-                    lastSeenImage = importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount - 1);
-                    lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount - 1);
-                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount, importedImagesList.size()));
-
-                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount, importedImagesBitmaps.size()));
-                    listDeletedBitmapsRedStroke = new ArrayList<>();
-                    Paint paint = new Paint();
-                    paint.setColor(Color.RED);
-                    paint.setStrokeWidth(2);
-                    int startX = 160;
-                    int startY = 0;
-                    int endX = 0;
-                    int endY = 144;
-                    for (Bitmap bitmap : listDeletedBitmaps) {
-                        Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
-                        Canvas canvas = new Canvas(copiedBitmap);
-                        canvas.drawLine(startX, startY, endX, endY, paint);
-                        listDeletedBitmapsRedStroke.add(copiedBitmap);
-                    }
-                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
-                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
-                    showImages(cbLastSeen, cbDeleted);
-                    btnAddImages.setText(getString(R.string.btn_add_images));
-                    btnAddImages.setVisibility(View.VISIBLE);
-                    layoutCb.setVisibility(View.VISIBLE);
-                    ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-                } else if (!savFile && !isJson) {
-                    btnAddImages.setEnabled(true);
-                    try {
-                        extractHexImages(fileContent);
-                    } catch (NoSuchAlgorithmException e) {
-                        e.printStackTrace();
-                    }
-                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
-                    gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
-                    btnAddImages.setText(getString(R.string.btn_add_images));
-                    btnAddImages.setVisibility(View.VISIBLE);
-                    layoutCb.setVisibility(View.GONE);
-                    ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-                } else if (!savFile && isJson) {
-                    receivedList = JsonReader.jsonCheck(fileContent);
-                    if (receivedList == null) {
-                        Utils.toast(getContext(), getString(R.string.no_valid_list));
-                        return;
-                    }
-                    switch (addEnum) {
-                        case PALETTES:
-                            btnAddImages.setEnabled(true);
-                            customAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true);
-                            gridViewImport.setAdapter(customAdapterPalette);
-                            btnAddImages.setText(getString(R.string.btn_add_palettes));
-                            btnAddImages.setVisibility(View.VISIBLE);
-                            layoutCb.setVisibility(View.GONE);
-                            break;
-
-                        case FRAMES:
-                            btnAddImages.setEnabled(true);
-                            btnAddImages.setText(getString(R.string.btn_add_frames));
-                            btnAddImages.setVisibility(View.VISIBLE);
-                            layoutCb.setVisibility(View.GONE);
-                            gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true));
-                            break;
-                        case IMAGES:
-                            btnAddImages.setEnabled(true);
-                            btnAddImages.setText(getString(R.string.btn_add_images));
-                            btnAddImages.setVisibility(View.VISIBLE);
-                            layoutCb.setVisibility(View.GONE);
-                            gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true));
-                            break;
-                    }
-                }
+                loadingDialog.show();
+                new loadDataTask().execute();
             }
         });
 
@@ -217,12 +142,14 @@ public class ImportFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 showImages(cbLastSeen, cbDeleted);
+                gridViewImport.setAdapter((ListAdapter) adapter);
             }
         });
         cbDeleted.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showImages(cbLastSeen, cbDeleted);
+                gridViewImport.setAdapter((ListAdapter) adapter);
             }
         });
 
@@ -354,6 +281,135 @@ public class ImportFragment extends Fragment {
         return view;
     }
 
+    private void extractFile() {
+
+        //I clear the lists in case I choose several files without leaving
+        importedImagesList.clear();
+        importedImagesBitmaps.clear();
+        listImportedImageBytes.clear();
+        cbLastSeen.setChecked(false);
+        cbDeleted.setChecked(false);
+        if (savFile && !isJson) {
+
+//            btnAddImages.setEnabled(true);
+            extractSavImages();
+            listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount - 1));
+            listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount - 1));
+            lastSeenImage = importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount - 1);
+            lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount - 1);
+            listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount, importedImagesList.size()));
+
+            listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount, importedImagesBitmaps.size()));
+            listDeletedBitmapsRedStroke = new ArrayList<>();
+            Paint paint = new Paint();
+            paint.setColor(Color.RED);
+            paint.setStrokeWidth(2);
+            int startX = 160;
+            int startY = 0;
+            int endX = 0;
+            int endY = 144;
+            for (Bitmap bitmap : listDeletedBitmaps) {
+                Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
+                Canvas canvas = new Canvas(copiedBitmap);
+                canvas.drawLine(startX, startY, endX, endY, paint);
+                listDeletedBitmapsRedStroke.add(copiedBitmap);
+            }
+//            tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
+//            btnAddImages.setText(getString(R.string.btn_add_images));
+//            btnAddImages.setVisibility(View.VISIBLE);
+//            layoutCb.setVisibility(View.VISIBLE);
+            showImages(cbLastSeen, cbDeleted);
+            ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
+        } else if (!savFile && !isJson) {
+//            btnAddImages.setEnabled(true);
+            try {
+                extractHexImages(fileContent);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            adapter = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true);
+//            gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
+//            tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
+//            btnAddImages.setText(getString(R.string.btn_add_images));
+//            btnAddImages.setVisibility(View.VISIBLE);
+//            layoutCb.setVisibility(View.GONE);
+            ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
+        } else if (!savFile && isJson) {
+            receivedList = JsonReader.jsonCheck(fileContent);
+            if (receivedList == null) {
+                Utils.toast(getContext(), getString(R.string.no_valid_list));
+                return;
+            }
+
+        }
+
+    }
+
+    private class loadDataTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            try {
+                extractFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (savFile && !isJson) {
+                btnAddImages.setEnabled(true);
+                tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
+                btnAddImages.setText(getString(R.string.btn_add_images));
+                btnAddImages.setVisibility(View.VISIBLE);
+                layoutCb.setVisibility(View.VISIBLE);
+
+            } else if (!savFile && !isJson) {
+                btnAddImages.setEnabled(true);
+                tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
+                btnAddImages.setText(getString(R.string.btn_add_images));
+                btnAddImages.setVisibility(View.VISIBLE);
+                layoutCb.setVisibility(View.GONE);
+            } else if (!savFile && isJson) {
+                switch (addEnum) {
+                    case PALETTES:
+                        btnAddImages.setEnabled(true);
+                        adapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true);
+                        customAdapterPalette = (CustomGridViewAdapterPalette) adapter;
+//                    gridViewImport.setAdapter(customAdapterPalette);
+                        btnAddImages.setText(getString(R.string.btn_add_palettes));
+                        btnAddImages.setVisibility(View.VISIBLE);
+                        layoutCb.setVisibility(View.GONE);
+                        break;
+
+                    case FRAMES:
+                        btnAddImages.setEnabled(true);
+                        btnAddImages.setText(getString(R.string.btn_add_frames));
+                        btnAddImages.setVisibility(View.VISIBLE);
+                        layoutCb.setVisibility(View.GONE);
+                        adapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true);
+//                    gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true));
+                        break;
+                    case IMAGES:
+                        btnAddImages.setEnabled(true);
+                        btnAddImages.setText(getString(R.string.btn_add_images));
+                        btnAddImages.setVisibility(View.VISIBLE);
+                        layoutCb.setVisibility(View.GONE);
+                        adapter = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true);
+//                    gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true));
+                        break;
+                }
+            }
+            gridViewImport.setAdapter((ListAdapter) adapter);
+            loadingDialog.dismiss();
+
+        }
+    }
+
     //Refactor, also on UsbSerialFragment
     private void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
         List<Bitmap> bitmapsAdapterList = null;
@@ -385,7 +441,8 @@ public class ImportFragment extends Fragment {
             finalListBitmaps.addAll(listDeletedBitmaps);
             bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
         }
-        gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true)));
+        adapter = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true);
+//        gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true)));
     }
 
     private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -650,7 +707,7 @@ public class ImportFragment extends Fragment {
                 importedImagesList.add(gbcImage);
             }
         } catch (Exception e) {
-            Utils.toast(getContext(),"Error\n" + e.toString());
+            Utils.toast(getContext(), "Error\n" + e.toString());
             e.printStackTrace();
         }
     }

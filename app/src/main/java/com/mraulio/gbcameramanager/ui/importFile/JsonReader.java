@@ -116,7 +116,7 @@ public class JsonReader {
                         gbcImage.setTags(tagsStrings);
                     }
                     if (imageJson.has("palette")) {
-                        if (!Utils.hashPalettes.containsKey(gbcImage.getPaletteId())) {
+                        if (!Utils.hashPalettes.containsKey(imageJson.getString("palette"))) {
                             gbcImage.setPaletteId("bw");
                         } else
                             gbcImage.setPaletteId(imageJson.getString("palette"));//To get the palette from the json
@@ -148,6 +148,7 @@ public class JsonReader {
                         e.printStackTrace();
                     }
 
+                    System.out.println(gbcImage.getPaletteId()+"/////////////////////////////////////////////////");
                     Bitmap imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(), bytes, gbcImage);
                     if (imageBitmap.getHeight() == 144) {
                         imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), gbcImage.isLockFrame());//Need to change the frame to use the one in the json

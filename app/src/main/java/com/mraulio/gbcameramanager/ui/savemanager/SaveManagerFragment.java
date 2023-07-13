@@ -88,9 +88,10 @@ public class SaveManagerFragment extends Fragment {
                 saveName = (String) parent.getItemAtPosition(position);
 
                 selectedFile = new File(Utils.SAVE_FOLDER, saveName);
-                new LoadDataTask().execute();
+                new loadDataTask().execute();
             }
         });
+
 
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,8 +122,7 @@ public class SaveManagerFragment extends Fragment {
 
     }
 
-    // AsyncTask para realizar la carga en segundo plano
-    private class LoadDataTask extends AsyncTask<Void, Void, Void> {
+    private class loadDataTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -258,7 +258,7 @@ public class SaveManagerFragment extends Fragment {
                     listViewAdapter.notifyDataSetChanged();
                     btnDelete.setEnabled(false);
                 } else {
-                   Utils.toast(getContext(),getString(R.string.toast_couldnt_delete_sav));
+                    Utils.toast(getContext(), getString(R.string.toast_couldnt_delete_sav));
                 }
             }
         });

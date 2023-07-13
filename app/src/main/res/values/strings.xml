@@ -30,7 +30,6 @@
     <string name="total_images">Total of images:\u0020</string>
     <string name="no_images">No images in the gallery. Go to Import tab</string>
 
-
     <!--Settings fragment xml strings-->
     <string name="export_txt">Export as TXT.</string>
     <string name="export_png">Export as PNG.</string>

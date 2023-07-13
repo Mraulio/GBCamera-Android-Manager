@@ -227,16 +227,13 @@ public class PalettesFragment extends Fragment {
         }
         stateObj.put("palettes", palettesArr);
         json.put("state", stateObj);
-        System.out.println(json.toString(2));
 
-        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
         String fileName = "palettes_" + dateFormat.format(new Date()) + ".json";
         File file = new File(Utils.PALETTES_FOLDER, fileName);
 
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(json.toString(2));
-            System.out.println("Saved.");
             Utils.toast(getContext(), getString(R.string.toast_palettes_json));
         } catch (IOException e) {
             e.printStackTrace();
@@ -329,9 +326,9 @@ public class PalettesFragment extends Fragment {
                     ivPalette.setImageBitmap(paletteMaker(palette));
 
                 } catch (NumberFormatException e) {
-                    System.out.println("Number format exception");
+                    e.printStackTrace();
                 } catch (Exception e) {
-                    System.out.println("Other exception" + e.toString());
+                    e.printStackTrace();
                 }
             }
 
@@ -356,9 +353,9 @@ public class PalettesFragment extends Fragment {
                     ivPalette.setImageBitmap(paletteMaker(palette));
 
                 } catch (NumberFormatException e) {
-                    System.out.println("Number format exception");
+                    e.printStackTrace();
                 } catch (Exception e) {
-                    System.out.println("Other exception" + e.toString());
+                    e.printStackTrace();
                 }
             }
 
@@ -383,9 +380,9 @@ public class PalettesFragment extends Fragment {
                     ivPalette.setImageBitmap(paletteMaker(palette));
 
                 } catch (NumberFormatException e) {
-                    System.out.println("Number format exception");
+                    e.printStackTrace();
                 } catch (Exception e) {
-                    System.out.println("Other exception" + e.toString());
+                    e.printStackTrace();
                 }
             }
 
@@ -410,9 +407,9 @@ public class PalettesFragment extends Fragment {
                     ivPalette.setImageBitmap(paletteMaker(palette));
 
                 } catch (NumberFormatException e) {
-                    System.out.println("Number format exception");
+                    e.printStackTrace();
                 } catch (Exception e) {
-                    System.out.println("Other exception" + e.toString());
+                    e.printStackTrace();
                 }
             }
 
@@ -614,7 +611,7 @@ public class PalettesFragment extends Fragment {
                     newPalette.setPaletteId(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
                     newPalette.setPaletteColors(palette);
                     Utils.gbcPalettesList.add(newPalette);
-                    Utils.hashPalettes.put(newPalette.getPaletteId(),newPalette);
+                    Utils.hashPalettes.put(newPalette.getPaletteId(), newPalette);
                     gridViewPalettes.setAdapter(imageAdapter);
                     Utils.toast(getContext(), getString(R.string.palette_added));
                     dialog.hide();

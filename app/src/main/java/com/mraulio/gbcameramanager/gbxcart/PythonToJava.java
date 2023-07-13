@@ -6,6 +6,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hoho.android.usbserial.driver.UsbSerialPort;
+import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,7 +32,6 @@ public class PythonToJava {
 
     private static final int TIMEOUT = 2000;
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-    private static File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
     private static FileOutputStream fos = null;
     private static BufferedOutputStream bos = null;
@@ -203,7 +203,7 @@ public class PythonToJava {
         String fileName = "PhotoFullRom_";
         String folderName = "PhotoFullRom_" + dtf.format(now);
         fileName += dtf.format(now) + ".full";
-        File parentFile = new File(directory + "/PHOTO Roms Dumps", folderName);
+        File parentFile = new File(Utils.PHOTO_DUMPS_FOLDER, folderName);
         //I create the new directory if it doesn't exists
         try {
             if (!parentFile.exists() && !parentFile.mkdirs()) {
@@ -315,7 +315,7 @@ public class PythonToJava {
         LocalDateTime now = LocalDateTime.now();
         String fileName = "gbCamera_";
         fileName += dtf.format(now) + ".sav";
-        File file = new File(directory + "/GBxCamera Dumps", fileName);
+        File file = new File(Utils.SAVE_FOLDER, fileName);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         //I create the new directory if it doesn't exists
         try {

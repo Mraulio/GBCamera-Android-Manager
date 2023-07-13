@@ -248,7 +248,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                             }
                             clickCount = 0;
-                            System.out.println(Utils.gbcImagesList.get(globalImageIndex).getTags());
                             updateGridView(currentPage);
                         }
                         //To save the image with the favorite tag to the database
@@ -288,8 +287,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         GbcImage gbcImage = Utils.gbcImagesList.get(globalImageIndex);
                         gbcImage.setLockFrame(keepFrame);
                         Utils.imageBitmapCache.put(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), bitmap);
-//                        Bitmap image = Methods.imageBitmapCache.get(Methods.gbcImagesList.get(globalImageIndex).getHashCode());
-                        System.out.println(Utils.gbcImagesList.get(globalImageIndex).getHashCode());
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                         new SaveImageAsyncTask(gbcImage).execute();
                         updateGridView(currentPage);
@@ -567,7 +564,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             port.setParameters(1000000, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 
         } catch (Exception e) {
-            System.out.println(e.toString());
             tv.append(e.toString());
             Toast.makeText(getContext(), "Error in connect." + e.toString(), Toast.LENGTH_SHORT).show();
         }
@@ -734,7 +730,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(Intent.createChooser(intent, "Share"));
         } catch (Exception e) {
-            Utils.toast(getContext(),"Exception");
+            Utils.toast(getContext(), "Exception");
             e.printStackTrace();
         } finally {
             if (fileOutputStream != null) {
@@ -746,19 +742,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
         }
     }
+
     private void saveImage(GbcImage gbcImage, String fileName) {
         Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
-        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File file = new File(directory, fileName);
-        try {
-            File parent = file.getParentFile();
-            if (parent != null && !parent.exists() && !parent.mkdirs()) {
-                throw new IllegalStateException("Couldn't create dir: " + parent);
-            }
-        } catch (Exception e) {
-            System.out.println(e.toString());
-        }
+
         if (MainActivity.exportPng) {
+            File file = new File(Utils.IMAGES_FOLDER, fileName);
+
             if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
                 image = Bitmap.createBitmap(image, 16, 16, 128, 112);
             }
@@ -774,6 +764,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 e.printStackTrace();
             }
         } else {
+            File file = new File(Utils.TXT_FOLDER, fileName);
+
             //Saving txt without cropping it
             try {
                 //Need to change the palette to bw so the encodeImage method works

@@ -74,9 +74,7 @@ import java.util.List;
 public class UsbSerialFragment extends Fragment implements SerialInputOutputManager.Listener {
     List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
     List<GbcImage> extractedImagesList = new ArrayList<>();
-    StringBuilder sb = new StringBuilder();
 
-    File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
     File latestFile;
     boolean ape = false;
     static UsbDeviceConnection connection;
@@ -92,11 +90,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     LinearLayout layoutCb;
     CheckBox cbLastSeen, cbDeleted;
     GridView gridView;
-    ImageView img;
     boolean gbxMode = true;
     public static List<File> fullRomFileList = new ArrayList<>();
-    public static boolean freeTv = false;
-    DecimalFormat df = new DecimalFormat("#.00");
     static TextView tv;
 
     TextView tvMode;
@@ -241,7 +236,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // Acción a realizar cuando se presiona el botón "Cancelar"
                     }
                 });
                 //Show the dialog
@@ -658,11 +652,9 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             @Override
             public void run() {
                 //To get the extracted file, as the latest one in the directory
-                File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 latestFile = null;
-                File folder = new File(directory + "/GBxCamera Dumps");
                 //To get the last created file
-                File[] files = folder.listFiles();
+                File[] files = Utils.SAVE_FOLDER.listFiles();
                 if (files != null && files.length > 0) {
                     Arrays.sort(files, new Comparator<File>() {
                         public int compare(File f1, File f2) {
@@ -726,7 +718,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             fileName += dtf.format(now) + ".txt";
         } else
             fileName += ".txt";
-        File file = new File(directory + "/SaveTestHex", fileName);
+        File file = new File(Utils.ARDUINO_HEX_FOLDER, fileName);
         try {
             File parent = file.getParentFile();
             if (parent != null && !parent.exists() && !parent.mkdirs()) {

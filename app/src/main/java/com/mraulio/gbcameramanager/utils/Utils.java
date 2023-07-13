@@ -40,6 +40,8 @@ public class Utils {
     public static final File IMAGES_FOLDER = new File(MAIN_FOLDER, "Images");
     public static final File TXT_FOLDER = new File(MAIN_FOLDER, "Hex images");
     public static final File PALETTES_FOLDER = new File(MAIN_FOLDER, "Palettes json");
+    public static final File ARDUINO_HEX_FOLDER = new File(MAIN_FOLDER, "Arduino Printer Hex");
+    public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
 
 
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
@@ -82,6 +84,9 @@ public class Utils {
         listFiles.add(IMAGES_FOLDER);
         listFiles.add(TXT_FOLDER);
         listFiles.add(PALETTES_FOLDER);
+        listFiles.add(ARDUINO_HEX_FOLDER);
+        listFiles.add(PHOTO_DUMPS_FOLDER);
+
         for (File file : listFiles) {
             try {
                 file.mkdirs();

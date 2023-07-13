@@ -36,6 +36,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -111,7 +112,11 @@ public class SaveManagerFragment extends Fragment {
             for (File file : files) {
                 fileList.add(file.getName());
             }
-            // Crear un adaptador de lista y asignarlo al ListView
+
+            //Sort by name and reverse to show last date first
+            Collections.sort(fileList, String.CASE_INSENSITIVE_ORDER);
+            Collections.reverse(fileList);
+
             listViewAdapter = new ArrayAdapter<>(getContext(),
                     android.R.layout.simple_list_item_1, fileList);
             listView.setAdapter(listViewAdapter);

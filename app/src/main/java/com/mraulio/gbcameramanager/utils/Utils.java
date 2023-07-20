@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
@@ -28,16 +30,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Class with puclic static variables and methods that are shared alongside the app
  */
 public class Utils {
     static File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+    static File picturesDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
 
     public static final File MAIN_FOLDER = new File(downloadDirectory, "GBCamera Manager");
     public static final File SAVE_FOLDER = new File(MAIN_FOLDER, "Save dumps");
-    public static final File IMAGES_FOLDER = new File(MAIN_FOLDER, "Images");
+    public static final File IMAGES_FOLDER = new File(picturesDirectory, "GBCamera Manager");
     public static final File TXT_FOLDER = new File(MAIN_FOLDER, "Hex images");
     public static final File PALETTES_FOLDER = new File(MAIN_FOLDER, "Palettes json");
     public static final File ARDUINO_HEX_FOLDER = new File(MAIN_FOLDER, "Arduino Printer Hex");
@@ -112,6 +117,8 @@ public class Utils {
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return dialog;
     }
+
+
 
 
 }

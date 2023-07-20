@@ -7,13 +7,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
@@ -29,6 +29,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,10 +64,9 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Random;
 
 public class GalleryFragment extends Fragment implements SerialInputOutputManager.Listener {
 
@@ -91,24 +92,36 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static List<Bitmap> imagesForPage;
     static List<GbcImage> gbcImagesForPage;
     public static TextView tv;
+    DisplayMetrics displayMetrics;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.GALLERY;
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;
-        DisplayMetrics displayMetrics = new DisplayMetrics();
+        displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        tv = (TextView) view.findViewById(R.id.text_gallery);
-        gridView = (GridView) view.findViewById(R.id.gridView);
+        tv = view.findViewById(R.id.text_gallery);
+        gridView = view.findViewById(R.id.gridView);
         loadingDialog = Utils.loadingDialog(getContext());
 
 
-        Button btnPrevPage = (Button) view.findViewById(R.id.btnPrevPage);
-        Button btnNextPage = (Button) view.findViewById(R.id.btnNextPage);
-        Button btnFirstPage = (Button) view.findViewById(R.id.btnFirstPage);
-        Button btnLastPage = (Button) view.findViewById(R.id.btnLastPage);
+        Button btnPrevPage = view.findViewById(R.id.btnPrevPage);
+        Button btnNextPage = view.findViewById(R.id.btnNextPage);
+        Button btnFirstPage = view.findViewById(R.id.btnFirstPage);
+        Button btnLastPage = view.findViewById(R.id.btnLastPage);
 
-        tv_page = (TextView) view.findViewById(R.id.tv_page);
+        tv_page = view.findViewById(R.id.tv_page);
+
+        tv_page.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog spinnerDialog = numberPickerPageDialog(getContext());
+
+                spinnerDialog.show();
+            }
+        });
+
         view.setOnTouchListener(new OnSwipeTouchListener(getContext()) {
             @Override
             public void onSwipeLeft() {
@@ -178,6 +191,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 dialog.setCancelable(true);//So it closes when clicking outside or back button
 
                 ImageView imageView = dialog.findViewById(R.id.image_view);
+                Button btn_paperize = dialog.findViewById(R.id.btnPaperize);
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
                 int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
                 imageView.setMaxHeight(maxHeight);
@@ -210,7 +224,32 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     keepFrame = true;
                     cbFrameKeep.setChecked(true);
                 }
+                btn_paperize.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bitmap bw_image = paletteChanger("bw", Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex));
 
+                        Bitmap paperized = Paperize(bw_image);
+                        LocalDateTime now = LocalDateTime.now();
+
+                        File file = new File(Utils.IMAGES_FOLDER, "paperized_" + dtf.format(now) + ".png");
+
+                        if (paperized.getHeight() == 144 && paperized.getWidth() == 160 && crop) {
+                            paperized = Bitmap.createBitmap(paperized, 16, 16, 128, 112);
+                        }
+                        try (FileOutputStream out = new FileOutputStream(file)) {
+                            Bitmap scaled = Bitmap.createScaledBitmap(paperized, paperized.getWidth(), paperized.getHeight(), false);
+
+                            scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+                            Toast toast = Toast.makeText(getContext(), "Saved Paperized!", Toast.LENGTH_LONG);
+                            toast.show();
+                            // PNG is a lossless format, the compression factor (100) is ignored
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 imageView.setOnClickListener(new View.OnClickListener() {
                     private int clickCount = 0;
                     private final Handler handler = new Handler();
@@ -488,7 +527,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 builder.setTitle(getString(R.string.delete_dialog_gallery) + Utils.gbcImagesList.get(globalImageIndex).getName() + "?");
                 builder.setMessage(getString(R.string.sure_dialog));
 
-                // Crear un ImageView y establecer la imagen deseada
+
                 ImageView imageView = new ImageView(getContext());
                 imageView.setAdjustViewBounds(true);
                 imageView.setPadding(40, 10, 40, 10);
@@ -496,7 +535,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 int scaler = 6;
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * scaler, bitmap.getHeight() * scaler, false));
 
-                // Agregar el ImageView al diseño del diálogo
                 builder.setView(imageView);
 
                 builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
@@ -511,12 +549,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         //No action
                     }
                 });
-                // Mostrar el diálogo
+
                 AlertDialog dialog = builder.create();
 
                 int screenWidth = displayMetrics.widthPixels;
                 int desiredWidth = (int) (screenWidth * 0.8);
-                // Configurar el tamaño del diálogo
+                // Configure Dialog size
 
                 if (bitmap.getHeight() > 144) {
                     int screenHeight = displayMetrics.heightPixels;
@@ -529,21 +567,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
         });
 
+        if (MainActivity.doneLoading) updateFromMain();
 
-        if (Utils.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
-            updateGridView(currentPage);
-        } else {
-            tv.setText(getString(R.string.loading));
-        }
-        tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
-        if (Utils.gbcImagesList.size() > 0) {
-            updateGridView(currentPage);
-            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
-
-        } else {
-            tv.setText(tv.getContext().getString(R.string.no_images));
-        }
-        tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
         return view;
     }
 
@@ -608,7 +633,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         return framed;
     }
 
-    //Cambiar paleta
+    //Change palette
     public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage) {
         ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes);
@@ -654,31 +679,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         dialog.getWindow().setAttributes(lp);
     }
 
-    //This one changes pixel by pixel of the bitmap, but works better with the frames
-    public Bitmap paletteChanger2(int newPaletteIndex, Bitmap bitmap, int imageIndex) {
-        int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
-        bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-        int[] oldColors = Utils.hashPalettes.get(Utils.gbcImagesList.get(imageIndex).getPaletteId()).getPaletteColorsInt();
-        int[] newColors = Utils.gbcPalettesList.get(newPaletteIndex).getPaletteColorsInt();
-
-        Map<Integer, Integer> colorIndexMap = new HashMap<>();
-        for (int i = 0; i < oldColors.length; i++) {
-            colorIndexMap.put(oldColors[i], i);
-        }
-
-        for (int i = 0; i < pixels.length; i++) {
-            int pixelColor = pixels[i];
-            if (colorIndexMap.containsKey(pixelColor)) {
-                int oldIndex = colorIndexMap.get(pixelColor);
-                pixels[i] = newColors[oldIndex];
-            }
-        }
-
-        Bitmap newBitmap = Bitmap.createBitmap(pixels, bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        return newBitmap;
-    }
-
     private void prevPage() {
 
         if (currentPage > 0) {
@@ -697,19 +697,40 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         }
     }
 
-//    //The shared image is stored in Pictures and compressed, then shared. This needs to change.
-//    private void shareImage(Bitmap bitmap) {
-//        if ((bitmap.getHeight() / MainActivity.exportSize) == 144 && (bitmap.getWidth() / MainActivity.exportSize) == 160 && crop) {
-//            bitmap = Bitmap.createBitmap(bitmap, 16 * MainActivity.exportSize, 16 * MainActivity.exportSize, 128 * MainActivity.exportSize, 112 * MainActivity.exportSize);
-//        }
-//        String bitmapPath = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), bitmap, "image", "share image");
-//        Uri bitmapUri = Uri.parse(bitmapPath);
-//
-//        Intent intent = new Intent(Intent.ACTION_SEND);
-//        intent.setType("image/png");
-//        intent.putExtra(Intent.EXTRA_STREAM, bitmapUri);
-//        startActivity(Intent.createChooser(intent, "Share"));
-//    }
+    private AlertDialog numberPickerPageDialog(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        NumberPicker numberPicker = new NumberPicker(context);
+        builder.setTitle("Select page");//Add to string xml
+        builder.setView(numberPicker);
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(lastPage + 1);
+        numberPicker.setWrapSelectorWheel(false);
+        numberPicker.setValue(currentPage + 1);
+
+        // Disable keyboard
+        numberPicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+
+        AlertDialog dialog = builder.create();
+//        int screenWidth = displayMetrics.widthPixels;
+//        int desiredWidth = (int) (screenWidth * 0.2);
+//       dialog.getWindow().setLayout(desiredWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+
+        numberPicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int selectedValue = numberPicker.getValue();
+
+                if (selectedValue != currentPage + 1) {
+                    currentPage = selectedValue - 1;
+                    updateGridView(currentPage);
+                    tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+                }
+                dialog.hide();
+            }
+        });
+        return dialog;
+    }
 
     private void shareImage(Bitmap bitmap) {
         if ((bitmap.getHeight() / MainActivity.exportSize) == 144 && (bitmap.getWidth() / MainActivity.exportSize) == 160 && crop) {
@@ -811,14 +832,32 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     public void updateFromMain() {
+
+        if (Utils.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
+            updateGridView(currentPage);
+        }
+//                else {
+//            tv.setText(getString(R.string.loading));
+//        }
+//        tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+        if (Utils.gbcImagesList.size() > 0) {
+            updateGridView(currentPage);
+            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
+            tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+
+        } else {
+            tv.setText(tv.getContext().getString(R.string.no_images));
+        }
+
+
 //        if (Methods.gbcImagesList.size() > 0) {
 //            updateGridView(currentPage);
 //            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
 //        } else {
 //            tv.setText(tv.getContext().getString(R.string.no_images));
 //        }
-        tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
-        updateGridView(currentPage);
+//        tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+//        updateGridView(currentPage);
     }
 
     //Method to update the gallery gridview
@@ -826,13 +865,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         //Bitmap list to store current page bitmaps
         imagesForPage = new ArrayList<>();
         itemsPerPage = MainActivity.imagesPage;
-        //Por si la lista de imagenes es mas corta que el tamaño de paginacion
+        //In case the list of images is shorter than the pagination size
         if (Utils.gbcImagesList.size() < itemsPerPage) {
             itemsPerPage = Utils.gbcImagesList.size();
         }
         lastPage = (Utils.gbcImagesList.size() - 1) / itemsPerPage;
 
-        //Para que si la pagina final no está completa (no tiene tantos items como itemsPerPage)
+        //In case the last page is not complete
         if (currentPage == lastPage && (Utils.gbcImagesList.size() % itemsPerPage) != 0) {
             itemsPerPage = Utils.gbcImagesList.size() % itemsPerPage;
             startIndex = Utils.gbcImagesList.size() - itemsPerPage;
@@ -1064,6 +1103,74 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             TextView txtTitle;
             ImageView imageItem;
         }
+    }
+
+
+    private Bitmap Paperize(Bitmap inputBitmap) {
+        //intensity map for printer head with threshold
+        int mul = 20;
+        int overlapping = 4;
+        Bitmap pixelSampleBitmap;
+        pixelSampleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.pixel_sample);
+
+        int height = inputBitmap.getHeight();
+        int width = inputBitmap.getWidth();
+        int newWidth = width * 20;
+        int newHeight = height * 20;
+        Bitmap newBitmap = Bitmap.createBitmap(newWidth, newHeight, inputBitmap.getConfig());
+
+
+        int[][] streaks = new int[height][width];
+        Random random = new Random();
+//        for (int i = 0; i < width; i++) {
+//            int start = random.nextInt(2); // Generar 0 o 1 aleatoriamente
+//            for (int j = 0; j < height; j++) {
+//                streaks[j][i] = start;
+//                //you can change the streak length here
+//                if (random.nextDouble() < 0.2) {
+//                    start = random.nextInt(2); // Generar 0 o 1 aleatoriamente si se cumple la condición
+//                }
+//            }
+//        }
+        // Tamaño de la región que deseas copiar (20x20)
+        int regionSize = 20;
+
+        for (int y = 0; y < inputBitmap.getHeight(); y++) {
+            for (int x = 0; x < inputBitmap.getWidth(); x++) {
+                int color = inputBitmap.getPixel(x, y);
+                int randomRegionX = random.nextInt(50) * regionSize;
+                // Calcular la posición correspondiente en el nuevo Bitmap
+                int newX = x * regionSize;
+                int newY = y * regionSize;
+
+                // Determinar la zona de pixelSampleBitmap según el color
+                if (color == Color.parseColor("#FFFFFF")) {
+                    // Color blanco (#FFFFFF), no se coge nada de pixelSampleBitmap
+                    for (int dy = 0; dy < regionSize; dy++) {
+                        for (int dx = 0; dx < regionSize; dx++) {
+                            newBitmap.setPixel(newX + dx, newY + dy, Color.WHITE);
+                        }
+                    }
+                } else if (color == Color.parseColor("#AAAAAA")) {
+                    // Color aaaaaa, coger la 3a fila de 20x20 píxeles de pixelSampleBitmap
+                    Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 2 * regionSize, regionSize, regionSize);
+                    Canvas canvas = new Canvas(newBitmap);
+                    canvas.drawBitmap(regionBitmap, newX, newY, null);
+                } else if (color == Color.parseColor("#555555")) {
+                    // Color 555555, coger la 2a fila de 20x20 píxeles de pixelSampleBitmap
+                    Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 1 * regionSize, regionSize, regionSize);
+                    Canvas canvas = new Canvas(newBitmap);
+                    canvas.drawBitmap(regionBitmap, newX, newY, null);
+                } else if (color == Color.parseColor("#000000")) {
+                    // Color 000000, coger la 1a fila de 20x20 píxeles de pixelSampleBitmap
+                    Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 0 * regionSize, regionSize, regionSize);
+                    Canvas canvas = new Canvas(newBitmap);
+                    canvas.drawBitmap(regionBitmap, newX, newY, null);
+                }
+            }
+        }
+
+        return newBitmap;
     }
 
     /**

@@ -8,7 +8,9 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
 import java.io.ByteArrayOutputStream;
 
-
+/**
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
+ */
 public class ImageCodec implements Codec {
 
     private final int imageWidth;

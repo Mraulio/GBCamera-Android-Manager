@@ -4,14 +4,9 @@
  */
 package com.mraulio.gbcameramanager.gameboycameralib.constants;
 
-
-/**
- *
- * @author Raúl Miras Vidal
- */
 import android.graphics.Color;
-
 /**
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
  * Indexed palette representation with default choices for Gameboy colour conversion
  */
 public class IndexedPalette {

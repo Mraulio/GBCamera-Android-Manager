@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.frames;
 
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -37,14 +38,17 @@ import java.util.List;
  */
 public class FramesFragment extends Fragment {
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
+        MainActivity.fab.hide();
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
         CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Utils.framesList, true, false);
         TextView tvNumFrames = view.findViewById(R.id.tvNumFrames);
+        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.FRAMES;
 
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override

@@ -1,5 +1,8 @@
 package com.mraulio.gbcameramanager.gameboycameralib.constants;
 
+/**
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
+ */
 public final class SaveImageConstants {
 
     public static final int IMAGE_WIDTH = 128;

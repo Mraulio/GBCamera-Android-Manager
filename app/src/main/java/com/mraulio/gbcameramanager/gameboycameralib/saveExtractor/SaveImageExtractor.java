@@ -1,6 +1,5 @@
 package com.mraulio.gbcameramanager.gameboycameralib.saveExtractor;
 
-
 import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.*;
 
 import android.graphics.Bitmap;
@@ -22,6 +21,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
+ */
 public class SaveImageExtractor implements Extractor {
 
     private static final String PNG_FORMAT = "png";
@@ -36,7 +38,7 @@ public class SaveImageExtractor implements Extractor {
 
     @Override
     public List<Bitmap> extract(File file) throws IOException {
-        return extract(Files.readAllBytes(file.toPath()));//Modificado
+        return extract(Files.readAllBytes(file.toPath()));//Modified
     }
 
     @Override
@@ -72,7 +74,7 @@ public class SaveImageExtractor implements Extractor {
 
     @Override
     public List<byte[]> extractBytes(File file) throws IOException {
-        return extractBytes(Files.readAllBytes(file.toPath()));//Modificado
+        return extractBytes(Files.readAllBytes(file.toPath()));//Modified
     }
 
     //Added by Mraulio

@@ -78,6 +78,7 @@ public class SaveManagerFragment extends Fragment {
         gridviewSaves = view.findViewById(R.id.gridViewSaves);
         btnDelete = view.findViewById(R.id.btnDelete);
         loadingDialog = Utils.loadingDialog(getContext());
+        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
 
 
         fileList = new ArrayList<>();

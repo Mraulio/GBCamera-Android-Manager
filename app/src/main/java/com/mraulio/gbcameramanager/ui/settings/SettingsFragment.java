@@ -38,6 +38,7 @@ public class SettingsFragment extends Fragment {
         RadioButton rbPng = view.findViewById(R.id.rbPng);
         RadioButton rbTxt = view.findViewById(R.id.rbTxt);
         CheckBox cbPrint = view.findViewById(R.id.cbPrint);
+        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
 
         cbPrint.setChecked(MainActivity.printingEnabled);
         cbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

@@ -14,13 +14,20 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -28,6 +35,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.utils.StartCreation;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
@@ -52,10 +60,23 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     public static int printIndex = 0;//If there are no images there will be a crash when trying to print
     private AppBarConfiguration mAppBarConfiguration;
-    boolean anyImage = false;
+    boolean anyImage = true;
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
+
+    public static enum CURRENT_FRAGMENT {
+        GALLERY,
+        PALETTES,
+        FRAMES,
+        USB_SERIAL,
+        SAVE_MANAGER,
+        SETTINGS
+    }
+
+    public static CURRENT_FRAGMENT current_fragment;
+
+    public static FloatingActionButton fab;
 
     public static SharedPreferences sharedPreferences;
     //Store in the shared preferences
@@ -95,15 +116,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //Keep only the Light Theme
-//        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
         sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         exportSize = sharedPreferences.getInt("export_size", 4);
         imagesPage = sharedPreferences.getInt("images_per_page", 12);
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
+        fab = findViewById(R.id.fab);
 
         Utils.makeDirs();
 
@@ -148,17 +167,34 @@ public class MainActivity extends AppCompatActivity {
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         if (openedSav) navigationView.setCheckedItem(R.id.nav_import);
+        fab = binding.appBarMain.fab;
+        //Floating Action Button
+        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_gallery, R.id.nav_settings, R.id.nav_palettes)
+                R.id.nav_gallery)
                 .setOpenableLayout(drawer)
                 .build();
+
+
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+        navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
+            @Override
+            public void onDestinationChanged(@NonNull NavController navController, @NonNull NavDestination navDestination, @Nullable Bundle bundle) {
+                invalidateOptionsMenu();
+            }
 
+        });
         /**
          * I ask for storage permissions
          */
@@ -170,7 +206,49 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         }
+
+
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        switch (current_fragment) {
+            case GALLERY:
+                menu.clear(); // Limpia el menú actual
+                getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentA
+                fab.show();
+                break;
+
+            case PALETTES:
+                menu.clear(); // Limpia el menú actual
+                fab.hide();
+                menu.close();
+//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
+                break;
+            case FRAMES:
+                break;
+
+            case USB_SERIAL:
+                break;
+
+            case SAVE_MANAGER:
+                break;
+
+            case SETTINGS:
+                break;
+
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.main, menu);
+//        return true;
+//    }
 
     private class ReadDataAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -232,24 +310,23 @@ public class MainActivity extends AppCompatActivity {
             }
             //Now that I have palettes and frames, I can add images:
             if (imagesFromDao.size() > 0) {
-                anyImage = true;
+//                anyImage = true;
                 //I need to add them to the gbcImagesList(GbcImage)
                 Utils.gbcImagesList.addAll(imagesFromDao);
                 GbcImage.numImages += Utils.gbcImagesList.size();
-            }
+            } else anyImage = false;
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            // Notifica al Adapter que los datos han cambiado
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
-            if (anyImage) {
-                gf.updateFromMain();
-            } else {
-                GalleryFragment.tv.setText(GalleryFragment.tv.getContext().getString(R.string.no_images));
-            }
+//            if (anyImage) {
+            gf.updateFromMain();
+//            } else {
+//                GalleryFragment.tv.setText(GalleryFragment.tv.getContext().getString(R.string.no_images));
+//            }
         }
     }
 

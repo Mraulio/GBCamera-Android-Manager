@@ -6,13 +6,8 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
 import java.io.IOException;
 
-
 /**
- * Codec para decodificar y codificar una imagen de mosaico de 8x8 píxeles
- * a un conjunto de datos de bytes y viceversa.
- * <p>
- * Este codec utiliza una paleta de colores indexados para decodificar
- * y codificar los datos de mosaico.
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
  */
 public class TileCodec implements Codec {
 

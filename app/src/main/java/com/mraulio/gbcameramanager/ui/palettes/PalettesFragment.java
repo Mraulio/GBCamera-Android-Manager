@@ -74,6 +74,7 @@ public class PalettesFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_palettes, container, false);
         MainActivity.pressBack = false;
+        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.PALETTES;
 
         Button btnAdd = view.findViewById(R.id.btnAdd);
         Button btnExportPaletteJson = view.findViewById(R.id.btnExportPaletteJson);

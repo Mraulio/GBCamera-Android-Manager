@@ -90,8 +90,19 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="horizontal"
-        android:weightSum="2">
-
+        android:weightSum="3">
+        <Button
+            android:id="@+id/btnPaperize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:layout_weight="1"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="3sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
+            android:text="Paperize"
+            android:textSize="10dp"></Button>
         <CheckBox
             android:id="@+id/cbFrameKeep"
             android:layout_width="wrap_content"

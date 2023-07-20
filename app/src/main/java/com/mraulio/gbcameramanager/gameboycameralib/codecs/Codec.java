@@ -7,8 +7,7 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 import java.io.IOException;
 
 /**
- *
- * @author Raúl Miras Vidal
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
  */
 public interface Codec {
     Bitmap decode(byte[] data);

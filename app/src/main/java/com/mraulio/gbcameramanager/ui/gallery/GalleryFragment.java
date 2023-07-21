@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,9 @@ import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +33,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,12 +67,14 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class GalleryFragment extends Fragment implements SerialInputOutputManager.Listener {
-
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     static UsbManager manager = MainActivity.manager;
     SerialInputOutputManager usbIoManager;
@@ -77,6 +82,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static UsbSerialPort port = null;
     public static GridView gridView;
     private static AlertDialog loadingDialog;
+
+    List<Integer> selectedImages = new ArrayList<>();
 
     private static int itemsPerPage = MainActivity.imagesPage;
     static int startIndex = 0;
@@ -104,7 +111,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         tv = view.findViewById(R.id.text_gallery);
         gridView = view.findViewById(R.id.gridView);
         loadingDialog = Utils.loadingDialog(getContext());
-
+        setHasOptionsMenu(true);
 
         Button btnPrevPage = view.findViewById(R.id.btnPrevPage);
         Button btnNextPage = view.findViewById(R.id.btnNextPage);
@@ -515,6 +522,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         });
         //LongPress on an image to delete it
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 int globalImageIndex;
@@ -523,53 +531,139 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 } else {
                     globalImageIndex = Utils.gbcImagesList.size() - (itemsPerPage - position);
                 }
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle(getString(R.string.delete_dialog_gallery) + Utils.gbcImagesList.get(globalImageIndex).getName() + "?");
-                builder.setMessage(getString(R.string.sure_dialog));
 
+                if (selectedImages.contains(globalImageIndex)) {
+                    selectedImages.remove(Integer.valueOf(globalImageIndex));
+                    Utils.toast(getContext(), "Unselected " + globalImageIndex);
 
-                ImageView imageView = new ImageView(getContext());
-                imageView.setAdjustViewBounds(true);
-                imageView.setPadding(40, 10, 40, 10);
-                Bitmap bitmap = Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode());
-                int scaler = 6;
-                imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * scaler, bitmap.getHeight() * scaler, false));
+                    view.setBackgroundColor(getContext().getResources().getColor(R.color.white));
+                } else if (!selectedImages.contains(globalImageIndex)) {
+                    selectedImages.add(globalImageIndex);
+                    Utils.toast(getContext(), "Selected " + globalImageIndex);
 
-                builder.setView(imageView);
-
-                builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        new DeleteImageAsyncTask(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), globalImageIndex).execute();
-                    }
-                });
-                builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //No action
-                    }
-                });
-
-                AlertDialog dialog = builder.create();
-
-                int screenWidth = displayMetrics.widthPixels;
-                int desiredWidth = (int) (screenWidth * 0.8);
-                // Configure Dialog size
-
-                if (bitmap.getHeight() > 144) {
-                    int screenHeight = displayMetrics.heightPixels;
-                    int desiredHeight = (int) (screenHeight * 0.8);
-                    imageView.setMaxHeight((int) (desiredHeight * 0.5));
+                    view.setBackgroundColor(getContext().getResources().getColor(R.color.teal_700));
                 }
-
-                dialog.show();
-                return true;//true so the normal onItemClick doesn't show
+                for (int i : selectedImages) {
+                    System.out.println(i);
+                }
+                return true;
+//                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+//                builder.setTitle(getString(R.string.delete_dialog_gallery) + Utils.gbcImagesList.get(globalImageIndex).getName() + "?");
+//                builder.setMessage(getString(R.string.sure_dialog));
+//
+//
+//                ImageView imageView = new ImageView(getContext());
+//                imageView.setAdjustViewBounds(true);
+//                imageView.setPadding(40, 10, 40, 10);
+//                Bitmap bitmap = Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode());
+//                int scaler = 6;
+//                imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * scaler, bitmap.getHeight() * scaler, false));
+//
+//                builder.setView(imageView);
+//
+//                builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        new DeleteImageAsyncTask(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), globalImageIndex).execute();
+//                        new DeleteImageAsyncTask(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), globalImageIndex).execute();
+//                    }
+//                });
+//                builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        //No action
+//                    }
+//                });
+//
+//                AlertDialog dialog = builder.create();
+//
+//                int screenWidth = displayMetrics.widthPixels;
+//                int desiredWidth = (int) (screenWidth * 0.8);
+//                // Configure Dialog size
+//
+//                if (bitmap.getHeight() > 144) {
+//                    int screenHeight = displayMetrics.heightPixels;
+//                    int desiredHeight = (int) (screenHeight * 0.8);
+//                    imageView.setMaxHeight((int) (desiredHeight * 0.5));
+//                }
+//
+//                dialog.show();
+//                return true;//true so the normal onItemClick doesn't show
             }
         });
 
         if (MainActivity.doneLoading) updateFromMain();
 
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Do something that differs the Activity's menu here
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+//            case R.id.action_delete:
+//                // Not implemented here
+//                return false;
+            case R.id.action_delete:
+                // Do Fragment menu item stuff here
+                if (!selectedImages.isEmpty()) {
+                    loadingDialog.show();
+                    new DeleteImageAsyncTask(selectedImages).execute();
+
+                } else
+                    Utils.toast(getContext(), "No images selected;");
+                return true;
+            case R.id.action_average:
+                // Do Fragment menu item stuff here
+                if (!selectedImages.isEmpty()) {
+                    List<Bitmap> listBitmaps = new ArrayList<>();
+
+                    for (int i : selectedImages) {
+                        listBitmaps.add(Utils.imageBitmapCache.get(Utils.gbcImagesList.get(i).getHashCode()));
+                    }
+
+                    Bitmap bitmap = combineImages(listBitmaps);
+                    Bitmap averaged = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() *6, bitmap.getHeight() *6, false);
+
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("HDR!");
+
+                    // Crear un ImageView y establecer la imagen deseada
+                    ImageView imageView = new ImageView(getContext());
+                    imageView.setAdjustViewBounds(true);
+                    imageView.setPadding(30, 10, 30, 10);
+                    imageView.setImageBitmap(averaged);
+
+                    // Agregar el ImageView al diseño del diálogo
+                    builder.setView(imageView);
+
+                    builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //No action
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+                return true;
+            default:
+                break;
+        }
+
+        return false;
     }
 
     private void connect() {
@@ -833,9 +927,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     public void updateFromMain() {
 
-        if (Utils.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
-            updateGridView(currentPage);
-        }
+//        if (Utils.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
+//            updateGridView(currentPage);
+//        }
 //                else {
 //            tv.setText(getString(R.string.loading));
 //        }
@@ -890,7 +984,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
         }
         if (doAsync) {
-            loadingDialog.show();
+            System.out.println("loadingDialog showing:" + loadingDialog.isShowing() + "/////////////////////////");
+            if (!loadingDialog.isShowing())
+                loadingDialog.show();
             new UpdateGridViewAsyncTask().execute();
         } else {
             List<Bitmap> bitmapList = new ArrayList<>();
@@ -944,10 +1040,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 //Add the hashcode to the list of current hashes
                 String imageHash = gbcImage.getHashCode();
                 currentPageHashes.add(imageHash);
-                byte[] imageBytes;
-
-                //Get the image bytes from the database for the current gbcImage
+                byte[] imageBytes = new byte[0];
+//                System.out.println(imageBytes.length + " before dao get");
+//                Get the image bytes from the database for the current gbcImage
                 imageBytes = imageDataDao.getDataByImageId(imageHash);
+//                System.out.println(imageBytes + "after dao");
+//                System.out.println(imageBytes.length + " length After dao get");
+
                 //Set the image bytes to the object
                 gbcImage.setImageBytes(imageBytes);
                 //Create the image bitmap
@@ -956,12 +1055,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                 //Add the bitmap to the cache
                 Utils.imageBitmapCache.put(imageHash, image);
-
+//                System.out.println("AQUI " + imageHash);
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
                     if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
                         image = frameChange(Utils.gbcImagesList.get(newStartIndex + index), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(newStartIndex + index).getHashCode()), Utils.gbcImagesList.get(newStartIndex + index).getFrameId(), Utils.gbcImagesList.get(newStartIndex + index).isLockFrame());
+                    Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                     Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -982,36 +1082,56 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         protected void onPostExecute(Void aVoid) {
             //Notifies the adapter
             gridView.setAdapter(customGridViewAdapterImage);
-            loadingDialog.hide();
+            loadingDialog.dismiss();
+
         }
     }
 
     private class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
-        private String hashCode;
-        private int imageIndex;
+        //        private int imageIndex;
+        private List<Integer> listImagesIndexes;
 
-        public DeleteImageAsyncTask(String hashCode, int imageIndex) {
-            this.hashCode = hashCode;
-            this.imageIndex = imageIndex;
+        public DeleteImageAsyncTask(List<Integer> listImagesIndexes) {
+            this.listImagesIndexes = listImagesIndexes;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            GbcImage gbcImage = Utils.gbcImagesList.get(imageIndex);
-            ImageDao imageDao = MainActivity.db.imageDao();
-            ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
-            ImageData imageData = imageDataDao.getImageDataByid(hashCode);
-            imageDao.delete(gbcImage);
-            imageDataDao.delete(imageData);
-            Utils.imageBitmapCache.remove(hashCode);
-            Utils.gbcImagesList.remove(imageIndex);
+            for (int imageIndex : listImagesIndexes) {
+                String hashCode = Utils.gbcImagesList.get(imageIndex).getHashCode();
+                GbcImage gbcImage = Utils.gbcImagesList.get(imageIndex);
+                ImageDao imageDao = MainActivity.db.imageDao();
+                ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
+                ImageData imageData = imageDataDao.getImageDataByid(hashCode);
+                imageDao.delete(gbcImage);
+                imageDataDao.delete(imageData);
+                Utils.imageBitmapCache.remove(hashCode);
+                GbcImage.numImages--;
+//                Utils.gbcImagesList.remove(imageIndex);
+            }
+            for (int i : listImagesIndexes) {
+                System.out.println(i + " back");
+            }
+            //Doing this after deleting the images
+            Collections.sort(listImagesIndexes);
+            for (int index = listImagesIndexes.size(); index > 0; index--) {
+                int image = listImagesIndexes.get(index - 1);
+                Utils.gbcImagesList.remove(image);
+            }
+
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             //Notifies the adapter
+//            loadingDialog.hide();
             updateGridView(currentPage);
+            selectedImages.clear();
+            loadingDialog.dismiss();
+            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
+            tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+
         }
     }
 
@@ -1072,7 +1192,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             } else {
                 holder = (RecordHolder) row.getTag();
             }
-
             Bitmap image = images.get(position);
             String name = data.get(position).getName();
             String hash = data.get(position).getHashCode();
@@ -1220,4 +1339,64 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
         }
     }
+
+    public Bitmap combineImages(List<Bitmap> bitmaps) {
+        if (bitmaps == null || bitmaps.isEmpty()) {
+            throw new IllegalArgumentException("La lista de imágenes no puede estar vacía.");
+        }
+
+        // Asegúrate de que todas las imágenes tengan las mismas dimensiones
+        int width = bitmaps.get(0).getWidth();
+        int height = bitmaps.get(0).getHeight();
+        for (Bitmap bitmap : bitmaps) {
+            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
+                throw new IllegalArgumentException("Todas las imágenes deben tener las mismas dimensiones.");
+            }
+        }
+
+        // Crea un nuevo Bitmap para almacenar la imagen combinada
+        Bitmap combinedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        // Crea un arreglo para almacenar los valores de los píxeles de todas las imágenes
+        int numImages = bitmaps.size();
+        int[][] pixelValues = new int[numImages][width * height];
+
+        // Obtiene los valores de los píxeles de todas las imágenes
+        for (int i = 0; i < numImages; i++) {
+            bitmaps.get(i).getPixels(pixelValues[i], 0, width, 0, 0, width, height);
+        }
+
+        // Crea un nuevo arreglo para almacenar los valores promedio de los píxeles combinados
+        int[] combinedPixels = new int[width * height];
+
+        // Calcula el valor promedio de cada canal de color (rojo, verde y azul) para cada píxel
+        for (int i = 0; i < width * height; i++) {
+            int alpha = Color.alpha(pixelValues[0][i]); // El canal alfa se mantiene igual
+            int red = 0;
+            int green = 0;
+            int blue = 0;
+
+            // Suma los valores de los píxeles para cada canal de color
+            for (int j = 0; j < numImages; j++) {
+                red += Color.red(pixelValues[j][i]);
+                green += Color.green(pixelValues[j][i]);
+                blue += Color.blue(pixelValues[j][i]);
+            }
+
+            // Calcula el promedio de los valores para cada canal de color
+            red /= numImages;
+            green /= numImages;
+            blue /= numImages;
+
+            // Combina los valores de los canales de color para formar el píxel final
+            combinedPixels[i] = Color.argb(alpha, red, green, blue);
+        }
+
+        // Establece los píxeles combinados en el Bitmap resultante
+        combinedBitmap.setPixels(combinedPixels, 0, width, 0, 0, width, height);
+
+        return combinedBitmap;
+    }
+
+
 }

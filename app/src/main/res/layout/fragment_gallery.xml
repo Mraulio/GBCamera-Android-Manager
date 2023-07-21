@@ -11,8 +11,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/text_gallery"
@@ -37,33 +37,34 @@
 
 
     <LinearLayout
+        android:id="@+id/layourButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
         android:gravity="center"
-        android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:weightSum="5"
-        android:id="@+id/layourButtons">
+        android:weightSum="5">
 
         <Button
             android:id="@+id/btnFirstPage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginHorizontal="2dp"
-            android:drawableTint="@color/white"
+            android:layout_weight="1"
             android:drawableRight="@drawable/ic_double_arrow"
+            android:drawableTint="@color/white"
             android:rotation="180" />
+
         <Button
             android:id="@+id/btnPrevPage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
             android:drawableRight="@drawable/ic_arrow"
-            android:rotation="180"
-            android:drawableTint="@color/white"/>
+            android:drawableTint="@color/white"
+            android:rotation="180" />
 
         <TextView
             android:id="@+id/tv_page"
@@ -81,16 +82,16 @@
             android:layout_marginHorizontal="2dp"
             android:layout_weight="1"
             android:drawableRight="@drawable/ic_arrow"
-            android:drawableTint="@color/white"/>
+            android:drawableTint="@color/white" />
+
         <Button
             android:id="@+id/btnLastPage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
             android:drawableRight="@drawable/ic_double_arrow"
-            android:drawableTint="@color/white"
-            />
+            android:drawableTint="@color/white" />
     </LinearLayout>
 
 </LinearLayout>

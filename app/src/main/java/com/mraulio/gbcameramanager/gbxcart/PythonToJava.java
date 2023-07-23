@@ -302,7 +302,7 @@ public class PythonToJava {
     private static boolean containsFFBytes(byte[] bytes) {
         int length = Math.min(bytes.length, 16); // Solo comprobar los primeros 16 bytes
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0x2000; i < length; i++) {
             if (bytes[i] != (byte) 0xFF) {
                 return false;
             }

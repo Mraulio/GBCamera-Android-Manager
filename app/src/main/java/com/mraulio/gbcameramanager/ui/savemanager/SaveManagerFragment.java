@@ -235,7 +235,7 @@ public class SaveManagerFragment extends Fragment {
         finalListBitmaps.addAll(listDeletedBitmaps);
         bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
 
-        gridviewSaves.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true)));
+        gridviewSaves.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true,false,null)));
         gridAdapter = (GalleryFragment.CustomGridViewAdapterImage) gridviewSaves.getAdapter();
     }
 
@@ -247,7 +247,7 @@ public class SaveManagerFragment extends Fragment {
         GridView grid = new GridView(getContext());
         grid.setNumColumns(4);
         grid.setPadding(30, 10, 30, 10);
-        grid.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, false)));
+        grid.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, false,false,null));
 
         // Agregar el ImageView al diseño del diálogo
         builder.setView(grid);

@@ -295,7 +295,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true);
+            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true,false,null);
             gridView.setAdapter(customGridViewAdapterImage);
             tv.append(extractedImagesList.size() + " images.");
             btnAddImages.setVisibility(View.VISIBLE);
@@ -493,7 +493,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     canvas.drawLine(startX, startY, endX, endY, paint);
                     listDeletedBitmapsRedStroke.add(copiedBitmap);
                 }
-                GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true);
+                GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true,false,null);
                 gridView.setAdapter(customGridViewAdapterImage);
                 showImages(cbLastSeen, cbDeleted);
             } else {
@@ -516,7 +516,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             for (File file : fullRomFileList) {
                 readSav(file);
             }
-            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true);
+            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true,false,null);
             gridView.setAdapter(customGridViewAdapterImage);
 //            } else {
 //                tv.append("\nNOT A GOOD SAVE DUMP.");
@@ -701,7 +701,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             finalListBitmaps.addAll(listDeletedBitmaps);
             bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
         }
-        gridView.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true)));
+        gridView.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true,false,null)));
     }
 
 

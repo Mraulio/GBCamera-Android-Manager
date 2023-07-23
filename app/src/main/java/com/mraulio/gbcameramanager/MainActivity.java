@@ -168,14 +168,15 @@ public class MainActivity extends AppCompatActivity {
         NavigationView navigationView = binding.navView;
         if (openedSav) navigationView.setCheckedItem(R.id.nav_import);
         fab = binding.appBarMain.fab;
+        fab.hide();
         //Floating Action Button
-        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -206,10 +207,7 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         }
-
-
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -218,7 +216,6 @@ public class MainActivity extends AppCompatActivity {
             case GALLERY:
                 menu.clear(); // Limpia el menú actual
                 getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentA
-                fab.show();
                 break;
 
             case PALETTES:

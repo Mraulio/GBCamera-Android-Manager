@@ -225,15 +225,31 @@ public class MainActivity extends AppCompatActivity {
 //            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
                 break;
             case FRAMES:
+                menu.clear(); // Limpia el menú actual
+                fab.hide();
+                menu.close();
+//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
                 break;
 
             case USB_SERIAL:
+                menu.clear(); // Limpia el menú actual
+                fab.hide();
+                menu.close();
+//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
                 break;
 
             case SAVE_MANAGER:
+                menu.clear(); // Limpia el menú actual
+                fab.hide();
+                menu.close();
+//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
                 break;
 
             case SETTINGS:
+                menu.clear(); // Limpia el menú actual
+                fab.hide();
+                menu.close();
+//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
                 break;
 
         }

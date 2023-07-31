@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -89,13 +90,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static UsbSerialPort port = null;
     public static GridView gridView;
     private static AlertDialog loadingDialog;
+    SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
 
     static List<Integer> selectedImages = new ArrayList<>();
 
     private static int itemsPerPage = MainActivity.imagesPage;
     static int startIndex = 0;
     static int endIndex = 0;
-    public static int currentPage = 0;
+    public static int currentPage;
     static int lastPage = 0;
     public static TextView tvResponseBytes;
     boolean crop = false;
@@ -174,6 +176,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     currentPage = 0;
                     updateGridView(currentPage);
                     tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+                    editor.putInt("current_page", currentPage);
+                    editor.apply();
                 }
             }
 
@@ -185,6 +189,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     currentPage = lastPage;
                     updateGridView(currentPage);
                     tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+                    editor.putInt("current_page", currentPage);
+                    editor.apply();
                 }
             }
         });
@@ -1019,11 +1025,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     private void prevPage() {
-
         if (currentPage > 0) {
             currentPage--;
             updateGridView(currentPage);
             tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+            editor.putInt("current_page", currentPage);
+            editor.apply();
         }
     }
 
@@ -1033,6 +1040,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             currentPage++;
             updateGridView(currentPage);
             tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
+            editor.putInt("current_page", currentPage);
+            editor.apply();
         }
     }
 
@@ -1433,6 +1442,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
             if (currentPage >= (Utils.gbcImagesList.size() / itemsPerPage) - 1) {
                 currentPage = ((Utils.gbcImagesList.size() - 1) / itemsPerPage);
+                editor.putInt("current_page", currentPage);
+                editor.apply();
                 lastPage = currentPage;
             }
             MainActivity.fab.hide();

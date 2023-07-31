@@ -122,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
+        GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
+
         fab = findViewById(R.id.fab);
 
         Utils.makeDirs();
@@ -219,49 +221,21 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case PALETTES:
-                menu.clear(); // Limpia el menú actual
-                fab.hide();
-                menu.close();
-//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
-                break;
             case FRAMES:
-                menu.clear(); // Limpia el menú actual
-                fab.hide();
-                menu.close();
-//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
-                break;
 
             case USB_SERIAL:
-                menu.clear(); // Limpia el menú actual
-                fab.hide();
-                menu.close();
-//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
-                break;
 
             case SAVE_MANAGER:
-                menu.clear(); // Limpia el menú actual
-                fab.hide();
-                menu.close();
-//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
-                break;
 
             case SETTINGS:
                 menu.clear(); // Limpia el menú actual
                 fab.hide();
                 menu.close();
-//            getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentB
                 break;
 
         }
         return super.onPrepareOptionsMenu(menu);
     }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.main, menu);
-//        return true;
-//    }
 
     private class ReadDataAsyncTask extends AsyncTask<Void, Void, Void> {
 

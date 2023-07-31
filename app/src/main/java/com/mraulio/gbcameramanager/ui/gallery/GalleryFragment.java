@@ -48,6 +48,7 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
+import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 import com.mraulio.gbcameramanager.ui.usbserial.PrintOverArduino;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
@@ -62,6 +63,9 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -69,13 +73,18 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
+import java.util.zip.Deflater;
 
 import javax.xml.transform.Result;
 
@@ -725,8 +734,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     builder.setPositiveButton("Save", (dialog, which) -> {
                         LocalDateTime now = LocalDateTime.now();
                         File file = new File(Utils.IMAGES_FOLDER, "HDR" + dtf.format(now) + ".png");
-                        if (averaged[0].getHeight() == 144*6 && averaged[0].getWidth() == 160*6 && crop) {
-                            averaged[0] = Bitmap.createBitmap(averaged[0], 16*6, 16*6, 128*6, 112*6);
+                        if (averaged[0].getHeight() == 144 * 6 && averaged[0].getWidth() == 160 * 6 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 128 * 6, 112 * 6);
                         }
                         try (FileOutputStream out = new FileOutputStream(file)) {
                             averaged[0].compress(Bitmap.CompressFormat.PNG, 100, out);
@@ -853,7 +862,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                                 for (int i : selectedImages) {
                                     Bitmap bitmap = Utils.imageBitmapCache.get(Utils.gbcImagesList.get(i).getHashCode());
-                                    bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() *4, bitmap.getHeight()*4, false));
+                                    bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false));
                                 }
 
                                 for (Bitmap bitmap : bitmapList) {
@@ -912,11 +921,110 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 } else
                     Utils.toast(getContext(), "No images selected");
                 return true;
+            case R.id.action_json:
+                //Using this library https://github.com/nbadal/android-gif-encoder
+
+                if (!selectedImages.isEmpty()) {
+                    Collections.sort(selectedImages);
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    JSONObject jsonObject = new JSONObject();
+                    List<Integer> indexesToLoad = new ArrayList<>();
+                    for (int i : selectedImages) {
+                        String hashCode = Utils.gbcImagesList.get(i).getHashCode();
+                        if (Utils.imageBitmapCache.get(hashCode) == null) {
+                            indexesToLoad.add(i);
+                            loadCache = true;
+                        }
+                    }
+                    loadingDialog.show();
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, result -> {
+
+                        try {
+                            JSONObject stateObject = new JSONObject();
+                            JSONArray imagesArray = new JSONArray();
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+                            for (int i = 0; i < selectedImages.size(); i++){
+                                GbcImage gbcImage = Utils.gbcImagesList.get(selectedImages.get(i));
+                                JSONObject imageObject = new JSONObject();
+                                imageObject.put("hash",gbcImage.getHashCode().substring(0,40));
+                                imageObject.put("created", sdf.format(gbcImage.getCreationDate()));
+                                imageObject.put("title", gbcImage.getName());
+                                imageObject.put("tags", new JSONArray(gbcImage.getTags()));
+                                imageObject.put("palette", gbcImage.getPaletteId());
+                                imageObject.put("frame", gbcImage.getFrameId());
+                                imageObject.put("lockFrame", gbcImage.isLockFrame());
+                                imagesArray.put(imageObject);
+                            }
+                            stateObject.put("images", imagesArray);
+                            stateObject.put("lastUpdateUTC", System.currentTimeMillis() / 1000);
+                            jsonObject.put("state", stateObject);
+                            for (int i = 0; i < selectedImages.size(); i++){
+                                GbcImage gbcImage = Utils.gbcImagesList.get(selectedImages.get(i));
+                                Bitmap imageBitmap = paletteChanger("bw",gbcImage.getImageBytes(),gbcImage);
+
+                                String txt = Utils.bytesToHex(Utils.encodeImage(imageBitmap)).toUpperCase();
+                                System.out.println();
+                                StringBuilder sb = new StringBuilder();
+                                for (int j = 0; j < txt.length(); j++) {
+                                    if (j > 0 && j % 32 == 0) {  // Agregar salto de línea cada 32 caracteres
+                                        sb.append("\n");
+                                    }
+                                    sb.append(txt.charAt(j));
+                                }
+                                String tileData = sb.toString();
+                                System.out.println("encoded: "+tileData);
+                                String deflated = encodeData(tileData);
+                                jsonObject.put(gbcImage.getHashCode().substring(0,40),deflated);
+
+                            }
+                            String jsonString = jsonObject.toString(2);
+                            System.out.println(jsonString);
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+
+                            String fileName = "imagesJson" + dateFormat.format(new Date()) + ".json";
+
+                            File file = new File(Utils.PALETTES_FOLDER, fileName);
+
+                            try (FileWriter fileWriter = new FileWriter(file)) {
+                                fileWriter.write(jsonString);
+                                Utils.toast(getContext(), getString(R.string.toast_palettes_json));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }catch (Exception e){
+                            System.out.println(e.toString());
+                        }
+
+
+                    });
+                    asyncTask.execute();
+
+                } else
+                    Utils.toast(getContext(), "No images selected");
+                return true;
             default:
                 break;
         }
 
         return false;
+    }
+    public static String encodeData(String value) {
+        System.out.println(value.length()+ " length to encode//////////////");
+        byte[] inputBytes = value.getBytes(StandardCharsets.UTF_8);
+        Deflater deflater = new Deflater();
+        deflater.setInput(inputBytes);
+        deflater.finish();
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        while (!deflater.finished()) {
+            int length = deflater.deflate(buffer);
+            outputStream.write(buffer, 0, length);
+        }
+
+        deflater.end();
+        byte[] compressedBytes = outputStream.toByteArray();
+        return new String(compressedBytes, StandardCharsets.ISO_8859_1);
     }
 
     private void connect() {
@@ -1667,8 +1775,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
         }
     }
-
-
 
 
 }

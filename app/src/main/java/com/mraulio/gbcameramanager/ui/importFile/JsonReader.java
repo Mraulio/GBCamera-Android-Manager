@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 
 public class JsonReader {
@@ -71,7 +74,7 @@ public class JsonReader {
                     return null;
                 }
                 JSONObject imageObject = imagesArray.getJSONObject(0);
-                if (imageObject.has("hash") && imageObject.has("created") && imageObject.has("title") && imageObject.has("lines") && imageObject.has("tags")) {
+                if (imageObject.has("hash") && imageObject.has("created") && imageObject.has("title") /*&& imageObject.has("lines")*/ && imageObject.has("tags")) {
                     //There are some more values to check, but not all images have those
                     return readerImages(jsonObject);
                 } else return null;
@@ -98,11 +101,11 @@ public class JsonReader {
                     stringValues.add(hash);
                     String data = jsonObject.getString(hash);
                     String decodedData = decodeData(data);
+                    System.out.println("Decoded " + decodedData.length() + "  " + decodedData);
                     byte[] bytes = Utils.convertToByteArray(decodedData);
                     GbcImage gbcImage = new GbcImage();
                     gbcImage.setHashCode(hash);
                     gbcImage.setImageBytes(bytes);
-
                     if (!imageJson.getString("title").equals("")) {
                         gbcImage.setName(imageJson.getString("title"));
                     } else gbcImage.setName("*No title*");
@@ -148,7 +151,6 @@ public class JsonReader {
                         e.printStackTrace();
                     }
 
-                    System.out.println(gbcImage.getPaletteId()+"/////////////////////////////////////////////////");
                     Bitmap imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(), bytes, gbcImage);
                     if (imageBitmap.getHeight() == 144) {
                         imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), gbcImage.isLockFrame());//Need to change the frame to use the one in the json
@@ -239,7 +241,6 @@ public class JsonReader {
         return frameList;
     }
 
-
     public static String decodeData(String value) {
         byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
         Inflater inflater = new Inflater();
@@ -253,6 +254,7 @@ public class JsonReader {
             e.printStackTrace();
         }
         String uncompressedData = new String(outputBytes, 0, length, StandardCharsets.UTF_8);
+        System.out.println(uncompressedData + "  UNCOMPRESSED DATA");
         String outputString = uncompressedData.replaceAll(System.lineSeparator(), "");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < outputString.length(); i += 2) {
@@ -262,6 +264,7 @@ public class JsonReader {
             } catch (Exception e) {
             }
         }
+        System.out.println(sb.toString());
         return sb.toString();
     }
 

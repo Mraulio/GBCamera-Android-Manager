@@ -340,7 +340,6 @@ public class ImportFragment extends Fragment {
                 Utils.toast(getContext(), getString(R.string.no_valid_list));
                 return;
             }
-
         }
 
     }

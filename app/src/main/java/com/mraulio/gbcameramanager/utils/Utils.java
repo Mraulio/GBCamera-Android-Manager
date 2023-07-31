@@ -73,7 +73,6 @@ public class Utils {
     public static byte[] convertToByteArray(String data) {
         String[] byteStrings = data.split(" ");
         byte[] bytes = new byte[byteStrings.length];
-        System.out.println(data.length());
         for (int i = 0; i < byteStrings.length; i++) {
             bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
                     + Character.digit(byteStrings[i].charAt(1), 16));

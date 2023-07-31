@@ -106,9 +106,9 @@ public class JsonReader {
                     GbcImage gbcImage = new GbcImage();
                     gbcImage.setHashCode(hash);
                     gbcImage.setImageBytes(bytes);
-                    if (!imageJson.getString("title").equals("")) {
+//                    if (!imageJson.getString("title").equals("")) {
                         gbcImage.setName(imageJson.getString("title"));
-                    } else gbcImage.setName("*No title*");
+//                    } else gbcImage.setName("*No title*");
                     JSONArray tagsArray = imageJson.getJSONArray("tags");
                     if (tagsArray.length() > 0) {
                         List<String> tagsStrings = new ArrayList<>();

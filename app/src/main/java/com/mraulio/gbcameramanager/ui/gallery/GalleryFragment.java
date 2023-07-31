@@ -687,16 +687,27 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 return true;
             case R.id.action_average:
                 if (!selectedImages.isEmpty()) {
-
+                    crop = false;
                     final Bitmap[] averaged = new Bitmap[1];
+                    LayoutInflater inflater = LayoutInflater.from(getContext());
 
+                    View averageView = inflater.inflate(R.layout.average_dialog, null);
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+                    builder.setView(averageView);
+
+                    CheckBox cbAverageCrop = averageView.findViewById(R.id.cb_average_crop);
+                    ImageView imageView = averageView.findViewById(R.id.iv_average);
+                    cbAverageCrop.setOnClickListener(v -> {
+                        if (!crop) {
+                            crop = true;
+                        } else {
+                            crop = false;
+                        }
+                    });
                     builder.setTitle("HDR!");
 
-                    // Crear un ImageView y establecer la imagen deseada
-                    ImageView imageView = new ImageView(getContext());
-                    imageView.setAdjustViewBounds(true);
-                    imageView.setPadding(30, 10, 30, 10);
+                    imageView.setPadding(10, 10, 10, 10);
                     List<Integer> indexesToLoad = new ArrayList<>();
                     for (int i : selectedImages) {
                         String hashCode = Utils.gbcImagesList.get(i).getHashCode();
@@ -705,25 +716,21 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             loadCache = true;
                         }
                     }
-                    builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            LocalDateTime now = LocalDateTime.now();
-                            File file = new File(Utils.IMAGES_FOLDER, "HDR" + dtf.format(now) + ".png");
-                            try (FileOutputStream out = new FileOutputStream(file)) {
-                                averaged[0].compress(Bitmap.CompressFormat.PNG, 100, out);
-                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + "HDR!", Toast.LENGTH_LONG);
-                                toast.show();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                    builder.setPositiveButton("Save", (dialog, which) -> {
+                        LocalDateTime now = LocalDateTime.now();
+                        File file = new File(Utils.IMAGES_FOLDER, "HDR" + dtf.format(now) + ".png");
+                        if (averaged[0].getHeight() == 144*6 && averaged[0].getWidth() == 160*6 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16*6, 16*6, 128*6, 112*6);
+                        }
+                        try (FileOutputStream out = new FileOutputStream(file)) {
+                            averaged[0].compress(Bitmap.CompressFormat.PNG, 100, out);
+                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + "HDR!", Toast.LENGTH_LONG);
+                            toast.show();
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     });
-                    builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            shareImage(averaged[0]);
-                        }
+                    builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     });
                     loadingDialog.show();
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, new AsyncTaskCompleteListener<Result>() {
@@ -734,11 +741,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             for (int i : selectedImages) {
                                 listBitmaps.add(Utils.imageBitmapCache.get(Utils.gbcImagesList.get(i).getHashCode()));
                             }
-                            Bitmap bitmap = combineImages(listBitmaps);
+                            Bitmap bitmap = Utils.combineImages(listBitmaps);
                             averaged[0] = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false);
                             imageView.setImageBitmap(averaged[0]);
 
-                            builder.setView(imageView);
                             AlertDialog dialog = builder.create();
                             dialog.show();
                         }
@@ -764,14 +770,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     Button reload_anim = dialogView.findViewById(R.id.btn_animation);
                     CheckBox cb_loop = dialogView.findViewById(R.id.cb_loop);
                     final int[] loop = {0};
-                    cb_loop.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (cb_loop.isChecked()) {
-                                loop[0] = 0;//0 to infinite loop
-                            } else {
-                                loop[0] = -1;//-1 to not repeat
-                            }
+                    cb_loop.setOnClickListener(v -> {
+                        if (cb_loop.isChecked()) {
+                            loop[0] = 0;//0 to infinite loop
+                        } else {
+                            loop[0] = -1;//-1 to not repeat
                         }
                     });
                     ImageView imageView = dialogView.findViewById(R.id.animation_image);
@@ -782,7 +785,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            // Aquí obtendrás el valor seleccionado (número entero) desde el 'progress'
                             fps[0] = progress;
                             tv_animation.setText(fps[0] + " fps");
 
@@ -845,7 +847,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                                 for (int i : selectedImages) {
                                     Bitmap bitmap = Utils.imageBitmapCache.get(Utils.gbcImagesList.get(i).getHashCode());
-                                    bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), false));
+                                    bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() *4, bitmap.getHeight()*4, false));
                                 }
 
                                 for (Bitmap bitmap : bitmapList) {
@@ -889,8 +891,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         try {
                             // Crea el GifDrawable a partir del array de bytes
                             gifDrawable = new GifDrawable(gifBytes);
-
-
                             gifDrawable.start(); // Inicia la animación
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -1657,69 +1657,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         }
     }
 
-    /**
-     * Average HDR method
-     *
-     * @param bitmaps List of bitmaps for the average
-     * @return returns the averaged image
-     */
-    public Bitmap combineImages(List<Bitmap> bitmaps) {
-        if (bitmaps == null || bitmaps.isEmpty()) {
-            throw new IllegalArgumentException("La lista de imágenes no puede estar vacía.");
-        }
 
-        // Asegúrate de que todas las imágenes tengan las mismas dimensiones
-        int width = bitmaps.get(0).getWidth();
-        int height = bitmaps.get(0).getHeight();
-        for (Bitmap bitmap : bitmaps) {
-            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
-                throw new IllegalArgumentException("Todas las imágenes deben tener las mismas dimensiones.");
-            }
-        }
-
-        // Crea un nuevo Bitmap para almacenar la imagen combinada
-        Bitmap combinedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
-        // Crea un arreglo para almacenar los valores de los píxeles de todas las imágenes
-        int numImages = bitmaps.size();
-        int[][] pixelValues = new int[numImages][width * height];
-
-        // Obtiene los valores de los píxeles de todas las imágenes
-        for (int i = 0; i < numImages; i++) {
-            bitmaps.get(i).getPixels(pixelValues[i], 0, width, 0, 0, width, height);
-        }
-
-        // Crea un nuevo arreglo para almacenar los valores promedio de los píxeles combinados
-        int[] combinedPixels = new int[width * height];
-
-        // Calcula el valor promedio de cada canal de color (rojo, verde y azul) para cada píxel
-        for (int i = 0; i < width * height; i++) {
-            int alpha = Color.alpha(pixelValues[0][i]); // El canal alfa se mantiene igual
-            int red = 0;
-            int green = 0;
-            int blue = 0;
-
-            // Suma los valores de los píxeles para cada canal de color
-            for (int j = 0; j < numImages; j++) {
-                red += Color.red(pixelValues[j][i]);
-                green += Color.green(pixelValues[j][i]);
-                blue += Color.blue(pixelValues[j][i]);
-            }
-
-            // Calcula el promedio de los valores para cada canal de color
-            red /= numImages;
-            green /= numImages;
-            blue /= numImages;
-
-            // Combina los valores de los canales de color para formar el píxel final
-            combinedPixels[i] = Color.argb(alpha, red, green, blue);
-        }
-
-        // Establece los píxeles combinados en el Bitmap resultante
-        combinedBitmap.setPixels(combinedPixels, 0, width, 0, 0, width, height);
-
-        return combinedBitmap;
-    }
 
 
 }

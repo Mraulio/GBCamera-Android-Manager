@@ -32,7 +32,7 @@
         android:id="@+id/tv_animation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="3"
+        android:text="10 fps"
         android:textSize="20sp"
         app:layout_constraintTop_toTopOf="@id/animation_seekbar"
         app:layout_constraintStart_toEndOf="@id/animation_seekbar"

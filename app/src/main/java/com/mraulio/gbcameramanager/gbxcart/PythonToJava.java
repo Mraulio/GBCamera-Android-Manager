@@ -301,13 +301,13 @@ public class PythonToJava {
     //To check if all bytes are FF. If they are, it's not a valid sav
     private static boolean containsFFBytes(byte[] bytes) {
         int length = Math.min(bytes.length, 16); // Solo comprobar los primeros 16 bytes
-
-        for (int i = 0x2000; i < length; i++) {
-            if (bytes[i] != (byte) 0xFF) {
-                return false;
+        int holder = 0;
+        for (int i = 0x2FB1; i < 5; i++) {//Where a MAGIC is, I just check if there are no FF
+            if (bytes[i] == (byte) 0xFF) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     public static void ReadRam(UsbSerialPort port, Context context, TextView tv) {

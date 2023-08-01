@@ -943,10 +943,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             JSONObject stateObject = new JSONObject();
                             JSONArray imagesArray = new JSONArray();
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
-                            for (int i = 0; i < selectedImages.size(); i++){
+                            for (int i = 0; i < selectedImages.size(); i++) {
                                 GbcImage gbcImage = Utils.gbcImagesList.get(selectedImages.get(i));
                                 JSONObject imageObject = new JSONObject();
-                                imageObject.put("hash",gbcImage.getHashCode().substring(0,40));
+                                imageObject.put("hash", gbcImage.getHashCode());
                                 imageObject.put("created", sdf.format(gbcImage.getCreationDate()));
                                 imageObject.put("title", gbcImage.getName());
                                 imageObject.put("tags", new JSONArray(gbcImage.getTags()));
@@ -958,23 +958,23 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             stateObject.put("images", imagesArray);
                             stateObject.put("lastUpdateUTC", System.currentTimeMillis() / 1000);
                             jsonObject.put("state", stateObject);
-                            for (int i = 0; i < selectedImages.size(); i++){
+                            for (int i = 0; i < selectedImages.size(); i++) {
                                 GbcImage gbcImage = Utils.gbcImagesList.get(selectedImages.get(i));
-                                Bitmap imageBitmap = paletteChanger("bw",gbcImage.getImageBytes(),gbcImage);
+                                Bitmap imageBitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage);
 
                                 String txt = Utils.bytesToHex(Utils.encodeImage(imageBitmap)).toUpperCase();
                                 System.out.println();
                                 StringBuilder sb = new StringBuilder();
                                 for (int j = 0; j < txt.length(); j++) {
-                                    if (j > 0 && j % 32 == 0) {  // Agregar salto de línea cada 32 caracteres
+                                    if (j > 0 && j % 32 == 0) {
                                         sb.append("\n");
                                     }
                                     sb.append(txt.charAt(j));
                                 }
                                 String tileData = sb.toString();
-                                System.out.println("encoded: "+tileData);
+                                System.out.println("encoded: " + tileData);
                                 String deflated = encodeData(tileData);
-                                jsonObject.put(gbcImage.getHashCode().substring(0,40),deflated);
+                                jsonObject.put(gbcImage.getHashCode(), deflated);
 
                             }
                             String jsonString = jsonObject.toString(2);
@@ -987,18 +987,16 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             try (FileWriter fileWriter = new FileWriter(file)) {
                                 fileWriter.write(jsonString);
-                                Utils.toast(getContext(), getString(R.string.toast_palettes_json));
+                                Utils.toast(getContext(), "JSON Backup saved!");
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             System.out.println(e.toString());
                         }
 
-
                     });
                     asyncTask.execute();
-
                 } else
                     Utils.toast(getContext(), "No images selected");
                 return true;
@@ -1008,8 +1006,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
         return false;
     }
+
     public static String encodeData(String value) {
-        System.out.println(value.length()+ " length to encode//////////////");
         byte[] inputBytes = value.getBytes(StandardCharsets.UTF_8);
         Deflater deflater = new Deflater();
         deflater.setInput(inputBytes);
@@ -1645,7 +1643,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
             if (showName) {
                 holder.txtTitle.setTextColor(dup ? context.getResources().getColor(R.color.duplicated) : Color.BLACK);
-                holder.txtTitle.setText(name);
+                if (name.equals("")) {
+                    holder.txtTitle.setText("*No title*");
+                } else
+                    holder.txtTitle.setText(name);
             } else {
                 holder.txtTitle.setVisibility(View.GONE);
             }
@@ -1775,6 +1776,4 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
         }
     }
-
-
 }

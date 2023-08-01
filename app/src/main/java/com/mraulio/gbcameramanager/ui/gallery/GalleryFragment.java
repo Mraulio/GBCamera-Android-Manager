@@ -56,6 +56,7 @@ import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.utils.AnimatedGifEncoder;
+import com.mraulio.gbcameramanager.utils.DiskCache;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -119,6 +120,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static TextView tv;
     DisplayMetrics displayMetrics;
 
+    private static DiskCache diskCache;
+
     static boolean selectionMode = false;
     static boolean firstToLast = true;
     static boolean alreadyMultiSelect = false;
@@ -136,6 +139,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         gridView = view.findViewById(R.id.gridView);
         loadingDialog = Utils.loadingDialog(getContext());
         setHasOptionsMenu(true);
+
+        diskCache = new DiskCache(getContext());
 
         Button btnPrevPage = view.findViewById(R.id.btnPrevPage);
         Button btnNextPage = view.findViewById(R.id.btnNextPage);
@@ -1283,14 +1288,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     public void updateFromMain() {
-
-//        if (Utils.gbcImagesList.size() > 0 && MainActivity.doneLoading) {//This because if not updateGridView will use sublists on the same list that the MainAcvitity is creating
-//            updateGridView(currentPage);
-//        }
-//                else {
-//            tv.setText(getString(R.string.loading));
-//        }
-//        tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
         if (Utils.gbcImagesList.size() > 0) {
             updateGridView(currentPage);
             tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
@@ -1299,16 +1296,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         } else {
             tv.setText(tv.getContext().getString(R.string.no_images));
         }
-
-
-//        if (Methods.gbcImagesList.size() > 0) {
-//            updateGridView(currentPage);
-//            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
-//        } else {
-//            tv.setText(tv.getContext().getString(R.string.no_images));
-//        }
-//        tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
-//        updateGridView(currentPage);
     }
 
     //Method to update the gallery gridview
@@ -1407,7 +1394,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 currentPageHashes.add(imageHash);
                 byte[] imageBytes = new byte[0];
 //                Get the image bytes from the database for the current gbcImage
-                imageBytes = imageDataDao.getDataByImageId(imageHash);
+                imageBytes = diskCache.get(imageHash);
+                if (imageBytes == null) {
+                    imageBytes = imageDataDao.getDataByImageId(imageHash);
+                    diskCache.put(imageHash,imageBytes);
+                    System.out.println("Cached!*************************************");
+                }
 
                 //Set the image bytes to the object
                 gbcImage.setImageBytes(imageBytes);
@@ -1467,8 +1459,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 String imageHash = gbcImage.getHashCode();
                 byte[] imageBytes = new byte[0];
 //                Get the image bytes from the database for the current gbcImage
-                imageBytes = imageDataDao.getDataByImageId(imageHash);
-
+                imageBytes = diskCache.get(imageHash);
+                if (imageBytes == null) {
+                    imageBytes = imageDataDao.getDataByImageId(imageHash);
+                    diskCache.put(imageHash,imageBytes);
+                    System.out.println("Cached!*************************************");
+                }
                 //Set the image bytes to the object
                 gbcImage.setImageBytes(imageBytes);
                 //Create the image bitmap
@@ -1540,7 +1536,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            itemsPerPage = MainActivity.imagesPage;//Because it's changed when going to the last page on the UpgradeGridview
+            itemsPerPage = MainActivity.imagesPage;//Because it's changed when going to the last page on the updateGridView
             selectedImages.clear();
             selectionMode = false;
             tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);

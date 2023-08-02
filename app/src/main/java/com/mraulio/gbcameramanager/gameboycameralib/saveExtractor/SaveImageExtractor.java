@@ -32,8 +32,8 @@ public class SaveImageExtractor implements Extractor {
     private final ImageCodec smallImageCodec;
 
     public SaveImageExtractor(IndexedPalette palette) {
-        this.imageCodec = new ImageCodec(palette, IMAGE_WIDTH, IMAGE_HEIGHT);
-        this.smallImageCodec = new ImageCodec(palette, SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT);
+        this.imageCodec = new ImageCodec( IMAGE_WIDTH, IMAGE_HEIGHT,false);
+        this.smallImageCodec = new ImageCodec( SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT,false);
     }
 
     @Override

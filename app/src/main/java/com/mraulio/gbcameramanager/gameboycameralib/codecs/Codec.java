@@ -13,6 +13,6 @@ public interface Codec {
     Bitmap decode(byte[] data);
     Bitmap decodeWithPalette(int[] palette,byte[] data);//Added
     byte[] encode(Bitmap image) throws IOException;
-    byte[] encodeInternal(Bitmap image) throws IOException;//Added
+    byte[] encodeInternal(Bitmap image,String paletteId) throws IOException;//Added
 
 }

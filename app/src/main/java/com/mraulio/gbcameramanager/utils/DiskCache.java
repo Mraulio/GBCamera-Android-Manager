@@ -1,10 +1,16 @@
 package com.mraulio.gbcameramanager.utils;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * Class to manage the images cache
+ */
 public class DiskCache {
 
     private static final String CACHE_DIR_NAME = "images_cache";
@@ -18,12 +24,12 @@ public class DiskCache {
         }
     }
 
-    public void put(String key, byte[] data) {
+    public void put(String key, Bitmap bitmap) {
         File file = new File(cacheDir, key);
         FileOutputStream outputStream = null;
         try {
             outputStream = new FileOutputStream(file);
-            outputStream.write(data);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -37,20 +43,19 @@ public class DiskCache {
         }
     }
 
-    public byte[] get(String key) {
+    public Bitmap get(String key) {
         File file = new File(cacheDir, key);
         if (!file.exists()) {
             return null;
         }
 
-        byte[] data = new byte[(int) file.length()];
+        Bitmap bitmap = null;
         FileInputStream inputStream = null;
         try {
             inputStream = new FileInputStream(file);
-            inputStream.read(data);
+            bitmap = BitmapFactory.decodeStream(inputStream);
         } catch (IOException e) {
             e.printStackTrace();
-            data = null;
         } finally {
             if (inputStream != null) {
                 try {
@@ -61,6 +66,14 @@ public class DiskCache {
             }
         }
 
-        return data;
+        return bitmap;
+    }
+
+    public boolean remove(String key) {
+        File file = new File(cacheDir, key);
+        if (file.exists()) {
+            return file.delete();
+        }
+        return false;
     }
 }

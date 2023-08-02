@@ -78,7 +78,7 @@ public class TileCodec implements Codec {
     }
 
     @Override
-    public byte[] encodeInternal(Bitmap image) throws IOException {
+    public byte[] encodeInternal(Bitmap image, String paletteId) throws IOException {
         //Not used
         return new byte[0];
     }

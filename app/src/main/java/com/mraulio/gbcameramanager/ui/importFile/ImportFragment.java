@@ -37,7 +37,6 @@ import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.ui.savemanager.SaveManagerFragment;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
@@ -687,7 +686,7 @@ public class ImportFragment extends Fragment {
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                 String hashHex = Utils.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 128, 112);
+                ImageCodec imageCodec = new ImageCodec(128, 112,gbcImage.isLockFrame());
                 Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
@@ -695,7 +694,7 @@ public class ImportFragment extends Fragment {
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
-                    imageBytes = Utils.encodeImage(image);
+                    imageBytes = Utils.encodeImage(image,gbcImage.getPaletteId());
                 }
                 ImageData imageData = new ImageData();
                 imageData.setImageId(gbcImage.getHashCode());
@@ -730,7 +729,7 @@ public class ImportFragment extends Fragment {
             String formattedIndex = String.format("%02d", index++);
             gbcImage.setName(fileName + " " + formattedIndex);
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, height);
+            ImageCodec imageCodec = new ImageCodec(160, height,false);
             Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes());
             importedImagesBitmaps.add(image);
             importedImagesList.add(gbcImage);

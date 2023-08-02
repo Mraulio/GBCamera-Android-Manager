@@ -458,7 +458,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                     String hashHex = Utils.bytesToHex(hash);
                     gbcImage.setHashCode(hashHex);
-                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 128, 112);
+                    ImageCodec imageCodec = new ImageCodec(128, 112,false);
                     Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         //I need to use copy because if not it's inmutable bitmap
@@ -466,7 +466,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                         Canvas canvas = new Canvas(framed);
                         canvas.drawBitmap(image, 16, 16, null);
                         image = framed;
-                        imageBytes = Utils.encodeImage(image);
+                        imageBytes = Utils.encodeImage(image,"bw");
                     }
                     gbcImage.setImageBytes(imageBytes);
                     extractedImagesBitmaps.add(image);
@@ -834,7 +834,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             gbcImage.setName(index++ + "-" + " arduino");
             gbcImage.setFrameId("GBCManager_Frame");//Could just leave it blank
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, height);
+            ImageCodec imageCodec = new ImageCodec(160, height,false);
             Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes());
             extractedImagesBitmaps.add(image);
             extractedImagesList.add(gbcImage);

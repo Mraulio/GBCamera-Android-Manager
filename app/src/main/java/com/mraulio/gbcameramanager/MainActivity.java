@@ -284,6 +284,11 @@ public class MainActivity extends AppCompatActivity {
             if (frames.size() > 0) {
                 for (GbcFrame gbcFrame : frames) {
                     Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
+//                    try {
+//                        Utils.hashFrameBytes.put(gbcFrame.getFrameName(), Utils.encodeImage(gbcFrame.getFrameBitmap()));
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
                 }
                 Utils.framesList.addAll(frames);
             } else {

@@ -130,6 +130,8 @@ public class SettingsFragment extends Fragment {
         sizesIntegerImages.add(15);
         sizesIntegerImages.add(18);
         sizesIntegerImages.add(30);
+        sizesIntegerImages.add(2000);
+
 
         List<String> sizesImages = new ArrayList<>();
         sizesImages.add("6");
@@ -138,6 +140,8 @@ public class SettingsFragment extends Fragment {
         sizesImages.add("15");
         sizesImages.add("18");
         sizesImages.add("30");
+        sizesImages.add("2000");
+
         ArrayAdapter<String> adapterImages = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, sizesImages);
         adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -149,8 +153,9 @@ public class SettingsFragment extends Fragment {
                 // I set the export size on the Main activity int as the selected one
                 MainActivity.imagesPage = sizesIntegerImages.get(position);
                 editor.putInt("images_per_page", sizesIntegerImages.get(position));
-                editor.apply();
                 GalleryFragment.currentPage = 0;
+                editor.putInt("current_page", 0);
+                editor.apply();
             }
 
             @Override

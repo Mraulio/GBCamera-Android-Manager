@@ -151,7 +151,7 @@ public class JsonReader {
                         e.printStackTrace();
                     }
 
-                    Bitmap imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(), bytes, gbcImage);
+                    Bitmap imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(), bytes, gbcImage,gbcImage.isLockFrame());
                     if (imageBitmap.getHeight() == 144) {
                         imageBitmap = GalleryFragment.frameChange(gbcImage, imageBitmap, gbcImage.getFrameId(), gbcImage.isLockFrame());//Need to change the frame to use the one in the json
                     }
@@ -227,7 +227,7 @@ public class JsonReader {
                 String decompHash = recreateFrame(hash);
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
+                ImageCodec imageCodec = new ImageCodec(160, height,false);
                 Bitmap image = imageCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), bytes);
                 gbcFrame.setFrameBitmap(image);
                 frameList.add(gbcFrame);

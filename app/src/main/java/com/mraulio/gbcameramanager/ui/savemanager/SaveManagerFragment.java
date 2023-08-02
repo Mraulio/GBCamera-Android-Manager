@@ -178,7 +178,7 @@ public class SaveManagerFragment extends Fragment {
                     byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                     String hashHex = Utils.bytesToHex(hash);
                     gbcImage.setHashCode(hashHex);
-                    ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 128, 112);
+                    ImageCodec imageCodec = new ImageCodec(128, 112,false);
                     Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         //I need to use copy because if not it's inmutable bitmap
@@ -186,7 +186,7 @@ public class SaveManagerFragment extends Fragment {
                         Canvas canvas = new Canvas(framed);
                         canvas.drawBitmap(image, 16, 16, null);
                         image = framed;
-                        imageBytes = Utils.encodeImage(image);
+                        imageBytes = Utils.encodeImage(image,"bw");
                     }
                     gbcImage.setImageBytes(imageBytes);
                     extractedImagesBitmaps.add(image);

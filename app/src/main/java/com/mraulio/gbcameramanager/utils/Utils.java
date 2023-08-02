@@ -55,6 +55,7 @@ public class Utils {
     public static HashMap<String, Bitmap> imageBitmapCache = new HashMap<>();
     public static HashMap<String, GbcFrame> hashFrames = new HashMap<>();
     public static HashMap<String, GbcPalette> hashPalettes = new HashMap<>();
+    public static HashMap<String, byte[]> hashFrameBytes = new HashMap<>();
 
     //Auxiliar method to convert byte[] to hexadecimal String
     public static String bytesToHex(byte[] bytes) {
@@ -65,9 +66,9 @@ public class Utils {
         return sb.toString();
     }
 
-    public static byte[] encodeImage(Bitmap bitmap) throws IOException {
-        Codec decoder = new ImageCodec(new IndexedPalette(hashPalettes.get("bw").getPaletteColorsInt()), 160, bitmap.getHeight());
-        return decoder.encodeInternal(bitmap);
+    public static byte[] encodeImage(Bitmap bitmap, String paletteId) throws IOException {
+        Codec decoder = new ImageCodec(160, bitmap.getHeight(),false);
+        return decoder.encodeInternal(bitmap,paletteId);
     }
 
     public static byte[] convertToByteArray(String data) {

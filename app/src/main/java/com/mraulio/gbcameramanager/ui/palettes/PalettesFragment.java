@@ -125,7 +125,7 @@ public class PalettesFragment extends Fragment {
                                     Utils.gbcImagesList.get(i).setPaletteId("bw");
                                     //If the bitmap cache already has the bitmap, change it.
                                     if (Utils.imageBitmapCache.containsKey(Utils.gbcImagesList.get(i).getHashCode())) {
-                                        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt()), 160, Utils.gbcImagesList.get(i).getImageBytes().length / 40);
+                                        ImageCodec imageCodec = new ImageCodec( 160, Utils.gbcImagesList.get(i).getImageBytes().length / 40, false);
                                         Bitmap image = imageCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), Utils.gbcImagesList.get(i).getImageBytes());
                                         Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                     }
@@ -633,12 +633,12 @@ public class PalettesFragment extends Fragment {
     }
 
     private Bitmap paletteMaker(int[] palette) throws IOException {
-        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(palette), 160, 144);//imageBytes.length/40 to get the height of the image
+        ImageCodec imageCodec = new ImageCodec(160, 144, false);//imageBytes.length/40 to get the height of the image
         Bitmap bitmap;
         Bitmap upscaledBitmap;
         byte[] imageBytes;
         if (Utils.gbcImagesList.size() == 0 || (Utils.gbcImagesList.get(0).getImageBytes().length / 40 != 144)) {//If there are no images, or they are not 144 height
-            imageBytes = Utils.encodeImage(Utils.framesList.get(0).getFrameBitmap());
+            imageBytes = Utils.encodeImage(Utils.framesList.get(1).getFrameBitmap(),"bw");
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Utils.framesList.get(0).getFrameBitmap().getWidth() * 6, Utils.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {

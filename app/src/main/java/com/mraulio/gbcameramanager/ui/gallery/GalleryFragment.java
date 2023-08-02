@@ -48,7 +48,6 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
-import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 import com.mraulio.gbcameramanager.ui.usbserial.PrintOverArduino;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
@@ -91,7 +90,6 @@ import javax.xml.transform.Result;
 
 import pl.droidsonroids.gif.GifDrawable;
 
-
 public class GalleryFragment extends Fragment implements SerialInputOutputManager.Listener {
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     static UsbManager manager = MainActivity.manager;
@@ -119,8 +117,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static List<GbcImage> gbcImagesForPage;
     public static TextView tv;
     DisplayMetrics displayMetrics;
-
-    private static DiskCache diskCache;
+    static DiskCache diskCache;
 
     static boolean selectionMode = false;
     static boolean firstToLast = true;
@@ -139,7 +136,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         gridView = view.findViewById(R.id.gridView);
         loadingDialog = Utils.loadingDialog(getContext());
         setHasOptionsMenu(true);
-
         diskCache = new DiskCache(getContext());
 
         Button btnPrevPage = view.findViewById(R.id.btnPrevPage);
@@ -269,7 +265,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     btn_paperize.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Bitmap bw_image = paletteChanger("bw", Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex));
+                            Bitmap bw_image = paletteChanger("bw", Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), false);
 
                             Bitmap paperized = Paperize(bw_image);
                             LocalDateTime now = LocalDateTime.now();
@@ -359,13 +355,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onClick(View v) {
                             if (keepFrame) keepFrame = false;
                             else keepFrame = true;
-                            Bitmap bitmap = null;
-                            try {
-                                bitmap = frameChange(Utils.gbcImagesList.get(globalImageIndex), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()), Utils.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
                             GbcImage gbcImage = Utils.gbcImagesList.get(globalImageIndex);
+                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame);
+
+//                            try {
+//                                bitmap = frameChange(Utils.gbcImagesList.get(globalImageIndex), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()), Utils.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
                             gbcImage.setLockFrame(keepFrame);
                             Utils.imageBitmapCache.put(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), bitmap);
                             imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
@@ -416,20 +413,20 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onItemClick(AdapterView<?> parent, View view, int palettePosition, long id) {
                             //Action when clicking a palette inside the Dialog
                             Bitmap changedImage;
-                            if (!keepFrame) {
-                                Utils.gbcImagesList.get(globalImageIndex).setPaletteId("bw");//Need to set this to the palette 0 to then change it with the frame
-                            }
+//                            if (!keepFrame) {
+//                                Utils.gbcImagesList.get(globalImageIndex).setPaletteId("bw");//Need to set this to the palette 0 to then change it with the frame
+//                            }
                             //Set the new palette to the gbcImage
                             Utils.gbcImagesList.get(globalImageIndex).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
-                            changedImage = paletteChanger(Utils.gbcImagesList.get(globalImageIndex).getPaletteId(), Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex));
+                            changedImage = paletteChanger(Utils.gbcImagesList.get(globalImageIndex).getPaletteId(), Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), Utils.gbcImagesList.get(globalImageIndex).isLockFrame());
                             Utils.imageBitmapCache.put(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
-                            if (keepFrame) {
-                                try {
-                                    changedImage = frameChange(Utils.gbcImagesList.get(globalImageIndex), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()), Utils.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
+//                            if (keepFrame) {
+//                                try {
+//                                    changedImage = frameChange(Utils.gbcImagesList.get(globalImageIndex), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()), Utils.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
+//                                } catch (IOException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
                             Utils.gbcImagesList.get(globalImageIndex).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
                             adapterPalette.setLastSelectedPosition(palettePosition);
                             adapterPalette.notifyDataSetChanged();
@@ -965,9 +962,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             jsonObject.put("state", stateObject);
                             for (int i = 0; i < selectedImages.size(); i++) {
                                 GbcImage gbcImage = Utils.gbcImagesList.get(selectedImages.get(i));
-                                Bitmap imageBitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage);
+                                Bitmap imageBitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, gbcImage.isLockFrame());
 
-                                String txt = Utils.bytesToHex(Utils.encodeImage(imageBitmap)).toUpperCase();
+                                String txt = Utils.bytesToHex(Utils.encodeImage(imageBitmap, gbcImage.getPaletteId())).toUpperCase();
                                 System.out.println();
                                 StringBuilder sb = new StringBuilder();
                                 for (int j = 0; j < txt.length(); j++) {
@@ -1063,11 +1060,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
-            Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage);
+            Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, keepFrame);
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed), gbcImage);
+                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, keepFrame);
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
@@ -1075,7 +1072,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             canvas.drawBitmap(croppedBitmap, 16, 16, null);
 
             try {
-                byte[] imageBytes = Utils.encodeImage(framedAux);//Use the framedAux because it doesn't a different palette to encode
+                byte[] imageBytes = Utils.encodeImage(framedAux, "bw");//Use the framedAux because it doesn't a different palette to encode
                 gbcImage.setImageBytes(imageBytes);
                 for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
                     if (Utils.gbcImagesList.get(i).getHashCode().equals(gbcImage.getHashCode())) {
@@ -1087,15 +1084,41 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 e.printStackTrace();
             }
         }
+        diskCache.put(gbcImage.getHashCode(), framed);
         new SaveImageAsyncTask(gbcImage).execute();
         return framed;
     }
 
+//    public static Bitmap frameChange(GbcImage gbcImage, Bitmap bitmap, String selectedFrameId, boolean keepFrame) throws IOException {
+////        bitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage,false);
+//        Bitmap framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+//        byte[] imageBytes = Utils.encodeImage(bitmap,gbcImage.getPaletteId());
+//        Bitmap setToPalette = paletteChanger("bw", imageBytes, gbcImage, keepFrame);
+//        Canvas canvas = new Canvas(framed);
+////        byte[] frameBytes = Utils.encodeImage(framed);
+////        if (!keepFrame) {
+////            framed = paletteChanger(gbcImage.getPaletteId(), frameBytes, gbcImage, false);
+////        }
+//        canvas.drawBitmap(Bitmap.createBitmap(setToPalette, 16, 16, 128, 112), 16, 16, null);
+////        framed = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame);
+////        gbcImage.setFrameId(selectedFrameId);
+////        framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed), gbcImage, keepFrame);
+////        gbcImage.setImageBytes(Utils.encodeImage(framed));
+//        new SaveImageAsyncTask(gbcImage).execute();
+//        diskCache.put(gbcImage.getHashCode(), framed);
+//
+//        return framed;
+//    }
+
+
     //Change palette
-    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage) {
-        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt()), 160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
+    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage, boolean keepFrame) {
+        ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40, keepFrame);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes);
+
         new SaveImageAsyncTask(gbcImage).execute();
+        diskCache.put(gbcImage.getHashCode(), image);
+
         return image;
     }
 
@@ -1146,7 +1169,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     private void nextPage() {
-
         if (currentPage < lastPage) {
             currentPage++;
             updateGridView(currentPage);
@@ -1246,14 +1268,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             //Saving txt without cropping it
             try {
                 //Need to change the palette to bw so the encodeImage method works
-                image = paletteChanger("bw", gbcImage.getImageBytes(), Utils.gbcImagesList.get(0));
+                image = paletteChanger("bw", gbcImage.getImageBytes(), Utils.gbcImagesList.get(0), false);
                 StringBuilder txtBuilder = new StringBuilder();
                 //Appending these commands so the export is compatible with
                 // https://herrzatacke.github.io/gb-printer-web/#/import
                 // and https://mofosyne.github.io/arduino-gameboy-printer-emulator/GameBoyPrinterDecoderJS/gameboy_printer_js_decoder.html
                 txtBuilder.append("{\"command\":\"INIT\"}\n" +
                         "{\"command\":\"DATA\",\"compressed\":0,\"more\":1}\n");
-                String txt = Utils.bytesToHex(Utils.encodeImage(image));
+                String txt = Utils.bytesToHex(Utils.encodeImage(image, "bw"));
                 txt = addSpacesAndNewLines(txt).toUpperCase();
                 txtBuilder.append(txt);
                 txtBuilder.append("\n{\"command\":\"DATA\",\"compressed\":0,\"more\":0}\n" +
@@ -1392,31 +1414,34 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 //Add the hashcode to the list of current hashes
                 String imageHash = gbcImage.getHashCode();
                 currentPageHashes.add(imageHash);
-                byte[] imageBytes = new byte[0];
-//                Get the image bytes from the database for the current gbcImage
-                imageBytes = diskCache.get(imageHash);
-                if (imageBytes == null) {
-                    imageBytes = imageDataDao.getDataByImageId(imageHash);
-                    diskCache.put(imageHash,imageBytes);
-                    System.out.println("Cached!*************************************");
-                }
-
-                //Set the image bytes to the object
-                gbcImage.setImageBytes(imageBytes);
-                //Create the image bitmap
-                int height = (imageBytes.length + 1) / 40;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
-                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
-                //Add the bitmap to the cache
+                byte[] imageBytes;
+                Bitmap image = diskCache.get(imageHash);
                 Utils.imageBitmapCache.put(imageHash, image);
-                //Do a frameChange to create the Bitmap of the image
-                try {
-                    //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
-                    if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
-                        image = frameChange(Utils.gbcImagesList.get(newStartIndex + index), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(newStartIndex + index).getHashCode()), Utils.gbcImagesList.get(newStartIndex + index).getFrameId(), Utils.gbcImagesList.get(newStartIndex + index).isLockFrame());
-                    Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
-                } catch (IOException e) {
-                    e.printStackTrace();
+//                imageBytes = imageDataDao.getDataByImageId(imageHash);
+//                gbcImage.setImageBytes(imageBytes);
+
+//                Get the image bytes from the database for the current gbcImage
+                if (image == null) {
+                    imageBytes = imageDataDao.getDataByImageId(imageHash);
+                    //Set the image bytes to the object
+                    gbcImage.setImageBytes(imageBytes);
+                    //Create the image bitmap
+                    int height = (imageBytes.length + 1) / 40;//To get the real height of the image
+                    ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
+                    image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
+                    //Add the bitmap to the cache
+                    Utils.imageBitmapCache.put(imageHash, image);
+                    diskCache.put(imageHash, image);
+                    //Do a frameChange to create the Bitmap of the image
+                    try {
+                        //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
+                        if (image.getHeight() == 144 && !gbcImage.getFrameId().equals("") /*&& !gbcImage.getFrameId().equals("Nintendo_Frame")*/)
+                            image = frameChange(Utils.gbcImagesList.get(newStartIndex + index), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(newStartIndex + index).getHashCode()), Utils.gbcImagesList.get(newStartIndex + index).getFrameId(), Utils.gbcImagesList.get(newStartIndex + index).isLockFrame());
+                        Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
+                        diskCache.put(imageHash, image);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 index++;
             }
@@ -1452,37 +1477,40 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         protected Result doInBackground(Void... voids) {
             ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
             //foreach index
-//            int index = 0;
             for (int i : indexesToLoad) {
                 GbcImage gbcImage = Utils.gbcImagesList.get(i);
                 //Add the hashcode to the list of current hashes
                 String imageHash = gbcImage.getHashCode();
-                byte[] imageBytes = new byte[0];
-//                Get the image bytes from the database for the current gbcImage
-                imageBytes = diskCache.get(imageHash);
-                if (imageBytes == null) {
-                    imageBytes = imageDataDao.getDataByImageId(imageHash);
-                    diskCache.put(imageHash,imageBytes);
-                    System.out.println("Cached!*************************************");
-                }
-                //Set the image bytes to the object
-                gbcImage.setImageBytes(imageBytes);
-                //Create the image bitmap
-                int height = (imageBytes.length + 1) / 40;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt()), 160, height);
-                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
-                //Add the bitmap to the cache
+                byte[] imageBytes;
+                Bitmap image = diskCache.get(imageHash);
                 Utils.imageBitmapCache.put(imageHash, image);
-                //Do a frameChange to create the Bitmap of the image
-                try {
-                    //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
-                    if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
-                        image = frameChange(Utils.gbcImagesList.get(i), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(i).getHashCode()), Utils.gbcImagesList.get(i).getFrameId(), Utils.gbcImagesList.get(i).isLockFrame());
-                    Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
-                } catch (IOException e) {
-                    e.printStackTrace();
+//                imageBytes = imageDataDao.getDataByImageId(imageHash);
+//                gbcImage.setImageBytes(imageBytes);
+
+//                Get the image bytes from the database for the current gbcImage
+                if (image == null) {
+                    imageBytes = imageDataDao.getDataByImageId(imageHash);
+                    //Set the image bytes to the object
+                    gbcImage.setImageBytes(imageBytes);
+                    //Create the image bitmap
+                    int height = (imageBytes.length + 1) / 40;//To get the real height of the image
+                    ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
+                    image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
+                    //Add the bitmap to the cache
+                    Utils.imageBitmapCache.put(imageHash, image);
+                    diskCache.put(imageHash, image);
+                    //Do a frameChange to create the Bitmap of the image
+                    try {
+                        //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
+                        if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
+                            image = frameChange(Utils.gbcImagesList.get(i), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(i).getHashCode()), Utils.gbcImagesList.get(i).getFrameId(), Utils.gbcImagesList.get(i).isLockFrame());
+                        Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
+                        diskCache.put(imageHash, image);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-//                index++;
             }
 
             return null;
@@ -1492,7 +1520,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         protected void onPostExecute(Result result) {
             //Notifies the adapter
             loadCache = false;
-//            deleteDialog.show();
 
             if (listener != null) {
                 listener.onTaskComplete(result); // Notifica la finalización a través de la interfaz
@@ -1521,6 +1548,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 imageDao.delete(gbcImage);
                 imageDataDao.delete(imageData);
                 Utils.imageBitmapCache.remove(hashCode);
+                diskCache.remove(hashCode);
                 GbcImage.numImages--;
             }
 

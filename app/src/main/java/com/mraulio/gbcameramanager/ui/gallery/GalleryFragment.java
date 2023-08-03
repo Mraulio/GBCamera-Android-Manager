@@ -322,7 +322,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         if (nombre.equals("__filter:favourite__")) {
                                             iter.remove();
                                             dialog.dismiss();
-                                            System.out.println("DISMISSING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                                         }
                                         filteredGbcImages.get(globalImageIndex).setTags(tags);
                                         imageView.setBackgroundColor(getContext().getColor(R.color.white));

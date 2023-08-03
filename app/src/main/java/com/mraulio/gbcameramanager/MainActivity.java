@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     //Store in the shared preferences
     public static boolean exportPng = true;
     public static boolean printingEnabled = false;
+    public static boolean showPaperizeButton = false;
     public static int exportSize = 4;
     public static int imagesPage = 12;
     public static String languageCode = "en";
@@ -119,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
         exportSize = sharedPreferences.getInt("export_size", 4);
         imagesPage = sharedPreferences.getInt("images_per_page", 12);
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
+        showPaperizeButton = sharedPreferences.getBoolean("show_paperize_button", false);
+
         languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);

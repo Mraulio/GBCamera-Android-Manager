@@ -38,6 +38,7 @@ public class SettingsFragment extends Fragment {
         RadioButton rbPng = view.findViewById(R.id.rbPng);
         RadioButton rbTxt = view.findViewById(R.id.rbTxt);
         CheckBox cbPrint = view.findViewById(R.id.cbPrint);
+        CheckBox cbPaperize =  view.findViewById(R.id.cbPaperize);
         MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
 
         cbPrint.setChecked(MainActivity.printingEnabled);
@@ -50,6 +51,20 @@ public class SettingsFragment extends Fragment {
                 } else {
                     editor.putBoolean("print_enabled", false);
                     MainActivity.printingEnabled = false;
+                }
+                editor.apply();
+            }
+        });
+        cbPaperize.setChecked(MainActivity.showPaperizeButton);
+        cbPaperize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("show_paperize_button", true);
+                    MainActivity.showPaperizeButton = true;
+                } else {
+                    editor.putBoolean("show_paperize_button", false);
+                    MainActivity.showPaperizeButton = false;
                 }
                 editor.apply();
             }

@@ -222,7 +222,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="6"
-        android:background="#E3E3E3"
+        android:background="#32E3E3E3"
         android:orientation="vertical"
         android:weightSum="4">
 

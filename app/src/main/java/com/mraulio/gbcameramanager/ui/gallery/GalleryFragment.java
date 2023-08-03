@@ -265,7 +265,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     btn_paperize.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Bitmap bw_image = paletteChanger("bw", Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), false,false);
+                            Bitmap bw_image = paletteChanger("bw", Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), false, false);
 
                             Bitmap paperized = Paperize(bw_image);
                             LocalDateTime now = LocalDateTime.now();
@@ -295,7 +295,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             @Override
                             public void run() {
                                 //Single tap action
-                                showCustomDialog(Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()));
+                                showCustomDialog(globalImageIndex);
                                 clickCount = 0;
                             }
                         };
@@ -356,7 +356,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             if (keepFrame) keepFrame = false;
                             else keepFrame = true;
                             GbcImage gbcImage = Utils.gbcImagesList.get(globalImageIndex);
-                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame,true);
+                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true);
 
 //                            try {
 //                                bitmap = frameChange(Utils.gbcImagesList.get(globalImageIndex), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()), Utils.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
@@ -418,7 +418,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 //                            }
                             //Set the new palette to the gbcImage
                             Utils.gbcImagesList.get(globalImageIndex).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
-                            changedImage = paletteChanger(Utils.gbcImagesList.get(globalImageIndex).getPaletteId(), Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), Utils.gbcImagesList.get(globalImageIndex).isLockFrame(),true);
+                            changedImage = paletteChanger(Utils.gbcImagesList.get(globalImageIndex).getPaletteId(), Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), Utils.gbcImagesList.get(globalImageIndex).isLockFrame(), true);
                             Utils.imageBitmapCache.put(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
 //                            if (keepFrame) {
 //                                try {
@@ -960,7 +960,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             jsonObject.put("state", stateObject);
                             for (int i = 0; i < selectedImages.size(); i++) {
                                 GbcImage gbcImage = Utils.gbcImagesList.get(selectedImages.get(i));
-                                Bitmap imageBitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, false,false);
+                                Bitmap imageBitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, false, false);
 
                                 String txt = Utils.bytesToHex(Utils.encodeImage(imageBitmap, "bw"));
                                 StringBuilder sb = new StringBuilder();
@@ -971,7 +971,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     sb.append(txt.charAt(j));
                                 }
                                 String tileData = sb.toString();
-                                System.out.println("encoded: " + tileData);
                                 String deflated = encodeData(tileData);
                                 jsonObject.put(gbcImage.getHashCode(), deflated);
 
@@ -981,7 +980,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             String fileName = "imagesJson" + dateFormat.format(new Date()) + ".json";
 
-                            File file = new File(Utils.PALETTES_FOLDER, fileName);
+                            File file = new File(Utils.IMAGES_JSON, fileName);
 
                             try (FileWriter fileWriter = new FileWriter(file)) {
                                 fileWriter.write(jsonString);
@@ -990,7 +989,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 e.printStackTrace();
                             }
                         } catch (Exception e) {
-                            System.out.println(e.toString());
+                            e.printStackTrace();
                         }
 
                     });
@@ -1056,11 +1055,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
-            Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, keepFrame,false);
+            Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, keepFrame, false);
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, keepFrame,true);
+                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, keepFrame, true);
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
@@ -1119,7 +1118,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     //To show the "big" Image dialog when doing a simple tap on the image
-    private void showCustomDialog(Bitmap bitmap) {
+    private void showCustomDialog(int globalImageIndex) {
+        Bitmap bitmap = Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode());
         // Crear el diálogo personalizado
         final Dialog dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.single_image_dialog);
@@ -1133,7 +1133,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         // Obtener el ImageView y configurarlo como desplazable
         ImageView imageView = dialog.findViewById(R.id.imageView);
         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false));
-
+        TextView tvImageName = dialog.findViewById(R.id.tv_imageName);
+        tvImageName.setText(Utils.gbcImagesList.get(globalImageIndex).getName());
         imageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {

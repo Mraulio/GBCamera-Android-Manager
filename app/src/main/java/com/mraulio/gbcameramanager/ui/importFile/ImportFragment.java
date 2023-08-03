@@ -223,7 +223,7 @@ public class ImportFragment extends Fragment {
                             for (int i = 0; i < importedImagesList.size(); i++) {
                                 GbcImage gbcImage = importedImagesList.get(i);
                                 boolean alreadyAdded = false;
-                                //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
+                                //If the image already exists (by the hash) it doesn't add it. Same if it's already added
                                 for (GbcImage image : Utils.gbcImagesList) {
                                     if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
                                         alreadyAdded = true;

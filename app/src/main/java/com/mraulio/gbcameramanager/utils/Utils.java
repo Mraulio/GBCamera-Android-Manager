@@ -43,11 +43,11 @@ public class Utils {
     public static final File MAIN_FOLDER = new File(downloadDirectory, "GBCamera Manager");
     public static final File SAVE_FOLDER = new File(MAIN_FOLDER, "Save dumps");
     public static final File IMAGES_FOLDER = new File(picturesDirectory, "GBCamera Manager");
+    public static final File IMAGES_JSON = new File(MAIN_FOLDER, "Images json");
     public static final File TXT_FOLDER = new File(MAIN_FOLDER, "Hex images");
     public static final File PALETTES_FOLDER = new File(MAIN_FOLDER, "Palettes json");
     public static final File ARDUINO_HEX_FOLDER = new File(MAIN_FOLDER, "Arduino Printer Hex");
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
-
 
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
@@ -55,7 +55,6 @@ public class Utils {
     public static HashMap<String, Bitmap> imageBitmapCache = new HashMap<>();
     public static HashMap<String, GbcFrame> hashFrames = new HashMap<>();
     public static HashMap<String, GbcPalette> hashPalettes = new HashMap<>();
-    public static HashMap<String, byte[]> hashFrameBytes = new HashMap<>();
 
     //Auxiliar method to convert byte[] to hexadecimal String
     public static String bytesToHex(byte[] bytes) {
@@ -87,10 +86,12 @@ public class Utils {
         listFiles.add(MAIN_FOLDER);
         listFiles.add(SAVE_FOLDER);
         listFiles.add(IMAGES_FOLDER);
+        listFiles.add(IMAGES_JSON);
         listFiles.add(TXT_FOLDER);
         listFiles.add(PALETTES_FOLDER);
         listFiles.add(ARDUINO_HEX_FOLDER);
         listFiles.add(PHOTO_DUMPS_FOLDER);
+
 
         for (File file : listFiles) {
             try {

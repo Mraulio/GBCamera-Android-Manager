@@ -265,7 +265,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     btn_paperize.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Bitmap bw_image = paletteChanger("bw", Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), false);
+                            Bitmap bw_image = paletteChanger("bw", Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), false,false);
 
                             Bitmap paperized = Paperize(bw_image);
                             LocalDateTime now = LocalDateTime.now();
@@ -356,7 +356,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             if (keepFrame) keepFrame = false;
                             else keepFrame = true;
                             GbcImage gbcImage = Utils.gbcImagesList.get(globalImageIndex);
-                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame);
+                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame,true);
 
 //                            try {
 //                                bitmap = frameChange(Utils.gbcImagesList.get(globalImageIndex), Utils.imageBitmapCache.get(Utils.gbcImagesList.get(globalImageIndex).getHashCode()), Utils.gbcImagesList.get(globalImageIndex).getFrameId(), keepFrame);
@@ -418,7 +418,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 //                            }
                             //Set the new palette to the gbcImage
                             Utils.gbcImagesList.get(globalImageIndex).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
-                            changedImage = paletteChanger(Utils.gbcImagesList.get(globalImageIndex).getPaletteId(), Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), Utils.gbcImagesList.get(globalImageIndex).isLockFrame());
+                            changedImage = paletteChanger(Utils.gbcImagesList.get(globalImageIndex).getPaletteId(), Utils.gbcImagesList.get(globalImageIndex).getImageBytes(), Utils.gbcImagesList.get(globalImageIndex), Utils.gbcImagesList.get(globalImageIndex).isLockFrame(),true);
                             Utils.imageBitmapCache.put(Utils.gbcImagesList.get(globalImageIndex).getHashCode(), changedImage);
 //                            if (keepFrame) {
 //                                try {
@@ -924,8 +924,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     Utils.toast(getContext(), "No images selected");
                 return true;
             case R.id.action_json:
-                //Using this library https://github.com/nbadal/android-gif-encoder
-
                 if (!selectedImages.isEmpty()) {
                     Collections.sort(selectedImages);
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -962,10 +960,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             jsonObject.put("state", stateObject);
                             for (int i = 0; i < selectedImages.size(); i++) {
                                 GbcImage gbcImage = Utils.gbcImagesList.get(selectedImages.get(i));
-                                Bitmap imageBitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, gbcImage.isLockFrame());
+                                Bitmap imageBitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, false,false);
 
-                                String txt = Utils.bytesToHex(Utils.encodeImage(imageBitmap, gbcImage.getPaletteId())).toUpperCase();
-                                System.out.println();
+                                String txt = Utils.bytesToHex(Utils.encodeImage(imageBitmap, "bw"));
                                 StringBuilder sb = new StringBuilder();
                                 for (int j = 0; j < txt.length(); j++) {
                                     if (j > 0 && j % 32 == 0) {
@@ -980,7 +977,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             }
                             String jsonString = jsonObject.toString(2);
-                            System.out.println(jsonString);
                             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
 
                             String fileName = "imagesJson" + dateFormat.format(new Date()) + ".json";
@@ -1060,11 +1056,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
-            Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, keepFrame);
+            Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, keepFrame,false);
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, keepFrame);
+                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, keepFrame,true);
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
@@ -1112,13 +1108,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
 
     //Change palette
-    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage, boolean keepFrame) {
+    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage, boolean keepFrame, boolean save) {
         ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40, keepFrame);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes);
 
         new SaveImageAsyncTask(gbcImage).execute();
-        diskCache.put(gbcImage.getHashCode(), image);
-
+        if (save)
+            diskCache.put(gbcImage.getHashCode(), image);
         return image;
     }
 
@@ -1268,7 +1264,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             //Saving txt without cropping it
             try {
                 //Need to change the palette to bw so the encodeImage method works
-                image = paletteChanger("bw", gbcImage.getImageBytes(), Utils.gbcImagesList.get(0), false);
+                image = paletteChanger("bw", gbcImage.getImageBytes(), Utils.gbcImagesList.get(0), false, false);
                 StringBuilder txtBuilder = new StringBuilder();
                 //Appending these commands so the export is compatible with
                 // https://herrzatacke.github.io/gb-printer-web/#/import

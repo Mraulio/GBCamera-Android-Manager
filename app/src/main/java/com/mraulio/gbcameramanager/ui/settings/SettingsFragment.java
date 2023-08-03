@@ -130,8 +130,6 @@ public class SettingsFragment extends Fragment {
         sizesIntegerImages.add(15);
         sizesIntegerImages.add(18);
         sizesIntegerImages.add(30);
-        sizesIntegerImages.add(2000);
-
 
         List<String> sizesImages = new ArrayList<>();
         sizesImages.add("6");
@@ -140,7 +138,6 @@ public class SettingsFragment extends Fragment {
         sizesImages.add("15");
         sizesImages.add("18");
         sizesImages.add("30");
-        sizesImages.add("2000");
 
         ArrayAdapter<String> adapterImages = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, sizesImages);

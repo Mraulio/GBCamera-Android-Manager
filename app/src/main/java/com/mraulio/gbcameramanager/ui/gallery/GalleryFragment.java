@@ -1,5 +1,7 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static android.view.View.GONE;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -14,6 +16,7 @@ import android.graphics.Color;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -215,16 +218,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 if (!selectionMode) {
-                    int selectedPosition = 0;
+//                    int selectedPosition = 0;
                     crop = false;
                     keepFrame = false;
-                    // Obtain selected image
+                    //Obtain selected image
+                    int globalImageIndex;
                     if (currentPage != lastPage) {
-                        selectedPosition = position + (currentPage * itemsPerPage);
+                        globalImageIndex = position + (currentPage * itemsPerPage);
                     } else {
-                        selectedPosition = filteredGbcImages.size() - (itemsPerPage - position);
+                        globalImageIndex = filteredGbcImages.size() - (itemsPerPage - position);
                     }
-                    final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(selectedPosition).getHashCode())};
+                    final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode())};
                     // Create custom dialog
                     final Dialog dialog = new Dialog(getContext());
                     dialog.setContentView(R.layout.custom_dialog);
@@ -242,7 +246,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     Button printButton = dialog.findViewById(R.id.print_button);
                     if (MainActivity.printingEnabled) {
                         printButton.setVisibility(View.VISIBLE);
-                    } else printButton.setVisibility(View.GONE);
+                    } else printButton.setVisibility(GONE);
 
                     Button shareButton = dialog.findViewById(R.id.share_button);
                     Button saveButton = dialog.findViewById(R.id.save_button);
@@ -254,12 +258,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                     showPalettes = true;
 
-                    int globalImageIndex;
-                    if (currentPage != lastPage) {
-                        globalImageIndex = position + (currentPage * itemsPerPage);
-                    } else {
-                        globalImageIndex = filteredGbcImages.size() - (itemsPerPage - position);
-                    }
                     if (filteredGbcImages.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
                         imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                     }
@@ -321,9 +319,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         String nombre = iter.next();
                                         if (nombre.equals("__filter:favourite__")) {
                                             iter.remove();
-                                            dialog.dismiss();
                                         }
                                         filteredGbcImages.get(globalImageIndex).setTags(tags);
+                                        if (!filterTags.isEmpty())
+                                            dialog.dismiss();
                                         imageView.setBackgroundColor(getContext().getColor(R.color.white));
                                     }
                                 } else {
@@ -354,8 +353,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                     //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
                     if (selectedImage[0].getHeight() != 144) {
-                        cbFrameKeep.setVisibility(View.GONE);
-                        paletteFrameSelButton.setVisibility(View.GONE);
+                        cbFrameKeep.setVisibility(GONE);
+                        paletteFrameSelButton.setVisibility(GONE);
                     }
 
                     cbFrameKeep.setOnClickListener(new View.OnClickListener() {
@@ -399,7 +398,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 e.printStackTrace();
                             }
                             imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
-                            selectedImage[0] = framed;
+//                            selectedImage[0] = framed;
                             Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), framed);
                             frameAdapter.setLastSelectedPosition(selectedFrameIndex);
                             frameAdapter.notifyDataSetChanged();
@@ -439,7 +438,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             adapterPalette.setLastSelectedPosition(palettePosition);
                             adapterPalette.notifyDataSetChanged();
                             Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), changedImage);
-                            selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
+//                            selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
                             imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
                             updateGridView(currentPage);
                         }
@@ -450,13 +449,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             if (showPalettes) {
                                 showPalettes = false;
                                 paletteFrameSelButton.setText(getString(R.string.btn_show_palettes));
-                                gridViewPalette.setVisibility(View.GONE);
+                                gridViewPalette.setVisibility(GONE);
                                 gridViewFrames.setVisibility(View.VISIBLE);
 
                             } else {
                                 showPalettes = true;
                                 paletteFrameSelButton.setText(getString(R.string.btn_show_frames));
-                                gridViewFrames.setVisibility(View.GONE);
+                                gridViewFrames.setVisibility(GONE);
                                 gridViewPalette.setVisibility(View.VISIBLE);
                             }
                         }
@@ -465,7 +464,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         @Override
                         public void onClick(View v) {
                             try {
-                                MainActivity.printIndex = globalImageIndex;
 //                            UsbSerialFragment.btnPrintImage.callOnClick();//This works.
                                 connect();
                                 usbIoManager.start();
@@ -475,16 +473,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 View dialogView = getLayoutInflater().inflate(R.layout.print_dialog, null);
                                 tvResponseBytes = dialogView.findViewById(R.id.tvResponseBytes);
                                 builder.setView(dialogView);
-//                            builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialog, int which) {
-//                                    // Acciones a realizar al hacer clic en el botón Aceptar
-//                                }
-//                            });
+
                                 builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        // Acciones a realizar al hacer clic en el botón Cancelar
                                     }
                                 });
 
@@ -493,25 +485,22 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 //PRINT IMAGE
                                 PrintOverArduino printOverArduino = new PrintOverArduino();
 
-                                printOverArduino.oneImage = true;
                                 printOverArduino.banner = false;
-//                printOverArduino.sendImage(port, tv);
                                 try {
                                     List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
                                     if (availableDrivers.isEmpty()) {
                                         return;
                                     }
                                     UsbSerialDriver driver = availableDrivers.get(0);
-
-                                    printOverArduino.sendThreadDelay(connection, driver.getDevice(), tvResponseBytes, getContext());
+                                    List printList = new ArrayList();
+                                    printList.add(filteredGbcImages.get(globalImageIndex));
+                                    printOverArduino.sendThreadDelay(connection, driver.getDevice(), tvResponseBytes,printList);
                                 } catch (Exception e) {
                                     tv.append(e.toString());
                                     Toast toast = Toast.makeText(getContext(), getString(R.string.error_print_image) + e.toString(), Toast.LENGTH_LONG);
                                     toast.show();
                                 }
 
-//                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_printing), Toast.LENGTH_LONG);
-//                            toast.show();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -521,25 +510,23 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     shareButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Bitmap sharedBitmap = Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * MainActivity.exportSize, selectedImage[0].getHeight() * MainActivity.exportSize, false);
-                            shareImage(sharedBitmap);
+                            Bitmap image = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode());
+                            Bitmap sharedBitmap = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
+                            List sharedList = new ArrayList();
+                            sharedList.add(sharedBitmap);
+                            shareImage(sharedList);
                         }
                     });
                     saveButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-//                        crop = false;
-                            LocalDateTime now = LocalDateTime.now();
-                            String fileName = "gbcImage_";
-                            if (MainActivity.exportPng) {
-                                fileName += dtf.format(now) + ".png";
-                            } else fileName += dtf.format(now) + ".txt";
-                            saveImage(filteredGbcImages.get(globalImageIndex), fileName);
+                            List saveList = new ArrayList();
+                            saveList.add(filteredGbcImages.get(globalImageIndex));
+                            saveImage(saveList);
                         }
                     });
 
-                    // Configurar el diálogo para que ocupe el 80% de  la pantalla
-
+                    //Configure the dialog to occupy 80% of screen
                     int screenWidth = displayMetrics.widthPixels;
                     int desiredWidth = (int) (screenWidth * 0.8);
                     Window window = dialog.getWindow();
@@ -631,7 +618,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                 } else {
                     selectedImages.add(globalImageIndex);
-                    Utils.toast(getContext(), "Selected " + globalImageIndex);
                     selectionMode = true;
                     alreadyMultiSelect = false;
                 }
@@ -653,15 +639,381 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         // Do something that differs the Activity's menu here
         super.onCreateOptionsMenu(menu, inflater);
         if (filterTags.isEmpty()) {
-            menu.getItem(0).setTitle("Filter favorites");
+            menu.getItem(1).setTitle("Filter favorites");
         } else {
-            menu.getItem(0).setTitle("Remove filter");
+            menu.getItem(1).setTitle("Remove filter");
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_multi_edit:
+                if (selectionMode && selectedImages.size() > 1) {
+                    Collections.sort(selectedImages);
+                    List<Integer> indexesToLoad = new ArrayList<>();
+                    for (int i : selectedImages) {
+                        String hashCode = filteredGbcImages.get(i).getHashCode();
+                        if (Utils.imageBitmapCache.get(hashCode) == null) {
+                            indexesToLoad.add(i);
+                            loadCache = true;
+                        }
+                    }
+                    final Dialog dialog = new Dialog(getContext());
+
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, new AsyncTaskCompleteListener<Result>() {
+                        @Override
+                        public void onTaskComplete(Result result) {
+                            int globalImageIndex = selectedImages.get(0);
+
+                            crop = false;
+                            keepFrame = false;
+
+                            final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode())};
+                            // Create custom dialog
+                            dialog.setContentView(R.layout.custom_dialog);
+                            dialog.setCancelable(true);//So it closes when clicking outside or back button
+                            GridView gridMultiedit = dialog.findViewById(R.id.grid_multiedit);
+                            gridMultiedit.setNumColumns(selectedImages.size());
+                            gridMultiedit.setVisibility(View.VISIBLE);
+                            List<Bitmap> selectedBitmaps = new ArrayList<>();
+                            List<GbcImage> selectedGbcImages = new ArrayList<>();
+                            for (int i : selectedImages) {
+                                selectedBitmaps.add(Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
+                                selectedGbcImages.add(filteredGbcImages.get(i));
+
+                            }
+                            gridMultiedit.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, selectedGbcImages, selectedBitmaps, false, false, false, null));
+
+                            ImageView imageView = dialog.findViewById(R.id.image_view);
+
+                            imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
+                            int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
+                            imageView.setMaxHeight(maxHeight);
+
+                            Button printButton = dialog.findViewById(R.id.print_button);
+                            if (MainActivity.printingEnabled) {
+                                printButton.setVisibility(View.VISIBLE);
+                            } else printButton.setVisibility(GONE);
+
+                            printButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    try {
+                                        connect();
+                                        usbIoManager.start();
+                                        port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                        View dialogView = getLayoutInflater().inflate(R.layout.print_dialog, null);
+                                        tvResponseBytes = dialogView.findViewById(R.id.tvResponseBytes);
+                                        builder.setView(dialogView);
+
+                                        builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                            }
+                                        });
+
+                                        AlertDialog dialog = builder.create();
+                                        dialog.show();
+                                        //PRINT IMAGE
+                                        PrintOverArduino printOverArduino = new PrintOverArduino();
+
+                                        printOverArduino.banner = false;
+                                        try {
+                                            List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+                                            if (availableDrivers.isEmpty()) {
+                                                return;
+                                            }
+                                            UsbSerialDriver driver = availableDrivers.get(0);
+
+                                            printOverArduino.sendThreadDelay(connection, driver.getDevice(), tvResponseBytes,selectedGbcImages );
+                                        } catch (Exception e) {
+                                            tv.append(e.toString());
+                                            Toast toast = Toast.makeText(getContext(), getString(R.string.error_print_image) + e.toString(), Toast.LENGTH_LONG);
+                                            toast.show();
+                                        }
+
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                            Button shareButton = dialog.findViewById(R.id.share_button);
+                            Button saveButton = dialog.findViewById(R.id.save_button);
+                            Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
+                            GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
+                            GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
+                            CheckBox cbFrameKeep = dialog.findViewById(R.id.cbFrameKeep);
+                            CheckBox cbCrop = dialog.findViewById(R.id.cbCrop);
+                            showPalettes = true;
+                            Button btn_paperize = dialog.findViewById(R.id.btnPaperize);
+                            if (MainActivity.showPaperizeButton) {
+                                btn_paperize.setVisibility(View.VISIBLE);
+                            }
+                            btn_paperize.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    int index = 1;
+                                    LocalDateTime now = LocalDateTime.now();
+                                    String date = dtf.format(now);
+                                    for (int i : selectedImages) {
+                                        Bitmap bw_image = paletteChanger("bw", filteredGbcImages.get(i).getImageBytes(), filteredGbcImages.get(i), false, false);
+                                        Bitmap paperized = Paperize(bw_image);
+
+                                        File file = new File(Utils.IMAGES_FOLDER, "paperized_" + date + "_" + (index) + ".png");
+
+                                        if (paperized.getHeight() == 144 && paperized.getWidth() == 160 && crop) {
+                                            paperized = Bitmap.createBitmap(paperized, 16, 16, 128, 112);
+                                        }
+                                        try (FileOutputStream out = new FileOutputStream(file)) {
+                                            Bitmap scaled = Bitmap.createScaledBitmap(paperized, paperized.getWidth(), paperized.getHeight(), false);
+
+                                            scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+                                            Toast toast = Toast.makeText(getContext(), "Saved Paperized!", Toast.LENGTH_LONG);
+                                            toast.show();
+                                            // PNG is a lossless format, the compression factor (100) is ignored
+
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        index++;
+                                    }
+
+                                }
+                            });
+                            if (filteredGbcImages.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
+                                imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+                            }
+                            if (filteredGbcImages.get(globalImageIndex).isLockFrame()) {
+                                keepFrame = true;
+                                cbFrameKeep.setChecked(true);
+                            }
+                            cbCrop.setOnClickListener(v -> {
+                                if (!crop) {
+                                    crop = true;
+                                } else {
+                                    crop = false;
+                                }
+                            });
+
+
+                            FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Utils.framesList, false, false);
+                            int frameIndex = 0;
+                            for (int i = 0; i < Utils.framesList.size(); i++) {
+                                if (Utils.framesList.get(i).getFrameName().equals(filteredGbcImages.get(globalImageIndex).getFrameId())) {
+                                    frameIndex = i;
+                                    break;
+                                }
+                            }
+
+                            frameAdapter.setLastSelectedPosition(frameIndex);
+                            gridViewFrames.setAdapter(frameAdapter);
+
+                            imageView.setOnClickListener(new View.OnClickListener() {
+                                private int clickCount = 0;
+                                private final Handler handler = new Handler();
+                                private final Runnable runnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        //Single tap action
+//                                showCustomDialog(globalImageIndex);
+                                        clickCount = 0;
+                                    }
+                                };
+
+                                @Override
+                                public void onClick(View v) {
+                                    clickCount++;
+                                    if (clickCount == 1) {
+                                        // Start timer to detect the double tap
+                                        handler.postDelayed(runnable, 300);
+                                    } else if (clickCount == 2) {
+
+                                        // Stop timer and make double tap action
+                                        handler.removeCallbacks(runnable);
+
+                                        //Get the favorite status of the first selected image
+                                        boolean isFav = filteredGbcImages.get(globalImageIndex).getTags().contains("__filter:favourite__");
+                                        for (int i : selectedImages) {
+                                            if (isFav) {
+                                                List<String> tags = filteredGbcImages.get(i).getTags();
+                                                for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
+                                                    String nombre = iter.next();
+                                                    if (nombre.equals("__filter:favourite__")) {
+                                                        iter.remove();
+
+                                                    }
+                                                    filteredGbcImages.get(i).setTags(tags);
+                                                    if (i == 0)
+                                                        imageView.setBackgroundColor(getContext().getColor(R.color.white));
+                                                }
+                                                if (!filterTags.isEmpty())
+                                                    dialog.dismiss();
+                                            } else {
+                                                filteredGbcImages.get(i).addTag("__filter:favourite__");
+                                                if (i == 0)
+                                                    imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+
+                                            }
+                                            //To save the image with the favorite tag to the database
+                                            new SaveImageAsyncTask(filteredGbcImages.get(i)).execute();
+                                        }
+
+                                        clickCount = 0;
+                                        updateGridView(currentPage);
+                                    }
+
+                                }
+                            });
+
+
+                            //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
+                            if (selectedImage[0].getHeight() != 144) {
+                                cbFrameKeep.setVisibility(GONE);
+                                paletteFrameSelButton.setVisibility(GONE);
+                            }
+
+                            cbFrameKeep.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if (keepFrame) keepFrame = false;
+                                    else keepFrame = true;
+                                    for (int i : selectedImages) {
+                                        GbcImage gbcImage = filteredGbcImages.get(i);
+                                        //In case in the multiselect there are bigger images than standard
+                                        if (Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getHeight() == 144) {
+                                            gbcImage.setLockFrame(keepFrame);
+                                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true);
+                                            Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), bitmap);
+                                            new SaveImageAsyncTask(gbcImage).execute();
+                                        }
+                                    }
+                                    Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode());
+                                    imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
+
+                                    updateGridView(currentPage);
+
+                                }
+                            });
+
+                            gridViewFrames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
+                                    //Action when clicking a frame inside the Dialog
+                                    Bitmap framed = null;
+
+                                    try {
+                                        for (int i : selectedImages) {
+                                            filteredGbcImages.get(i).setFrameId(Utils.framesList.get(selectedFrameIndex).getFrameName());//Need to set the frame index before changing it because if not it's not added to db
+
+                                            framed = frameChange(filteredGbcImages.get(i), Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()), Utils.framesList.get(selectedFrameIndex).getFrameName(), filteredGbcImages.get(i).isLockFrame());
+                                            Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), framed);
+
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode());
+
+                                    imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
+                                    frameAdapter.setLastSelectedPosition(selectedFrameIndex);
+                                    frameAdapter.notifyDataSetChanged();
+                                    updateGridView(currentPage);
+                                }
+                            });
+                            CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, false, false);
+                            int paletteIndex = 0;
+                            for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
+                                if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex).getPaletteId())) {
+                                    paletteIndex = i;
+                                    break;
+                                }
+                            }
+                            adapterPalette.setLastSelectedPosition(paletteIndex);
+                            gridViewPalette.setAdapter(adapterPalette);
+                            gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> parent, View view, int palettePosition, long id) {
+                                    //Action when clicking a palette inside the Dialog
+                                    Bitmap changedImage = null;
+                                    for (int i : selectedImages) {
+                                        filteredGbcImages.get(i).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
+
+                                        changedImage = paletteChanger(filteredGbcImages.get(i).getPaletteId(), filteredGbcImages.get(i).getImageBytes(), filteredGbcImages.get(i), filteredGbcImages.get(i).isLockFrame(), true);
+                                        Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), changedImage);
+
+                                    }
+                                    adapterPalette.setLastSelectedPosition(palettePosition);
+                                    adapterPalette.notifyDataSetChanged();
+//                            Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), changedImage);
+                                    Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode());
+//                            selectedImage[0] = changedImage;//Needed to save the image with the palette changed without leaving the Dialog
+                                    imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
+                                    updateGridView(currentPage);
+                                }
+                            });
+                            paletteFrameSelButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if (showPalettes) {
+                                        showPalettes = false;
+                                        paletteFrameSelButton.setText(getString(R.string.btn_show_palettes));
+                                        gridViewPalette.setVisibility(GONE);
+                                        gridViewFrames.setVisibility(View.VISIBLE);
+
+                                    } else {
+                                        showPalettes = true;
+                                        paletteFrameSelButton.setText(getString(R.string.btn_show_frames));
+                                        gridViewFrames.setVisibility(GONE);
+                                        gridViewPalette.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            });
+                            shareButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    List<Bitmap> sharedList = new ArrayList<>();
+                                    for (int i : selectedImages) {
+                                        Bitmap image = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                                        Bitmap sharedBitmap = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
+                                        sharedList.add(sharedBitmap);
+                                    }
+                                    shareImage(sharedList);
+                                }
+                            });
+                            saveButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    saveImage(selectedGbcImages);
+                                }
+                            });
+
+                            int screenWidth = displayMetrics.widthPixels;
+                            int desiredWidth = (int) (screenWidth * 0.8);
+                            Window window = dialog.getWindow();
+                            window.setLayout(desiredWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+                            //To only dismiss it instead of cancelling when clicking outside it
+                            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    dialog.dismiss();
+                                }
+                            });
+                        }
+                    });
+                    asyncTask.execute();
+
+
+                    //Show Dialog
+                    dialog.show();
+                    customGridViewAdapterImage.notifyDataSetChanged();
+                } else Utils.toast(getContext(), "Select at least 2 images");
+
+                return true;
+
             case R.id.action_filter_favorite:
                 if (selectionMode) {
                     Utils.toast(getContext(), "Unselect all before filtering");
@@ -731,7 +1083,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
 
                 } else
-                    Utils.toast(getContext(), "No images selected;");
+                    Utils.toast(getContext(), "No images selected");
                 return true;
             case R.id.action_average:
                 if (!selectedImages.isEmpty()) {
@@ -1238,22 +1590,32 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         return dialog;
     }
 
-    private void shareImage(Bitmap bitmap) {
-        if ((bitmap.getHeight() / MainActivity.exportSize) == 144 && (bitmap.getWidth() / MainActivity.exportSize) == 160 && crop) {
-            bitmap = Bitmap.createBitmap(bitmap, 16 * MainActivity.exportSize, 16 * MainActivity.exportSize, 128 * MainActivity.exportSize, 112 * MainActivity.exportSize);
-        }
-
-        File file = new File(getActivity().getExternalCacheDir(), "shared_image.png");
+    private void shareImage(List<Bitmap> bitmaps) {
+        ArrayList<Uri> imageUris = new ArrayList<>();
         FileOutputStream fileOutputStream = null;
 
         try {
-            fileOutputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
-            fileOutputStream.flush();
+            for (int i = 0; i < bitmaps.size(); i++) {
+                Bitmap bitmap = bitmaps.get(i);
 
-            Intent intent = new Intent(Intent.ACTION_SEND);
+                if ((bitmap.getHeight() / MainActivity.exportSize) == 144 && (bitmap.getWidth() / MainActivity.exportSize) == 160 && crop) {
+                    bitmap = Bitmap.createBitmap(bitmap, 16 * MainActivity.exportSize, 16 * MainActivity.exportSize, 128 * MainActivity.exportSize, 112 * MainActivity.exportSize);
+                }
+
+                File file = new File(getActivity().getExternalCacheDir(), "shared_image_" + i + ".png");
+                fileOutputStream = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+                fileOutputStream.flush();
+                fileOutputStream.close();
+
+                // Convertir el archivo temporal en una Uri
+                Uri uri = FileProvider.getUriForFile(getActivity(), getActivity().getPackageName() + ".fileprovider", file);
+                imageUris.add(uri);
+            }
+
+            Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
             intent.setType("image/png");
-            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(getActivity(), getActivity().getPackageName() + ".fileprovider", file));
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(Intent.createChooser(intent, "Share"));
         } catch (Exception e) {
@@ -1270,54 +1632,70 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         }
     }
 
-    private void saveImage(GbcImage gbcImage, String fileName) {
-        Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
 
-        if (MainActivity.exportPng) {
-            File file = new File(Utils.IMAGES_FOLDER, fileName);
+    private void saveImage(List<GbcImage> gbcImages) {
+        LocalDateTime now = LocalDateTime.now();
+        String fileNameBase = "gbcImage_";
+        String extension = MainActivity.exportPng ? ".png" : ".txt";
+        System.out.println(gbcImages.size() + " size");
+        for (int i = 0; i < gbcImages.size(); i++) {
+            GbcImage gbcImage = gbcImages.get(i);
+            Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
+            String fileName = fileNameBase + dtf.format(now);
 
-            if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
-                image = Bitmap.createBitmap(image, 16, 16, 128, 112);
+            if (gbcImages.size() > 1) {
+                fileName += "_" + (i + 1);
             }
-            try (FileOutputStream out = new FileOutputStream(file)) {
-                Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
 
-                scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
-                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + MainActivity.exportSize, Toast.LENGTH_LONG);
-                toast.show();
-                // PNG is a lossless format, the compression factor (100) is ignored
+            fileName += extension;
+            System.out.println(i + 1 + " Posicion");
+            if (MainActivity.exportPng) {
+                File file = new File(Utils.IMAGES_FOLDER, fileName);
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            File file = new File(Utils.TXT_FOLDER, fileName);
+                if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
+                    image = Bitmap.createBitmap(image, 16, 16, 128, 112);
+                }
+                try (FileOutputStream out = new FileOutputStream(file)) {
+                    Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
 
-            //Saving txt without cropping it
-            try {
-                //Need to change the palette to bw so the encodeImage method works
-                image = paletteChanger("bw", gbcImage.getImageBytes(), filteredGbcImages.get(0), false, false);
-                StringBuilder txtBuilder = new StringBuilder();
-                //Appending these commands so the export is compatible with
-                // https://herrzatacke.github.io/gb-printer-web/#/import
-                // and https://mofosyne.github.io/arduino-gameboy-printer-emulator/GameBoyPrinterDecoderJS/gameboy_printer_js_decoder.html
-                txtBuilder.append("{\"command\":\"INIT\"}\n" +
-                        "{\"command\":\"DATA\",\"compressed\":0,\"more\":1}\n");
-                String txt = Utils.bytesToHex(Utils.encodeImage(image, "bw"));
-                txt = addSpacesAndNewLines(txt).toUpperCase();
-                txtBuilder.append(txt);
-                txtBuilder.append("\n{\"command\":\"DATA\",\"compressed\":0,\"more\":0}\n" +
-                        "{\"command\":\"PRNT\",\"sheets\":1,\"margin_upper\":1,\"margin_lower\":3,\"pallet\":228,\"density\":64 }");
-                FileWriter fileWriter = new FileWriter(file);
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-                bufferedWriter.write(txtBuilder.toString());
-                bufferedWriter.close();
-                Utils.toast(getContext(), getString(R.string.toast_saved_txt));
-            } catch (IOException e) {
-                e.printStackTrace();
+                    scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + MainActivity.exportSize, Toast.LENGTH_LONG);
+                    toast.show();
+                    // PNG is a lossless format, the compression factor (100) is ignored
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                File file = new File(Utils.TXT_FOLDER, fileName);
+
+                //Saving txt without cropping it
+                try {
+                    //Need to change the palette to bw so the encodeImage method works
+                    image = paletteChanger("bw", gbcImage.getImageBytes(), filteredGbcImages.get(0), false, false);
+                    StringBuilder txtBuilder = new StringBuilder();
+                    //Appending these commands so the export is compatible with
+                    // https://herrzatacke.github.io/gb-printer-web/#/import
+                    // and https://mofosyne.github.io/arduino-gameboy-printer-emulator/GameBoyPrinterDecoderJS/gameboy_printer_js_decoder.html
+                    txtBuilder.append("{\"command\":\"INIT\"}\n" +
+                            "{\"command\":\"DATA\",\"compressed\":0,\"more\":1}\n");
+                    String txt = Utils.bytesToHex(Utils.encodeImage(image, "bw"));
+                    txt = addSpacesAndNewLines(txt).toUpperCase();
+                    txtBuilder.append(txt);
+                    txtBuilder.append("\n{\"command\":\"DATA\",\"compressed\":0,\"more\":0}\n" +
+                            "{\"command\":\"PRNT\",\"sheets\":1,\"margin_upper\":1,\"margin_lower\":3,\"pallet\":228,\"density\":64 }");
+                    FileWriter fileWriter = new FileWriter(file);
+                    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                    bufferedWriter.write(txtBuilder.toString());
+                    bufferedWriter.close();
+                    Utils.toast(getContext(), getString(R.string.toast_saved_txt));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
+
 
     private String addSpacesAndNewLines(String input) {
         StringBuilder sb = new StringBuilder();
@@ -1722,7 +2100,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 } else
                     holder.txtTitle.setText(name);
             } else {
-                holder.txtTitle.setVisibility(View.GONE);
+                holder.txtTitle.setVisibility(GONE);
             }
 
             holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));

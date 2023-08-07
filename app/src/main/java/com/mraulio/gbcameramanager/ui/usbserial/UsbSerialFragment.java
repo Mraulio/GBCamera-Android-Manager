@@ -84,8 +84,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     String romName = "";
     int numImagesAdded;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
-    StringBuilder dataCreate = new StringBuilder();
-
 
     LinearLayout layoutCb;
     CheckBox cbLastSeen, cbDeleted;
@@ -187,15 +185,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             }
         });
 
-
         btnPrintBanner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                dataCreate.setLength(0);
                 //PRINT IMAGE
                 PrintOverArduino printOverArduino = new PrintOverArduino();
-                printOverArduino.oneImage = false;
                 printOverArduino.banner = true;
                 try {
                     List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
@@ -203,7 +197,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                         return;
                     }
                     UsbSerialDriver driver = availableDrivers.get(0);
-                    printOverArduino.sendThreadDelay(connection, driver.getDevice(), tv, getContext());
+                    printOverArduino.sendThreadDelay(connection, driver.getDevice(), tv, null);
                 } catch (Exception e) {
                     tv.append(e.toString());
                     Toast toast = Toast.makeText(getContext(), getString(R.string.error_print_image) + e.toString(), Toast.LENGTH_LONG);
@@ -295,7 +289,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true,false,null);
+            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
             tv.append(extractedImagesList.size() + " images.");
             btnAddImages.setVisibility(View.VISIBLE);
@@ -458,7 +452,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                     String hashHex = Utils.bytesToHex(hash);
                     gbcImage.setHashCode(hashHex);
-                    ImageCodec imageCodec = new ImageCodec(128, 112,false);
+                    ImageCodec imageCodec = new ImageCodec(128, 112, false);
                     Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         //I need to use copy because if not it's inmutable bitmap
@@ -466,7 +460,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                         Canvas canvas = new Canvas(framed);
                         canvas.drawBitmap(image, 16, 16, null);
                         image = framed;
-                        imageBytes = Utils.encodeImage(image,"bw");
+                        imageBytes = Utils.encodeImage(image, "bw");
                     }
                     gbcImage.setImageBytes(imageBytes);
                     extractedImagesBitmaps.add(image);
@@ -493,7 +487,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     canvas.drawLine(startX, startY, endX, endY, paint);
                     listDeletedBitmapsRedStroke.add(copiedBitmap);
                 }
-                GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true,false,null);
+                GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
                 gridView.setAdapter(customGridViewAdapterImage);
                 showImages(cbLastSeen, cbDeleted);
             } else {
@@ -516,7 +510,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             for (File file : fullRomFileList) {
                 readSav(file);
             }
-            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true,false,null);
+            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
 //            } else {
 //                tv.append("\nNOT A GOOD SAVE DUMP.");
@@ -701,7 +695,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             finalListBitmaps.addAll(listDeletedBitmaps);
             bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
         }
-        gridView.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true,false,null)));
+        gridView.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
     }
 
 
@@ -834,7 +828,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             gbcImage.setName(index++ + "-" + " arduino");
             gbcImage.setFrameId("GBCManager_Frame");//Could just leave it blank
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(160, height,false);
+            ImageCodec imageCodec = new ImageCodec(160, height, false);
             Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes());
             extractedImagesBitmaps.add(image);
             extractedImagesList.add(gbcImage);

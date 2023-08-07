@@ -58,7 +58,6 @@ import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
-    public static int printIndex = 0;//If there are no images there will be a crash when trying to print
     private AppBarConfiguration mAppBarConfiguration;
     boolean anyImage = true;
     private ActivityMainBinding binding;

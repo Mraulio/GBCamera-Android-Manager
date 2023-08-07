@@ -78,6 +78,7 @@ public class PrintOverArduino {
         byte[] bytesTileData;
         String data_nospace = "";
         int chunkSize = 640;//each data packet size
+        int printsNeeded;
         if (banner) {
             data_nospace = TEST_BANNER.replaceAll(System.lineSeparator(), " ").replaceAll(" ", "");
             int len2 = data_nospace.length();
@@ -86,12 +87,40 @@ public class PrintOverArduino {
                 bytesTileData[i / 2] = (byte) ((Character.digit(data_nospace.charAt(i), 16) << 4)
                         + Character.digit(data_nospace.charAt(i + 1), 16));
             }
+            listBytes.add(getCommandBytes(INIT));//listBytes.get(0)
+            byte[] splittedArray;
+            //If there is only 1 print, or its more prints and its the last one, the end is the bytesTileData.length
+                splittedArray = Arrays.copyOfRange(bytesTileData, 0, bytesTileData.length);
+            for (int i = 0; i < splittedArray.length; i += chunkSize) {
+                int chunkLength = Math.min(chunkSize, splittedArray.length - i);
+                byte[] chunk = Arrays.copyOfRange(splittedArray, i, i + chunkLength);
+                try {
+                    outputStream.write(getCommandBytes(DATA_COMMAND));
+                    outputStream.write(chunk);//I write the 640 bytes
+                    outputStream.write(checksumCalc(chunk)); //I write the Checksum, need to calculate it with start_checksum+data
+                    outputStream.write(getCommandBytes(END_DATA));//The last 2 bytes
+                    listBytes.add(outputStream.toByteArray());//listBytes.get(1-X)
+                    outputStream.reset();//Empty the outputstream
+                } catch (Exception e) {
+                    tv.append(e.toString());
+                }
+            }
+            listBytes.add(getCommandBytes(EMPTY_DATA));//listBytes.get(size-1)
+            listBytes.add(getCommandBytes(PRINT_MARGIN));//listBytes.get(size)
+
+            listOfLists.add(new ArrayList<>(listBytes));
+
+            try {
+                listBytes.clear();
+            } catch (Exception e) {
+                tv.append("\nError en clear\n" + e.toString());
+            }
         } else {
             tv.append("\nImages to print: " + listImages.size());
             for (int k = 0; k < listImages.size(); k++) {
                 bytesTileData = listImages.get(k).getImageBytes();
 
-                int printsNeeded = ((bytesTileData.length / chunkSize) / 9);
+                printsNeeded = ((bytesTileData.length / chunkSize) / 9);
 
                 //If result is 0.222 or 1.4343, add 1 needed print
                 if (((bytesTileData.length / chunkSize) % 9) != 0) {
@@ -137,11 +166,6 @@ public class PrintOverArduino {
                 }
             }
         }
-
-//        tv.append("\nCHUNKS = " + bytesTileData.length / chunkSize);
-        //I NEED TO CREATE A FULL 9 PACKETS WITH COMMANDS FOR EACH BYTE LIST TO SEND.
-        //IF IMAGE IS LARGER THAN THE 9 PACKETS, CREATE ANOTHER BYTE LIST WITH COMMANDS AND THE REST OF THE DATA PACKETS.
-
 
         return listOfLists;
     }

@@ -22,7 +22,7 @@
     <string name="cb_crop">Beschneiden</string>
 
     <string name="toast_printing">Drucke, bitte warten...</string>
-    <string name="toast_saved">Gespeichert</string>
+    <string name="toast_saved">Gespeichert x</string>
     <string name="toast_saved_txt">TXT gespeichert</string>
 
     <string name="loading">Lade...</string>

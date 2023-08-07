@@ -15,8 +15,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -35,7 +33,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.utils.StartCreation;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;

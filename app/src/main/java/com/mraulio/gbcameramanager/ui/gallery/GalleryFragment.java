@@ -1608,7 +1608,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 fileOutputStream.flush();
                 fileOutputStream.close();
 
-                // Convertir el archivo temporal en una Uri
                 Uri uri = FileProvider.getUriForFile(getActivity(), getActivity().getPackageName() + ".fileprovider", file);
                 imageUris.add(uri);
             }

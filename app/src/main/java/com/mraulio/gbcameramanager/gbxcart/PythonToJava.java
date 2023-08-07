@@ -202,7 +202,7 @@ public class PythonToJava {
         LocalDateTime now = LocalDateTime.now();
         String fileName = "PhotoFullRom_";
         String folderName = "PhotoFullRom_" + dtf.format(now);
-        fileName += dtf.format(now) + ".full";
+        fileName += dtf.format(now) + ".full.gbc";
         File parentFile = new File(Utils.PHOTO_DUMPS_FOLDER, folderName);
         //I create the new directory if it doesn't exists
         try {
@@ -243,7 +243,7 @@ public class PythonToJava {
                     bos.write(receivedData);
                 }
             }
-            tv.append("\nDONE DUMPING! Check your Download/PHOTO Dumps folder");
+            tv.append("\nDONE DUMPING! Check your Download/PHOTO Dumps folder");//Add to strings
             bos.close();
 
         } catch (Exception e) {
@@ -260,7 +260,7 @@ public class PythonToJava {
                 String extension = "";
                 if (i == 0) {
                     extension = ".gbc";
-                } else extension = ".part_" + (i) + ".sav";
+                } else extension = ".part_" + i + ".sav";
                 File outputFile = new File(parentFile, fileName + extension);
 
                 try (OutputStream writer = new FileOutputStream(outputFile)) {
@@ -300,9 +300,9 @@ public class PythonToJava {
 
     //To check if all bytes are FF. If they are, it's not a valid sav
     private static boolean containsFFBytes(byte[] bytes) {
-        int length = Math.min(bytes.length, 16); // Solo comprobar los primeros 16 bytes
-        int holder = 0;
-        for (int i = 0x2FB1; i < 5; i++) {//Where a MAGIC is, I just check if there are no FF
+        int startPosition = 0x2FB1;
+        int numberOfBytes = 5;
+        for (int i = startPosition; i < startPosition + numberOfBytes; i++) {
             if (bytes[i] == (byte) 0xFF) {
                 return true;
             }

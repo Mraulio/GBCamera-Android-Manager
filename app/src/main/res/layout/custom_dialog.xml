@@ -16,16 +16,17 @@
 
     <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/cardview_light_background">
 
-        <GridView
-            android:id="@+id/grid_multiedit"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:horizontalSpacing="8dp"
-            android:stretchMode="columnWidth"
-            android:verticalSpacing="8dp"
-            android:visibility="gone"/>
+        <LinearLayout
+            android:paddingVertical="5dp"
+            android:id="@+id/ly_selected_images"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+        </LinearLayout>
     </HorizontalScrollView>
 
     <LinearLayout

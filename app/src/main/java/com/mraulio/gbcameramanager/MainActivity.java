@@ -13,6 +13,7 @@ import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.util.Log;
 import android.view.Menu;
 import android.widget.Toast;
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean showPaperizeButton = false;
     public static int exportSize = 4;
     public static int imagesPage = 12;
-    public static String languageCode = "en";
+    public static String languageCode;
 
     private boolean openedSav = false;
     public static UsbManager manager;
@@ -113,29 +114,47 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
         exportSize = sharedPreferences.getInt("export_size", 4);
         imagesPage = sharedPreferences.getInt("images_per_page", 12);
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         showPaperizeButton = sharedPreferences.getBoolean("show_paperize_button", false);
-
-        languageCode = sharedPreferences.getString("language", "en");
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
+
+        //To get the locale on the first startup and set the def value
+        Resources resources = getResources();
+        Configuration configuration = resources.getConfiguration();
+        LocaleList locales = configuration.getLocales();
+
+        Locale currentLocale = locales.get(0);
+
+        if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
+                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
+            languageCode = "en";
+        } else {
+            languageCode = currentLocale.getLanguage();
+        }
+
+        languageCode = sharedPreferences.getString("language", languageCode);
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+
+        configuration.setLocale(locale);
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
 
         fab = findViewById(R.id.fab);
 
         Utils.makeDirs();
-
-        // Change language config
-        if (!languageCode.equals("en")) {
-            Locale locale = new Locale(languageCode);
-            Locale.setDefault(locale);
-
-            Resources resources = getResources();
-            Configuration configuration = resources.getConfiguration();
-            configuration.setLocale(locale);
-            resources.updateConfiguration(configuration, resources.getDisplayMetrics());
-        }
+//        // Change language config
+//        if (!languageCode.equals("en")) {
+//            Locale locale = new Locale(languageCode);
+//            Locale.setDefault(locale);
+//
+//            configuration.setLocale(locale);
+//            resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+//        }
 
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();

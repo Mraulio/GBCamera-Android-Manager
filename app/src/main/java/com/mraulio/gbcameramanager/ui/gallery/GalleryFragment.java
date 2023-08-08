@@ -125,9 +125,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static DiskCache diskCache;
 
     static boolean selectionMode = false;
-    static boolean firstToLast = true;
     static boolean alreadyMultiSelect = false;
-    static boolean loadCache = false;
     static AlertDialog deleteDialog;
 
     public GalleryFragment() {
@@ -633,7 +631,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         String hashCode = filteredGbcImages.get(i).getHashCode();
                         if (Utils.imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
-                            loadCache = true;
                         }
                     }
                     final Dialog dialog = new Dialog(getContext());
@@ -998,7 +995,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         item.setTitle(getString(R.string.filter_favorites_item));
                     }
                     currentPage = 0;
-                    updateGridView(0);
+                    updateGridView(currentPage);
                     return true;
                 }
                 break;
@@ -1019,7 +1016,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         String hashCode = filteredGbcImages.get(i).getHashCode();
                         if (Utils.imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
-                            loadCache = true;
                         }
                         deleteGbcImage.add(filteredGbcImages.get(i));
                     }
@@ -1084,7 +1080,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         String hashCode = filteredGbcImages.get(i).getHashCode();
                         if (Utils.imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
-                            loadCache = true;
                         }
                     }
                     builder.setPositiveButton(getString(R.string.btn_save), (dialog, which) -> {
@@ -1119,10 +1114,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                                 AlertDialog dialog = builder.create();
                                 dialog.show();
-                            }catch (IllegalArgumentException e){
-                                Utils.toast(getContext(),getString(R.string.hdr_exception));
+                            } catch (IllegalArgumentException e) {
+                                Utils.toast(getContext(), getString(R.string.hdr_exception));
                             }
-
                         }
                     });
                     asyncTask.execute();
@@ -1204,7 +1198,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         String hashCode = filteredGbcImages.get(i).getHashCode();
                         if (Utils.imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
-                            loadCache = true;
                         }
                     }
                     reload_anim.setOnClickListener(v -> {
@@ -1286,7 +1279,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         String hashCode = filteredGbcImages.get(i).getHashCode();
                         if (Utils.imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
-                            loadCache = true;
                         }
                     }
                     loadingDialog.show();
@@ -1754,8 +1746,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 }
             }
             if (doAsync) {
-                if (!loadingDialog.isShowing())
-                    loadingDialog.show();
+//                if (!loadingDialog.isShowing())
+//                    loadingDialog.show();
                 new UpdateGridViewAsyncTask().execute();
             } else {
                 List<Bitmap> bitmapList = new ArrayList<>();
@@ -1825,6 +1817,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
 //                Get the image bytes from the database for the current gbcImage
                 if (image == null) {
+                    if (!loadingDialog.isShowing())
+                        publishProgress();
                     imageBytes = imageDataDao.getDataByImageId(imageHash);
                     //Set the image bytes to the object
                     gbcImage.setImageBytes(imageBytes);
@@ -1856,6 +1850,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
             customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, filteredGbcImages.subList(newStartIndex, newEndIndex), bitmapList, false, false, true, selectedImages);
             return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+            if (!loadingDialog.isShowing())
+                loadingDialog.show();
         }
 
         @Override
@@ -1919,8 +1920,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         @Override
         protected void onPostExecute(Result result) {
             //Notifies the adapter
-            loadCache = false;
-
             if (listener != null) {
                 listener.onTaskComplete(result); //Notify the finalization from the interface
             }

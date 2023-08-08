@@ -80,8 +80,6 @@ public class SettingsFragment extends Fragment {
             spinnerExport.setEnabled(false);
         }
 
-//        MainActivity.pressBack=false;
-
         rbPng.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,10 +130,8 @@ public class SettingsFragment extends Fragment {
                 editor.putInt("export_size", sizesInteger.get(position));
                 editor.apply();
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Acción que quieres hacer cuando no se selecciona ningún elemento en el Spinner
             }
         });
 
@@ -170,12 +166,10 @@ public class SettingsFragment extends Fragment {
                 GalleryFragment.currentPage = 0;
                 editor.putInt("current_page", 0);
                 editor.apply();
-                System.out.println("IMmageessss");
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Acción que quieres hacer cuando no se selecciona ningún elemento en el Spinner
             }
         });
 
@@ -202,7 +196,6 @@ public class SettingsFragment extends Fragment {
         spinnerLanguage.setAdapter(adapterLanguage);
         spinnerLanguage.setSelection(langs.indexOf(MainActivity.languageCode));
         spinnerLanguage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            // Variable para rastrear si la selección es del usuario o la inicialización
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -213,15 +206,11 @@ public class SettingsFragment extends Fragment {
                 } else {
                     userSelect = true; // Because the spinner executes an item selection on startup
                 }
-
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
-
         return view;
     }
 

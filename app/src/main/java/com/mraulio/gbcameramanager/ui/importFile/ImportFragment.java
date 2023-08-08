@@ -281,7 +281,6 @@ public class ImportFragment extends Fragment {
     }
 
     private void extractFile() {
-
         //I clear the lists in case I choose several files without leaving
         importedImagesList.clear();
         importedImagesBitmaps.clear();
@@ -290,7 +289,6 @@ public class ImportFragment extends Fragment {
         cbDeleted.setChecked(false);
         if (savFile && !isJson) {
 
-//            btnAddImages.setEnabled(true);
             extractSavImages();
             listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount - 1));
             listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount - 1));
@@ -313,25 +311,17 @@ public class ImportFragment extends Fragment {
                 canvas.drawLine(startX, startY, endX, endY, paint);
                 listDeletedBitmapsRedStroke.add(copiedBitmap);
             }
-//            tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
-//            btnAddImages.setText(getString(R.string.btn_add_images));
-//            btnAddImages.setVisibility(View.VISIBLE);
-//            layoutCb.setVisibility(View.VISIBLE);
+
             showImages(cbLastSeen, cbDeleted);
             ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
         } else if (!savFile && !isJson) {
-//            btnAddImages.setEnabled(true);
             try {
                 extractHexImages(fileContent);
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
             adapter = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true,false,null);
-//            gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true)));
-//            tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
-//            btnAddImages.setText(getString(R.string.btn_add_images));
-//            btnAddImages.setVisibility(View.VISIBLE);
-//            layoutCb.setVisibility(View.GONE);
+
             ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
         } else if (!savFile && isJson) {
             receivedList = JsonReader.jsonCheck(fileContent);
@@ -378,7 +368,6 @@ public class ImportFragment extends Fragment {
                         btnAddImages.setEnabled(true);
                         adapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true);
                         customAdapterPalette = (CustomGridViewAdapterPalette) adapter;
-//                    gridViewImport.setAdapter(customAdapterPalette);
                         btnAddImages.setText(getString(R.string.btn_add_palettes));
                         btnAddImages.setVisibility(View.VISIBLE);
                         layoutCb.setVisibility(View.GONE);
@@ -390,7 +379,6 @@ public class ImportFragment extends Fragment {
                         btnAddImages.setVisibility(View.VISIBLE);
                         layoutCb.setVisibility(View.GONE);
                         adapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true);
-//                    gridViewImport.setAdapter(new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true));
                         break;
                     case IMAGES:
                         btnAddImages.setEnabled(true);
@@ -398,7 +386,6 @@ public class ImportFragment extends Fragment {
                         btnAddImages.setVisibility(View.VISIBLE);
                         layoutCb.setVisibility(View.GONE);
                         adapter = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true,false,null);
-//                    gridViewImport.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true));
                         break;
                 }
             }
@@ -440,7 +427,6 @@ public class ImportFragment extends Fragment {
             bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
         }
         adapter = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true,false,null);
-//        gridViewImport.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true)));
     }
 
     private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -570,7 +556,6 @@ public class ImportFragment extends Fragment {
                         Intent data = result.getData();
                         Uri uri = data.getData();
                         Utils.toast(getContext(), getFileName(uri));
-//                        String[] aux = uri.getPath().split("/");
                         fileName = getFileName(uri);
                         //I check the extension of the file
                         if (fileName.endsWith("sav")) {
@@ -580,9 +565,7 @@ public class ImportFragment extends Fragment {
 
                             try {
                                 InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                // Crear un ByteArrayOutputStream para copiar el contenido del archivo
                                 byteStream = new ByteArrayOutputStream();
-                                // Leer el contenido del archivo en un buffer de 1KB y copiarlo en el ByteArrayOutputStream
                                 byte[] buffer = new byte[1024];
                                 int len;
                                 while ((len = inputStream.read(buffer)) != -1) {
@@ -595,7 +578,7 @@ public class ImportFragment extends Fragment {
                             }
                             // Obtener los bytes del archivo como un byte[]
                             fileBytes = byteStream.toByteArray();
-                            tvFileName.setText("Bytes: " + fileBytes.length + ". Name: " + fileName);
+                            tvFileName.setText(getString(R.string.file_name) + fileName);
                             btnExtractFile.setVisibility(View.VISIBLE);
                         } else if (fileName.endsWith("txt")) {
                             savFile = false;
@@ -603,7 +586,6 @@ public class ImportFragment extends Fragment {
 
                             try {
                                 InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                // Crear un ByteArrayOutputStream para copiar el contenido del archivo
                                 StringBuilder stringBuilder = new StringBuilder();
                                 try {
                                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -623,7 +605,7 @@ public class ImportFragment extends Fragment {
                                 }
                                 fileContent = stringBuilder.toString();
                                 fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
-                                tvFileName.setText("Bytes: " + fileBytes.length + ". Name: " + fileName);
+                                tvFileName.setText(getString(R.string.file_name) + fileName);
                                 btnExtractFile.setVisibility(View.VISIBLE);
                             } catch (Exception e) {
                             }
@@ -632,7 +614,6 @@ public class ImportFragment extends Fragment {
                             isJson = true;
                             try {
                                 InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                // Crear un ByteArrayOutputStream para copiar el contenido del archivo
                                 StringBuilder stringBuilder = new StringBuilder();
                                 try {
                                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -651,7 +632,7 @@ public class ImportFragment extends Fragment {
                                 }
                                 fileContent = stringBuilder.toString();
                                 fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
-                                tvFileName.setText("" + fileBytes.length + " Name: " + fileName);
+                                tvFileName.setText(getString(R.string.file_name) + fileName);
                                 btnExtractFile.setVisibility(View.VISIBLE);
 
                             } catch (Exception e) {

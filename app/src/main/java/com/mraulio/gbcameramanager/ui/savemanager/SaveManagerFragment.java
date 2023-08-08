@@ -67,7 +67,6 @@ public class SaveManagerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -93,15 +92,12 @@ public class SaveManagerFragment extends Fragment {
                 new loadDataTask().execute();
             }
         });
-
-
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 createDialog();
             }
         });
-
         return view;
     }
 
@@ -243,13 +239,11 @@ public class SaveManagerFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getString(R.string.delete) + " " + saveName + "?");
 
-        // Crear un ImageView y establecer la imagen deseada
         GridView grid = new GridView(getContext());
         grid.setNumColumns(4);
         grid.setPadding(30, 10, 30, 10);
         grid.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, false,false,null));
 
-        // Agregar el ImageView al diseño del diálogo
         builder.setView(grid);
 
         builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {

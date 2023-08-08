@@ -3,34 +3,24 @@ package com.mraulio.gbcameramanager.utils;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
-import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.Codec;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
-import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
-import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Class with puclic static variables and methods that are shared alongside the app
@@ -125,7 +115,7 @@ public class Utils {
      * @param bitmaps List of bitmaps for the average
      * @return returns the averaged image
      */
-    public static Bitmap combineImages(List<Bitmap> bitmaps) {
+    public static Bitmap averageImages(List<Bitmap> bitmaps) {
         if (bitmaps == null || bitmaps.isEmpty()) {
             throw new IllegalArgumentException("List of images cannot be empty.");
         }

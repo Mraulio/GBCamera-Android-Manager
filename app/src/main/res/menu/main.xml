@@ -4,27 +4,27 @@
     <item
         android:id="@+id/action_multi_edit"
         android:orderInCategory="100"
-        android:title="Edit selected"
+        android:title="@string/edit_selected_item"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_filter_favorite"
         android:orderInCategory="100"
-        android:title="Filter favorites"
+        android:title="@string/filter_favorites_item"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_average"
         android:orderInCategory="100"
-        android:title="Average"
+        android:title="@string/average_item"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_gif"
         android:orderInCategory="100"
-        android:title="Animate"
+        android:title="@string/animate_item"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_json"
         android:orderInCategory="100"
-        android:title="JSON Backup"
+        android:title="@string/json_backup_item"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_delete"

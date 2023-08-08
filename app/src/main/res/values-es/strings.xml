@@ -35,8 +35,6 @@
     <string name="png_size">Tamaño PNG:\u0020</string>
     <string name="images_page">Seleccionar imágenes por página:\u0020</string>
     <string name="language">Idioma (necesita reinicar):\u0020</string>
-    <string name="showPrint">Mostrar botón Imprimir.</string>
-
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">No se puede borrar un marco base.</string>
@@ -120,6 +118,26 @@
 
     <string name="delete_dialog_gallery">Borrar imagen\u0020</string>
 
-
+    <string name="menu_savmanager">Gestor de Saves</string>
+    <string name="file_name">Nombre del archivo:\u0020</string>
+    <string name="paperize_settings">Mostrar boton Paperizar</string>
+    <string name="paperize_button">Paperizar</string>
+    <string name="saved_paperized_toast">¡Guardada en Papel!</string>
+    <string name="showPrint">Mostrar botón Imprimir.</string>
+    <string name="permissions_toast">Permisos otorgados.</string>
+    <string name="no_favorites">No hay favoritos</string>
+    <string name="edit_selected_item">Editar seleccionadas</string>
+    <string name="filter_favorites_item">Filtrar favoritos</string>
+    <string name="remove_filter_item">Quitar filtro</string>
+    <string name="average_item">HDR</string>
+    <string name="animate_item">Animar</string>
+    <string name="json_backup_item">JSON Backup</string>
+    <string name="dialog_close_button">Cerrar</string>
+    <string name="select_minimum_toast">Selecciona al menos 2 imágenes</string>
+    <string name="unselect_all_toast">Deselecciona todo antes de filtrar</string>
+    <string name="delete_all_title">¿Borrar imágenes seleccionadas?</string>
+    <string name="no_selected">No hay imágenes seleccionadas</string>
+    <string name="json_backup_saved">¡Guardado JSON Backup!</string>
+    <string name="page_selector_dialog">Selecciona página</string>
 
 </resources>

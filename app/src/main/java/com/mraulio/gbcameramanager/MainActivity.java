@@ -147,14 +147,6 @@ public class MainActivity extends AppCompatActivity {
         fab = findViewById(R.id.fab);
 
         Utils.makeDirs();
-//        // Change language config
-//        if (!languageCode.equals("en")) {
-//            Locale locale = new Locale(languageCode);
-//            Locale.setDefault(locale);
-//
-//            configuration.setLocale(locale);
-//            resources.updateConfiguration(configuration, resources.getDisplayMetrics());
-//        }
 
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
@@ -169,8 +161,8 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = intent.getData();
 
         if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
-            // Si el Intent contiene la acción ACTION_VIEW y la categoría CATEGORY_DEFAULT y
-            // el tipo es "application/octet-stream" y el URI del Intent termina en ".sav", realizar la acción deseada
+            // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
+            // the type is "application/octet-stream" and the URI of the Intent ends in ".sav", make the desired action
             Utils.toast(this, "Opened from file");
             openedSav = true;
         }
@@ -188,14 +180,6 @@ public class MainActivity extends AppCompatActivity {
         if (openedSav) navigationView.setCheckedItem(R.id.nav_import);
         fab = binding.appBarMain.fab;
         fab.hide();
-        //Floating Action Button
-//        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -233,8 +217,8 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         switch (current_fragment) {
             case GALLERY:
-                menu.clear(); // Limpia el menú actual
-                getMenuInflater().inflate(R.menu.main, menu); // Infla el menú del FragmentA
+                menu.clear(); // Cleans the current menu
+                getMenuInflater().inflate(R.menu.main, menu); // Inflates the menu
                 break;
 
             case PALETTES:
@@ -245,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
             case SAVE_MANAGER:
 
             case SETTINGS:
-                menu.clear(); // Limpia el menú actual
+                menu.clear(); // Cleans the current menu
                 fab.hide();
                 menu.close();
                 break;
@@ -302,11 +286,7 @@ public class MainActivity extends AppCompatActivity {
             if (frames.size() > 0) {
                 for (GbcFrame gbcFrame : frames) {
                     Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
-//                    try {
-//                        Utils.hashFrameBytes.put(gbcFrame.getFrameName(), Utils.encodeImage(gbcFrame.getFrameBitmap()));
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
+
                 }
                 Utils.framesList.addAll(frames);
             } else {
@@ -319,7 +299,6 @@ public class MainActivity extends AppCompatActivity {
             }
             //Now that I have palettes and frames, I can add images:
             if (imagesFromDao.size() > 0) {
-//                anyImage = true;
                 //I need to add them to the gbcImagesList(GbcImage)
                 Utils.gbcImagesList.addAll(imagesFromDao);
                 GbcImage.numImages += Utils.gbcImagesList.size();
@@ -331,11 +310,8 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
-//            if (anyImage) {
             gf.updateFromMain();
-//            } else {
-//                GalleryFragment.tv.setText(GalleryFragment.tv.getContext().getString(R.string.no_images));
-//            }
+
         }
     }
 
@@ -344,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             //resume tasks needing this permission
-            Toast toast = Toast.makeText(this, "Granted permissions.", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(this, getString(R.string.permissions_toast), Toast.LENGTH_LONG);
             toast.show();
         }
     }

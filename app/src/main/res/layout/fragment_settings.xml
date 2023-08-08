@@ -45,7 +45,7 @@
             android:id="@+id/spExportSize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:ignore="MissingConstraints"></Spinner>
+            ></Spinner>
     </LinearLayout>
 
     <LinearLayout
@@ -83,7 +83,7 @@
             android:id="@+id/spLanguage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:ignore="MissingConstraints"></Spinner>
+            ></Spinner>
     </LinearLayout>
 
     <CheckBox
@@ -97,5 +97,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        android:text="Show paperize button" />
+        android:text="@string/paperize_settings" />
 </LinearLayout>

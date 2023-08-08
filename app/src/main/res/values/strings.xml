@@ -12,7 +12,6 @@
     <string name="menu_frames">Frames</string>
     <string name="menu_import">Import</string>
     <string name="menu_usbserial">USB Serial</string>
-    <string name="menu_savmanager" translatable="false">Save manager</string>
 
     <string name="menu_settings">Settings</string>
 
@@ -36,7 +35,6 @@
     <string name="png_size">PNG size:\u0020</string>
     <string name="images_page">Select images per page:\u0020</string>
     <string name="language">Language (needs restart):\u0020</string>
-    <string name="showPrint">Show Print button.</string>
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">Can\'t delete a base frame</string>
@@ -120,5 +118,26 @@
 
     <string name="delete_dialog_gallery">Delete image\u0020</string>
 
+    <string name="menu_savmanager">Save manager</string>
+    <string name="file_name">Name of file:\u0020</string>
+    <string name="paperize_settings">Show paperize button</string>
+    <string name="paperize_button">Paperize</string>
+    <string name="saved_paperized_toast">Saved Paperized!</string>
+    <string name="showPrint">Show Print button.</string>
+    <string name="permissions_toast">Granted permissions.</string>
+    <string name="no_favorites">No favorites</string>
+    <string name="edit_selected_item">Edit selected</string>
+    <string name="filter_favorites_item">Filter favorites</string>
+    <string name="remove_filter_item">Remove filter</string>
+    <string name="average_item">Average</string>
+    <string name="animate_item">Animate</string>
+    <string name="json_backup_item">JSON Backup</string>
+    <string name="dialog_close_button">Close</string>
+    <string name="select_minimum_toast">Select at least 2 images</string>
+    <string name="unselect_all_toast">Unselect all before filtering</string>
+    <string name="delete_all_title">Delete selected images?</string>
+    <string name="no_selected">No images selected</string>
+    <string name="json_backup_saved">JSON Backup saved!</string>
+    <string name="page_selector_dialog">Select page</string>
 
 </resources>

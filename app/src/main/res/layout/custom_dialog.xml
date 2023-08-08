@@ -117,7 +117,7 @@
             android:autoSizeMinTextSize="3sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
-            android:text="Paperize"
+            android:text="@string/paperize_button"
             android:textSize="10dp"
             android:visibility="gone"></Button>
 

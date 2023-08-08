@@ -101,7 +101,6 @@ public class JsonReader {
                     stringValues.add(hash);
                     String data = jsonObject.getString(hash);
                     String decodedData = decodeData(data);
-                    System.out.println("Decoded " + decodedData.length() + "  " + decodedData);
                     byte[] bytes = Utils.convertToByteArray(decodedData);
                     GbcImage gbcImage = new GbcImage();
                     gbcImage.setHashCode(hash);
@@ -160,7 +159,6 @@ public class JsonReader {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("Error. Can't be added.\n" + e.toString());//For RGB pics
             }
 
         }

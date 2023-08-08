@@ -139,5 +139,7 @@
     <string name="no_selected">No images selected</string>
     <string name="json_backup_saved">JSON Backup saved!</string>
     <string name="page_selector_dialog">Select page</string>
+    <string name="hdr_exception">All images must have the same size.</string>
+
 
 </resources>

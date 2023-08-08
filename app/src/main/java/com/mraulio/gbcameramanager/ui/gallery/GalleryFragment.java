@@ -1112,12 +1112,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             for (int i : selectedImages) {
                                 listBitmaps.add(Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
                             }
-                            Bitmap bitmap = Utils.averageImages(listBitmaps);
-                            averaged[0] = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false);
-                            imageView.setImageBitmap(averaged[0]);
+                            try {
+                                Bitmap bitmap = Utils.averageImages(listBitmaps);
+                                averaged[0] = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false);
+                                imageView.setImageBitmap(averaged[0]);
 
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                            }catch (IllegalArgumentException e){
+                                Utils.toast(getContext(),getString(R.string.hdr_exception));
+                            }
+
                         }
                     });
                     asyncTask.execute();
@@ -1160,6 +1165,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             tv_animation.setText(fps[0] + " fps");
 
                         }
+
                         @Override
                         public void onStartTrackingTouch(SeekBar seekBar) {
                         }
@@ -1424,6 +1430,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            return bitmap;
         }
         diskCache.put(gbcImage.getHashCode(), framed);
         new SaveImageAsyncTask(gbcImage).execute();
@@ -1978,7 +1986,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             MainActivity.fab.hide();
             loadingDialog.dismiss();
             updateGridView(currentPage);
-
         }
     }
 
@@ -2144,7 +2151,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 }
             }
         }
-
         return newBitmap;
     }
 

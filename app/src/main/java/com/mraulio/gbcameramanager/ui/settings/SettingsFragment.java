@@ -1,7 +1,5 @@
 package com.mraulio.gbcameramanager.ui.settings;
 
-import static androidx.core.app.ActivityCompat.recreate;
-
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -135,7 +133,6 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-
         List<Integer> sizesIntegerImages = new ArrayList<>();
         sizesIntegerImages.add(6);
         sizesIntegerImages.add(9);
@@ -223,7 +220,5 @@ public class SettingsFragment extends Fragment {
         resources.updateConfiguration(configuration, resources.getDisplayMetrics());
         editor.putString("language", languageCode);
         editor.apply();
-
     }
-
 }

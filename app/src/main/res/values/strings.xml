@@ -143,6 +143,8 @@
     <string name="save_location_hint">PNGs, HDRs and GIFs are saved into \n\u0020 Pictures/GBCamera Manager. \nOther files are stored in \n\u0020 Download/GBCamera Manager.</string>
 
     <string name="done_dumping_ram">DONE DUMPING RAM! Check your Download/GBCamera Manager/Save dumps folder</string>
-    <string name="done_dumping_photo">DONE DUMPING ROM! Check your Download/GBCamera Manager/PHOTO Rom Dumps folder</string>
+    <string name="done_dumping_photo">DONE DUMPING PHOTO ROM! Check your Download/GBCamera Manager/PHOTO Rom Dumps folder</string>
+    <string name="filtered_images">Filtered images:\u0020</string>
+    <string name="selected_images">Selected:\u0020</string>
 
 </resources>

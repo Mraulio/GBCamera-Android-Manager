@@ -143,4 +143,8 @@
     <string name="hdr_exception">As imagens devem ter o mesmo tamanho.</string>
     <string name="save_location_hint">PNGs, HDRs e animações são salvas em \n\u0020 Pictures/GBCamera Manager.\nOutros arquivos em Download/GBCamera Manager.</string>
 
+    <string name="filtered_images">Imagens filtradas:\u0020</string>
+    <string name="selected_images">Selecionadas:\u0020</string>
+    <string name="done_dumping_ram">CÓPIA DA RAM COMPLETA! Confira a pasta Download/GBCamera Manager/Save Dumps</string>
+    <string name="done_dumping_photo">CÓPIA DA ROM PHOTO COMPLETA! Confira a pasta Download/GBCamera Manager/PHOTO Rom Dumps</string>
 </resources>

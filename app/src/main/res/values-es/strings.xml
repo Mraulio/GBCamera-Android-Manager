@@ -142,5 +142,7 @@
     <string name="hdr_exception">Todas las imágenes deben tener el mismo tamaño.</string>
     <string name="save_location_hint">PNGs, HDRs y GIFs se guardan en \n\u0020 Pictures/GBCamera Manager.\n Otros archivos se guardan en Download/GBCamera Manager.</string>
     <string name="done_dumping_ram">¡Volcado de RAM terminado! Comrueba la carpeta Download/GBCamera Manager/Save dumps</string>
-    <string name="done_dumping_photo">¡Volcado de ROM terminado!Comrueba la carpeta Download/GBCamera Manager/PHOTO Rom Dumps</string>
+    <string name="done_dumping_photo">¡Volcado de ROM PHOTO terminado!Comrueba la carpeta Download/GBCamera Manager/PHOTO Rom Dumps</string>
+    <string name="filtered_images">Imágenes filtradas:\u0020</string>
+    <string name="selected_images">Seleccionadas:\u0020</string>
 </resources>

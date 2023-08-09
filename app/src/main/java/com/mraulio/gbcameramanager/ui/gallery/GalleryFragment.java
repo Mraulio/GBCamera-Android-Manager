@@ -106,7 +106,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static List<GbcImage> filteredGbcImages = new ArrayList<>();
     final int[] globalImageIndex = new int[1];
     static List<Integer> selectedImages = new ArrayList<>();
-
+    StringBuilder sbTitle = new StringBuilder();
     private static int itemsPerPage = MainActivity.imagesPage;
     static int startIndex = 0;
     static int endIndex = 0;
@@ -543,6 +543,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         selectedImages.add(globalImageIndex);
 
                     }
+                    updateTitleText();
+
                     customGridViewAdapterImage.notifyDataSetChanged();
                 }
             }
@@ -564,6 +566,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             selectionMode = false;
                             gridView.setAdapter(customGridViewAdapterImage);
                             MainActivity.fab.hide();
+                            updateTitleText();
                         }
                     });
                 }
@@ -594,13 +597,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                     }
                     alreadyMultiSelect = true;
+                    updateTitleText();
 
                 } else {
                     selectedImages.add(globalImageIndex);
                     selectionMode = true;
                     alreadyMultiSelect = false;
+                    updateTitleText();
                 }
-
                 customGridViewAdapterImage.notifyDataSetChanged();
 
                 return true;
@@ -610,6 +614,18 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         if (MainActivity.doneLoading) updateFromMain();
 
         return view;
+    }
+
+    private void updateTitleText() {
+        if (!filterTags.isEmpty()) {
+            sbTitle.append(tv.getContext().getString(R.string.filtered_images) + filteredGbcImages.size());
+        } else {
+            sbTitle.append(tv.getContext().getString(R.string.total_images) + filteredGbcImages.size());
+        }if (selectedImages.size()>0){
+            sbTitle.append("  "+tv.getContext().getString(R.string.selected_images) + selectedImages.size());
+        }
+        tv.setText(sbTitle.toString());
+        sbTitle.setLength(0);
     }
 
     @Override
@@ -1002,9 +1018,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     if (filterTags.isEmpty()) {
                         filterTags.add("__filter:favourite__");
                         item.setTitle(getString(R.string.remove_filter_item));
+
                     } else {
                         filterTags.clear();
                         item.setTitle(getString(R.string.filter_favorites_item));
+
                     }
                     currentPage = 0;
                     updateGridView(currentPage);
@@ -1709,7 +1727,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         if (MainActivity.exportPng) {
             Utils.toast(getContext(), getString(R.string.toast_saved) + MainActivity.exportSize);
         } else Utils.toast(getContext(), getString(R.string.toast_saved_txt));
-
     }
 
 
@@ -1797,12 +1814,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 gridView.setAdapter(customGridViewAdapterImage);
             }
             tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
-            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
+            if (!filterTags.isEmpty()) {
+                tv.setText(tv.getContext().getString(R.string.filtered_images) + filteredGbcImages.size());
+
+            } else {
+                tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
+            }
 
         } else {
-            if (Utils.gbcImagesList.isEmpty())
+            if (Utils.gbcImagesList.isEmpty()) {
                 tv.setText(tv.getContext().getString(R.string.no_images));
-            else
+            } else
                 tv.setText(tv.getContext().getString(R.string.no_favorites));
             tv_page.setText("");
             gridView.setAdapter(null);

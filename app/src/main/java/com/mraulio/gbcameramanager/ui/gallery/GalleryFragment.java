@@ -765,9 +765,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true, gbcImage.isInvertPalette());
 
                                         Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), bitmap);
-                                        imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                                         new SaveImageAsyncTask(gbcImage).execute();
                                     }
+                                    Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
+                                    imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
                                     reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
                                     updateGridView(currentPage);
 

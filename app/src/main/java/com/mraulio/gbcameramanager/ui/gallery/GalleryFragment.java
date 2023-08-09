@@ -286,26 +286,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     btn_paperize.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Bitmap bw_image = paletteChanger("bw", filteredGbcImages.get(globalImageIndex).getImageBytes(), filteredGbcImages.get(globalImageIndex), false, false, filteredGbcImages.get(globalImageIndex).isInvertPalette());
-
-                            Bitmap paperized = Paperize(bw_image);
-                            LocalDateTime now = LocalDateTime.now();
-
-                            File file = new File(Utils.IMAGES_FOLDER, "paperized_" + dtf.format(now) + ".png");
-
-                            if (paperized.getHeight() == 144 && paperized.getWidth() == 160 && crop) {
-                                paperized = Bitmap.createBitmap(paperized, 16, 16, 128, 112);
+                            List<Integer> indexToPaperize = new ArrayList<>();
+                            indexToPaperize.add(globalImageIndex);
+                            if (!loadingDialog.isShowing()) {
+                                loadingDialog.show();
                             }
-                            try (FileOutputStream out = new FileOutputStream(file)) {
-                                Bitmap scaled = Bitmap.createScaledBitmap(paperized, paperized.getWidth(), paperized.getHeight(), false);
-
-                                scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
-                                Toast toast = Toast.makeText(getContext(), getString(R.string.saved_paperized_toast), Toast.LENGTH_LONG);
-                                toast.show();
-
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            new PaperizeAsyncTask(indexToPaperize).execute();
                         }
                     });
                     imageView.setOnClickListener(new View.OnClickListener() {
@@ -747,32 +733,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             btn_paperize.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    int index = 1;
-                                    LocalDateTime now = LocalDateTime.now();
-                                    String date = dtf.format(now);
-                                    for (int i : selectedImages) {
-                                        Bitmap bw_image = paletteChanger("bw", filteredGbcImages.get(i).getImageBytes(), filteredGbcImages.get(i), false, false, filteredGbcImages.get(i).isInvertPalette());
-                                        Bitmap paperized = Paperize(bw_image);
-
-                                        File file = new File(Utils.IMAGES_FOLDER, "paperized_" + date + "_" + (index) + ".png");
-
-                                        if (paperized.getHeight() == 144 && paperized.getWidth() == 160 && crop) {
-                                            paperized = Bitmap.createBitmap(paperized, 16, 16, 128, 112);
-                                        }
-                                        try (FileOutputStream out = new FileOutputStream(file)) {
-                                            Bitmap scaled = Bitmap.createScaledBitmap(paperized, paperized.getWidth(), paperized.getHeight(), false);
-
-                                            scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
-
-                                            // PNG is a lossless format, the compression factor (100) is ignored
-
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        index++;
-                                    }
-                                    Toast toast = Toast.makeText(getContext(), getString(R.string.saved_paperized_toast), Toast.LENGTH_LONG);
-                                    toast.show();
+                                    if (!loadingDialog.isShowing())
+                                        loadingDialog.show();
+                                    new PaperizeAsyncTask(selectedImages).execute();
                                 }
                             });
                             if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains("__filter:favourite__")) {
@@ -805,7 +768,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                                         new SaveImageAsyncTask(gbcImage).execute();
                                     }
-                                    reloadLayout(layoutSelected, imageView, cbFrameKeep,cbInvert,adapterPalette,frameAdapter);
+                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
                                     updateGridView(currentPage);
 
                                 }
@@ -866,7 +829,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                             //To save the image with the favorite tag to the database
                                             new SaveImageAsyncTask(filteredGbcImages.get(i)).execute();
                                         }
-                                        reloadLayout(layoutSelected, imageView, cbFrameKeep,cbInvert,adapterPalette,frameAdapter);
+                                        reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
 
                                         clickCount = 0;
                                         updateGridView(currentPage);
@@ -897,7 +860,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     }
                                     Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
                                     imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
-                                    reloadLayout(layoutSelected, imageView, cbFrameKeep,cbInvert,adapterPalette,frameAdapter);
+                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
 
                                     updateGridView(currentPage);
 
@@ -926,7 +889,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
                                     frameAdapter.setLastSelectedPosition(selectedFrameIndex);
                                     frameAdapter.notifyDataSetChanged();
-                                    reloadLayout(layoutSelected, imageView, cbFrameKeep,cbInvert, adapterPalette,frameAdapter);
+                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
 
                                     updateGridView(currentPage);
                                 }
@@ -955,7 +918,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     adapterPalette.setLastSelectedPosition(palettePosition);
                                     adapterPalette.notifyDataSetChanged();
 
-                                    reloadLayout(layoutSelected, imageView, cbFrameKeep,cbInvert, adapterPalette,frameAdapter);
+                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
                                     Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
                                     imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
                                     updateGridView(currentPage);
@@ -1009,7 +972,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     dialog.dismiss();
                                 }
                             });
-                            reloadLayout(layoutSelected, imageView, cbFrameKeep,cbInvert,adapterPalette,frameAdapter);
+                            reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
 
                         }
 
@@ -1583,7 +1546,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         return dialog;
     }
 
-    private void reloadLayout(LinearLayout layoutSelected, ImageView imageView, CheckBox keepFrameCb, CheckBox invertCb,CustomGridViewAdapterPalette adapterPalette,FramesFragment.CustomGridViewAdapterFrames frameAdapter) {
+    private void reloadLayout(LinearLayout layoutSelected, ImageView imageView, CheckBox keepFrameCb, CheckBox invertCb, CustomGridViewAdapterPalette adapterPalette, FramesFragment.CustomGridViewAdapterFrames frameAdapter) {
         layoutSelected.removeAllViews();
         for (int i = 0; i < selectedImages.size(); i++) {
             GbcImage gbcImage = filteredGbcImages.get(selectedImages.get(i));
@@ -2054,6 +2017,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         }
     }
 
+
     //Method to update an image to the database in the background
     public static class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
         private GbcImage gbcImage;
@@ -2152,6 +2116,49 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         }
     }
 
+    public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
+        private List<Integer> gbcImagesList;
+
+        public PaperizeAsyncTask(List<Integer> gbcImagesList) {
+            this.gbcImagesList = gbcImagesList;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            int index = 1;
+            LocalDateTime now = LocalDateTime.now();
+            String date = dtf.format(now);
+            for (int i : gbcImagesList) {
+                Bitmap bw_image = paletteChanger("bw", filteredGbcImages.get(i).getImageBytes(), filteredGbcImages.get(i), false, false, filteredGbcImages.get(i).isInvertPalette());
+                Bitmap paperized = Paperize(bw_image);
+                File file = null;
+                if (gbcImagesList.size() > 1)
+                    file = new File(Utils.IMAGES_FOLDER, "paperized_" + date + "_" + (index) + ".png");
+                else {
+                    file = new File(Utils.IMAGES_FOLDER, "paperized_" + date + ".png");
+                }
+
+                if (paperized.getHeight() == 144 && paperized.getWidth() == 160 && crop) {
+                    paperized = Bitmap.createBitmap(paperized, 16, 16, 128, 112);
+                }
+                try (FileOutputStream out = new FileOutputStream(file)) {
+                    Bitmap scaled = Bitmap.createScaledBitmap(paperized, paperized.getWidth(), paperized.getHeight(), false);
+                    scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                index++;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Utils.toast(getContext(), getString(R.string.saved_paperized_toast));
+            loadingDialog.dismiss();
+        }
+    }
 
     private Bitmap Paperize(Bitmap inputBitmap) {
         //intensity map for printer head with threshold

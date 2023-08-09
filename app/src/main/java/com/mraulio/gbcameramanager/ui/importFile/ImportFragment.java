@@ -668,7 +668,7 @@ public class ImportFragment extends Fragment {
                 String hashHex = Utils.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);
                 ImageCodec imageCodec = new ImageCodec(128, 112,gbcImage.isLockFrame());
-                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
+                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes,false);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
                     Bitmap framed = Utils.framesList.get(3).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -711,7 +711,7 @@ public class ImportFragment extends Fragment {
             gbcImage.setName(fileName + " " + formattedIndex);
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(160, height,false);
-            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes());
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(),false);
             importedImagesBitmaps.add(image);
             importedImagesList.add(gbcImage);
         }

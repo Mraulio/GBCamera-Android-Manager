@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/custom_checkbox.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/crop_unchecked_icon" android:state_checked="true" />
+    <item android:drawable="@drawable/crop_unchecked_icon" />
+</selector>

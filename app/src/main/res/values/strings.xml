@@ -140,6 +140,6 @@
     <string name="json_backup_saved">JSON Backup saved!</string>
     <string name="page_selector_dialog">Select page</string>
     <string name="hdr_exception">All images must have the same size.</string>
-
+    <string name="save_location_hint">PNGs, HDRs and GIFs are saved into \n\u0020 Pictures/GBCamera Manager. \nOther files are stored in \n\u0020 Download/GBCamera Manager.</string>
 
 </resources>

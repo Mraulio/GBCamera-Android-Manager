@@ -51,34 +51,8 @@ public class ImageCodec implements Codec {
         return image;
     }
 
-    //    @Override
-//    public Bitmap decodeWithPalette(int[] palette, byte[] data) {
-//        Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
-//        IndexedPalette ip = new IndexedPalette(Utils.gbcPalettesList.get(paletteIndex).getPaletteColorsInt());
-//
-//        Codec tileCodec = new TileCodec(ip);
-//        Canvas canvas = new Canvas(image);
-//        int xPos = 0;
-//        int yPos = 0;
-//        for (int i = 0; i < data.length; i += TileCodec.TILE_BYTES_LENGTH) {
-//            byte[] tileData = new byte[TileCodec.TILE_BYTES_LENGTH];
-//            System.arraycopy(data, i, tileData, 0, TileCodec.TILE_BYTES_LENGTH);
-//            Bitmap tile = tileCodec.decodeWithPalette(palette,tileData);
-//            canvas.drawBitmap(tile, xPos, yPos, null);
-//            xPos += TileCodec.TILE_WIDTH;
-//            if (xPos >= imageWidth) {
-//                xPos = 0;
-//                yPos += TileCodec.TILE_HEIGHT;
-//            }
-//            // Failsafe
-//            if (yPos >= imageHeight) {
-//                break;
-//            }
-//        }
-//        return image;
-//    }
     @Override
-    public Bitmap decodeWithPalette(int[] palette, byte[] data) {
+    public Bitmap decodeWithPalette(int[] palette, byte[] data, boolean invertPalette) {
         if (keepFrame) {
             int regionWidth = 128;
             int regionHeight = 112;
@@ -88,10 +62,7 @@ public class ImageCodec implements Codec {
             Bitmap regionBitmap = Bitmap.createBitmap(regionWidth, regionHeight, Bitmap.Config.ARGB_8888);
             Bitmap externalBitmap = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
 
-            IndexedPalette ip = new IndexedPalette(Utils.gbcPalettesList.get(paletteIndex).getPaletteColorsInt());
-            IndexedPalette externalPalette = new IndexedPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt()); // Reemplaza externalPaletteColorsInt con los colores de la paleta externa
-            Codec tileCodec = new TileCodec(ip);
-            Codec externalTileCodec = new TileCodec(externalPalette);
+            Codec tileCodec = new TileCodec();
 
             Canvas regionCanvas = new Canvas(regionBitmap);
             Canvas externalCanvas = new Canvas(externalBitmap);
@@ -101,15 +72,16 @@ public class ImageCodec implements Codec {
             for (int i = 0; i < data.length; i += TileCodec.TILE_BYTES_LENGTH) {
                 byte[] tileData = new byte[TileCodec.TILE_BYTES_LENGTH];
                 System.arraycopy(data, i, tileData, 0, TileCodec.TILE_BYTES_LENGTH);
-                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData);
+                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData, invertPalette);
 
-                // Dibujar solo en la región a procesar
+                //Draw only on the part to processs
                 if (xPos >= startX && xPos + TileCodec.TILE_WIDTH <= startX + regionWidth &&
                         yPos >= startY && yPos + TileCodec.TILE_HEIGHT <= startY + regionHeight) {
                     regionCanvas.drawBitmap(tile, xPos - startX, yPos - startY, null);
                 } else {
-                    // Dibujar en la parte externa con la paleta externa
-                    externalCanvas.drawBitmap(externalTileCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), tileData), xPos, yPos, null);
+                    // Draw the frame with the default bw palette
+
+                    externalCanvas.drawBitmap(tileCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), tileData, invertPalette), xPos, yPos, null);
                 }
 
                 xPos += TileCodec.TILE_WIDTH;
@@ -123,7 +95,7 @@ public class ImageCodec implements Codec {
                 }
             }
 
-            // Combinar los dos bitmaps
+            //Combine the 2 bitmaps
             Bitmap combinedBitmap = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
             Canvas combinedCanvas = new Canvas(combinedBitmap);
             combinedCanvas.drawBitmap(regionBitmap, startX, startY, null);
@@ -132,16 +104,15 @@ public class ImageCodec implements Codec {
             return combinedBitmap;
         } else {
             Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
-            IndexedPalette ip = new IndexedPalette(Utils.gbcPalettesList.get(paletteIndex).getPaletteColorsInt());
 
-            Codec tileCodec = new TileCodec(ip);
+            Codec tileCodec = new TileCodec();
             Canvas canvas = new Canvas(image);
             int xPos = 0;
             int yPos = 0;
             for (int i = 0; i < data.length; i += TileCodec.TILE_BYTES_LENGTH) {
                 byte[] tileData = new byte[TileCodec.TILE_BYTES_LENGTH];
                 System.arraycopy(data, i, tileData, 0, TileCodec.TILE_BYTES_LENGTH);
-                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData);
+                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData, invertPalette);
                 canvas.drawBitmap(tile, xPos, yPos, null);
                 xPos += TileCodec.TILE_WIDTH;
                 if (xPos >= imageWidth) {

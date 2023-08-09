@@ -35,7 +35,7 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:orientation="horizontal"
-        android:weightSum="4">
+        android:weightSum="5">
 
         <Button
             android:id="@+id/print_button"
@@ -54,18 +54,20 @@
             app:icon="@drawable/ic_print"
             app:iconGravity="textStart"
             app:iconPadding="0dp" />
-
+        <CheckBox
+            android:id="@+id/cbInvert"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:button="@drawable/invert_icon"
+            ></CheckBox>
         <CheckBox
             android:id="@+id/cbCrop"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:autoSizeMaxTextSize="30sp"
-            android:autoSizeMinTextSize="5sp"
-            android:autoSizeTextType="uniform"
-            android:maxLines="1"
-            android:text="@string/cb_crop"
-            android:textSize="10dp"></CheckBox>
+            android:button="@drawable/crop_checkbox"
+           ></CheckBox>
 
         <Button
             android:id="@+id/save_button"
@@ -105,13 +107,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="horizontal"
+        android:layout_marginBottom="10dp"
         android:weightSum="3">
 
         <Button
             android:id="@+id/btnPaperize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
             android:layout_weight="1"
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="3sp"
@@ -131,14 +133,14 @@
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
-            android:text="@string/cb_keep_frame"
+            android:button="@drawable/keep_frame_icon"
+
             android:textSize="10dp"></CheckBox>
 
         <Button
             android:id="@+id/btnPaletteFrame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
             android:layout_weight="1"
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="3sp"

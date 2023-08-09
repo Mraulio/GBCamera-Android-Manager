@@ -174,15 +174,15 @@ public class SaveManagerFragment extends Fragment {
                     byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                     String hashHex = Utils.bytesToHex(hash);
                     gbcImage.setHashCode(hashHex);
-                    ImageCodec imageCodec = new ImageCodec(128, 112,false);
-                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
+                    ImageCodec imageCodec = new ImageCodec(128, 112, false);
+                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         //I need to use copy because if not it's inmutable bitmap
                         Bitmap framed = Utils.hashFrames.get((gbcImage.getFrameId())).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                         Canvas canvas = new Canvas(framed);
                         canvas.drawBitmap(image, 16, 16, null);
                         image = framed;
-                        imageBytes = Utils.encodeImage(image,"bw");
+                        imageBytes = Utils.encodeImage(image, "bw");
                     }
                     gbcImage.setImageBytes(imageBytes);
                     extractedImagesBitmaps.add(image);
@@ -231,7 +231,7 @@ public class SaveManagerFragment extends Fragment {
         finalListBitmaps.addAll(listDeletedBitmaps);
         bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
 
-        gridviewSaves.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true,false,null)));
+        gridviewSaves.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
         gridAdapter = (GalleryFragment.CustomGridViewAdapterImage) gridviewSaves.getAdapter();
     }
 
@@ -242,7 +242,7 @@ public class SaveManagerFragment extends Fragment {
         GridView grid = new GridView(getContext());
         grid.setNumColumns(4);
         grid.setPadding(30, 10, 30, 10);
-        grid.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, false,false,null));
+        grid.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, false, false, null));
 
         builder.setView(grid);
 

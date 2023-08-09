@@ -255,6 +255,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
                     CheckBox cbFrameKeep = dialog.findViewById(R.id.cbFrameKeep);
                     CheckBox cbCrop = dialog.findViewById(R.id.cbCrop);
+                    CheckBox cbInvert = dialog.findViewById(R.id.cbInvert);
 
                     showPalettes = true;
 
@@ -265,10 +266,29 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         keepFrame = true;
                         cbFrameKeep.setChecked(true);
                     }
+                    if (filteredGbcImages.get(globalImageIndex).isInvertPalette()) {
+                        cbInvert.setChecked(true);
+                    }
+                    cbInvert.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            System.out.println(cbInvert.isChecked() + " is checked");
+                            GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                            gbcImage.setInvertPalette(cbInvert.isChecked());
+
+                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true, gbcImage.isInvertPalette());
+
+                            Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
+                            imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
+                            new SaveImageAsyncTask(gbcImage).execute();
+                            updateGridView(currentPage);
+
+                        }
+                    });
                     btn_paperize.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Bitmap bw_image = paletteChanger("bw", filteredGbcImages.get(globalImageIndex).getImageBytes(), filteredGbcImages.get(globalImageIndex), false, false);
+                            Bitmap bw_image = paletteChanger("bw", filteredGbcImages.get(globalImageIndex).getImageBytes(), filteredGbcImages.get(globalImageIndex), false, false,filteredGbcImages.get(globalImageIndex).isInvertPalette());
 
                             Bitmap paperized = Paperize(bw_image);
                             LocalDateTime now = LocalDateTime.now();
@@ -334,7 +354,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 new SaveImageAsyncTask(filteredGbcImages.get(globalImageIndex)).execute();
                                 updateGridView(currentPage);
                             }
-
                         }
                     });
 
@@ -362,7 +381,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             if (keepFrame) keepFrame = false;
                             else keepFrame = true;
                             GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
-                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true);
+                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true, gbcImage.isInvertPalette());
 
                             gbcImage.setLockFrame(keepFrame);
                             Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
@@ -379,6 +398,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             crop = false;
                         }
                     });
+
                     gridViewFrames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
@@ -417,7 +437,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             //Set the new palette to the gbcImage
                             filteredGbcImages.get(globalImageIndex).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
-                            changedImage = paletteChanger(filteredGbcImages.get(globalImageIndex).getPaletteId(), filteredGbcImages.get(globalImageIndex).getImageBytes(), filteredGbcImages.get(globalImageIndex), filteredGbcImages.get(globalImageIndex).isLockFrame(), true);
+                            changedImage = paletteChanger(filteredGbcImages.get(globalImageIndex).getPaletteId(), filteredGbcImages.get(globalImageIndex).getImageBytes(), filteredGbcImages.get(globalImageIndex), filteredGbcImages.get(globalImageIndex).isLockFrame(), true,filteredGbcImages.get(globalImageIndex).isInvertPalette());
                             Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), changedImage);
 
                             filteredGbcImages.get(globalImageIndex).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
@@ -730,7 +750,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     LocalDateTime now = LocalDateTime.now();
                                     String date = dtf.format(now);
                                     for (int i : selectedImages) {
-                                        Bitmap bw_image = paletteChanger("bw", filteredGbcImages.get(i).getImageBytes(), filteredGbcImages.get(i), false, false);
+                                        Bitmap bw_image = paletteChanger("bw", filteredGbcImages.get(i).getImageBytes(), filteredGbcImages.get(i), false, false, filteredGbcImages.get(i).isInvertPalette());
                                         Bitmap paperized = Paperize(bw_image);
 
                                         File file = new File(Utils.IMAGES_FOLDER, "paperized_" + date + "_" + (index) + ".png");
@@ -853,7 +873,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         //In case in the multiselect there are bigger images than standard
                                         if (Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getHeight() == 144) {
                                             gbcImage.setLockFrame(keepFrame);
-                                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true);
+                                            Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true, gbcImage.isInvertPalette());
                                             Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), bitmap);
                                             new SaveImageAsyncTask(gbcImage).execute();
                                         }
@@ -912,7 +932,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     for (int i : selectedImages) {
                                         filteredGbcImages.get(i).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
 
-                                        changedImage = paletteChanger(filteredGbcImages.get(i).getPaletteId(), filteredGbcImages.get(i).getImageBytes(), filteredGbcImages.get(i), filteredGbcImages.get(i).isLockFrame(), true);
+                                        changedImage = paletteChanger(filteredGbcImages.get(i).getPaletteId(), filteredGbcImages.get(i).getImageBytes(), filteredGbcImages.get(i), filteredGbcImages.get(i).isLockFrame(), true,  filteredGbcImages.get(i).isInvertPalette());
                                         Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), changedImage);
 
                                     }
@@ -1297,6 +1317,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 imageObject.put("tags", new JSONArray(gbcImage.getTags()));
                                 imageObject.put("palette", gbcImage.getPaletteId());
                                 imageObject.put("frame", gbcImage.getFrameId());
+                                imageObject.put("invertPalette", gbcImage.isInvertPalette());
                                 imageObject.put("lockFrame", gbcImage.isLockFrame());
                                 imagesArray.put(imageObject);
                             }
@@ -1305,7 +1326,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             jsonObject.put("state", stateObject);
                             for (int i = 0; i < selectedImages.size(); i++) {
                                 GbcImage gbcImage = filteredGbcImages.get(selectedImages.get(i));
-                                Bitmap imageBitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, false, false);
+                                Bitmap imageBitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, false, false, gbcImage.isInvertPalette());
 
                                 String txt = Utils.bytesToHex(Utils.encodeImage(imageBitmap, "bw"));
                                 StringBuilder sb = new StringBuilder();
@@ -1399,11 +1420,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
-            Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, keepFrame, false);
+            Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, keepFrame, false,false);
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
             if (!keepFrame) {
-                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, keepFrame, true);
+                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, keepFrame, true,gbcImage.isInvertPalette());
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
@@ -1413,12 +1434,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             try {
                 byte[] imageBytes = Utils.encodeImage(framedAux, "bw");//Use the framedAux because it doesn't a different palette to encode
                 gbcImage.setImageBytes(imageBytes);
-                for (int i = 0; i < filteredGbcImages.size(); i++) {
-                    if (filteredGbcImages.get(i).getHashCode().equals(gbcImage.getHashCode())) {
-                        filteredGbcImages.get(i).setImageBytes(imageBytes);
-                        break;
-                    }
-                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1431,31 +1446,29 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
 //    public static Bitmap frameChange(GbcImage gbcImage, Bitmap bitmap, String selectedFrameId, boolean keepFrame) throws IOException {
-////        bitmap = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage,false);
-//        Bitmap framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-//        byte[] imageBytes = Utils.encodeImage(bitmap,gbcImage.getPaletteId());
-//        Bitmap setToPalette = paletteChanger("bw", imageBytes, gbcImage, keepFrame);
-//        Canvas canvas = new Canvas(framed);
-////        byte[] frameBytes = Utils.encodeImage(framed);
-////        if (!keepFrame) {
-////            framed = paletteChanger(gbcImage.getPaletteId(), frameBytes, gbcImage, false);
-////        }
-//        canvas.drawBitmap(Bitmap.createBitmap(setToPalette, 16, 16, 128, 112), 16, 16, null);
+//        if ((gbcImage.getImageBytes().length / 40) == 144) {
+//            Bitmap framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+//            Canvas canvas = new Canvas(framed);
+//            Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, 16, 16, 128, 112); //Getting the internal 128x112 image
+//            canvas.drawBitmap(croppedBitmap, 16, 16, null);
+////            byte[] imageBytes = Utils.encodeImage(bitmap, gbcImage.getPaletteId());
+//            byte[] frameBytes = Utils.encodeImage(framed, gbcImage.getPaletteId());
+//            framed = paletteChanger(gbcImage.getPaletteId(), frameBytes, gbcImage, keepFrame, true);
 ////        framed = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame);
-////        gbcImage.setFrameId(selectedFrameId);
+//        gbcImage.setFrameId(selectedFrameId);
 ////        framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed), gbcImage, keepFrame);
-////        gbcImage.setImageBytes(Utils.encodeImage(framed));
-//        new SaveImageAsyncTask(gbcImage).execute();
-//        diskCache.put(gbcImage.getHashCode(), framed);
-//
-//        return framed;
+//        gbcImage.setImageBytes(frameBytes);
+//            new SaveImageAsyncTask(gbcImage).execute();
+//            return framed;
+//        } else return bitmap;
 //    }
 
 
     //Change palette
-    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage, boolean keepFrame, boolean save) {
+    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage, boolean keepFrame, boolean save, boolean invertPalette) {
+
         ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40, keepFrame);//imageBytes.length/40 to get the height of the image
-        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes);
+        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
 
         new SaveImageAsyncTask(gbcImage).execute();
         if (save)
@@ -1613,7 +1626,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         }
     }
 
-
     private void saveImage(List<GbcImage> gbcImages) {
         LocalDateTime now = LocalDateTime.now();
         String fileNameBase = "gbcImage_";
@@ -1646,7 +1658,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 //Saving txt without cropping it
                 try {
                     //Need to change the palette to bw so the encodeImage method works
-                    image = paletteChanger("bw", gbcImage.getImageBytes(), filteredGbcImages.get(0), false, false);
+                    image = paletteChanger("bw", gbcImage.getImageBytes(), filteredGbcImages.get(0), false, false, false);
                     StringBuilder txtBuilder = new StringBuilder();
                     //Appending these commands so the export is compatible with
                     // https://herrzatacke.github.io/gb-printer-web/#/import
@@ -1825,7 +1837,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     //Create the image bitmap
                     int height = (imageBytes.length + 1) / 40;//To get the real height of the image
                     ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
-                    image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
+                    image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette());
                     //Add the bitmap to the cache
                     Utils.imageBitmapCache.put(imageHash, image);
                     diskCache.put(imageHash, image);
@@ -1897,7 +1909,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     //Create the image bitmap
                     int height = (imageBytes.length + 1) / 40;//To get the real height of the image
                     ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
-                    image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes);
+                    image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette());
                     //Add the bitmap to the cache
                     Utils.imageBitmapCache.put(imageHash, image);
                     diskCache.put(imageHash, image);

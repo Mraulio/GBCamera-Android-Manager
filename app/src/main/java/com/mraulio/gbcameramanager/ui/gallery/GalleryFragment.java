@@ -106,7 +106,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static List<GbcImage> filteredGbcImages = new ArrayList<>();
     final int[] globalImageIndex = new int[1];
     static List<Integer> selectedImages = new ArrayList<>();
-    StringBuilder sbTitle = new StringBuilder();
+    static StringBuilder sbTitle = new StringBuilder();
     private static int itemsPerPage = MainActivity.imagesPage;
     static int startIndex = 0;
     static int endIndex = 0;
@@ -616,7 +616,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         return view;
     }
 
-    private void updateTitleText() {
+    private static void updateTitleText() {
         if (!filterTags.isEmpty()) {
             sbTitle.append(tv.getContext().getString(R.string.filtered_images) + filteredGbcImages.size());
         } else {
@@ -1814,12 +1814,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 gridView.setAdapter(customGridViewAdapterImage);
             }
             tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
-            if (!filterTags.isEmpty()) {
-                tv.setText(tv.getContext().getString(R.string.filtered_images) + filteredGbcImages.size());
+            updateTitleText();
 
-            } else {
-                tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
-            }
 
         } else {
             if (Utils.gbcImagesList.isEmpty()) {

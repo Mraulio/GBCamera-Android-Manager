@@ -84,8 +84,8 @@
                     android:autoSizeMaxTextSize="30sp"
                     android:autoSizeMinTextSize="5sp"
                     android:autoSizeTextType="uniform"
-                    android:backgroundTint="#D64141"
                     android:maxLines="1"
+                    android:backgroundTint="#D64141"
                     android:text="@string/delete"
                     android:textSize="15sp"
                     android:visibility="gone"></Button>

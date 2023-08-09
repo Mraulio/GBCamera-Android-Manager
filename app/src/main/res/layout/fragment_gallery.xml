@@ -21,6 +21,10 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:autoSizeMaxTextSize="40sp"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
             android:textAlignment="center"
             android:textSize="20sp" />
 

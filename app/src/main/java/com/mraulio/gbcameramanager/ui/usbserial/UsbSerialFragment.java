@@ -72,10 +72,10 @@ import java.util.List;
  * By Mraulio
  */
 public class UsbSerialFragment extends Fragment implements SerialInputOutputManager.Listener {
-    List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
-    List<GbcImage> extractedImagesList = new ArrayList<>();
+    static List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
+    static List<GbcImage> extractedImagesList = new ArrayList<>();
 
-    File latestFile;
+    static File latestFile;
     boolean ape = false;
     static UsbDeviceConnection connection;
     static UsbSerialPort port = null;
@@ -85,9 +85,10 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     int numImagesAdded;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
 
-    LinearLayout layoutCb;
-    CheckBox cbLastSeen, cbDeleted;
-    GridView gridView;
+    static LinearLayout layoutCb;
+    static CheckBox cbLastSeen;
+    static CheckBox cbDeleted;
+    static GridView gridView;
     boolean gbxMode = true;
     public static List<File> fullRomFileList = new ArrayList<>();
     static TextView tv;
@@ -98,15 +99,15 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     public static RadioButton rbPrint;
     RadioGroup rbGroup;
 
-    List<GbcImage> listActiveImages = new ArrayList<>();
-    List<Bitmap> listActiveBitmaps = new ArrayList<>();
-    List<GbcImage> listDeletedImages;
-    List<Bitmap> listDeletedBitmaps;
-    List<Bitmap> listDeletedBitmapsRedStroke;
-    List<GbcImage> finalListImages;
-    List<Bitmap> finalListBitmaps;
-    GbcImage lastSeenImage;
-    Bitmap lastSeenBitmap;
+    static List<GbcImage> listActiveImages = new ArrayList<>();
+    static List<Bitmap> listActiveBitmaps = new ArrayList<>();
+    static List<GbcImage> listDeletedImages;
+    static List<Bitmap> listDeletedBitmaps;
+    static List<Bitmap> listDeletedBitmapsRedStroke;
+    static List<GbcImage> finalListImages;
+    static List<Bitmap> finalListBitmaps;
+    static GbcImage lastSeenImage;
+    static Bitmap lastSeenBitmap;
 
 
     @Override
@@ -427,7 +428,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         completeReadRomName();
     }
 
-    private void readSav(File file) {
+    public static void readSav(File file) {
+        latestFile = file;
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         LocalDateTime now = LocalDateTime.now();
         //I get the last file from the directory, which I just dumped
@@ -487,11 +489,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     canvas.drawLine(startX, startY, endX, endY, paint);
                     listDeletedBitmapsRedStroke.add(copiedBitmap);
                 }
-                GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
+                GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
                 gridView.setAdapter(customGridViewAdapterImage);
                 showImages(cbLastSeen, cbDeleted);
             } else {
-                tv.append(getString(R.string.no_good_dump));
+                tv.append(gridView.getContext().getString(R.string.no_good_dump));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -609,8 +611,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     }
 
     private void completeRamDump() {
-        tv.setText("");
-        tv.append(getString(R.string.dumping_ram_wait));
         Handler handlerRam = new Handler();
         handlerRam.postDelayed(new Runnable() {
             @Override
@@ -633,39 +633,39 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         handlerRam.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.ReadRam(port, getContext(), tv);
+                new PythonToJava.ReadRamAsyncTask(port, getContext(), tv, latestFile).execute();
             }
         }, 200);
-        handlerRam.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                PythonToJava.powerOff(port, getContext());
-            }
-        }, 200);
-        handlerRam.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //To get the extracted file, as the latest one in the directory
-                latestFile = null;
-                //To get the last created file
-                File[] files = Utils.SAVE_FOLDER.listFiles();
-                if (files != null && files.length > 0) {
-                    Arrays.sort(files, new Comparator<File>() {
-                        public int compare(File f1, File f2) {
-                            return Long.compare(f2.lastModified(), f1.lastModified());
-                        }
-                    });
-                    latestFile = files[0];
-                    tv.append(getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
-                            getString(R.string.size) + latestFile.length() / 1024 + "KB");
-                }
-                readSav(latestFile);
-            }
-        }, 200);
+//        handlerRam.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                PythonToJava.powerOff(port, getContext());
+//            }
+//        }, 200);
+//        handlerRam.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                //To get the extracted file, as the latest one in the directory
+//                latestFile = null;
+//                //To get the last created file
+//                File[] files = Utils.SAVE_FOLDER.listFiles();
+//                if (files != null && files.length > 0) {
+//                    Arrays.sort(files, new Comparator<File>() {
+//                        public int compare(File f1, File f2) {
+//                            return Long.compare(f2.lastModified(), f1.lastModified());
+//                        }
+//                    });
+//                    latestFile = files[0];
+//                    tv.append(getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
+//                            getString(R.string.size) + latestFile.length() / 1024 + "KB");
+//                }
+//                readSav(latestFile);
+//            }
+//        }, 200);
     }
 
     //Refactor
-    private void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
+    private static void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
         List<Bitmap> bitmapsAdapterList = null;
         if (!showLastSeen.isChecked() && !showDeleted.isChecked()) {
             finalListImages = new ArrayList<>(listActiveImages);
@@ -695,7 +695,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             finalListBitmaps.addAll(listDeletedBitmaps);
             bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
         }
-        gridView.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
+        gridView.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(showLastSeen.getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
     }
 
 

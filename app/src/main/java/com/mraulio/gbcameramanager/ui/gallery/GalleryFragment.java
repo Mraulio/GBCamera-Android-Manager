@@ -1518,7 +1518,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
         NumberPicker numberPicker = new NumberPicker(context);
-        builder.setTitle(getString(R.string.page_selector_dialog));//Add to string xml
+        builder.setTitle(getString(R.string.page_selector_dialog));
         builder.setView(numberPicker);
         numberPicker.setMinValue(1);
         numberPicker.setMaxValue(lastPage + 1);

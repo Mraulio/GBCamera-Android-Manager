@@ -1,11 +1,17 @@
 package com.mraulio.gbcameramanager.gbxcart;
 
+import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hoho.android.usbserial.driver.UsbSerialPort;
+import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.BufferedOutputStream;
@@ -23,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -243,7 +250,7 @@ public class PythonToJava {
                     bos.write(receivedData);
                 }
             }
-            tv.append("\nDONE DUMPING! Check your Download/PHOTO Dumps folder");//Add to strings
+            tv.append("\n" + tv.getContext().getString(R.string.done_dumping_photo));
             bos.close();
 
         } catch (Exception e) {
@@ -310,6 +317,105 @@ public class PythonToJava {
         return false;
     }
 
+    public static class ReadRamAsyncTask extends AsyncTask<Void, Integer, Void> {
+        private Context context;
+        private TextView tv;
+        private UsbSerialPort port;
+        File latestFile;
+
+
+        public ReadRamAsyncTask(UsbSerialPort port, Context context, TextView tv, File latestFile) {
+            this.port = port;
+            this.context = context;
+            this.tv = tv;
+            this.latestFile = latestFile;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            LocalDateTime now = LocalDateTime.now();
+            String fileName = "gbCamera_";
+            fileName += dtf.format(now) + ".sav";
+            File file = new File(Utils.SAVE_FOLDER, fileName);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            //I create the new directory if it doesn't exists
+            try {
+                File parent = file.getParentFile();
+                if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                    throw new IllegalStateException("Couldn't create dir: " + parent);
+                }
+            } catch (Exception e) {
+                Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            //# Enable SRAM access
+            Cart_write(0x6000, 0x01, port, context);
+            Cart_write(0x0000, 0x0A, port, context);
+
+            try {
+                fos = new FileOutputStream(file);
+                bos = new BufferedOutputStream(fos);
+                byte[] readLength = new byte[64];
+                for (int i = 0; i < 16; i++) {
+                    // Set SRAM bank
+                    Cart_write(0x4000, i, port, context);
+                    // Read 8 KiB of SRAM
+                    for (int j = 0; j < 128; j++) {
+                        CartRead_RAM(j * 64, 64, port, context);
+                        int len = port.read(readLength, TIMEOUT);
+                        outputStream.write(Arrays.copyOf(readLength, len));
+
+                        int totalIterations = 16 * 128;
+                        int currentIteration = i * 128 + j + 1;
+                        int progress = currentIteration * 100 / totalIterations;
+                        publishProgress(progress);
+                    }
+                }
+                bos.write(outputStream.toByteArray());
+                bos.close();
+            } catch (Exception e) {
+                Utils.toast(context, "Error en READRAM\n" + e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            int progress = values[0];
+            tv.setText(context.getString(R.string.dumping_ram_wait)+"\n" + progress + "%");
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            tv.append("\n" + tv.getContext().getString(R.string.done_dumping_ram));
+            powerOff(port, context);
+
+            //To get the extracted file, as the latest one in the directory
+            latestFile = null;
+            //To get the last created file
+            File[] files = Utils.SAVE_FOLDER.listFiles();
+            if (files != null && files.length > 0) {
+                Arrays.sort(files, new Comparator<File>() {
+                    public int compare(File f1, File f2) {
+                        return Long.compare(f2.lastModified(), f1.lastModified());
+                    }
+                });
+                latestFile = files[0];
+                tv.append(context.getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
+                        context.getString(R.string.size) + latestFile.length() / 1024 + "KB");
+            }
+            try {
+                UsbSerialFragment.readSav(latestFile);
+            } catch (Exception e) {
+                Utils.toast(context, "ERROR EN READSAV");
+            }
+        }
+    }
+
     public static void ReadRam(UsbSerialPort port, Context context, TextView tv) {
 
         LocalDateTime now = LocalDateTime.now();
@@ -323,7 +429,6 @@ public class PythonToJava {
             if (parent != null && !parent.exists() && !parent.mkdirs()) {
                 throw new IllegalStateException("Couldn't create dir: " + parent);
             }
-
         } catch (Exception e) {
             Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
             toast.show();
@@ -336,7 +441,6 @@ public class PythonToJava {
             fos = new FileOutputStream(file);
             bos = new BufferedOutputStream(fos);
             byte[] readLength = new byte[64];
-
             for (int i = 0; i < 16; i++) {
                 // Set SRAM bank
                 Cart_write(0x4000, i, port, context);
@@ -346,12 +450,14 @@ public class PythonToJava {
                     int len = port.read(readLength, TIMEOUT);
                     outputStream.write(Arrays.copyOf(readLength, len));
                 }
+
             }
+
             bos.write(outputStream.toByteArray());
-            tv.append("\nDONE DUMPING! Check your Download/GBxCamera Dumps folder");
+            tv.append("\n" + tv.getContext().getString(R.string.done_dumping_ram));
             bos.close();
         } catch (Exception e) {
-            Toast.makeText(context, "Error en READRAM\n" + e.toString(), Toast.LENGTH_LONG).show();
+            Utils.toast(context, "Error en READRAM\n" + e.toString());
         }
     }
 

@@ -324,14 +324,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                             iter.remove();
                                         }
                                         filteredGbcImages.get(globalImageIndex).setTags(tags);
-                                        if (!filterTags.isEmpty())
+                                        if (!filterTags.isEmpty())//Because right now I'm only filtering favourites
                                             dialog.dismiss();
                                         imageView.setBackgroundColor(getContext().getColor(R.color.white));
                                     }
                                 } else {
                                     filteredGbcImages.get(globalImageIndex).addTag("__filter:favourite__");
                                     imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
-
                                 }
                                 clickCount = 0;
                                 //To save the image with the favorite tag to the database
@@ -798,15 +797,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                                 @Override
                                 public void onClick(View v) {
+                                    List<Integer> indexesToRemove = new ArrayList<>();
                                     clickCount++;
                                     if (clickCount == 1) {
                                         // Start timer to detect the double tap
                                         handler.postDelayed(runnable, 300);
                                     } else if (clickCount == 2) {
-
                                         // Stop timer and make double tap action
                                         handler.removeCallbacks(runnable);
-
                                         //Get the favorite status of the first selected image
                                         boolean isFav = filteredGbcImages.get(globalImageIndex[0]).getTags().contains("__filter:favourite__");
                                         for (int i : selectedImages) {
@@ -816,22 +814,33 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                                     String nombre = iter.next();
                                                     if (nombre.equals("__filter:favourite__")) {
                                                         iter.remove();
-
                                                     }
                                                     filteredGbcImages.get(i).setTags(tags);
                                                     imageView.setBackgroundColor(getContext().getColor(R.color.white));
+                                                    indexesToRemove.add(i);
                                                 }
-                                                if (!filterTags.isEmpty())
-                                                    dialog.dismiss();
+
                                             } else {
                                                 filteredGbcImages.get(i).addTag("__filter:favourite__");
                                                 imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                                             }
+
                                             //To save the image with the favorite tag to the database
                                             new SaveImageAsyncTask(filteredGbcImages.get(i)).execute();
                                         }
-                                        reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
+                                        if (!filterTags.isEmpty()) {
+                                            dialog.dismiss();
+                                        }
+                                        if (selectionMode && !filterTags.isEmpty()) {
+                                            for (int i = indexesToRemove.size(); i > 0; i--) {
+                                                filteredGbcImages.remove(indexesToRemove.get(i - 1));
+                                            }
+                                            selectedImages.clear();
+                                            MainActivity.fab.hide();
+                                            selectionMode = false;
+                                        }
 
+                                        reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
                                         clickCount = 0;
                                         updateGridView(currentPage);
                                     }

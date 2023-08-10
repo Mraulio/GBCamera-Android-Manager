@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.usbserial;
 
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import android.os.Handler;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
+
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -111,31 +113,31 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         View view = inflater.inflate(R.layout.fragment_usb_serial, container, false);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 
-        gridView = (GridView) view.findViewById(R.id.gridView);
+        gridView = view.findViewById(R.id.gridView);
         gridView.setNumColumns(2);//To see the images bigger in case there is corruption extracting with gbxcart
-        tv = (TextView) view.findViewById(R.id.textV);
-        tvMode = (TextView) view.findViewById(R.id.tvMode);
-        rbGroup = (RadioGroup) view.findViewById(R.id.rbGroup);
+        tv = view.findViewById(R.id.textV);
+        tvMode = view.findViewById(R.id.tvMode);
+        rbGroup = view.findViewById(R.id.rbGroup);
         tv.setMovementMethod(new ScrollingMovementMethod());
-        btnSave = (Button) view.findViewById(R.id.btnSave);
+        btnSave = view.findViewById(R.id.btnSave);
         cbLastSeen = view.findViewById(R.id.cbLastSeen);
         cbDeleted = view.findViewById(R.id.cbDeletedImages);
         layoutCb = view.findViewById(R.id.layout_cb);
 
-        btnFullRom = (Button) view.findViewById(R.id.btnFullRom);
-        btnReadRom = (Button) view.findViewById(R.id.btnReadRom);
-        btnReadRam = (Button) view.findViewById(R.id.btnReadRam);
+        btnFullRom = view.findViewById(R.id.btnFullRom);
+        btnReadRom = view.findViewById(R.id.btnReadRom);
+        btnReadRam = view.findViewById(R.id.btnReadRam);
 
-        btnPrintBanner = (Button) view.findViewById(R.id.btnPrintBanner);
-        btnAddImages = (Button) view.findViewById(R.id.btnAddImages);
-        btnDelSav = (Button) view.findViewById(R.id.btnDelSav);
-        btnDelete = (Button) view.findViewById(R.id.btnDelete);
-        btnDecode = (Button) view.findViewById(R.id.btnDecode);
+        btnPrintBanner = view.findViewById(R.id.btnPrintBanner);
+        btnAddImages = view.findViewById(R.id.btnAddImages);
+        btnDelSav = view.findViewById(R.id.btnDelSav);
+        btnDelete = view.findViewById(R.id.btnDelete);
+        btnDecode = view.findViewById(R.id.btnDecode);
 
 
-        rbApe = (RadioButton) view.findViewById(R.id.rbApe);
-        rbGbx = (RadioButton) view.findViewById(R.id.rbGbx);
-        rbPrint = (RadioButton) view.findViewById(R.id.rbPrint);
+        rbApe = view.findViewById(R.id.rbApe);
+        rbGbx = view.findViewById(R.id.rbGbx);
+        rbPrint = view.findViewById(R.id.rbPrint);
 
         List<Integer> sizesInteger = new ArrayList<>();
         sizesInteger.add(0);
@@ -285,7 +287,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-           CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
+            CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
             tv.append(extractedImagesList.size() + " images.");
             btnAddImages.setVisibility(View.VISIBLE);
@@ -426,7 +428,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     public static void readSav(File file) {
         latestFile = file;
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
-        //I get the last file from the directory, which I just dumped
+
         try {
             if (file.length() / 1024 == 128) {
                 List<byte[]> listExtractedImageBytes;
@@ -483,7 +485,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     canvas.drawLine(startX, startY, endX, endY, paint);
                     listDeletedBitmapsRedStroke.add(copiedBitmap);
                 }
-               CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
+                CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
                 gridView.setAdapter(customGridViewAdapterImage);
                 showImages(cbLastSeen, cbDeleted);
             } else {
@@ -497,6 +499,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         btnAddImages.setVisibility(View.VISIBLE);
         btnDelSav.setVisibility(View.VISIBLE);
         layoutCb.setVisibility(View.VISIBLE);
+
     }
 
     public static void readRomSavs() {

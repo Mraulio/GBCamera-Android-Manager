@@ -39,6 +39,8 @@ public class SettingsFragment extends Fragment {
         RadioButton rbTxt = view.findViewById(R.id.rbTxt);
         CheckBox cbPrint = view.findViewById(R.id.cbPrint);
         CheckBox cbPaperize = view.findViewById(R.id.cbPaperize);
+        CheckBox cbMagicCheck = view.findViewById(R.id.cbMagic);
+
         MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
 
         cbPrint.setChecked(MainActivity.printingEnabled);
@@ -77,6 +79,21 @@ public class SettingsFragment extends Fragment {
             rbTxt.setChecked(true);
             spinnerExport.setEnabled(false);
         }
+
+        cbMagicCheck.setChecked(MainActivity.magicCheck);
+        cbMagicCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    MainActivity.magicCheck = true;
+                    editor.putBoolean("magic_check", true);
+                } else {
+                    MainActivity.magicCheck = false;
+                    editor.putBoolean("magic_check", false);
+                }
+                editor.apply();
+            }
+        });
 
         rbPng.setOnClickListener(new View.OnClickListener() {
             @Override

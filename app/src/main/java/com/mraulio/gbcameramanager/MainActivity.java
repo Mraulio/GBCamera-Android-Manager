@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     public static int exportSize = 4;
     public static int imagesPage = 12;
     public static String languageCode;
+    public static boolean magicCheck;
 
     private boolean openedSav = false;
     public static UsbManager manager;
@@ -121,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
         showPaperizeButton = sharedPreferences.getBoolean("show_paperize_button", false);
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
+        magicCheck = sharedPreferences.getBoolean("magic_check", true);
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
 
         //To get the locale on the first startup and set the def value
@@ -214,21 +216,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
         switch (current_fragment) {
             case GALLERY:
                 menu.clear(); // Cleans the current menu
-                getMenuInflater().inflate(R.menu.main, menu); // Inflates the menu
+                getMenuInflater().inflate(R.menu.gallery_menu, menu); // Inflates the menu
                 break;
 
             case PALETTES:
-            case FRAMES:
-
-            case USB_SERIAL:
-
-            case SAVE_MANAGER:
-
             case SETTINGS:
+            case SAVE_MANAGER:
+            case USB_SERIAL:
+            case FRAMES:
                 menu.clear(); // Cleans the current menu
                 fab.hide();
                 menu.close();

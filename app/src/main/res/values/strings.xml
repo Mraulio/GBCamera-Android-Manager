@@ -150,5 +150,6 @@
     <string name="analyzing">Analyzing, please wait...</string>
     <string name="done_analyzing">Finished analyzing!</string>
 
+    <string name="check_magic">Check for valid .sav when importing/extracting</string>
 
 </resources>

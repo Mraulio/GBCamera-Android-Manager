@@ -63,7 +63,7 @@
 
 
     <!--Import fragment xml strings-->
-    <string name="btn_select_file">Seleciona archivo</string>
+    <string name="btn_select_file">Selecciona archivo</string>
     <string name="tv_select_file">Selecciona un archivo para importar</string>
     <string name="btn_extract_file">Extraer archivo.</string>
     <string name="btn_add_images">Añadir imágenes</string>
@@ -148,4 +148,7 @@
 
     <string name="analyzing">Analizando, por favor espera...</string>
     <string name="done_analyzing">¡Análisis terminado!</string>
+
+    <string name="check_magic">Comprobar .sav válido al importar/extraer</string>
+
 </resources>

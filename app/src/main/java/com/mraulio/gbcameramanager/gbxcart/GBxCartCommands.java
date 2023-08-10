@@ -1,5 +1,8 @@
 package com.mraulio.gbcameramanager.gbxcart;
 
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.readSav;
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.TextView;
@@ -21,9 +24,9 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -302,7 +305,7 @@ public class GBxCartCommands {
                             }
                             byte[] fileBytes = outputStream.toByteArray();
 
-                            if (!containsFFBytes(fileBytes)) {
+                            if (magicIsReal(fileBytes)) {
                                 fullRomFileList.add(outputFile);
                             } else {
                                 outputFile.delete();
@@ -326,14 +329,14 @@ public class GBxCartCommands {
             if (finishedExtracting == 0)
                 tv.setText(context.getString(R.string.dumping_rom_wait) + "\n" + progress + "%");
             else if (finishedExtracting == 1) {
-                tv.append("\n"+context.getString(R.string.analyzing));
+                tv.append("\n" + context.getString(R.string.analyzing));
             }
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            tv.append("\n"+context.getString(R.string.done_analyzing));
+            tv.append("\n" + context.getString(R.string.done_analyzing));
             tv.append("\n" + tv.getContext().getString(R.string.done_dumping_photo));
             powerOff(port, context);
 
@@ -428,22 +431,24 @@ public class GBxCartCommands {
                     }
                 });
                 latestFile = files[0];
-                tv.append(context.getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
-                        context.getString(R.string.size) + latestFile.length() / 1024 + "KB");
+
             }
-            UsbSerialFragment.readSav(latestFile);
+            byte[] fileBytes = new byte[0];
+            try {
+                fileBytes = Files.readAllBytes(latestFile.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (!magicIsReal(fileBytes)) {
+                tv.append(context.getString(R.string.no_valid_file));
+                return;
+            }
+
+            tv.append(context.getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
+                    context.getString(R.string.size) + latestFile.length() / 1024 + "KB");
+            readSav(latestFile);
         }
     }
 
-    //To check if all bytes are FF. If they are, it's not a valid sav
-    private static boolean containsFFBytes(byte[] bytes) {
-        int startPosition = 0x2FB1;
-        int numberOfBytes = 5;
-        for (int i = startPosition; i < startPosition + numberOfBytes; i++) {
-            if (bytes[i] == (byte) 0xFF) {
-                return true;
-            }
-        }
-        return false;
-    }
+
 }

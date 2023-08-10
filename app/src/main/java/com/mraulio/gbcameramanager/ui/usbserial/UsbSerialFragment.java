@@ -426,11 +426,10 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     public static void readSav(File file) {
         latestFile = file;
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
-        LocalDateTime now = LocalDateTime.now();
         //I get the last file from the directory, which I just dumped
         try {
             if (file.length() / 1024 == 128) {
-                List<byte[]> listExtractedImageBytes = new ArrayList<>();
+                List<byte[]> listExtractedImageBytes;
 
                 listExtractedImageBytes = extractor.extractBytes(file);
                 int nameIndex = 1;
@@ -616,32 +615,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 new GBxCartCommands.ReadRamAsyncTask(port, getContext(), tv, latestFile).execute();
             }
         }, 200);
-//        handlerRam.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                PythonToJava.powerOff(port, getContext());
-//            }
-//        }, 200);
-//        handlerRam.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                //To get the extracted file, as the latest one in the directory
-//                latestFile = null;
-//                //To get the last created file
-//                File[] files = Utils.SAVE_FOLDER.listFiles();
-//                if (files != null && files.length > 0) {
-//                    Arrays.sort(files, new Comparator<File>() {
-//                        public int compare(File f1, File f2) {
-//                            return Long.compare(f2.lastModified(), f1.lastModified());
-//                        }
-//                    });
-//                    latestFile = files[0];
-//                    tv.append(getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
-//                            getString(R.string.size) + latestFile.length() / 1024 + "KB");
-//                }
-//                readSav(latestFile);
-//            }
-//        }, 200);
     }
 
     //Refactor
@@ -755,12 +728,12 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         } else {
             BigInteger bigInt = new BigInteger(1, data);
             String hexString = bigInt.toString(16);
-            // Asegurarse de que la cadena tenga una longitud par
+            // Make sure the string has pair length
             if (hexString.length() % 2 != 0) {
                 hexString = "0" + hexString;
             }
 
-            // Formatear la cadena en bloques de dos caracteres
+            // Format the string in blocks of 2 chars
             hexString = String.format("%0" + (hexString.length() + hexString.length() % 2) + "X", new BigInteger(hexString, 16));
             hexString = hexString.replaceAll("..", "$0 ");//To separate with spaces every hex byte
             String finalHexString = hexString;

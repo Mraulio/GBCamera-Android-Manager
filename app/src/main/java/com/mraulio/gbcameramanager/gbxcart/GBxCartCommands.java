@@ -196,119 +196,6 @@ public class GBxCartCommands {
         } catch (Exception e) {
             Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
-
-    }
-
-    public static List<File> ReadFullRom(UsbSerialPort port, Context context, TextView tv) {
-        //DUMP 1 MB ROM file
-        LocalDateTime now = LocalDateTime.now();
-        String fileName = "PhotoFullRom_";
-        String folderName = "PhotoFullRom_" + dtf.format(now);
-        fileName += dtf.format(now) + ".full.gbc";
-        File parentFile = new File(Utils.PHOTO_DUMPS_FOLDER, folderName);
-        //I create the new directory if it doesn't exists
-        try {
-            if (!parentFile.exists() && !parentFile.mkdirs()) {
-                throw new IllegalStateException("Couldn't create dir: " + parentFile);
-            }
-        } catch (Exception e) {
-            Toast toast = Toast.makeText(context, "Error making directory: " + e.toString(), Toast.LENGTH_SHORT);
-            toast.show();
-        }
-        File file = new File(parentFile, fileName);
-        // create the new file inside the directory
-        try {
-            if (!file.createNewFile()) {
-                throw new IllegalStateException("Couldn't create file: " + file);
-            }
-        } catch (Exception e) {
-            Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
-            toast.show();
-        }
-        try {
-            fos = new FileOutputStream(file);
-            bos = new BufferedOutputStream(fos);
-            byte[] readLength = new byte[64];
-            for (int i = 0; i < 64; i++) {
-                // Set ROM bank
-                Cart_write(0x2100, i, port, context);
-                // Read 16 (0x4000) KiB of SRAM
-                for (int j = 0; j < 256; j++) {
-                    //If first ROM bank, read 0-0x3fff, other banks from 0x4000 0x7fff
-                    if (i == 0) {
-                        CartRead_ROM(j * 64, 64, port, context, tv);
-                    } else {
-                        CartRead_ROM((j * 64) + 0x4000, 64, port, context, tv);
-                    }
-                    int len = port.read(readLength, TIMEOUT);
-                    byte[] receivedData = (Arrays.copyOf(readLength, len));
-                    bos.write(receivedData);
-                }
-            }
-            tv.append("\n" + tv.getContext().getString(R.string.done_dumping_photo));
-            bos.close();
-
-        } catch (Exception e) {
-            Toast.makeText(context, "Error en FullReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
-        }
-        //Now I divide the 1MB file into 8. First will be the gbc rom, next 7 ram files
-        int fileSize = (int) file.length();
-        int partSize = fileSize / 8; // Divides the file in 8 parts
-        byte[] buffer = new byte[partSize];
-
-        List<File> fileList = new ArrayList<>();
-        try (RandomAccessFile reader = new RandomAccessFile(file, "r")) {
-            for (int i = 0; i < 8; i++) {
-                String extension = "";
-                if (i == 0) {
-                    extension = ".gbc";
-                } else extension = ".part_" + i + ".sav";
-                File outputFile = new File(parentFile, fileName + extension);
-
-                try (OutputStream writer = new FileOutputStream(outputFile)) {
-                    int bytesRead = 0;
-                    while (bytesRead < partSize && reader.read(buffer) != -1) {
-                        writer.write(buffer);
-                        bytesRead += buffer.length;
-                    }
-                }
-                if (i != 0) {//Because 0 is the actual rom
-                    try (InputStream is = new FileInputStream(outputFile)) {
-                        byte[] bufferAux = new byte[1024];
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-                        int read;
-                        while ((read = is.read(bufferAux)) != -1) {
-                            outputStream.write(bufferAux, 0, read);
-                        }
-                        byte[] fileBytes = outputStream.toByteArray();
-
-                        if (!containsFFBytes(fileBytes)) {
-                            fileList.add(outputFile);
-                        } else {
-                            outputFile.delete();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fileList;
-    }
-
-    //To check if all bytes are FF. If they are, it's not a valid sav
-    private static boolean containsFFBytes(byte[] bytes) {
-        int startPosition = 0x2FB1;
-        int numberOfBytes = 5;
-        for (int i = startPosition; i < startPosition + numberOfBytes; i++) {
-            if (bytes[i] == (byte) 0xFF) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static class ReadPHOTORomAsyncTask extends AsyncTask<Void, Integer, Void> {
@@ -323,6 +210,7 @@ public class GBxCartCommands {
             this.tv = tv;
             this.fullRomFileList = fullRomFileList;
         }
+
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -438,15 +326,14 @@ public class GBxCartCommands {
             if (finishedExtracting == 0)
                 tv.setText(context.getString(R.string.dumping_rom_wait) + "\n" + progress + "%");
             else if (finishedExtracting == 1) {
-                tv.append("\nAnalyzing...");
+                tv.append("\n"+context.getString(R.string.analyzing));
             }
-
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            tv.append("\nFinished analyzing!");
+            tv.append("\n"+context.getString(R.string.done_analyzing));
             tv.append("\n" + tv.getContext().getString(R.string.done_dumping_photo));
             powerOff(port, context);
 
@@ -548,49 +435,15 @@ public class GBxCartCommands {
         }
     }
 
-    public static void ReadRam(UsbSerialPort port, Context context, TextView tv) {
-
-        LocalDateTime now = LocalDateTime.now();
-        String fileName = "gbCamera_";
-        fileName += dtf.format(now) + ".sav";
-        File file = new File(Utils.SAVE_FOLDER, fileName);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        //I create the new directory if it doesn't exists
-        try {
-            File parent = file.getParentFile();
-            if (parent != null && !parent.exists() && !parent.mkdirs()) {
-                throw new IllegalStateException("Couldn't create dir: " + parent);
+    //To check if all bytes are FF. If they are, it's not a valid sav
+    private static boolean containsFFBytes(byte[] bytes) {
+        int startPosition = 0x2FB1;
+        int numberOfBytes = 5;
+        for (int i = startPosition; i < startPosition + numberOfBytes; i++) {
+            if (bytes[i] == (byte) 0xFF) {
+                return true;
             }
-        } catch (Exception e) {
-            Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
-            toast.show();
         }
-        //# Enable SRAM access
-        Cart_write(0x6000, 0x01, port, context);
-        Cart_write(0x0000, 0x0A, port, context);
-
-        try {
-            fos = new FileOutputStream(file);
-            bos = new BufferedOutputStream(fos);
-            byte[] readLength = new byte[64];
-            for (int i = 0; i < 16; i++) {
-                // Set SRAM bank
-                Cart_write(0x4000, i, port, context);
-                // Read 8 KiB of SRAM
-                for (int j = 0; j < 128; j++) {
-                    CartRead_RAM(j * 64, 64, port, context);
-                    int len = port.read(readLength, TIMEOUT);
-                    outputStream.write(Arrays.copyOf(readLength, len));
-                }
-
-            }
-
-            bos.write(outputStream.toByteArray());
-            tv.append("\n" + tv.getContext().getString(R.string.done_dumping_ram));
-            bos.close();
-        } catch (Exception e) {
-            Utils.toast(context, "Error en READRAM\n" + e.toString());
-        }
+        return false;
     }
-
 }

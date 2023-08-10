@@ -146,6 +146,6 @@
     <string name="filtered_images">Imágenes filtradas:\u0020</string>
     <string name="selected_images">Seleccionadas:\u0020</string>
 
-    <string name="analyzing">Analizando, por favor espera</string>
+    <string name="analyzing">Analizando, por favor espera...</string>
     <string name="done_analyzing">¡Análisis terminado!</string>
 </resources>

@@ -49,7 +49,6 @@ import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtra
 import com.mraulio.gbcameramanager.gbxcart.GBxCartCommands;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
-import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
 import java.io.File;
@@ -501,23 +500,22 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         layoutCb.setVisibility(View.VISIBLE);
     }
 
-    private void readRomSavs() {
+    public static void readRomSavs() {
         extractedImagesBitmaps.clear();
-        tv.append(getString(R.string.sav_parts) + fullRomFileList.size());
+        tv.append(tv.getContext().getString(R.string.sav_parts) + fullRomFileList.size());
         try {
             for (File file : fullRomFileList) {
                 readSav(file);
             }
-            CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
+            CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(tv.getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
 
         } catch (Exception e) {
             e.printStackTrace();
-            Utils.toast(getContext(), "Error: " + e.toString());
+            Utils.toast(tv.getContext(), "Error: " + e.toString());
         }
         btnAddImages.setVisibility(View.VISIBLE);
     }
-
 
     private void completeReadRomName() {
         Handler handler = new Handler();
@@ -542,7 +540,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                romName = GBxCartCommands.ReadRom(port, getContext(), tv);
+                romName = GBxCartCommands.ReadRomName(port, getContext(), tv);
                 tv.setText(getString(R.string.rom_name) + romName);
             }
         }, 200);
@@ -587,19 +585,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                fullRomFileList = GBxCartCommands.ReadFullRom(port, getContext(), tv);
-            }
-        }, 200);
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                GBxCartCommands.powerOff(port, getContext());
-            }
-        }, 200);
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                readRomSavs();
+                new GBxCartCommands.ReadPHOTORomAsyncTask(port, getContext(), tv, fullRomFileList).execute();
             }
         }, 200);
     }

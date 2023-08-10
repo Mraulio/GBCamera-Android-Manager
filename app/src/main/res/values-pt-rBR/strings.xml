@@ -110,7 +110,7 @@
     <string name="no_good_dump">\nNÃO É UMA BOA EXTRAÇÃO DE SAV.</string>
     <string name="sav_parts">\nPartes do Sav:\u0020</string>
     <string name="rom_name">\nO nome da ROM é:\u0020</string>
-    <string name="dumping_rom_wait">\Extraido 1MB ROM, aguarde aproximadamente 45 segundos...\n...</string>
+    <string name="dumping_rom_wait">\Extraido 1MB ROM, aguarde aproximadamente 45 segundos...</string>
     <string name="dumping_ram_wait">\Extraindo RAM, agaurde...\n...</string>
     <string name="last_sav_name">\nO nome do último SAV é:\u0020</string>
     <string name="size">Tamanho:\u0020</string>
@@ -147,4 +147,7 @@
     <string name="selected_images">Selecionadas:\u0020</string>
     <string name="done_dumping_ram">CÓPIA DA RAM COMPLETA! Confira a pasta Download/GBCamera Manager/Save Dumps</string>
     <string name="done_dumping_photo">CÓPIA DA ROM PHOTO COMPLETA! Confira a pasta Download/GBCamera Manager/PHOTO Rom Dumps</string>
+
+    <string name="analyzing">Analisando, aguarde...</string>
+    <string name="done_analyzing">Análise concluída!</string>
 </resources>

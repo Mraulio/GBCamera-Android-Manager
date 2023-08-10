@@ -109,7 +109,7 @@
     <string name="no_good_dump">\nNOT A GOOD SAVE DUMP.</string>
     <string name="sav_parts">\nSav parts:\u0020</string>
     <string name="rom_name">\nThe ROM name is:\u0020</string>
-    <string name="dumping_rom_wait">\nDumping 1MB ROM, please wait about 45 seconds...\n...</string>
+    <string name="dumping_rom_wait">\nDumping 1MB ROM, please wait about 45 seconds...</string>
     <string name="dumping_ram_wait">\nDumping RAM, please wait...\n...</string>
     <string name="last_sav_name">\nThe name of the last SAV file is:\u0020</string>
     <string name="size">Size:\u0020</string>
@@ -146,5 +146,9 @@
     <string name="done_dumping_photo">DONE DUMPING PHOTO ROM! Check your Download/GBCamera Manager/PHOTO Rom Dumps folder</string>
     <string name="filtered_images">Filtered images:\u0020</string>
     <string name="selected_images">Selected:\u0020</string>
+
+    <string name="analyzing">Analyzing, please wait...</string>
+    <string name="done_analyzing">Finished analyzing!</string>
+
 
 </resources>

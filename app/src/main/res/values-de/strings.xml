@@ -147,4 +147,7 @@
     <string name="done_dumping_photo">ROM WURDE AUSGELESEN! Schau in den Ordner Download/GBCamera Manager/PHOTO Rom Dumps</string>
     <string name="filtered_images">Gefilterte Bilder:\u0020</string>
     <string name="selected_images">Ausgewählt:\u0020</string>
+
+    <string name="analyzing">Analyse läuft, bitte warten...</string>
+    <string name="done_analyzing">Fertig mit der Analyse!</string>
 </resources>

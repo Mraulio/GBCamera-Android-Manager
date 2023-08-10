@@ -143,7 +143,7 @@ public class GBxCartCommands {
         return buffer;
     }
 
-    public static String ReadRom(UsbSerialPort port, Context context, TextView tv) {
+    public static String ReadRomName(UsbSerialPort port, Context context, TextView tv) {
         byte[] readLength = new byte[0x10];
         byte[] receivedData = new byte[0x10];
 
@@ -292,7 +292,6 @@ public class GBxCartCommands {
                         e.printStackTrace();
                     }
                 }
-
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -312,12 +311,154 @@ public class GBxCartCommands {
         return false;
     }
 
+    public static class ReadPHOTORomAsyncTask extends AsyncTask<Void, Integer, Void> {
+        private Context context;
+        private TextView tv;
+        private UsbSerialPort port;
+        List<File> fullRomFileList;
+
+        public ReadPHOTORomAsyncTask(UsbSerialPort port, Context context, TextView tv, List<File> fullRomFileList) {
+            this.port = port;
+            this.context = context;
+            this.tv = tv;
+            this.fullRomFileList = fullRomFileList;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //DUMP 1 MB ROM file
+            LocalDateTime now = LocalDateTime.now();
+            String fileName = "PhotoFullRom_";
+            String folderName = "PhotoFullRom_" + dtf.format(now);
+            fileName += dtf.format(now) + ".full.gbc";
+            File parentFile = new File(Utils.PHOTO_DUMPS_FOLDER, folderName);
+            //I create the new directory if it doesn't exists
+            try {
+                if (!parentFile.exists() && !parentFile.mkdirs()) {
+                    throw new IllegalStateException("Couldn't create dir: " + parentFile);
+                }
+            } catch (Exception e) {
+                Toast toast = Toast.makeText(context, "Error making directory: " + e.toString(), Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            File file = new File(parentFile, fileName);
+            // create the new file inside the directory
+            try {
+                if (!file.createNewFile()) {
+                    throw new IllegalStateException("Couldn't create file: " + file);
+                }
+            } catch (Exception e) {
+                Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            try {
+                fos = new FileOutputStream(file);
+                bos = new BufferedOutputStream(fos);
+                byte[] readLength = new byte[64];
+                for (int i = 0; i < 64; i++) {
+                    // Set ROM bank
+                    Cart_write(0x2100, i, port, context);
+                    // Read 16 (0x4000) KiB of SRAM
+                    for (int j = 0; j < 256; j++) {
+                        //If first ROM bank, read 0-0x3fff, other banks from 0x4000 0x7fff
+                        if (i == 0) {
+                            CartRead_ROM(j * 64, 64, port, context, tv);
+                        } else {
+                            CartRead_ROM((j * 64) + 0x4000, 64, port, context, tv);
+                        }
+                        int len = port.read(readLength, TIMEOUT);
+                        byte[] receivedData = (Arrays.copyOf(readLength, len));
+                        bos.write(receivedData);
+                        int totalIterations = 64 * 256;
+                        int currentIteration = i * 256 + j + 1;
+                        int progress = currentIteration * 100 / totalIterations;
+                        publishProgress(progress, 0);
+                    }
+                }
+                tv.append("\n" + tv.getContext().getString(R.string.done_dumping_photo));
+                bos.close();
+
+            } catch (Exception e) {
+                Toast.makeText(context, "Error en FullReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
+            }
+            publishProgress(100, 1);
+
+            //Now I divide the 1MB file into 8. First will be the gbc rom, next 7 ram files
+            int fileSize = (int) file.length();
+            int partSize = fileSize / 8; // Divides the file in 8 parts
+            byte[] buffer = new byte[partSize];
+
+            try (RandomAccessFile reader = new RandomAccessFile(file, "r")) {
+                for (int i = 0; i < 8; i++) {
+                    String extension = "";
+                    if (i == 0) {
+                        extension = ".gbc";
+                    } else extension = ".part_" + i + ".sav";
+                    File outputFile = new File(parentFile, fileName + extension);
+
+                    try (OutputStream writer = new FileOutputStream(outputFile)) {
+                        int bytesRead = 0;
+                        while (bytesRead < partSize && reader.read(buffer) != -1) {
+                            writer.write(buffer);
+                            bytesRead += buffer.length;
+                        }
+                    }
+                    if (i != 0) {//Because 0 is the actual rom
+                        try (InputStream is = new FileInputStream(outputFile)) {
+                            byte[] bufferAux = new byte[1024];
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+                            int read;
+                            while ((read = is.read(bufferAux)) != -1) {
+                                outputStream.write(bufferAux, 0, read);
+                            }
+                            byte[] fileBytes = outputStream.toByteArray();
+
+                            if (!containsFFBytes(fileBytes)) {
+                                fullRomFileList.add(outputFile);
+                            } else {
+                                outputFile.delete();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            int progress = values[0];
+            int finishedExtracting = values[1];
+            if (finishedExtracting == 0)
+                tv.setText(context.getString(R.string.dumping_rom_wait) + "\n" + progress + "%");
+            else if (finishedExtracting == 1) {
+                tv.append("\nAnalyzing...");
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            tv.append("\nFinished analyzing!");
+            tv.append("\n" + tv.getContext().getString(R.string.done_dumping_photo));
+            powerOff(port, context);
+
+            UsbSerialFragment.readRomSavs();
+        }
+    }
+
     public static class ReadRamAsyncTask extends AsyncTask<Void, Integer, Void> {
         private Context context;
         private TextView tv;
         private UsbSerialPort port;
         File latestFile;
-
 
         public ReadRamAsyncTask(UsbSerialPort port, Context context, TextView tv, File latestFile) {
             this.port = port;
@@ -379,7 +520,7 @@ public class GBxCartCommands {
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
             int progress = values[0];
-            tv.setText(context.getString(R.string.dumping_ram_wait)+"\n" + progress + "%");
+            tv.setText(context.getString(R.string.dumping_ram_wait) + "\n" + progress + "%");
         }
 
         @Override
@@ -403,11 +544,7 @@ public class GBxCartCommands {
                 tv.append(context.getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
                         context.getString(R.string.size) + latestFile.length() / 1024 + "KB");
             }
-            try {
-                UsbSerialFragment.readSav(latestFile);
-            } catch (Exception e) {
-                Utils.toast(context, "ERROR EN READSAV");
-            }
+            UsbSerialFragment.readSav(latestFile);
         }
     }
 

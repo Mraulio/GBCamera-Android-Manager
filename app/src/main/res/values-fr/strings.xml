@@ -93,7 +93,7 @@
     <string name="no_good_dump">\nSauvegarde corrompue.</string>
     <string name="sav_parts">\nSav parties:\u0020</string>
     <string name="rom_name">\nLe nom de la rom est:\u0020</string>
-    <string name="dumping_rom_wait">\nTéléchargement 1MB ROM, attendre environ 45s...\n...</string>
+    <string name="dumping_rom_wait">\nTéléchargement 1MB ROM, attendre environ 45s...</string>
     <string name="dumping_ram_wait">\nTéléchargement RAM, attendre...\n...</string>
     <string name="last_sav_name">\Le nom du dernier fichier SAV est:\u0020</string>
     <string name="size">Taille:\u0020</string>
@@ -129,4 +129,7 @@
     <string name="done_dumping_photo">Copie de la rom PHOTO terminée ! La copie se trouve dans le répertoire Download/GBCamera Manager/PHOTO Rom Dumps</string>
     <string name="filtered_images">Images filtrées:\u0020</string>
     <string name="selected_images">Choisies:\u0020</string>
+
+    <string name="analyzing">Analyse en cours, veuillez patienter...</string>
+    <string name="done_analyzing">Analyse terminée!</string>
 </resources>

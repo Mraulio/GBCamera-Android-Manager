@@ -34,6 +34,7 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
@@ -129,18 +130,8 @@ public class PalettesFragment extends Fragment {
                                         Bitmap image = imageCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), Utils.gbcImagesList.get(i).getImageBytes(),false);//Palette not inverted, for the sake of palette creation
                                         Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                     }
-                                    new GalleryFragment.SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
+                                    new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
-//                                //Also need to change the palette index of the images with a superior index to the deleted one to current index -1
-//                                else if (Methods.gbcImagesList.get(i).getPaletteId() > position) {
-//                                    Methods.gbcImagesList.get(i).setPaletteId(Methods.gbcImagesList.get(i).getPaletteId() - 1);
-//                                    if (Methods.imageBitmapCache.containsKey(Methods.gbcImagesList.get(i).getHashCode())) {
-//                                        ImageCodec imageCodec = new ImageCodec(new IndexedPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteId()).getPaletteColorsInt()), 160, Methods.gbcImagesList.get(i).getImageBytes().length / 40);
-//                                        Bitmap image = imageCodec.decodeWithPalette(Methods.gbcPalettesList.get(Methods.gbcImagesList.get(i).getPaletteId()).getPaletteColorsInt(), Methods.gbcImagesList.get(i).getImageBytes());
-//                                        Methods.imageBitmapCache.put(Methods.gbcImagesList.get(i).getHashCode(), image);
-//                                    }
-//                                    new GalleryFragment.SaveImageAsyncTask(Methods.gbcImagesList.get(i)).execute();
-//                                }
                             }
                             imageAdapter.notifyDataSetChanged();
                         }

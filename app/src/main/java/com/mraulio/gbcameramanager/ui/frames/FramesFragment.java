@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.FrameDao;
@@ -92,7 +93,7 @@ public class FramesFragment extends Fragment {
                                         }
                                         Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                     }
-                                    new GalleryFragment.SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
+                                    new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
                             }
                             customGridViewAdapterFrames.notifyDataSetChanged();

@@ -27,6 +27,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -48,7 +49,7 @@ public class SaveManagerFragment extends Fragment {
     private Button btnDelete;
     private AlertDialog loadingDialog;
     private File selectedFile;
-    private GalleryFragment.CustomGridViewAdapterImage gridAdapter;
+    private CustomGridViewAdapterImage gridAdapter;
     private ArrayAdapter<String> listViewAdapter;
 
     List<GbcImage> listActiveImages = new ArrayList<>();
@@ -231,8 +232,8 @@ public class SaveManagerFragment extends Fragment {
         finalListBitmaps.addAll(listDeletedBitmaps);
         bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
 
-        gridviewSaves.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
-        gridAdapter = (GalleryFragment.CustomGridViewAdapterImage) gridviewSaves.getAdapter();
+        gridviewSaves.setAdapter((new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
+        gridAdapter = (CustomGridViewAdapterImage) gridviewSaves.getAdapter();
     }
 
     private void createDialog() {
@@ -242,7 +243,7 @@ public class SaveManagerFragment extends Fragment {
         GridView grid = new GridView(getContext());
         grid.setNumColumns(4);
         grid.setPadding(30, 10, 30, 10);
-        grid.setAdapter(new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, false, false, null));
+        grid.setAdapter(new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, false, false, null));
 
         builder.setView(grid);
 

@@ -34,6 +34,7 @@ import android.widget.TextView;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.ImageData;
+import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
@@ -320,7 +321,7 @@ public class ImportFragment extends Fragment {
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-            adapter = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true,false,null);
+            adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true,false,null);
 
             ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
         } else if (!savFile && isJson) {
@@ -385,7 +386,7 @@ public class ImportFragment extends Fragment {
                         btnAddImages.setText(getString(R.string.btn_add_images));
                         btnAddImages.setVisibility(View.VISIBLE);
                         layoutCb.setVisibility(View.GONE);
-                        adapter = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true,false,null);
+                        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true,false,null);
                         break;
                 }
             }
@@ -426,7 +427,7 @@ public class ImportFragment extends Fragment {
             finalListBitmaps.addAll(listDeletedBitmaps);
             bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
         }
-        adapter = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true,false,null);
+        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true,false,null);
     }
 
     private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {

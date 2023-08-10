@@ -16,7 +16,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.os.Environment;
 import android.os.Handler;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
@@ -26,7 +25,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -38,6 +36,7 @@ import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.ui.importFile.HexToTileData;
@@ -47,7 +46,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
-import com.mraulio.gbcameramanager.gbxcart.PythonToJava;
+import com.mraulio.gbcameramanager.gbxcart.GBxCartCommands;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
@@ -60,12 +59,9 @@ import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -290,7 +286,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
+           CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
             tv.append(extractedImagesList.size() + " images.");
             btnAddImages.setVisibility(View.VISIBLE);
@@ -489,7 +485,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     canvas.drawLine(startX, startY, endX, endY, paint);
                     listDeletedBitmapsRedStroke.add(copiedBitmap);
                 }
-                GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
+               CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
                 gridView.setAdapter(customGridViewAdapterImage);
                 showImages(cbLastSeen, cbDeleted);
             } else {
@@ -512,11 +508,9 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             for (File file : fullRomFileList) {
                 readSav(file);
             }
-            GalleryFragment.CustomGridViewAdapterImage customGridViewAdapterImage = new GalleryFragment.CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
+            CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
-//            } else {
-//                tv.append("\nNOT A GOOD SAVE DUMP.");
-//            }
+
         } catch (Exception e) {
             e.printStackTrace();
             Utils.toast(getContext(), "Error: " + e.toString());
@@ -530,32 +524,32 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.powerOff(port, getContext());
+                GBxCartCommands.powerOff(port, getContext());
             }
         }, 100);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.setCartType(port, getContext());
+                GBxCartCommands.setCartType(port, getContext());
             }
         }, 100);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.powerOn(port, getContext());
+                GBxCartCommands.powerOn(port, getContext());
             }
         }, 100);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                romName = PythonToJava.ReadRom(port, getContext(), tv);
+                romName = GBxCartCommands.ReadRom(port, getContext(), tv);
                 tv.setText(getString(R.string.rom_name) + romName);
             }
         }, 200);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.powerOff(port, getContext());
+                GBxCartCommands.powerOff(port, getContext());
             }
         }, 200);
         handler.postDelayed(new Runnable() {
@@ -575,31 +569,31 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.powerOff(port, getContext());
+                GBxCartCommands.powerOff(port, getContext());
             }
         }, 100);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.setCartType(port, getContext());
+                GBxCartCommands.setCartType(port, getContext());
             }
         }, 100);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.powerOn(port, getContext());
+                GBxCartCommands.powerOn(port, getContext());
             }
         }, 100);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                fullRomFileList = PythonToJava.ReadFullRom(port, getContext(), tv);
+                fullRomFileList = GBxCartCommands.ReadFullRom(port, getContext(), tv);
             }
         }, 200);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.powerOff(port, getContext());
+                GBxCartCommands.powerOff(port, getContext());
             }
         }, 200);
         handler.postDelayed(new Runnable() {
@@ -615,25 +609,25 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         handlerRam.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.powerOff(port, getContext());
+                GBxCartCommands.powerOff(port, getContext());
             }
         }, 100);
         handlerRam.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.setCartType(port, getContext());
+                GBxCartCommands.setCartType(port, getContext());
             }
         }, 100);
         handlerRam.postDelayed(new Runnable() {
             @Override
             public void run() {
-                PythonToJava.powerOn(port, getContext());
+                GBxCartCommands.powerOn(port, getContext());
             }
         }, 100);
         handlerRam.postDelayed(new Runnable() {
             @Override
             public void run() {
-                new PythonToJava.ReadRamAsyncTask(port, getContext(), tv, latestFile).execute();
+                new GBxCartCommands.ReadRamAsyncTask(port, getContext(), tv, latestFile).execute();
             }
         }, 200);
 //        handlerRam.postDelayed(new Runnable() {
@@ -695,9 +689,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             finalListBitmaps.addAll(listDeletedBitmaps);
             bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
         }
-        gridView.setAdapter((new GalleryFragment.CustomGridViewAdapterImage(showLastSeen.getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
+        gridView.setAdapter((new CustomGridViewAdapterImage(showLastSeen.getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
     }
-
 
     private void saveTv() {
         String texto = tv.getText().toString();

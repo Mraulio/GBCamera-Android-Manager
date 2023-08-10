@@ -1,11 +1,7 @@
 package com.mraulio.gbcameramanager.gbxcart;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class PythonToJava {
+public class GBxCartCommands {
     //Class that contains the methods to communicate with the GBxCart
     //Translated from the code from Lesserkuma
 
@@ -45,7 +41,7 @@ public class PythonToJava {
 
     public static void powerOff(UsbSerialPort port, Context context) {
         byte[] command = new byte[1];
-        int com = GBxCart.DEVICE_CMD.get("OFW_CART_PWR_OFF");
+        int com = GBxCartConstants.DEVICE_CMD.get("OFW_CART_PWR_OFF");
         command[0] = (byte) com; //POWER OFF
         try {
             port.write(command, TIMEOUT);//VER LO DE LOS TIMEOUTS
@@ -54,7 +50,6 @@ public class PythonToJava {
             Toast.makeText(context, "Error en PowerOff\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
-
 
     public static void powerOn(UsbSerialPort port, Context context) {
         byte[] command = new byte[1];
@@ -71,11 +66,11 @@ public class PythonToJava {
         byte[] command = new byte[1];
 
         try {
-            int com = GBxCart.DEVICE_CMD.get("SET_MODE_DMG");
+            int com = GBxCartConstants.DEVICE_CMD.get("SET_MODE_DMG");
             command[0] = (byte) com; //SET_MODE_DMG
             port.write(command, TIMEOUT);
 
-            com = GBxCart.DEVICE_CMD.get("SET_VOLTAGE_5V");
+            com = GBxCartConstants.DEVICE_CMD.get("SET_VOLTAGE_5V");
             command[0] = (byte) com; //SET_VOLTAGE_5V
             port.write(command, TIMEOUT);
 
@@ -91,7 +86,7 @@ public class PythonToJava {
     private static void setFwVariable(String key, int value, UsbSerialPort port, Context context) {
         int size = 0;
         int keyInt = 0;
-        for (Map.Entry<String, int[]> entry : GBxCart.DEVICE_VAR.entrySet()) {
+        for (Map.Entry<String, int[]> entry : GBxCartConstants.DEVICE_VAR.entrySet()) {
             String k = entry.getKey();
             int[] v = entry.getValue();
             if (k.contains(key)) {
@@ -106,7 +101,7 @@ public class PythonToJava {
                 break;
             }
         }
-        int temp = GBxCart.DEVICE_CMD.get("SET_VARIABLE");
+        int temp = GBxCartConstants.DEVICE_CMD.get("SET_VARIABLE");
         ByteBuffer bb = ByteBuffer.allocate(13);
         bb.order(ByteOrder.BIG_ENDIAN);
         bb.put((byte) temp);
@@ -138,7 +133,7 @@ public class PythonToJava {
 
         try {
             for (int i = 0; i < num; i++) {
-                int x = GBxCart.DEVICE_CMD.get(command);
+                int x = GBxCartConstants.DEVICE_CMD.get(command);
                 commandByte[0] = (byte) x;
                 port.write(commandByte, TIMEOUT);
             }
@@ -166,7 +161,7 @@ public class PythonToJava {
     public static void Cart_write(int address, int value, UsbSerialPort port, Context context) {
 
         byte[] buffer = new byte[6];
-        buffer[0] = (byte) (GBxCart.DEVICE_CMD.get("DMG_CART_WRITE") & 0xFF);
+        buffer[0] = (byte) (GBxCartConstants.DEVICE_CMD.get("DMG_CART_WRITE") & 0xFF);
         byte[] addressBytes = ByteBuffer.allocate(4).putInt(address).array();
         System.arraycopy(addressBytes, 0, buffer, 1, 4);
         buffer[5] = (byte) (value & 0xFF);
@@ -194,7 +189,7 @@ public class PythonToJava {
         String command = "DMG_CART_READ";
         try {
 //
-            int x = GBxCart.DEVICE_CMD.get(command);
+            int x = GBxCartConstants.DEVICE_CMD.get(command);
             commandByte[0] = (byte) x;
             port.write(commandByte, TIMEOUT);
 

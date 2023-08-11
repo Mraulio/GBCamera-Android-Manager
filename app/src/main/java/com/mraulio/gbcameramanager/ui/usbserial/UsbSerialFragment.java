@@ -1,6 +1,8 @@
 package com.mraulio.gbcameramanager.ui.usbserial;
 
 
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.deleteFolderRecursive;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +19,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.FileUtils;
 import android.os.Handler;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
@@ -71,7 +74,7 @@ import java.util.List;
 public class UsbSerialFragment extends Fragment implements SerialInputOutputManager.Listener {
     static List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
     static List<GbcImage> extractedImagesList = new ArrayList<>();
-
+    public static File photoFolder;
     static File latestFile;
     boolean ape = false;
     static UsbDeviceConnection connection;
@@ -81,17 +84,17 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     String romName = "";
     int numImagesAdded;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
-
-    static LinearLayout layoutCb;
-    static CheckBox cbLastSeen;
-    static CheckBox cbDeleted;
+    boolean isRomExtracted;
+    public static LinearLayout layoutCb;
+    public static CheckBox cbLastSeen;
+    public static CheckBox cbDeleted;
     static GridView gridView;
     boolean gbxMode = true;
     public static List<File> fullRomFileList = new ArrayList<>();
     static TextView tv;
 
     TextView tvMode;
-    public static Button btnSave, btnReadRom, btnReadRam, btnFullRom, btnPrintBanner, btnAddImages, btnDelSav, btnDecode, btnDelete;
+    public static Button btnSave, btnReadRomName, btnReadRam, btnFullRom, btnPrintBanner, btnAddImages, btnDelSav, btnDecode, btnDelete;
     RadioButton rbGbx, rbApe;
     public static RadioButton rbPrint;
     RadioGroup rbGroup;
@@ -125,7 +128,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         layoutCb = view.findViewById(R.id.layout_cb);
 
         btnFullRom = view.findViewById(R.id.btnFullRom);
-        btnReadRom = view.findViewById(R.id.btnReadRom);
+        btnReadRomName = view.findViewById(R.id.btnReadRom);
         btnReadRam = view.findViewById(R.id.btnReadRam);
 
         btnPrintBanner = view.findViewById(R.id.btnPrintBanner);
@@ -208,21 +211,36 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle(getString(R.string.delete_sav_dialog));
-                builder.setMessage(getString(R.string.sure_delete_sav) + latestFile.getName() + "?");
-
+                String title = isRomExtracted ? getString(R.string.delete_photo_folder_dialog) : getString(R.string.delete_sav_dialog);
+                builder.setTitle(title);
+                String fileToDelete = isRomExtracted ? "folder " + photoFolder.getName() : latestFile.getName();
+                builder.setMessage(getString(R.string.sure_delete_sav) + fileToDelete + "?");
+                btnDelete.setText(isRomExtracted ?"Delete folder":getString(R.string.btn_delete_sav));
                 builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Try to delete the file
-                        if (latestFile.delete()) {
-                            Utils.toast(getContext(), getString(R.string.toast_sav_deleted));
+                        if (isRomExtracted) {
+                            if (deleteFolderRecursive(photoFolder)) {
+                                Utils.toast(getContext(), "PHOTO FOLDER DELETED");
+                                tv.setText(getString(R.string.deleted_sav) + photoFolder.getName());
+
+                            } else {
+                                Utils.toast(getContext(), "COULDNT DELETE PHOTO FOLDER");
+                            }
                         } else {
-                            System.out.println(getString(R.string.toast_couldnt_delete_sav));
+                            if (latestFile.delete()) {
+                                Utils.toast(getContext(), getString(R.string.toast_sav_deleted));
+                                tv.setText(getString(R.string.deleted_sav) + latestFile.getName());
+
+                            } else {
+                                Utils.toast(getContext(), getString(R.string.toast_couldnt_delete_sav));
+                            }
                         }
                         btnAddImages.setVisibility(View.GONE);
                         btnDelSav.setVisibility(View.GONE);
-                        tv.setText(getString(R.string.deleted_sav) + latestFile.getName());
+                        layoutCb.setVisibility(View.GONE);
+                        gridView.setVisibility(View.GONE );
                     }
                 });
                 builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -293,15 +311,20 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             btnAddImages.setVisibility(View.VISIBLE);
         });
         btnFullRom.setOnClickListener(v -> {
+            isRomExtracted = true;
             btnAddImages.setVisibility(View.GONE);
             extractedImagesList.clear();
             extractedImagesBitmaps.clear();
+            fullRomFileList.clear();
             fullRomDump();
         });
 
-        btnReadRom.setOnClickListener(v -> completeReadRomName());
+        btnReadRomName.setOnClickListener(v -> {
+            completeReadRomName();
+        });
 
         btnReadRam.setOnClickListener(v -> {
+            isRomExtracted = false;
             btnAddImages.setVisibility(View.GONE);
             extractedImagesList.clear();
             extractedImagesBitmaps.clear();
@@ -403,7 +426,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         tvMode.setVisibility(View.VISIBLE);
         rbGroup.setVisibility(View.GONE);
         btnReadRam.setVisibility(View.VISIBLE);
-        btnReadRom.setVisibility(View.VISIBLE);
+        btnReadRomName.setVisibility(View.VISIBLE);
         try {
             connect();
         } catch (Exception e) {
@@ -464,6 +487,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     extractedImagesBitmaps.add(image);
                     extractedImagesList.add(gbcImage);
                 }
+
                 listActiveImages = new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount - 1));
                 listActiveBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount - 1));
                 lastSeenImage = extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount - 1);
@@ -472,6 +496,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
                 listDeletedBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount, extractedImagesBitmaps.size()));
                 listDeletedBitmapsRedStroke = new ArrayList<>();
+
                 Paint paint = new Paint();
                 paint.setColor(Color.RED);
                 paint.setStrokeWidth(2);
@@ -485,9 +510,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     canvas.drawLine(startX, startY, endX, endY, paint);
                     listDeletedBitmapsRedStroke.add(copiedBitmap);
                 }
-                CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
-                gridView.setAdapter(customGridViewAdapterImage);
-                showImages(cbLastSeen, cbDeleted);
             } else {
                 tv.append(gridView.getContext().getString(R.string.no_good_dump));
             }
@@ -496,10 +518,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        btnAddImages.setVisibility(View.VISIBLE);
-        btnDelSav.setVisibility(View.VISIBLE);
-        layoutCb.setVisibility(View.VISIBLE);
-
     }
 
     public static void readRomSavs() {
@@ -509,14 +527,15 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             for (File file : fullRomFileList) {
                 readSav(file);
             }
-            CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(tv.getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
-            gridView.setAdapter(customGridViewAdapterImage);
 
+            btnAddImages.setVisibility(View.VISIBLE);
+            btnDelSav.setVisibility(View.VISIBLE);
+            layoutCb.setVisibility(View.VISIBLE);
+            showImages(cbLastSeen, cbDeleted);
         } catch (Exception e) {
             e.printStackTrace();
             Utils.toast(tv.getContext(), "Error: " + e.toString());
         }
-        btnAddImages.setVisibility(View.VISIBLE);
     }
 
     private void completeReadRomName() {
@@ -621,7 +640,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     }
 
     //Refactor
-    private static void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
+    public static void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
         List<Bitmap> bitmapsAdapterList = null;
         if (!showLastSeen.isChecked() && !showDeleted.isChecked()) {
             finalListImages = new ArrayList<>(listActiveImages);

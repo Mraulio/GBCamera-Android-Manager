@@ -145,6 +145,70 @@ public class GalleryUtils {
         }
     }
 
+    /**
+     * Average HDR method
+     *
+     * @param bitmaps List of bitmaps for the average
+     * @return returns the averaged image
+     */
+    public static Bitmap averageImages(List<Bitmap> bitmaps) {
+        if (bitmaps == null || bitmaps.isEmpty()) {
+            throw new IllegalArgumentException("List of images cannot be empty.");
+        }
+
+        // Make sure all images have the same dimensions
+        int width = bitmaps.get(0).getWidth();
+        int height = bitmaps.get(0).getHeight();
+        for (Bitmap bitmap : bitmaps) {
+            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
+                throw new IllegalArgumentException("All images must have same dimensions.");
+            }
+        }
+
+        // Create a new Bitmap to store the combined image
+        Bitmap combinedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        // Create an array to store the values of the pixels of all images
+        int numImages = bitmaps.size();
+        int[][] pixelValues = new int[numImages][width * height];
+
+        // Obtain the values of the pixels of all images
+        for (int i = 0; i < numImages; i++) {
+            bitmaps.get(i).getPixels(pixelValues[i], 0, width, 0, 0, width, height);
+        }
+
+        // Create a new array to store the average values of the combined pixels
+        int[] combinedPixels = new int[width * height];
+
+        // Calculate the average of each channel (red,green, blue) for each pixel
+        for (int i = 0; i < width * height; i++) {
+            int alpha = Color.alpha(pixelValues[0][i]); // Alfa channel is not changed
+            int red = 0;
+            int green = 0;
+            int blue = 0;
+
+            // Adds the value of the pixels for each color channel
+            for (int j = 0; j < numImages; j++) {
+                red += Color.red(pixelValues[j][i]);
+                green += Color.green(pixelValues[j][i]);
+                blue += Color.blue(pixelValues[j][i]);
+            }
+
+            // Calculates the average value of each color channel
+            red /= numImages;
+            green /= numImages;
+            blue /= numImages;
+
+            // Combines the values of the color channels to form the final pixel
+            combinedPixels[i] = Color.argb(alpha, red, green, blue);
+        }
+
+        // Sets the combined pixels in the final Bitmap
+        combinedBitmap.setPixels(combinedPixels, 0, width, 0, 0, width, height);
+
+        return combinedBitmap;
+    }
+
     public static Bitmap Paperize(Bitmap inputBitmap) {
         //intensity map for printer head with threshold
         int mul = 20;

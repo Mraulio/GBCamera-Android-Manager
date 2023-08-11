@@ -1,10 +1,17 @@
 package com.mraulio.gbcameramanager.gbxcart;
 
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.btnAddImages;
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.btnDelSav;
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.cbDeleted;
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.cbLastSeen;
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.layoutCb;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.readSav;
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.showImages;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -222,17 +229,17 @@ public class GBxCartCommands {
             String fileName = "PhotoFullRom_";
             String folderName = "PhotoFullRom_" + dtf.format(now);
             fileName += dtf.format(now) + ".full.gbc";
-            File parentFile = new File(Utils.PHOTO_DUMPS_FOLDER, folderName);
+            UsbSerialFragment.photoFolder = new File(Utils.PHOTO_DUMPS_FOLDER, folderName);
             //I create the new directory if it doesn't exists
             try {
-                if (!parentFile.exists() && !parentFile.mkdirs()) {
-                    throw new IllegalStateException("Couldn't create dir: " + parentFile);
+                if (!UsbSerialFragment.photoFolder.exists() && !UsbSerialFragment.photoFolder.mkdirs()) {
+                    throw new IllegalStateException("Couldn't create dir: " + UsbSerialFragment.photoFolder);
                 }
             } catch (Exception e) {
                 Toast toast = Toast.makeText(context, "Error making directory: " + e.toString(), Toast.LENGTH_SHORT);
                 toast.show();
             }
-            File file = new File(parentFile, fileName);
+            File file = new File(UsbSerialFragment.photoFolder, fileName);
             // create the new file inside the directory
             try {
                 if (!file.createNewFile()) {
@@ -285,7 +292,7 @@ public class GBxCartCommands {
                     if (i == 0) {
                         extension = ".gbc";
                     } else extension = ".part_" + i + ".sav";
-                    File outputFile = new File(parentFile, fileName + extension);
+                    File outputFile = new File(UsbSerialFragment.photoFolder, fileName + extension);
 
                     try (OutputStream writer = new FileOutputStream(outputFile)) {
                         int bytesRead = 0;
@@ -447,6 +454,11 @@ public class GBxCartCommands {
             tv.append(context.getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
                     context.getString(R.string.size) + latestFile.length() / 1024 + "KB");
             readSav(latestFile);
+            btnAddImages.setVisibility(View.VISIBLE);
+            btnDelSav.setVisibility(View.VISIBLE);
+            layoutCb.setVisibility(View.VISIBLE);
+            showImages(cbLastSeen, cbDeleted);
+
         }
     }
 

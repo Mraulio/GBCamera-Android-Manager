@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
@@ -1125,7 +1126,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 listBitmaps.add(Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
                             }
                             try {
-                                Bitmap bitmap = Utils.averageImages(listBitmaps);
+                                Bitmap bitmap = averageImages(listBitmaps);
                                 averaged[0] = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false);
                                 imageView.setImageBitmap(averaged[0]);
 

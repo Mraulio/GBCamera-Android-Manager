@@ -151,5 +151,8 @@
     <string name="done_analyzing">Finished analyzing!</string>
 
     <string name="check_magic">Check for valid .sav when importing/extracting</string>
+    <string name="delete_photo_folder_dialog">Delete Photo rom folder?</string>
+
+
 
 </resources>

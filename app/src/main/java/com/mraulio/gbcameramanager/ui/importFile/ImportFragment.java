@@ -89,8 +89,7 @@ public class ImportFragment extends Fragment {
 
     TextView tvFileName;
     static String fileName;
-    boolean savFile = false;
-    boolean isJson = false;
+
     String fileContent = "";
     List<?> receivedList;
     int numImagesAdded;
@@ -105,9 +104,17 @@ public class ImportFragment extends Fragment {
         FRAMES,
         IMAGES
     }
+
     public static ADD_WHAT addEnum;
 
+    public enum FILE_TYPE {
+        SAV,
+        JSON,
+        TXT,
+        IMAGE
+    }
 
+    public static FILE_TYPE file_type;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -224,59 +231,66 @@ public class ImportFragment extends Fragment {
                         numImagesAdded = 0;
                         List<GbcImage> newGbcImages = new ArrayList<>();
                         List<ImageData> newImageDatas = new ArrayList<>();
-                        if (!savFile) {
-                            for (int i = 0; i < importedImagesList.size(); i++) {
-                                GbcImage gbcImage = importedImagesList.get(i);
-                                boolean alreadyAdded = false;
-                                //If the image already exists (by the hash) it doesn't add it. Same if it's already added
-                                for (GbcImage image : Utils.gbcImagesList) {
-                                    if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
-                                        alreadyAdded = true;
-                                        break;
+                        switch (file_type) {
+                            case TXT:
+                            case JSON: {
+                                for (int i = 0; i < importedImagesList.size(); i++) {
+                                    GbcImage gbcImage = importedImagesList.get(i);
+                                    boolean alreadyAdded = false;
+                                    //If the image already exists (by the hash) it doesn't add it. Same if it's already added
+                                    for (GbcImage image : Utils.gbcImagesList) {
+                                        if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
+                                            alreadyAdded = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!alreadyAdded) {
+                                        GbcImage.numImages++;
+                                        numImagesAdded++;
+                                        ImageData imageData = new ImageData();
+                                        imageData.setImageId(gbcImage.getHashCode());
+                                        imageData.setData(gbcImage.getImageBytes());
+                                        newImageDatas.add(imageData);
+                                        Utils.gbcImagesList.add(gbcImage);
+                                        newGbcImages.add(gbcImage);
+                                        Utils.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
                                     }
                                 }
-                                if (!alreadyAdded) {
-                                    GbcImage.numImages++;
-                                    numImagesAdded++;
-                                    ImageData imageData = new ImageData();
-                                    imageData.setImageId(gbcImage.getHashCode());
-                                    imageData.setData(gbcImage.getImageBytes());
-                                    newImageDatas.add(imageData);
-                                    Utils.gbcImagesList.add(gbcImage);
-                                    newGbcImages.add(gbcImage);
-                                    Utils.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
-                                }
+                                break;
                             }
-                        } else {
-                            for (int i = 0; i < finalListImages.size(); i++) {
-                                GbcImage gbcImage = finalListImages.get(i);
-                                boolean alreadyAdded = false;
-                                //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
-                                for (GbcImage image : Utils.gbcImagesList) {
-                                    if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
-                                        alreadyAdded = true;
-                                        break;
+                            case SAV: {
+                                for (int i = 0; i < finalListImages.size(); i++) {
+                                    GbcImage gbcImage = finalListImages.get(i);
+                                    boolean alreadyAdded = false;
+                                    //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
+                                    for (GbcImage image : Utils.gbcImagesList) {
+                                        if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
+                                            alreadyAdded = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!alreadyAdded) {
+                                        GbcImage.numImages++;
+                                        numImagesAdded++;
+                                        ImageData imageData = new ImageData();
+                                        imageData.setImageId(gbcImage.getHashCode());
+                                        imageData.setData(gbcImage.getImageBytes());
+                                        newImageDatas.add(imageData);
+                                        Utils.gbcImagesList.add(gbcImage);
+                                        newGbcImages.add(gbcImage);
+                                        Utils.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
                                     }
                                 }
-                                if (!alreadyAdded) {
-                                    GbcImage.numImages++;
-                                    numImagesAdded++;
-                                    ImageData imageData = new ImageData();
-                                    imageData.setImageId(gbcImage.getHashCode());
-                                    imageData.setData(gbcImage.getImageBytes());
-                                    newImageDatas.add(imageData);
-                                    Utils.gbcImagesList.add(gbcImage);
-                                    newGbcImages.add(gbcImage);
-                                    Utils.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
-                                }
                             }
+                            if (newGbcImages.size() > 0) {
+                                new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
+                            } else {
+                                Utils.toast(getContext(), getString(R.string.no_new_images));
+                                tvFileName.setText(getString(R.string.no_new_images));
+                            }
+                            break;
                         }
-                        if (newGbcImages.size() > 0) {
-                            new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
-                        } else {
-                            Utils.toast(getContext(), getString(R.string.no_new_images));
-                            tvFileName.setText(getString(R.string.no_new_images));
-                        }
+
                         break;
                 }
             }
@@ -292,50 +306,59 @@ public class ImportFragment extends Fragment {
         listImportedImageBytes.clear();
         cbLastSeen.setChecked(false);
         cbDeleted.setChecked(false);
-        if (savFile && !isJson) {
-            isGoodSave = extractSavImages();
-            if (isGoodSave) {
-                listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount - 1));
-                listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount - 1));
-                lastSeenImage = importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount - 1);
-                lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount - 1);
-                listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount, importedImagesList.size()));
+        switch (file_type) {
+            case SAV: {
+                isGoodSave = extractSavImages();
+                if (isGoodSave) {
+                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount - 1));
+                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount - 1));
+                    lastSeenImage = importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount - 1);
+                    lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount - 1);
+                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount, importedImagesList.size()));
 
-                listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount, importedImagesBitmaps.size()));
-                listDeletedBitmapsRedStroke = new ArrayList<>();
-                Paint paint = new Paint();
-                paint.setColor(Color.RED);
-                paint.setStrokeWidth(2);
-                int startX = 160;
-                int startY = 0;
-                int endX = 0;
-                int endY = 144;
-                for (Bitmap bitmap : listDeletedBitmaps) {
-                    Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
-                    Canvas canvas = new Canvas(copiedBitmap);
-                    canvas.drawLine(startX, startY, endX, endY, paint);
-                    listDeletedBitmapsRedStroke.add(copiedBitmap);
+                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount, importedImagesBitmaps.size()));
+                    listDeletedBitmapsRedStroke = new ArrayList<>();
+                    Paint paint = new Paint();
+                    paint.setColor(Color.RED);
+                    paint.setStrokeWidth(2);
+                    int startX = 160;
+                    int startY = 0;
+                    int endX = 0;
+                    int endY = 144;
+                    for (Bitmap bitmap : listDeletedBitmaps) {
+                        Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
+                        Canvas canvas = new Canvas(copiedBitmap);
+                        canvas.drawLine(startX, startY, endX, endY, paint);
+                        listDeletedBitmapsRedStroke.add(copiedBitmap);
+                    }
+
+                    showImages(cbLastSeen, cbDeleted);
+                    ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
                 }
+                break;
+            }
+            case TXT: {
+                try {
+                    extractHexImages(fileContent);
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                }
+                adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true, false, null);
 
-                showImages(cbLastSeen, cbDeleted);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-            }
-        } else if (!savFile && !isJson) {
-            try {
-                extractHexImages(fileContent);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-            adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true, false, null);
+                break;
 
-            ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-        } else if (!savFile && isJson) {
-            receivedList = JsonReader.jsonCheck(fileContent);
-            if (receivedList == null) {
-                Utils.toast(getContext(), getString(R.string.no_valid_list));
-                return;
+            }
+            case JSON: {
+                receivedList = JsonReader.jsonCheck(fileContent);
+                if (receivedList == null) {
+                    Utils.toast(getContext(), getString(R.string.no_valid_list));
+                    return;
+                }
+                break;
             }
         }
+
 
     }
 
@@ -355,55 +378,62 @@ public class ImportFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (savFile && !isJson) {
-                if (!isGoodSave){
-                    tvFileName.setText(getString(R.string.no_valid_file));
-                    loadingDialog.dismiss();
-                    adapter = null;
-                    gridViewImport.setAdapter((ListAdapter) adapter);
-                    btnAddImages.setVisibility(View.GONE);
-                    layoutCb.setVisibility(View.GONE);
-                    return;
+            switch (file_type) {
+                case SAV: {
+                    if (!isGoodSave) {
+                        tvFileName.setText(getString(R.string.no_valid_file));
+                        loadingDialog.dismiss();
+                        adapter = null;
+                        gridViewImport.setAdapter((ListAdapter) adapter);
+                        btnAddImages.setVisibility(View.GONE);
+                        layoutCb.setVisibility(View.GONE);
+                        return;
+                    }
+                    btnAddImages.setEnabled(true);
+                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
+                    btnAddImages.setText(getString(R.string.btn_add_images));
+                    btnAddImages.setVisibility(View.VISIBLE);
+                    layoutCb.setVisibility(View.VISIBLE);
+                    break;
                 }
-                btnAddImages.setEnabled(true);
-                tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
-                btnAddImages.setText(getString(R.string.btn_add_images));
-                btnAddImages.setVisibility(View.VISIBLE);
-                layoutCb.setVisibility(View.VISIBLE);
+                case TXT: {
+                    btnAddImages.setEnabled(true);
+                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
+                    btnAddImages.setText(getString(R.string.btn_add_images));
+                    btnAddImages.setVisibility(View.VISIBLE);
+                    layoutCb.setVisibility(View.GONE);
+                    break;
+                }
+                case JSON: {
+                    switch (addEnum) {
+                        case PALETTES:
+                            btnAddImages.setEnabled(true);
+                            adapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true);
+                            customAdapterPalette = (CustomGridViewAdapterPalette) adapter;
+                            btnAddImages.setText(getString(R.string.btn_add_palettes));
+                            btnAddImages.setVisibility(View.VISIBLE);
+                            layoutCb.setVisibility(View.GONE);
+                            break;
 
-            } else if (!savFile && !isJson) {
-                btnAddImages.setEnabled(true);
-                tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
-                btnAddImages.setText(getString(R.string.btn_add_images));
-                btnAddImages.setVisibility(View.VISIBLE);
-                layoutCb.setVisibility(View.GONE);
-            } else if (!savFile && isJson) {
-                switch (addEnum) {
-                    case PALETTES:
-                        btnAddImages.setEnabled(true);
-                        adapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true);
-                        customAdapterPalette = (CustomGridViewAdapterPalette) adapter;
-                        btnAddImages.setText(getString(R.string.btn_add_palettes));
-                        btnAddImages.setVisibility(View.VISIBLE);
-                        layoutCb.setVisibility(View.GONE);
-                        break;
-
-                    case FRAMES:
-                        btnAddImages.setEnabled(true);
-                        btnAddImages.setText(getString(R.string.btn_add_frames));
-                        btnAddImages.setVisibility(View.VISIBLE);
-                        layoutCb.setVisibility(View.GONE);
-                        adapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true);
-                        break;
-                    case IMAGES:
-                        btnAddImages.setEnabled(true);
-                        btnAddImages.setText(getString(R.string.btn_add_images));
-                        btnAddImages.setVisibility(View.VISIBLE);
-                        layoutCb.setVisibility(View.GONE);
-                        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true, false, null);
-                        break;
+                        case FRAMES:
+                            btnAddImages.setEnabled(true);
+                            btnAddImages.setText(getString(R.string.btn_add_frames));
+                            btnAddImages.setVisibility(View.VISIBLE);
+                            layoutCb.setVisibility(View.GONE);
+                            adapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, (List<GbcFrame>) receivedList, true, true);
+                            break;
+                        case IMAGES:
+                            btnAddImages.setEnabled(true);
+                            btnAddImages.setText(getString(R.string.btn_add_images));
+                            btnAddImages.setVisibility(View.VISIBLE);
+                            layoutCb.setVisibility(View.GONE);
+                            adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, importedImagesList, importedImagesBitmaps, true, true, false, null);
+                            break;
+                    }
+                    break;
                 }
             }
+
             gridViewImport.setAdapter((ListAdapter) adapter);
             loadingDialog.dismiss();
 
@@ -575,8 +605,7 @@ public class ImportFragment extends Fragment {
                         //I check the extension of the file
                         if (fileName.endsWith("sav")) {
                             ByteArrayOutputStream byteStream = null;
-                            savFile = true;
-                            isJson = false;
+                            file_type = FILE_TYPE.SAV;
 
                             try {
                                 InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
@@ -596,8 +625,8 @@ public class ImportFragment extends Fragment {
                             tvFileName.setText(getString(R.string.file_name) + fileName);
                             btnExtractFile.setVisibility(View.VISIBLE);
                         } else if (fileName.endsWith("txt")) {
-                            savFile = false;
-                            isJson = false;
+                            file_type = FILE_TYPE.TXT;
+
 
                             try {
                                 InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
@@ -625,8 +654,8 @@ public class ImportFragment extends Fragment {
                             } catch (Exception e) {
                             }
                         } else if (fileName.endsWith("json")) {
-                            savFile = false;
-                            isJson = true;
+                            file_type = FILE_TYPE.JSON;
+
                             try {
                                 InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
                                 StringBuilder stringBuilder = new StringBuilder();

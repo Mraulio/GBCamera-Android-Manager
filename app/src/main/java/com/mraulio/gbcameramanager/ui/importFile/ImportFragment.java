@@ -105,8 +105,9 @@ public class ImportFragment extends Fragment {
         FRAMES,
         IMAGES
     }
-
     public static ADD_WHAT addEnum;
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -122,6 +123,7 @@ public class ImportFragment extends Fragment {
         btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
         loadingDialog = Utils.loadingDialog(getContext());
+        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.IMPORT;
 
         tvFileName = view.findViewById(R.id.tvFileName);
         gridViewImport = view.findViewById(R.id.gridViewImport);

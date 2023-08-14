@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         GALLERY,
         PALETTES,
         FRAMES,
+        IMPORT,
         USB_SERIAL,
         SAVE_MANAGER,
         SETTINGS
@@ -226,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
             case SETTINGS:
             case SAVE_MANAGER:
             case USB_SERIAL:
+            case IMPORT:
             case FRAMES:
                 menu.clear(); // Cleans the current menu
                 fab.hide();

@@ -215,7 +215,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 builder.setTitle(title);
                 String fileToDelete = isRomExtracted ? "folder " + photoFolder.getName() : latestFile.getName();
                 builder.setMessage(getString(R.string.sure_delete_sav) + fileToDelete + "?");
-                btnDelete.setText(isRomExtracted ?"Delete folder":getString(R.string.btn_delete_sav));
                 builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -240,7 +239,12 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                         btnAddImages.setVisibility(View.GONE);
                         btnDelSav.setVisibility(View.GONE);
                         layoutCb.setVisibility(View.GONE);
-                        gridView.setVisibility(View.GONE );
+                        listActiveBitmaps.clear();
+                        listActiveImages.clear();
+                        listDeletedBitmaps.clear();
+                        listDeletedImages.clear();
+                        listDeletedBitmapsRedStroke.clear();
+                        showImages(cbLastSeen, cbDeleted);
                     }
                 });
                 builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -312,6 +316,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         });
         btnFullRom.setOnClickListener(v -> {
             isRomExtracted = true;
+            btnDelSav.setText("Delete folder");
+
             btnAddImages.setVisibility(View.GONE);
             extractedImagesList.clear();
             extractedImagesBitmaps.clear();
@@ -324,6 +330,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         });
 
         btnReadRam.setOnClickListener(v -> {
+            btnDelSav.setText(getString(R.string.btn_delete_sav));
+
             isRomExtracted = false;
             btnAddImages.setVisibility(View.GONE);
             extractedImagesList.clear();
@@ -612,6 +620,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     }
 
     private void completeRamDump() {
+
         Handler handlerRam = new Handler();
         handlerRam.postDelayed(new Runnable() {
             @Override

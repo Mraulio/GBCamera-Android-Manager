@@ -9,8 +9,10 @@ import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.readSav
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.showImages;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Process;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -366,7 +368,7 @@ public class GBxCartCommands {
 
         @Override
         protected Void doInBackground(Void... voids) {
-
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
             LocalDateTime now = LocalDateTime.now();
             String fileName = "gbCamera_";
             fileName += dtf.format(now) + ".sav";
@@ -389,19 +391,25 @@ public class GBxCartCommands {
             try {
                 fos = new FileOutputStream(file);
                 bos = new BufferedOutputStream(fos);
-                byte[] readLength = new byte[64];
                 for (int i = 0; i < 16; i++) {
                     // Set SRAM bank
                     Cart_write(0x4000, i, port, context);
                     // Read 8 KiB of SRAM
                     for (int j = 0; j < 128; j++) {
+                        byte[] readLength = new byte[64];
                         CartRead_RAM(j * 64, 64, port, context);
                         int len = port.read(readLength, TIMEOUT);
-                        outputStream.write(Arrays.copyOf(readLength, len));
+
+                        try {
+                            outputStream.write(Arrays.copyOf(readLength,len));
+                            outputStream.flush();
+                        } catch (IOException e) {
+                        }
 
                         int totalIterations = 16 * 128;
                         int currentIteration = i * 128 + j + 1;
                         int progress = currentIteration * 100 / totalIterations;
+
                         publishProgress(progress);
                     }
                 }
@@ -461,6 +469,5 @@ public class GBxCartCommands {
 
         }
     }
-
 
 }

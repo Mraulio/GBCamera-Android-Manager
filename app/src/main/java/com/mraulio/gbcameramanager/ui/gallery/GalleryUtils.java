@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 
 import androidx.core.content.FileProvider;
@@ -29,7 +30,7 @@ import java.util.Random;
 import java.util.zip.Deflater;
 
 public class GalleryUtils {
-    public static void saveImage(List<GbcImage> gbcImages) {
+    public static void saveImage(List<GbcImage> gbcImages, Context context) {
         LocalDateTime now = LocalDateTime.now();
         String fileNameBase = "gbcImage_";
         String extension = MainActivity.exportPng ? ".png" : ".txt";
@@ -52,6 +53,8 @@ public class GalleryUtils {
                 try (FileOutputStream out = new FileOutputStream(file)) {
                     Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                     scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    out.flush();
+                    mediaScanner(file,context);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -85,6 +88,17 @@ public class GalleryUtils {
         if (MainActivity.exportPng) {
             Utils.toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved) + MainActivity.exportSize);
         } else Utils.toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved_txt));
+    }
+
+    public static void mediaScanner(File file, Context context){
+        MediaScannerConnection.scanFile(
+                context,
+                new String[]{file.getAbsolutePath()},
+                null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onScanCompleted(String path, Uri uri) {
+                    }
+                });
     }
 
     private static String addSpacesAndNewLines(String input) {

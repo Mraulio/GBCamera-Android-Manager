@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.usbserial;
 
 
+import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.deleteFolderRecursive;
 
 import android.app.AlertDialog;
@@ -448,7 +449,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             toast.show();
         }
         try {
-            port.setParameters(1000000, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         } catch (Exception e) {
             Toast toast = Toast.makeText(getContext(), "Error in gbx\n" + e.toString(), Toast.LENGTH_LONG);
             toast.show();
@@ -735,7 +736,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         try {
             if (port.isOpen()) port.close();
             port.open(connection);
-            port.setParameters(1000000, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 
         } catch (Exception e) {
             tv.append(e.toString());

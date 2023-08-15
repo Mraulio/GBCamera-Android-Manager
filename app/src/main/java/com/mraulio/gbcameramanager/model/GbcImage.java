@@ -37,6 +37,9 @@ public class GbcImage {
     @ColumnInfo(name = "tags_list")
     private List<String> tags = new ArrayList<>();
 
+    @ColumnInfo(name = "rotation",defaultValue = "0")
+    private int rotation;
+
     public static int numImages = 0;
 
     private byte[] imageBytes;
@@ -46,7 +49,16 @@ public class GbcImage {
         this.frameId = "Nintendo_Frame";//I set the nintendo frame as the default
         this.lockFrame = false;
         this.invertPalette = false;
-        this.creationDate = new Date(System.currentTimeMillis());;
+        this.creationDate = new Date(System.currentTimeMillis());
+        this.rotation =0;
+    }
+
+    public int getRotation() {
+        return rotation;
+    }
+
+    public void setRotation(int rotation) {
+        this.rotation = rotation;
     }
 
     @NonNull

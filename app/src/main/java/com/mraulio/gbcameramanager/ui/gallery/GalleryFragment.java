@@ -2,8 +2,10 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 
+import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
 
@@ -17,6 +19,8 @@ import android.graphics.Canvas;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -497,7 +501,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onClick(View v) {
                             List saveList = new ArrayList();
                             saveList.add(filteredGbcImages.get(globalImageIndex));
-                            saveImage(saveList);
+                            saveImage(saveList,getContext());
                         }
                     });
 
@@ -970,7 +974,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             saveButton.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    saveImage(selectedGbcImages);
+                                    saveImage(selectedGbcImages,getContext());
                                 }
                             });
 
@@ -1110,6 +1114,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             averaged[0].compress(Bitmap.CompressFormat.PNG, 100, out);
                             Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + "HDR!", Toast.LENGTH_LONG);
                             toast.show();
+                            mediaScanner(file,getContext());
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -1200,6 +1206,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 out.write(bos.toByteArray());
                                 Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + "GIF!", Toast.LENGTH_LONG);
                                 toast.show();
+                                mediaScanner(file,getContext());
+
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -1381,7 +1389,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         try {
             if (port.isOpen()) port.close();
             port.open(connection);
-            port.setParameters(1000000, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 
         } catch (Exception e) {
             tv.append(e.toString());

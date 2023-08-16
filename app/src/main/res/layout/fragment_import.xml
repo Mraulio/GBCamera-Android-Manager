@@ -56,6 +56,10 @@
         android:id="@+id/gridViewImport"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:stretchMode="columnWidth"
+        android:horizontalSpacing="10dp"
+
+        android:verticalSpacing="10dp"
         android:numColumns="3"></GridView>
 
 </LinearLayout>

@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
 import android.widget.ProgressBar;
@@ -39,6 +40,8 @@ public class Utils {
     public static final File ARDUINO_HEX_FOLDER = new File(MAIN_FOLDER, "Arduino Printer Hex");
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
 
+
+    public static final int[] ROTATION_VALUES = {0, 90, 180, 270};
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
@@ -56,8 +59,8 @@ public class Utils {
     }
 
     public static byte[] encodeImage(Bitmap bitmap, String paletteId) throws IOException {
-        Codec decoder = new ImageCodec(160, bitmap.getHeight(),false);
-        return decoder.encodeInternal(bitmap,paletteId);
+        Codec decoder = new ImageCodec(160, bitmap.getHeight(), false);
+        return decoder.encodeInternal(bitmap, paletteId);
     }
 
     public static byte[] convertToByteArray(String data) {
@@ -109,7 +112,10 @@ public class Utils {
         return dialog;
     }
 
-
-
-
+    public static Bitmap rotateBitmap(Bitmap originalBitmap, GbcImage gbcImage) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(ROTATION_VALUES[gbcImage.getRotation()]);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, false);
+        return rotatedBitmap;
+    }
 }

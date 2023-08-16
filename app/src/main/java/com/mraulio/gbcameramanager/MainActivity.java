@@ -85,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
     public static int imagesPage = 12;
     public static String languageCode;
     public static boolean magicCheck;
+    public static boolean showRotationButton;
+
 
     private boolean openedSav = false;
     public static UsbManager manager;
@@ -124,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
         showPaperizeButton = sharedPreferences.getBoolean("show_paperize_button", false);
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
         magicCheck = sharedPreferences.getBoolean("magic_check", true);
+        showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
+
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
 
         //To get the locale on the first startup and set the def value

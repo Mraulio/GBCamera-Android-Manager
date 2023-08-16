@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
@@ -8,6 +9,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
+import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -230,26 +232,32 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     ImageView imageView = dialog.findViewById(R.id.image_view);
                     Button btn_paperize = dialog.findViewById(R.id.btnPaperize);
                     if (MainActivity.showPaperizeButton) {
-                        btn_paperize.setVisibility(View.VISIBLE);
+                        btn_paperize.setVisibility(VISIBLE);
                     }
+
+                    selectedImage[0] = rotateBitmap(selectedImage[0], filteredGbcImages.get(globalImageIndex));
                     imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
                     int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
                     imageView.setMaxHeight(maxHeight);
 
                     Button printButton = dialog.findViewById(R.id.print_button);
                     if (MainActivity.printingEnabled) {
-                        printButton.setVisibility(View.VISIBLE);
+                        printButton.setVisibility(VISIBLE);
                     } else printButton.setVisibility(GONE);
 
                     Button shareButton = dialog.findViewById(R.id.share_button);
                     Button saveButton = dialog.findViewById(R.id.save_button);
                     Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
+                    Button rotateButton = dialog.findViewById(R.id.btnRotate);
+
                     GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
                     GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
                     CheckBox cbFrameKeep = dialog.findViewById(R.id.cbFrameKeep);
                     CheckBox cbCrop = dialog.findViewById(R.id.cbCrop);
                     CheckBox cbInvert = dialog.findViewById(R.id.cbInvert);
-
+                    if (MainActivity.showRotationButton) {
+                        rotateButton.setVisibility(VISIBLE);
+                    }
                     showPalettes = true;
 
                     if (filteredGbcImages.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
@@ -270,6 +278,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true, gbcImage.isInvertPalette());
 
                             Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
+                            bitmap = rotateBitmap(bitmap, gbcImage);
+
                             imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                             new SaveImageAsyncTask(gbcImage).execute();
                             updateGridView(currentPage);
@@ -286,6 +296,23 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             new PaperizeAsyncTask(indexToPaperize, getContext()).execute();
                         }
                     });
+                    rotateButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                            Bitmap bitmap = Utils.imageBitmapCache.get(gbcImage.getHashCode());
+                            int rotation = gbcImage.getRotation();
+                            if (rotation != 3) {
+                                rotation++;
+                            } else rotation = 0;
+                            gbcImage.setRotation(rotation);
+                            bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
+                            imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
+                            new SaveImageAsyncTask(gbcImage).execute();
+                            updateGridView(currentPage);
+                        }
+                    });
+
                     imageView.setOnClickListener(new View.OnClickListener() {
                         private int clickCount = 0;
                         private final Handler handler = new Handler();
@@ -318,7 +345,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         filteredGbcImages.get(globalImageIndex).setTags(tags);
                                         if (!filterTags.isEmpty())//Because right now I'm only filtering favourites
                                             dialog.dismiss();
-                                        imageView.setBackgroundColor(getContext().getColor(R.color.white));
+                                        imageView.setBackgroundColor(getContext().getColor(R.color.imageview_bg));
                                     }
                                 } else {
                                     filteredGbcImages.get(globalImageIndex).addTag("__filter:favourite__");
@@ -345,7 +372,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     gridViewFrames.setAdapter(frameAdapter);
 
                     //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
-                    if (selectedImage[0].getHeight() != 144) {
+                    if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160) {
                         cbFrameKeep.setVisibility(GONE);
                         paletteFrameSelButton.setVisibility(GONE);
                     }
@@ -360,6 +387,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             gbcImage.setLockFrame(keepFrame);
                             Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
+                            bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
                             imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                             new SaveImageAsyncTask(gbcImage).execute();
                             updateGridView(currentPage);
@@ -386,9 +414,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                            imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
 //                            selectedImage[0] = framed;
                             Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), framed);
+                            framed = rotateBitmap(framed, filteredGbcImages.get(globalImageIndex));
+                            imageView.setImageBitmap(Bitmap.createScaledBitmap(framed, framed.getWidth() * 6, framed.getHeight() * 6, false));
+
                             frameAdapter.setLastSelectedPosition(selectedFrameIndex);
                             frameAdapter.notifyDataSetChanged();
                             updateGridView(currentPage);
@@ -419,6 +449,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             adapterPalette.setLastSelectedPosition(palettePosition);
                             adapterPalette.notifyDataSetChanged();
                             Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), changedImage);
+                            changedImage = rotateBitmap(changedImage, filteredGbcImages.get(globalImageIndex));
+
                             imageView.setImageBitmap(Bitmap.createScaledBitmap(changedImage, changedImage.getWidth() * 6, changedImage.getHeight() * 6, false));
                             updateGridView(currentPage);
                         }
@@ -430,13 +462,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 showPalettes = false;
                                 paletteFrameSelButton.setText(getString(R.string.btn_show_palettes));
                                 gridViewPalette.setVisibility(GONE);
-                                gridViewFrames.setVisibility(View.VISIBLE);
+                                gridViewFrames.setVisibility(VISIBLE);
 
                             } else {
                                 showPalettes = true;
                                 paletteFrameSelButton.setText(getString(R.string.btn_show_frames));
                                 gridViewFrames.setVisibility(GONE);
-                                gridViewPalette.setVisibility(View.VISIBLE);
+                                gridViewPalette.setVisibility(VISIBLE);
                             }
                         }
                     });
@@ -663,13 +695,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             dialog.setCancelable(true);//So it closes when clicking outside or back button
                             ImageView imageView = dialog.findViewById(R.id.image_view);
                             LinearLayout layoutSelected = dialog.findViewById(R.id.ly_selected_images);
-                            layoutSelected.setVisibility(View.VISIBLE);
+                            layoutSelected.setVisibility(VISIBLE);
                             List<Bitmap> selectedBitmaps = new ArrayList<>();
                             List<GbcImage> selectedGbcImages = new ArrayList<>();
                             for (int i : selectedImages) {
                                 selectedBitmaps.add(Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
                                 selectedGbcImages.add(filteredGbcImages.get(i));
                             }
+                            selectedImage[0] = rotateBitmap(selectedImage[0], filteredGbcImages.get(globalImageIndex[0]));
 
                             imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
                             int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
@@ -677,7 +710,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             Button printButton = dialog.findViewById(R.id.print_button);
                             if (MainActivity.printingEnabled) {
-                                printButton.setVisibility(View.VISIBLE);
+                                printButton.setVisibility(VISIBLE);
                             } else printButton.setVisibility(GONE);
 
                             printButton.setOnClickListener(new View.OnClickListener() {
@@ -726,6 +759,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             });
                             Button shareButton = dialog.findViewById(R.id.share_button);
                             Button saveButton = dialog.findViewById(R.id.save_button);
+                            Button rotateButton = dialog.findViewById(R.id.btnRotate);
+                            if (MainActivity.showRotationButton) {
+                                rotateButton.setVisibility(VISIBLE);
+                            }
                             Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
                             GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
                             GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
@@ -736,7 +773,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             showPalettes = true;
                             Button btn_paperize = dialog.findViewById(R.id.btnPaperize);
                             if (MainActivity.showPaperizeButton) {
-                                btn_paperize.setVisibility(View.VISIBLE);
+                                btn_paperize.setVisibility(VISIBLE);
                             }
                             btn_paperize.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -744,6 +781,26 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     if (!loadingDialog.isShowing())
                                         loadingDialog.show();
                                     new PaperizeAsyncTask(selectedImages, getContext()).execute();
+                                }
+                            });
+                            rotateButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    int rotation = filteredGbcImages.get(globalImageIndex[0]).getRotation();
+                                    if (rotation != 3) {
+                                        rotation++;
+                                    } else rotation = 0;
+                                    for (int i : selectedImages) {
+                                        GbcImage gbcImage = filteredGbcImages.get(i);
+                                        gbcImage.setRotation(rotation);
+                                        new SaveImageAsyncTask(gbcImage).execute();
+                                    }
+                                    Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
+                                    showing = rotateBitmap(showing, filteredGbcImages.get(globalImageIndex[0]));
+                                    imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
+                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, paletteFrameSelButton, adapterPalette, frameAdapter);
+
+                                    updateGridView(currentPage);
                                 }
                             });
                             if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains("__filter:favourite__")) {
@@ -776,8 +833,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         new SaveImageAsyncTask(gbcImage).execute();
                                     }
                                     Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
+                                    showing = rotateBitmap(showing, filteredGbcImages.get(globalImageIndex[0]));
                                     imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
-                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
+                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, paletteFrameSelButton, adapterPalette, frameAdapter);
                                     updateGridView(currentPage);
 
                                 }
@@ -849,7 +907,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                             selectionMode = false;
                                         }
 
-                                        reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
+                                        reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, paletteFrameSelButton, adapterPalette, frameAdapter);
                                         clickCount = 0;
                                         updateGridView(currentPage);
                                     }
@@ -857,7 +915,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             });
 
                             //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
-                            if (selectedImage[0].getHeight() != 144) {
+                            if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160) {
                                 cbFrameKeep.setVisibility(GONE);
                                 paletteFrameSelButton.setVisibility(GONE);
                             }
@@ -878,8 +936,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         }
                                     }
                                     Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
+                                    showing = rotateBitmap(showing, filteredGbcImages.get(globalImageIndex[0]));
+
                                     imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
-                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
+                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, paletteFrameSelButton, adapterPalette, frameAdapter);
 
                                     updateGridView(currentPage);
 
@@ -904,11 +964,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         e.printStackTrace();
                                     }
                                     Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
+                                    showing = rotateBitmap(showing, filteredGbcImages.get(globalImageIndex[0]));
 
                                     imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
                                     frameAdapter.setLastSelectedPosition(selectedFrameIndex);
                                     frameAdapter.notifyDataSetChanged();
-                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
+                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, paletteFrameSelButton, adapterPalette, frameAdapter);
 
                                     updateGridView(currentPage);
                                 }
@@ -937,8 +998,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     adapterPalette.setLastSelectedPosition(palettePosition);
                                     adapterPalette.notifyDataSetChanged();
 
-                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
+                                    reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, paletteFrameSelButton, adapterPalette, frameAdapter);
                                     Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
+                                    showing = rotateBitmap(showing, filteredGbcImages.get(globalImageIndex[0]));
+
                                     imageView.setImageBitmap(Bitmap.createScaledBitmap(showing, showing.getWidth() * 6, showing.getHeight() * 6, false));
                                     updateGridView(currentPage);
                                 }
@@ -950,13 +1013,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         showPalettes = false;
                                         paletteFrameSelButton.setText(getString(R.string.btn_show_palettes));
                                         gridViewPalette.setVisibility(GONE);
-                                        gridViewFrames.setVisibility(View.VISIBLE);
+                                        gridViewFrames.setVisibility(VISIBLE);
 
                                     } else {
                                         showPalettes = true;
                                         paletteFrameSelButton.setText(getString(R.string.btn_show_frames));
                                         gridViewFrames.setVisibility(GONE);
-                                        gridViewPalette.setVisibility(View.VISIBLE);
+                                        gridViewPalette.setVisibility(VISIBLE);
                                     }
                                 }
                             });
@@ -991,7 +1054,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     dialog.dismiss();
                                 }
                             });
-                            reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, adapterPalette, frameAdapter);
+                            reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, paletteFrameSelButton, adapterPalette, frameAdapter);
 
                         }
 
@@ -1130,7 +1193,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             List<Bitmap> listBitmaps = new ArrayList<>();
 
                             for (int i : selectedImages) {
-                                listBitmaps.add(Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
+                                Bitmap image = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                                image = rotateBitmap(image, (filteredGbcImages.get(i)));
+                                listBitmaps.add(image);
+
                             }
                             try {
                                 Bitmap bitmap = averageImages(listBitmaps);
@@ -1244,6 +1310,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                                 for (int i : selectedImages) {
                                     Bitmap bitmap = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                                    bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
                                     bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false));
                                 }
 
@@ -1274,6 +1341,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                         for (int i : selectedImages) {
                             Bitmap bitmap = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                            bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
                             bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false));
                         }
 
@@ -1329,6 +1397,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 imageObject.put("frame", gbcImage.getFrameId());
                                 imageObject.put("invertPalette", gbcImage.isInvertPalette());
                                 imageObject.put("lockFrame", gbcImage.isLockFrame());
+                                imageObject.put("rotation", gbcImage.getRotation());
                                 imagesArray.put(imageObject);
                             }
                             stateObject.put("images", imagesArray);
@@ -1471,7 +1540,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     //To show the "big" Image dialog when doing a simple tap on the image
     private void showCustomDialog(int globalImageIndex) {
         Bitmap bitmap = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode());
-
+        bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
         final Dialog dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.single_image_dialog);
 
@@ -1556,14 +1625,15 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         return dialog;
     }
 
-    private void reloadLayout(LinearLayout layoutSelected, ImageView imageView, CheckBox keepFrameCb, CheckBox invertCb, CustomGridViewAdapterPalette adapterPalette, FramesFragment.CustomGridViewAdapterFrames frameAdapter) {
+    private void reloadLayout(LinearLayout layoutSelected, ImageView imageView, CheckBox keepFrameCb, CheckBox invertCb, Button paletteFrameSelButton, CustomGridViewAdapterPalette adapterPalette, FramesFragment.CustomGridViewAdapterFrames frameAdapter) {
         layoutSelected.removeAllViews();
         for (int i = 0; i < selectedImages.size(); i++) {
             GbcImage gbcImage = filteredGbcImages.get(selectedImages.get(i));
             ImageView imageViewMini = new ImageView(getContext());
             imageViewMini.setId(i);
             imageViewMini.setPadding(5, 3, 5, 2);
-            imageViewMini.setImageBitmap(Utils.imageBitmapCache.get(gbcImage.getHashCode()));
+            Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
+            imageViewMini.setImageBitmap(rotateBitmap(image, gbcImage));
             if (gbcImage.getTags().contains("__filter:favourite__")) {
                 imageViewMini.setBackgroundColor(getContext().getColor(R.color.favorite));
             }
@@ -1572,6 +1642,15 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 public void onClick(View view) {
                     int imageViewId = view.getId(); // Get the ImageView id
                     Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
+                    if (image.getHeight() != 144 && image.getHeight() != 160) {
+                        keepFrameCb.setVisibility(GONE);
+                        paletteFrameSelButton.setVisibility(GONE);
+                    } else {
+                        keepFrameCb.setVisibility(VISIBLE);
+                        paletteFrameSelButton.setVisibility(VISIBLE);
+                    }
+                    image = rotateBitmap(image, gbcImage);
+
                     imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
                     globalImageIndex[0] = selectedImages.get(imageViewId);
                     boolean isFav = gbcImage.getTags().contains("__filter:favourite__");

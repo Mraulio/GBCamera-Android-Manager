@@ -1,5 +1,7 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -37,6 +39,7 @@ public class GalleryUtils {
         for (int i = 0; i < gbcImages.size(); i++) {
             GbcImage gbcImage = gbcImages.get(i);
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
+            image = rotateBitmap(image,gbcImage);
             String fileName = fileNameBase + GalleryFragment.dtf.format(now);
 
             if (gbcImages.size() > 1) {

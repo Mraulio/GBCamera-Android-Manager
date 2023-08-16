@@ -2,6 +2,8 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 
+import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -62,10 +64,7 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
             holder = (RecordHolder) row.getTag();
         }
         Bitmap image = images.get(position);
-        Matrix matrix = new Matrix();
-        matrix.postRotate(90);
-//        if (position % 2 == 0)
-//            image = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+        image= rotateBitmap(image,data.get(position));
         String name = data.get(position).getName();
         String hash = data.get(position).getHashCode();
         List<String> hashToCheck = new ArrayList<>();
@@ -77,7 +76,7 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
         }
 
         Boolean fav = data.get(position).getTags().contains("__filter:favourite__");
-        holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) :  context.getColor(R.color.imageview_bg));
+        holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) : context.getColor(R.color.imageview_bg));
         Boolean dup = false;
         if (checkDuplicate) {
             for (GbcImage gbcImage : Utils.gbcImagesList) {

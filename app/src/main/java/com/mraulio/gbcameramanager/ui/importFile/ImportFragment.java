@@ -256,6 +256,12 @@ public class ImportFragment extends Fragment {
                                         Utils.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
                                     }
                                 }
+                                if (newGbcImages.size() > 0) {
+                                    new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
+                                } else {
+                                    Utils.toast(getContext(), getString(R.string.no_new_images));
+                                    tvFileName.setText(getString(R.string.no_new_images));
+                                }
                                 break;
                             }
                             case SAV: {
@@ -281,12 +287,12 @@ public class ImportFragment extends Fragment {
                                         Utils.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
                                     }
                                 }
-                            }
-                            if (newGbcImages.size() > 0) {
-                                new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
-                            } else {
-                                Utils.toast(getContext(), getString(R.string.no_new_images));
-                                tvFileName.setText(getString(R.string.no_new_images));
+                                if (newGbcImages.size() > 0) {
+                                    new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
+                                } else {
+                                    Utils.toast(getContext(), getString(R.string.no_new_images));
+                                    tvFileName.setText(getString(R.string.no_new_images));
+                                }
                             }
                             break;
                         }

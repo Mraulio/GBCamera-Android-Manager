@@ -40,6 +40,7 @@ public class SettingsFragment extends Fragment {
         CheckBox cbPrint = view.findViewById(R.id.cbPrint);
         CheckBox cbPaperize = view.findViewById(R.id.cbPaperize);
         CheckBox cbMagicCheck = view.findViewById(R.id.cbMagic);
+        CheckBox cbRotation = view.findViewById(R.id.cbRotation);
 
         MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
 
@@ -225,6 +226,23 @@ public class SettingsFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
+        cbRotation.setChecked(MainActivity.showRotationButton);
+        cbRotation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("rotation_button", true);
+                    MainActivity.showRotationButton = true;
+                } else {
+                    editor.putBoolean("rotation_button", false);
+                    MainActivity.showRotationButton = false;
+                }
+                editor.apply();
+            }
+        });
+
+
         return view;
     }
 

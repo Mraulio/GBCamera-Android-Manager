@@ -7,113 +7,135 @@
     android:orientation="vertical"
     tools:context=".ui.settings.SettingsFragment">
 
-    <RadioGroup
-        android:id="@+id/rbGroup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="vertical">
-
-        <RadioButton
-            android:id="@+id/rbTxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:text="@string/export_txt" />
-
-        <RadioButton
-            android:id="@+id/rbPng"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:text="@string/export_png" />
-
-    </RadioGroup>
-
-    <LinearLayout
+    <ScrollView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content">
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/png_size"></TextView>
+            android:orientation="vertical">
 
-        <Spinner
-            android:id="@+id/spExportSize"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            ></Spinner>
-    </LinearLayout>
+            <RadioGroup
+                android:id="@+id/rbGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/rbTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="10dp"
+                    android:text="@string/export_txt" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/images_page"></TextView>
+                <RadioButton
+                    android:id="@+id/rbPng"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="10dp"
+                    android:text="@string/export_png" />
 
-        <Spinner
-            android:id="@+id/spImagesPage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:ignore="MissingConstraints"></Spinner>
-    </LinearLayout>
+            </RadioGroup>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/language"></TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/png_size"></TextView>
 
-        <Spinner
-            android:id="@+id/spLanguage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            ></Spinner>
-    </LinearLayout>
+                <Spinner
+                    android:id="@+id/spExportSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"></Spinner>
+            </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/cbPrint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:text="@string/showPrint" />
-    <CheckBox
-        android:id="@+id/cbPaperize"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:text="@string/paperize_settings" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
 
-    <CheckBox
-        android:id="@+id/cbMagic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:autoSizeMaxTextSize="40sp"
-        android:autoSizeMinTextSize="10sp"
-        android:autoSizeTextType="uniform"
-        android:maxLines="1"
-        android:text="@string/check_magic" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/images_page"></TextView>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:layout_marginHorizontal="20dp"
-        android:text="@string/save_location_hint"/>
+                <Spinner
+                    android:id="@+id/spImagesPage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:ignore="MissingConstraints"></Spinner>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/language"></TextView>
+
+                <Spinner
+                    android:id="@+id/spLanguage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"></Spinner>
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/cbPrint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:text="@string/showPrint" />
+
+            <CheckBox
+                android:id="@+id/cbPaperize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:text="@string/paperize_settings" />
+
+            <CheckBox
+                android:id="@+id/cbMagic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:autoSizeMaxTextSize="40sp"
+                android:autoSizeMinTextSize="10sp"
+                android:autoSizeTextType="uniform"
+                android:maxLines="1"
+                android:text="@string/check_magic" />
+
+            <CheckBox
+                android:id="@+id/cbRotation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:autoSizeMaxTextSize="40sp"
+                android:autoSizeMinTextSize="10sp"
+                android:autoSizeTextType="uniform"
+                android:maxLines="1"
+                android:text="Show Rotation button" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="50dp"
+                android:text="@string/save_location_hint" />
+        </LinearLayout>
+
+    </ScrollView>
 </LinearLayout>

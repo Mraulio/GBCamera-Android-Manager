@@ -19,8 +19,7 @@ import android.graphics.Canvas;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -85,6 +84,7 @@ import java.util.Locale;
 import javax.xml.transform.Result;
 
 import pl.droidsonroids.gif.GifDrawable;
+
 
 public class GalleryFragment extends Fragment implements SerialInputOutputManager.Listener {
     static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
@@ -493,7 +493,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             Bitmap sharedBitmap = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                             List sharedList = new ArrayList();
                             sharedList.add(sharedBitmap);
-                            shareImage(sharedList,getContext());
+                            shareImage(sharedList, getContext());
                         }
                     });
                     saveButton.setOnClickListener(new View.OnClickListener() {
@@ -501,7 +501,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onClick(View v) {
                             List saveList = new ArrayList();
                             saveList.add(filteredGbcImages.get(globalImageIndex));
-                            saveImage(saveList,getContext());
+                            saveImage(saveList, getContext());
                         }
                     });
 
@@ -613,8 +613,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             sbTitle.append(tv.getContext().getString(R.string.filtered_images) + filteredGbcImages.size());
         } else {
             sbTitle.append(tv.getContext().getString(R.string.total_images) + filteredGbcImages.size());
-        }if (selectedImages.size()>0){
-            sbTitle.append("  "+tv.getContext().getString(R.string.selected_images) + selectedImages.size());
+        }
+        if (selectedImages.size() > 0) {
+            sbTitle.append("  " + tv.getContext().getString(R.string.selected_images) + selectedImages.size());
         }
         tv.setText(sbTitle.toString());
         sbTitle.setLength(0);
@@ -968,13 +969,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         Bitmap sharedBitmap = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                                         sharedList.add(sharedBitmap);
                                     }
-                                    shareImage(sharedList,getContext());
+                                    shareImage(sharedList, getContext());
                                 }
                             });
                             saveButton.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    saveImage(selectedGbcImages,getContext());
+                                    saveImage(selectedGbcImages, getContext());
                                 }
                             });
 
@@ -1114,7 +1115,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             averaged[0].compress(Bitmap.CompressFormat.PNG, 100, out);
                             Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + "HDR!", Toast.LENGTH_LONG);
                             toast.show();
-                            mediaScanner(file,getContext());
+                            mediaScanner(file, getContext());
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -1163,6 +1164,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     TextView tv_animation = dialogView.findViewById(R.id.tv_animation);
                     Button reload_anim = dialogView.findViewById(R.id.btn_animation);
                     CheckBox cb_loop = dialogView.findViewById(R.id.cb_loop);
+
                     final int[] loop = {0};
                     cb_loop.setOnClickListener(v -> {
                         if (cb_loop.isChecked()) {
@@ -1199,18 +1201,20 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onClick(DialogInterface dialog, int which) {
                             LocalDateTime now = LocalDateTime.now();
 
-                            File file = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".gif");
+                            File gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".gif");
+                            File mp4File = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".mp4");
 
-                            try (FileOutputStream out = new FileOutputStream(file)) {
+                            try (FileOutputStream out = new FileOutputStream(gifFile)) {
 
                                 out.write(bos.toByteArray());
-                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + "GIF!", Toast.LENGTH_LONG);
-                                toast.show();
-                                mediaScanner(file,getContext());
+                                mediaScanner(gifFile, getContext());
+
+                                Utils.toast(getContext(), getString(R.string.toast_saved) + "GIF!");
 
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+
                         }
                     });
                     builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {

@@ -14,5 +14,6 @@
     <color name="background_dark">#292929</color>
     <color name="listview_back">#CCCCCC</color>
     <color name="listview_selected">#AE4F4F</color>
+    <color name="imageview_bg">#EAE9F3</color>
 
 </resources>

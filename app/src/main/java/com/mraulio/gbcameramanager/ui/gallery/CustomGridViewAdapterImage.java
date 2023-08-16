@@ -6,9 +6,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -59,6 +62,10 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
             holder = (RecordHolder) row.getTag();
         }
         Bitmap image = images.get(position);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+//        if (position % 2 == 0)
+//            image = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
         String name = data.get(position).getName();
         String hash = data.get(position).getHashCode();
         List<String> hashToCheck = new ArrayList<>();
@@ -70,7 +77,7 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
         }
 
         Boolean fav = data.get(position).getTags().contains("__filter:favourite__");
-        holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) : Color.WHITE);
+        holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) :  context.getColor(R.color.imageview_bg));
         Boolean dup = false;
         if (checkDuplicate) {
             for (GbcImage gbcImage : Utils.gbcImagesList) {
@@ -90,8 +97,15 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
         } else {
             holder.txtTitle.setVisibility(GONE);
         }
+        holder.imageItem.setImageBitmap(image);
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        int screenWidth = displayMetrics.widthPixels;
 
-        holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
+        int desiredHeight = (int) (screenWidth * 0.255);//Factor to work on every screen aprox
+        holder.imageItem.getLayoutParams().height = desiredHeight;
+        holder.imageItem.requestLayout();
+        RecordHolder finalHolder = holder;
+
         return row;
     }
 

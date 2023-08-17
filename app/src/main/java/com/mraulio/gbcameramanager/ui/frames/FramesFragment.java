@@ -75,19 +75,18 @@ public class FramesFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             new DeleteFrameAsyncTask(Utils.framesList.get(position)).execute();
-                            Utils.framesList.remove(position);
                             //I change the frame index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
                             for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
-                                if (Utils.gbcImagesList.get(i).getFrameId().equals(Utils.hashFrames.get(Utils.framesList.get(position).getFrameName()).getFrameName())) {
+                                if (Utils.gbcImagesList.get(i).getFrameId().equals(Utils.framesList.get(position).getFrameName())) {
                                     Utils.gbcImagesList.get(i).setFrameId("Nintendo_Frame");
                                     //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
                                     if (Utils.imageBitmapCache.containsKey(Utils.gbcImagesList.get(i).getHashCode())) {
                                         Bitmap image = null;
                                         try {
                                             GbcImage gbcImage = Utils.gbcImagesList.get(i);
-                                            image = GalleryFragment.frameChange(gbcImage, Utils.imageBitmapCache.get(gbcImage.getHashCode()), Utils.framesList.get(0).getFrameName(), Utils.gbcImagesList.get(i).isLockFrame());
+                                            image = GalleryFragment.frameChange(gbcImage, Utils.imageBitmapCache.get(gbcImage.getHashCode()), gbcImage.getFrameId(), Utils.gbcImagesList.get(i).isLockFrame());
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
@@ -96,6 +95,7 @@ public class FramesFragment extends Fragment {
                                     new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
                             }
+                            Utils.framesList.remove(position);
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }
                     });

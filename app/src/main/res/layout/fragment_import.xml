@@ -7,7 +7,6 @@
     android:padding="5dp"
     tools:context=".ui.importFile.ImportFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <Button
         android:id="@+id/btnSelectFile"
         android:layout_width="wrap_content"
@@ -55,6 +54,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/cbAddFrame"
+        android:visibility="gone"
         android:text="Add as frame"
         />
     <GridView

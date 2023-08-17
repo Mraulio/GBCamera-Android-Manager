@@ -1476,6 +1476,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         Bitmap framedAux;
         if ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224) {
             boolean wasWildFrame = Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame();
+            //To safecheck, maybe it's an image added with a wild frame size
+            if (!wasWildFrame && (gbcImage.getImageBytes().length / 40) == 224){
+                wasWildFrame = true;
+            }
             //I need to use copy because if not it's inmutable bitmap
             //new Frame
             framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);

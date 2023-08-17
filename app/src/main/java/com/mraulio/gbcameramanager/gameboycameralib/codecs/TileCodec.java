@@ -33,7 +33,7 @@ public class TileCodec implements Codec {
     }
 
     @Override
-    public Bitmap decodeWithPalette(int[] palette, byte[] tileData, boolean invertPalette) {
+    public Bitmap decodeWithPalette(int[] palette, byte[] tileData, boolean invertPalette, boolean isWildFrame) {
         int[] usedPalette = Arrays.copyOf(palette, palette.length);//Need to create a copy of the array to not change it all the time
         if (invertPalette) {//Invert order of all colors in the palette
             int temp = usedPalette[0];

@@ -312,8 +312,10 @@ public class ImportFragment extends Fragment {
                                         tvFileName.setText(getString(R.string.no_new_images));
                                     }
                                 } else if (cbAddFrame.isChecked()) {
-                                    frameNameDialog();
-
+                                    if (finalListBitmaps.get(0).getHeight() != 144 && finalListBitmaps.get(0).getHeight() != 224) {
+                                        Utils.toast(getContext(), "Can't add this image as a frame");//Add string
+                                        btnAddImages.setEnabled(true);
+                                    } else frameNameDialog();
                                 }
 
                                 break;
@@ -335,25 +337,27 @@ public class ImportFragment extends Fragment {
         EditText etFrameName = view.findViewById(R.id.etFrameName);
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(view);
-        AlertDialog alertdialog = builder.create();
-        etFrameName.setImeOptions(EditorInfo.IME_ACTION_DONE);//When pressing enter
+        AlertDialog alertdialog  = builder.create();
 
-        builder.setTitle("Set new Frame name");
-        builder.setPositiveButton(R.string.btn_save, null);
+        etFrameName.setImeOptions(EditorInfo.IME_ACTION_DONE);//When pressing enter
+        builder.setTitle("Set new Frame name");//Add string
         Button btnSaveFrame = view.findViewById(R.id.btnSaveFrame);
         btnSaveFrame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 GbcFrame gbcFrame = new GbcFrame();
                 gbcFrame.setFrameBitmap(filledFrame);
+                if (filledFrame.getHeight()==224){
+                    gbcFrame.setWildFrame(true);
+                }
                 List<GbcFrame> newFrameImages = new ArrayList<>();
                 //Add here the dialog for the frame name
                 String frameName = etFrameName.getText().toString();
                 if (frameName.equals("")) {
-                    Utils.toast(getContext(), "Name must not be empty");
+                    Utils.toast(getContext(), "Name must not be empty");//Add string
                     etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
                 } else if (frameName.contains(" ")) {
-                    Utils.toast(getContext(), "Text must no contain empty spaces.");
+                    Utils.toast(getContext(), "Text must no contain empty spaces.");//Add string
                     etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
                 } else {
                     gbcFrame.setFrameName(frameName);
@@ -363,7 +367,7 @@ public class ImportFragment extends Fragment {
                         if (frame.getFrameName().toLowerCase(Locale.ROOT).equals(gbcFrame.getFrameName())) {
                             alreadyAdded = true;
                             etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
-                            Utils.toast(getContext(), "This frame name already exists.");
+                            Utils.toast(getContext(), "This frame name already exists.");//Add string
                             break;
                         }
                     }
@@ -393,22 +397,20 @@ public class ImportFragment extends Fragment {
     //Fills the frame with white
     private Bitmap fillFrame() {
         Bitmap frame = finalListBitmaps.get(0).copy(Bitmap.Config.ARGB_8888, true);//only doing 1 by 1 for now
-
         int innerWidth = 128;
         int innerHeight = 112;
         int startX = 16;
         int startY = 16;
+        if (frame.getHeight() == 224) {
+            startY = 40;
+        }
 
-        Bitmap filledFrame = Bitmap.createBitmap(160, 144, frame.getConfig());
         Canvas canvas = new Canvas(frame);
 
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
 
         canvas.drawRect(startX, startY, startX + innerWidth, startY + innerHeight, paint);
-
-//        canvas.drawBitmap(frame, 0, 0, null);
-
 
         return frame;
     }
@@ -812,7 +814,8 @@ public class ImportFragment extends Fragment {
                                 int width = bitmap.getWidth();
                                 int height = bitmap.getHeight();
                                 // Verify the dimensions, multiple of 160x144. Need to store the factor somewhere to reduce the bitmap for storing it
-                                boolean hasDesiredDimensions = (width == 160 && height == 144);
+                                //height%8 == 0 so the image has multiple of x tiles
+                                boolean hasDesiredDimensions = (width == 160 && height % 8 == 0);
 //                                boolean hasDesiredDimensions = (width % 160 == 0 && height % 144 == 0);
                                 boolean hasAllColors = true;
                                 for (int y = 0; y < height; y++) {
@@ -914,7 +917,7 @@ public class ImportFragment extends Fragment {
                 String hashHex = Utils.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);
                 ImageCodec imageCodec = new ImageCodec(128, 112, gbcImage.isLockFrame());
-                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
+                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false,false);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
                     Bitmap framed = Utils.framesList.get(3).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -958,7 +961,7 @@ public class ImportFragment extends Fragment {
             gbcImage.setName(fileName + " " + formattedIndex);
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(160, height, false);
-            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false);
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false,false);
             importedImagesBitmaps.add(image);
             importedImagesList.add(gbcImage);
         }

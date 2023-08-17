@@ -372,7 +372,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     gridViewFrames.setAdapter(frameAdapter);
 
                     //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
-                    if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160) {
+                    if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
                         cbFrameKeep.setVisibility(GONE);
                         paletteFrameSelButton.setVisibility(GONE);
                     }
@@ -407,7 +407,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                             //Action when clicking a frame inside the Dialog
                             Bitmap framed = null;
-                            filteredGbcImages.get(globalImageIndex).setFrameId(Utils.framesList.get(selectedFrameIndex).getFrameName());//Need to set the frame index before changing it because if not it's not added to db
+//                            filteredGbcImages.get(globalImageIndex).setFrameId(Utils.framesList.get(selectedFrameIndex).getFrameName());//Need to set the frame index before changing it because if it's not added to db
 
                             try {
                                 framed = frameChange(filteredGbcImages.get(globalImageIndex), Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode()), Utils.framesList.get(selectedFrameIndex).getFrameName(), keepFrame);
@@ -1476,21 +1476,32 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static Bitmap frameChange(GbcImage gbcImage, Bitmap bitmap, String selectedFrameId, boolean keepFrame) throws IOException {
         Bitmap framed = null;
         Bitmap framedAux;
-        if ((gbcImage.getImageBytes().length / 40) == 144) {
+        if ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224) {
+            boolean wasWildFrame = Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame();
+            System.out.println(wasWildFrame+" was wild frame!!!!!!!!!!!!!!!!!!!1");
+
             //I need to use copy because if not it's inmutable bitmap
+            //new Frame
             framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+            boolean isWildFrameNow = Utils.hashFrames.get(selectedFrameId).isWildFrame();
+            System.out.println(isWildFrameNow+" is wild frame now!!!!!!!!!!!!!!!!!!!1");
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
             Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, keepFrame, false, false);
-            Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, 16, 128, 112);//Need to put this to palette 0
-            canvasAux.drawBitmap(croppedBitmapAux, 16, 16, null);
+            int yIndexActualImage = 16;// y Index where the actual image starts
+            if (wasWildFrame) yIndexActualImage = 40;
+            int yIndexNewFrame = 16;
+            if (isWildFrameNow) yIndexNewFrame = 40;
+
+            Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, yIndexActualImage, 128, 112);//Need to put this to palette 0
+            canvasAux.drawBitmap(croppedBitmapAux, 16, yIndexNewFrame, null);
             if (!keepFrame) {
                 framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, keepFrame, true, gbcImage.isInvertPalette());
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
-            Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, 16, 16, 128, 112);
-            canvas.drawBitmap(croppedBitmap, 16, 16, null);
+            Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, 16, yIndexActualImage, 128, 112);
+            canvas.drawBitmap(croppedBitmap, 16, yIndexNewFrame, null);
 
             try {
                 byte[] imageBytes = Utils.encodeImage(framedAux, "bw");//Use the framedAux because it doesn't a different palette to encode
@@ -1501,6 +1512,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         } else {
             return bitmap;
         }
+        gbcImage.setFrameId(selectedFrameId);
         diskCache.put(gbcImage.getHashCode(), framed);
         new SaveImageAsyncTask(gbcImage).execute();
         return framed;
@@ -1529,7 +1541,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage, boolean keepFrame, boolean save, boolean invertPalette) {
 
         ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40, keepFrame);//imageBytes.length/40 to get the height of the image
-        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
+        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette,Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame());
 
         new SaveImageAsyncTask(gbcImage).execute();
         if (save)

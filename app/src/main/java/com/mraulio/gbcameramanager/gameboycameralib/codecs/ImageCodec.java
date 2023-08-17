@@ -52,13 +52,15 @@ public class ImageCodec implements Codec {
     }
 
     @Override
-    public Bitmap decodeWithPalette(int[] palette, byte[] data, boolean invertPalette) {
+    public Bitmap decodeWithPalette(int[] palette, byte[] data, boolean invertPalette, boolean isWildFrame) {
         if (keepFrame) {
             int regionWidth = 128;
             int regionHeight = 112;
-            int startX = (imageWidth - regionWidth) / 2;
-            int startY = (imageHeight - regionHeight) / 2;
-
+            int startX = 16;
+            int startY = 16;
+            if (isWildFrame) {
+                startY = 40;
+            }
             Bitmap regionBitmap = Bitmap.createBitmap(regionWidth, regionHeight, Bitmap.Config.ARGB_8888);
             Bitmap externalBitmap = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
 
@@ -72,7 +74,7 @@ public class ImageCodec implements Codec {
             for (int i = 0; i < data.length; i += TileCodec.TILE_BYTES_LENGTH) {
                 byte[] tileData = new byte[TileCodec.TILE_BYTES_LENGTH];
                 System.arraycopy(data, i, tileData, 0, TileCodec.TILE_BYTES_LENGTH);
-                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData, invertPalette);
+                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData, invertPalette,false);
 
                 //Draw only on the part to processs
                 if (xPos >= startX && xPos + TileCodec.TILE_WIDTH <= startX + regionWidth &&
@@ -81,7 +83,7 @@ public class ImageCodec implements Codec {
                 } else {
                     // Draw the frame with the default bw palette
 
-                    externalCanvas.drawBitmap(tileCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), tileData, invertPalette), xPos, yPos, null);
+                    externalCanvas.drawBitmap(tileCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), tileData, invertPalette,false), xPos, yPos, null);
                 }
 
                 xPos += TileCodec.TILE_WIDTH;
@@ -112,7 +114,7 @@ public class ImageCodec implements Codec {
             for (int i = 0; i < data.length; i += TileCodec.TILE_BYTES_LENGTH) {
                 byte[] tileData = new byte[TileCodec.TILE_BYTES_LENGTH];
                 System.arraycopy(data, i, tileData, 0, TileCodec.TILE_BYTES_LENGTH);
-                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData, invertPalette);
+                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData, invertPalette,false);
                 canvas.drawBitmap(tile, xPos, yPos, null);
                 xPos += TileCodec.TILE_WIDTH;
                 if (xPos >= imageWidth) {

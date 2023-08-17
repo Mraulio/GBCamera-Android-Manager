@@ -47,7 +47,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
                 ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
-                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette());
+                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette(),Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame());
                 //Add the bitmap to the cache
                 Utils.imageBitmapCache.put(imageHash, image);
                 GalleryFragment.diskCache.put(imageHash, image);
@@ -61,9 +61,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-//                if (gbcImage.getRotation() !=0){
-//                    image = rotateBitmap(image,gbcImage);
-//                }
+
             }
             index++;
         }

@@ -6,6 +6,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.dtf;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filteredGbcImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.paletteChanger;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -50,6 +51,7 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
             try (FileOutputStream out = new FileOutputStream(file)) {
                 Bitmap scaled = Bitmap.createScaledBitmap(paperized, paperized.getWidth(), paperized.getHeight(), false);
                 scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+                mediaScanner(file, context);
 
             } catch (IOException e) {
                 e.printStackTrace();

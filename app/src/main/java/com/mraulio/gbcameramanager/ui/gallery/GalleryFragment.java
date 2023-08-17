@@ -391,7 +391,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                             new SaveImageAsyncTask(gbcImage).execute();
                             updateGridView(currentPage);
-
                         }
                     });
                     cbCrop.setOnClickListener(v -> {
@@ -915,10 +914,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             });
 
                             //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
-                            if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160) {
+                            if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
                                 cbFrameKeep.setVisibility(GONE);
                                 paletteFrameSelButton.setVisibility(GONE);
                             }
+
 
                             cbFrameKeep.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -928,12 +928,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     for (int i : selectedImages) {
                                         GbcImage gbcImage = filteredGbcImages.get(i);
                                         //In case in the multiselect there are bigger images than standard
-                                        if (Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getHeight() == 144) {
                                             gbcImage.setLockFrame(keepFrame);
                                             Bitmap bitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, true, gbcImage.isInvertPalette());
                                             Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), bitmap);
                                             new SaveImageAsyncTask(gbcImage).execute();
-                                        }
+
                                     }
                                     Bitmap showing = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
                                     showing = rotateBitmap(showing, filteredGbcImages.get(globalImageIndex[0]));
@@ -954,7 +953,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                                     try {
                                         for (int i : selectedImages) {
-                                            filteredGbcImages.get(i).setFrameId(Utils.framesList.get(selectedFrameIndex).getFrameName());//Need to set the frame index before changing it because if not it's not added to db
 
                                             framed = frameChange(filteredGbcImages.get(i), Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()), Utils.framesList.get(selectedFrameIndex).getFrameName(), filteredGbcImages.get(i).isLockFrame());
                                             Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), framed);
@@ -1478,13 +1476,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         Bitmap framedAux;
         if ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224) {
             boolean wasWildFrame = Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame();
-            System.out.println(wasWildFrame+" was wild frame!!!!!!!!!!!!!!!!!!!1");
-
             //I need to use copy because if not it's inmutable bitmap
             //new Frame
             framed = Utils.hashFrames.get(selectedFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             boolean isWildFrameNow = Utils.hashFrames.get(selectedFrameId).isWildFrame();
-            System.out.println(isWildFrameNow+" is wild frame now!!!!!!!!!!!!!!!!!!!1");
             framedAux = framed.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvasAux = new Canvas(framedAux);
             Bitmap setToPalette = paletteChanger("bw", gbcImage.getImageBytes(), gbcImage, keepFrame, false, false);
@@ -1496,7 +1491,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             Bitmap croppedBitmapAux = Bitmap.createBitmap(setToPalette, 16, yIndexActualImage, 128, 112);//Need to put this to palette 0
             canvasAux.drawBitmap(croppedBitmapAux, 16, yIndexNewFrame, null);
             if (!keepFrame) {
-                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, keepFrame, true, gbcImage.isInvertPalette());
+                framed = paletteChanger(gbcImage.getPaletteId(), Utils.encodeImage(framed, "bw"), gbcImage, false, true, gbcImage.isInvertPalette());
                 framed = framed.copy(Bitmap.Config.ARGB_8888, true);//To make it mutable
             }
             Canvas canvas = new Canvas(framed);
@@ -1654,7 +1649,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 public void onClick(View view) {
                     int imageViewId = view.getId(); // Get the ImageView id
                     Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
-                    if (image.getHeight() != 144 && image.getHeight() != 160) {
+                    if (image.getHeight() != 144 && image.getHeight() != 160 && image.getHeight() != 224) {
                         keepFrameCb.setVisibility(GONE);
                         paletteFrameSelButton.setVisibility(GONE);
                     } else {

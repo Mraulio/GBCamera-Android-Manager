@@ -2,7 +2,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:background="#EAEAEA"
     android:orientation="vertical"
     android:padding="5dp">
 
@@ -12,16 +11,31 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:adjustViewBounds="true"
+        android:background="@color/imageview_bg"
         android:padding="5dp"
         android:scaleType="fitXY" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/cardview_light_background">
+
+        <LinearLayout
+            android:id="@+id/ly_selected_images"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="5dp"
+            android:visibility="gone"/>
+    </HorizontalScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:weightSum="4"
-        android:gravity="center">
+        android:weightSum="5">
 
         <Button
             android:id="@+id/print_button"
@@ -36,22 +50,24 @@
             android:drawableTint="@color/white"
             android:gravity="center_horizontal"
             android:textSize="10dp"
+            android:visibility="gone"
             app:icon="@drawable/ic_print"
             app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            android:visibility="gone"/>
+            app:iconPadding="0dp" />
+
+        <CheckBox
+            android:id="@+id/cbInvert"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:button="@drawable/invert_icon"/>
 
         <CheckBox
             android:id="@+id/cbCrop"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:autoSizeMaxTextSize="30sp"
-            android:autoSizeMinTextSize="5sp"
-            android:autoSizeTextType="uniform"
-            android:maxLines="1"
-            android:text="@string/cb_crop"
-            android:textSize="10dp"></CheckBox>
+            android:button="@drawable/crop_checkbox"/>
 
         <Button
             android:id="@+id/save_button"
@@ -60,11 +76,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
             android:layout_weight="1"
-            android:autoSizeMaxTextSize="30sp"
-            android:autoSizeMinTextSize="5sp"
-            android:autoSizeTextType="uniform"
             android:backgroundTint="#69BF6C"
-            android:textSize="10dp"
             app:icon="@drawable/ic_download"
             app:iconGravity="textStart"
             app:iconPadding="0dp" />
@@ -76,10 +88,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
-            android:autoSizeMaxTextSize="30sp"
-            android:autoSizeMinTextSize="5sp"
-            android:autoSizeTextType="uniform"
-            android:textSize="10dp"
             app:icon="@drawable/ic_share"
             app:iconGravity="textStart"
             app:iconPadding="0dp" />
@@ -90,34 +98,52 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="4">
+
+        <Button
+            android:id="@+id/btnPaperize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="3sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
+            android:text="@string/paperize_button"
+            android:textSize="10dp"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnRotate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="5dp"
+            android:layout_weight="1"
+            app:icon="@drawable/ic_rotate"
+            app:iconGravity="textStart"
+            android:visibility="gone"/>
 
         <CheckBox
             android:id="@+id/cbFrameKeep"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
+            android:layout_marginHorizontal="5dp"
             android:layout_weight="1"
-            android:autoSizeMaxTextSize="30sp"
-            android:autoSizeMinTextSize="5sp"
-            android:autoSizeTextType="uniform"
-            android:maxLines="1"
-            android:text="@string/cb_keep_frame"
-            android:textSize="10dp"></CheckBox>
+            android:button="@drawable/keep_frame_icon" />
 
         <Button
             android:id="@+id/btnPaletteFrame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
             android:layout_weight="1"
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="3sp"
             android:autoSizeTextType="uniform"
             android:maxLines="1"
             android:text="@string/btn_show_frames"
-            android:textSize="10dp"></Button>
+            android:textSize="10dp"/>
     </LinearLayout>
 
     <GridView

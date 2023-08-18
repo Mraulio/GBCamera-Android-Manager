@@ -16,7 +16,12 @@ public class GbcFrame {
     @ColumnInfo(name = "frame_bitmap")
     Bitmap frameBitmap;
 
-    public GbcFrame(){}
+    @ColumnInfo(name = "wild_frame", defaultValue = "false")
+    boolean isWildFrame;
+
+    public GbcFrame() {
+        this.isWildFrame = false;
+    }
 
     public Bitmap getFrameBitmap() {
         return frameBitmap;
@@ -28,6 +33,14 @@ public class GbcFrame {
 
     public String getFrameName() {
         return frameName;
+    }
+
+    public boolean isWildFrame() {
+        return isWildFrame;
+    }
+
+    public void setWildFrame(boolean wildFrame) {
+        isWildFrame = wildFrame;
     }
 
     public void setFrameName(String frameName) {

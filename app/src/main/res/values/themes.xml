@@ -2,8 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.GBCameraManager" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#161C2E</item>
-        <item name="colorPrimaryVariant">#161C2E</item>
+        <item name="colorPrimary">@color/primary_color</item>
+        <item name="colorPrimaryVariant">@color/primary_color</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -11,7 +11,11 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
         <!-- Customize your theme here. -->
+        <item name="android:windowBackground">
+            @color/background_light
+        </item>
     </style>
 
     <style name="Theme.GBCameraManager.NoActionBar">

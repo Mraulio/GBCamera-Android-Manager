@@ -3,8 +3,8 @@ package com.mraulio.gbcameramanager.gbxcart;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GBxCart {
-
+public class GBxCartConstants {
+    public static final int BAUDRATE = 1000000;
 
     public static HashMap<String, Integer> DEVICE_CMD = new HashMap<String, Integer>() {{
         put("NULL", 0x30);

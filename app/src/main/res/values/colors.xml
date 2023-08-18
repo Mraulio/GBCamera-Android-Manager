@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary_color">#161C2E</color>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -9,7 +10,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="duplicated">#FA483B</color>
     <color name="favorite">#FF5389</color>
-    <color name="background">#F7F6E7</color>
-
+    <color name="background_light">#F7F6E7</color>
+    <color name="background_dark">#292929</color>
+    <color name="listview_back">#CCCCCC</color>
+    <color name="listview_selected">#AE4F4F</color>
+    <color name="imageview_bg">#EAE9F3</color>
 
 </resources>

@@ -13,15 +13,20 @@ import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.util.Log;
+import android.view.Menu;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
-import androidx.appcompat.app.AppCompatDelegate;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -29,8 +34,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
-import com.mraulio.gbcameramanager.methods.Methods;
-import com.mraulio.gbcameramanager.methods.StartCreation;
+import com.mraulio.gbcameramanager.utils.Utils;
+import com.mraulio.gbcameramanager.utils.StartCreation;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
 import com.mraulio.gbcameramanager.db.AppDatabase;
 import com.mraulio.gbcameramanager.db.FrameDao;
@@ -51,20 +56,37 @@ import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
-    public static int printIndex = 0;//If there are no images there will be a crash when trying to print
     private AppBarConfiguration mAppBarConfiguration;
-    boolean anyImage = false;
+    boolean anyImage = true;
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
+
+    public static enum CURRENT_FRAGMENT {
+        GALLERY,
+        PALETTES,
+        FRAMES,
+        IMPORT,
+        USB_SERIAL,
+        SAVE_MANAGER,
+        SETTINGS
+    }
+
+    public static CURRENT_FRAGMENT current_fragment;
+
+    public static FloatingActionButton fab;
 
     public static SharedPreferences sharedPreferences;
     //Store in the shared preferences
     public static boolean exportPng = true;
     public static boolean printingEnabled = false;
+    public static boolean showPaperizeButton = false;
     public static int exportSize = 4;
     public static int imagesPage = 12;
-    public static String languageCode = "en";
+    public static String languageCode;
+    public static boolean magicCheck;
+    public static boolean showRotationButton;
+
 
     private boolean openedSav = false;
     public static UsbManager manager;
@@ -95,34 +117,46 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //Keep only the Light Theme
-//        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
         sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
         exportSize = sharedPreferences.getInt("export_size", 4);
         imagesPage = sharedPreferences.getInt("images_per_page", 12);
         exportPng = sharedPreferences.getBoolean("export_as_png", true);
-        languageCode = sharedPreferences.getString("language", "en");
+        showPaperizeButton = sharedPreferences.getBoolean("show_paperize_button", false);
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
-        System.out.println(getResources().getConfiguration().locale+"///////////////////////locale");
+        magicCheck = sharedPreferences.getBoolean("magic_check", true);
+        showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
 
+        GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
 
-        // Change language config
-        if (!languageCode.equals("en")) {
-            Locale locale = new Locale(languageCode);
-            Locale.setDefault(locale);
+        //To get the locale on the first startup and set the def value
+        Resources resources = getResources();
+        Configuration configuration = resources.getConfiguration();
+        LocaleList locales = configuration.getLocales();
 
-            Resources resources = getResources();
-            Configuration configuration = resources.getConfiguration();
-            configuration.setLocale(locale);
-            resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+        Locale currentLocale = locales.get(0);
+
+        if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
+                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
+            languageCode = "en";
+        } else {
+            languageCode = currentLocale.getLanguage();
         }
+
+        languageCode = sharedPreferences.getString("language", languageCode);
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+
+        configuration.setLocale(locale);
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+
+        fab = findViewById(R.id.fab);
+
+        Utils.makeDirs();
 
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
-        System.out.println("Done loading: " + doneLoading);
-        System.out.println("Any image: " + anyImage);
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbReceiver, filter);
@@ -134,9 +168,9 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = intent.getData();
 
         if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
-            // Si el Intent contiene la acción ACTION_VIEW y la categoría CATEGORY_DEFAULT y
-            // el tipo es "application/octet-stream" y el URI del Intent termina en ".sav", realizar la acción deseada
-            Methods.toast(this, "Opened from file");
+            // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
+            // the type is "application/octet-stream" and the URI of the Intent ends in ".sav", make the desired action
+            Utils.toast(this, "Opened from file");
             openedSav = true;
         }
         if (!doneLoading) {
@@ -151,17 +185,27 @@ public class MainActivity extends AppCompatActivity {
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         if (openedSav) navigationView.setCheckedItem(R.id.nav_import);
+        fab = binding.appBarMain.fab;
+        fab.hide();
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_gallery, R.id.nav_settings, R.id.nav_palettes)
+                R.id.nav_gallery)
                 .setOpenableLayout(drawer)
                 .build();
+
+
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+        navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
+            @Override
+            public void onDestinationChanged(@NonNull NavController navController, @NonNull NavDestination navDestination, @Nullable Bundle bundle) {
+                invalidateOptionsMenu();
+            }
 
+        });
         /**
          * I ask for storage permissions
          */
@@ -173,6 +217,29 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        switch (current_fragment) {
+            case GALLERY:
+                menu.clear(); // Cleans the current menu
+                getMenuInflater().inflate(R.menu.gallery_menu, menu); // Inflates the menu
+                break;
+
+            case PALETTES:
+            case SETTINGS:
+            case SAVE_MANAGER:
+            case USB_SERIAL:
+            case IMPORT:
+            case FRAMES:
+                menu.clear(); // Cleans the current menu
+                fab.hide();
+                menu.close();
+                break;
+
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     private class ReadDataAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -189,9 +256,9 @@ public class MainActivity extends AppCompatActivity {
 
             if (palettes.size() > 0) {
                 for (GbcPalette gbcPalette : palettes) {
-                    Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                    Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
-                Methods.gbcPalettesList.addAll(palettes);
+                Utils.gbcPalettesList.addAll(palettes);
             } else {
                 StringBuilder stringBuilder = new StringBuilder();
                 int resourcePalettes = R.raw.palettes;
@@ -211,48 +278,44 @@ public class MainActivity extends AppCompatActivity {
                 }
                 String fileContent = stringBuilder.toString();
                 List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
-                Methods.gbcPalettesList.addAll(receivedList);
+                Utils.gbcPalettesList.addAll(receivedList);
                 for (GbcPalette gbcPalette : receivedList) {
-                    Methods.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
+                    Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
-                for (GbcPalette gbcPalette : Methods.gbcPalettesList) {
+                for (GbcPalette gbcPalette : Utils.gbcPalettesList) {
                     paletteDao.insert(gbcPalette);
                 }
             }
 
             if (frames.size() > 0) {
                 for (GbcFrame gbcFrame : frames) {
-                    Methods.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
+                    Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
+
                 }
-                Methods.framesList.addAll(frames);
+                Utils.framesList.addAll(frames);
             } else {
                 //First time add it to the database
                 StartCreation.addFrames(getBaseContext());
-                for (Map.Entry<String, GbcFrame> entry : Methods.hashFrames.entrySet()) {
+                for (Map.Entry<String, GbcFrame> entry : Utils.hashFrames.entrySet()) {
                     GbcFrame value = entry.getValue();
                     frameDao.insert(value);
                 }
             }
             //Now that I have palettes and frames, I can add images:
             if (imagesFromDao.size() > 0) {
-                anyImage = true;
                 //I need to add them to the gbcImagesList(GbcImage)
-                Methods.gbcImagesList.addAll(imagesFromDao);
-                GbcImage.numImages += Methods.gbcImagesList.size();
-            }
+                Utils.gbcImagesList.addAll(imagesFromDao);
+                GbcImage.numImages += Utils.gbcImagesList.size();
+            } else anyImage = false;
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            // Notifica al Adapter que los datos han cambiado
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
-            if (anyImage) {
-                gf.updateFromMain();
-            } else {
-                GalleryFragment.tv.setText(GalleryFragment.tv.getContext().getString(R.string.no_images));
-            }
+            gf.updateFromMain();
+
         }
     }
 
@@ -261,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             //resume tasks needing this permission
-            Toast toast = Toast.makeText(this, "Granted permissions.", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(this, getString(R.string.permissions_toast), Toast.LENGTH_LONG);
             toast.show();
         }
     }

@@ -6,8 +6,9 @@ import android.graphics.Bitmap;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
 /**
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
+
  * Interface for extracting raw 2bpp image(s) data from different source mediums, e.g
  * Gameboy save file or Gameboy printer dump, and returns the decoded images in the method
  * specified format.

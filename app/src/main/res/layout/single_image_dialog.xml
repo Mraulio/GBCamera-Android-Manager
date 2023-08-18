@@ -4,6 +4,11 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/tv_imageName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"></TextView>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -14,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:scaleType="fitXY"/>
+            android:scaleType="fitXY" />
 
     </ScrollView>
 

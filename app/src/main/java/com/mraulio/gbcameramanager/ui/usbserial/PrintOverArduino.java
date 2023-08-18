@@ -9,7 +9,8 @@ import android.hardware.usb.UsbInterface;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.methods.Methods;
+import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -34,7 +35,6 @@ public class PrintOverArduino {
     private final int TIMEOUT_READ = 100;
     public static int sleepTime = 0;
     public boolean banner = false;
-    public boolean oneImage = false;
 
 
     public byte[] checksumCalc(byte[] tileData) {
@@ -70,13 +70,15 @@ public class PrintOverArduino {
         return bytes;
     }
 
-    private List<List<byte[]>> createDataDelay(TextView tv) {
+    private List<List<byte[]>> createDataDelay(TextView tv, List<GbcImage> listImages) {
         List<byte[]> listBytes = new ArrayList<>();
         List<List<byte[]>> listOfLists = new ArrayList<>();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] bytesTileData;
         String data_nospace = "";
+        int chunkSize = 640;//each data packet size
+        int printsNeeded;
         if (banner) {
             data_nospace = TEST_BANNER.replaceAll(System.lineSeparator(), " ").replaceAll(" ", "");
             int len2 = data_nospace.length();
@@ -85,32 +87,10 @@ public class PrintOverArduino {
                 bytesTileData[i / 2] = (byte) ((Character.digit(data_nospace.charAt(i), 16) << 4)
                         + Character.digit(data_nospace.charAt(i + 1), 16));
             }
-        } else {
-            bytesTileData = Methods.gbcImagesList.get(MainActivity.printIndex).getImageBytes();
-        }
-
-        int chunkSize = 640;//each data packet size
-        tv.append("\nCHUNKS = " + bytesTileData.length / chunkSize);
-        //I NEED TO CREATE A FULL 9 PACKETS WITH COMMANDS FOR EACH BYTE LIST TO SEND.
-        //IF IMAGE IS LARGER THAN THE 9 PACKETS, CREATE ANOTHER BYTE LIST WITH COMMANDS AND THE REST OF THE DATA PACKETS.
-
-        int printsNeeded = ((bytesTileData.length / chunkSize) / 9);
-
-        //If result is 0.222 or 1.4343, add 1 needed print
-        if (((bytesTileData.length / chunkSize) % 9) != 0) {
-            printsNeeded += 1;
-        }
-
-        tv.append("\nNEEDED PRINTS = " + printsNeeded);
-        for (int x = 0; x < printsNeeded; x++) {
             listBytes.add(getCommandBytes(INIT));//listBytes.get(0)
             byte[] splittedArray;
             //If there is only 1 print, or its more prints and its the last one, the end is the bytesTileData.length
-            if (printsNeeded == 1 || (printsNeeded > 1 && x == printsNeeded - 1)) {
-                splittedArray = Arrays.copyOfRange(bytesTileData, x * 640 * 9, bytesTileData.length);
-            } else {
-                splittedArray = Arrays.copyOfRange(bytesTileData, x * 640 * 9, x * 640 * 9 + 640 * 9);
-            }
+                splittedArray = Arrays.copyOfRange(bytesTileData, 0, bytesTileData.length);
             for (int i = 0; i < splittedArray.length; i += chunkSize) {
                 int chunkLength = Math.min(chunkSize, splittedArray.length - i);
                 byte[] chunk = Arrays.copyOfRange(splittedArray, i, i + chunkLength);
@@ -126,28 +106,71 @@ public class PrintOverArduino {
                 }
             }
             listBytes.add(getCommandBytes(EMPTY_DATA));//listBytes.get(size-1)
-            if (x == printsNeeded - 1) {
-                listBytes.add(getCommandBytes(PRINT_MARGIN));//listBytes.get(size)
-            } else
-                listBytes.add(getCommandBytes(PRINT_NO_MARGIN));//listBytes.get(size)
+            listBytes.add(getCommandBytes(PRINT_MARGIN));//listBytes.get(size)
 
             listOfLists.add(new ArrayList<>(listBytes));
-            try {
-                tv.append("\nlistBytes before clear = " + listBytes.size());
 
-            } catch (Exception e) {
-                tv.append("\nError en listbytes size \n" + e.toString());
-            }
             try {
                 listBytes.clear();
             } catch (Exception e) {
                 tv.append("\nError en clear\n" + e.toString());
             }
+        } else {
+            tv.append("\nImages to print: " + listImages.size());
+            for (int k = 0; k < listImages.size(); k++) {
+                bytesTileData = listImages.get(k).getImageBytes();
+
+                printsNeeded = ((bytesTileData.length / chunkSize) / 9);
+
+                //If result is 0.222 or 1.4343, add 1 needed print
+                if (((bytesTileData.length / chunkSize) % 9) != 0) {
+                    printsNeeded += 1;
+                }
+                tv.append("\nNEEDED PRINTS = " + printsNeeded);
+                for (int x = 0; x < printsNeeded; x++) {
+                    listBytes.add(getCommandBytes(INIT));//listBytes.get(0)
+                    byte[] splittedArray;
+                    //If there is only 1 print, or its more prints and its the last one, the end is the bytesTileData.length
+                    if (printsNeeded == 1 || (printsNeeded > 1 && x == printsNeeded - 1)) {
+                        splittedArray = Arrays.copyOfRange(bytesTileData, x * 640 * 9, bytesTileData.length);
+                    } else {
+                        splittedArray = Arrays.copyOfRange(bytesTileData, x * 640 * 9, x * 640 * 9 + 640 * 9);
+                    }
+                    for (int i = 0; i < splittedArray.length; i += chunkSize) {
+                        int chunkLength = Math.min(chunkSize, splittedArray.length - i);
+                        byte[] chunk = Arrays.copyOfRange(splittedArray, i, i + chunkLength);
+                        try {
+                            outputStream.write(getCommandBytes(DATA_COMMAND));
+                            outputStream.write(chunk);//I write the 640 bytes
+                            outputStream.write(checksumCalc(chunk)); //I write the Checksum, need to calculate it with start_checksum+data
+                            outputStream.write(getCommandBytes(END_DATA));//The last 2 bytes
+                            listBytes.add(outputStream.toByteArray());//listBytes.get(1-X)
+                            outputStream.reset();//Empty the outputstream
+                        } catch (Exception e) {
+                            tv.append(e.toString());
+                        }
+                    }
+                    listBytes.add(getCommandBytes(EMPTY_DATA));//listBytes.get(size-1)
+                    if (x == printsNeeded - 1) {
+                        listBytes.add(getCommandBytes(PRINT_MARGIN));//listBytes.get(size)
+                    } else
+                        listBytes.add(getCommandBytes(PRINT_NO_MARGIN));//listBytes.get(size)
+
+                    listOfLists.add(new ArrayList<>(listBytes));
+
+                    try {
+                        listBytes.clear();
+                    } catch (Exception e) {
+                        tv.append("\nError en clear\n" + e.toString());
+                    }
+                }
+            }
         }
+
         return listOfLists;
     }
 
-    public void sendThreadDelay(UsbDeviceConnection connection, UsbDevice usbDevice, TextView textView, Context context) {
+    public void sendThreadDelay(UsbDeviceConnection connection, UsbDevice usbDevice, TextView textView, List<GbcImage> listImages) {
         UsbEndpoint endpoint = null;
         for (int i = 0; i < usbDevice.getInterfaceCount(); i++) {
             UsbInterface usbInterface = usbDevice.getInterface(i);
@@ -166,8 +189,8 @@ public class PrintOverArduino {
             textView.append("Could not find a valid endpoint");
         }
         UsbEndpoint finalEndpoint = endpoint;
-        List<List<byte[]>> listOfBytes = createDataDelay(textView);
-        textView.append("\nThere are this byte arrays" + listOfBytes.size()+"\n");
+        List<List<byte[]>> listOfBytes = createDataDelay(textView, listImages);
+        textView.append("\nThere are this byte arrays" + listOfBytes.size() + "\n");
 
         Thread sendThread = new Thread(new Runnable() {
             @Override
@@ -185,7 +208,7 @@ public class PrintOverArduino {
                     }
                     //Wait 14s between each print. Can play with this number
                     try {
-                        Thread.sleep(14000);
+                        Thread.sleep(16000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

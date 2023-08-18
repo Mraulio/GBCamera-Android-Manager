@@ -35,12 +35,10 @@
     <string name="png_size">Tamaño PNG:\u0020</string>
     <string name="images_page">Seleccionar imágenes por página:\u0020</string>
     <string name="language">Idioma (necesita reinicar):\u0020</string>
-    <string name="showPrint">Mostrar botón Imprimir.</string>
-
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">No se puede borrar un marco base.</string>
-    <string name="delete_dialog">Borrar marco\u0020</string>
+    <string name="delete_frame_dialog">Borrar marco\u0020</string>
     <string name="sure_dialog">¿Estás seguro?</string>
     <string name="delete">BORRAR</string>
     <string name="cancel">Cancelar</string>
@@ -65,7 +63,7 @@
 
 
     <!--Import fragment xml strings-->
-    <string name="btn_select_file">Seleciona archivo</string>
+    <string name="btn_select_file">Selecciona archivo</string>
     <string name="tv_select_file">Selecciona un archivo para importar</string>
     <string name="btn_extract_file">Extraer archivo.</string>
     <string name="btn_add_images">Añadir imágenes</string>
@@ -111,7 +109,7 @@
     <string name="no_good_dump">\nNO ES UN BUEN VOlCADO DE SAV.</string>
     <string name="sav_parts">\nPartes del sav:\u0020</string>
     <string name="rom_name">\nEl nombre de la ROM es:\u0020</string>
-    <string name="dumping_rom_wait">\Volcando 1MB ROM, por favor espera unos 45 segundos...\n...</string>
+    <string name="dumping_rom_wait">\Volcando 1MB ROM, por favor espera unos 45 segundos...</string>
     <string name="dumping_ram_wait">\nVolcando RAM, Por favor espera...\n...</string>
     <string name="last_sav_name">\nEl nombre del último archivo SAV es:\u0020</string>
     <string name="size">Tamaño:\u0020</string>
@@ -120,6 +118,37 @@
 
     <string name="delete_dialog_gallery">Borrar imagen\u0020</string>
 
+    <string name="menu_savmanager">Gestor de Saves</string>
+    <string name="file_name">Nombre del archivo:\u0020</string>
+    <string name="paperize_settings">Mostrar boton Paperizar</string>
+    <string name="paperize_button">Paperizar</string>
+    <string name="saved_paperized_toast">¡Guardada en Papel!</string>
+    <string name="showPrint">Mostrar botón Imprimir.</string>
+    <string name="permissions_toast">Permisos otorgados.</string>
+    <string name="no_favorites">No hay favoritos</string>
+    <string name="edit_selected_item">Editar seleccionadas</string>
+    <string name="filter_favorites_item">Filtrar favoritos</string>
+    <string name="remove_filter_item">Quitar filtro</string>
+    <string name="average_item">HDR</string>
+    <string name="animate_item">Animar</string>
+    <string name="json_backup_item">JSON Backup</string>
+    <string name="dialog_close_button">Cerrar</string>
+    <string name="select_minimum_toast">Selecciona al menos 2 imágenes</string>
+    <string name="unselect_all_toast">Deselecciona todo antes de filtrar</string>
+    <string name="delete_all_title">¿Borrar imágenes seleccionadas?</string>
+    <string name="no_selected">No hay imágenes seleccionadas</string>
+    <string name="json_backup_saved">¡Guardado JSON Backup!</string>
+    <string name="page_selector_dialog">Selecciona página</string>
+    <string name="hdr_exception">Todas las imágenes deben tener el mismo tamaño.</string>
+    <string name="save_location_hint">PNGs, HDRs y GIFs se guardan en \n\u0020 Pictures/GBCamera Manager.\n Otros archivos se guardan en Download/GBCamera Manager.</string>
+    <string name="done_dumping_ram">¡Volcado de RAM terminado!\u0020 Comprueba la carpeta Download/GBCamera Manager/Save dumps</string>
+    <string name="done_dumping_photo">¡Volcado de ROM PHOTO terminado!\u0020 Comprueba la carpeta Download/GBCamera Manager/PHOTO Rom Dumps</string>
+    <string name="filtered_images">Imágenes filtradas:\u0020</string>
+    <string name="selected_images">Seleccionadas:\u0020</string>
 
+    <string name="analyzing">Analizando, por favor espera...</string>
+    <string name="done_analyzing">¡Análisis terminado!</string>
+
+    <string name="check_magic">Comprobar .sav válido al importar/extraer</string>
 
 </resources>

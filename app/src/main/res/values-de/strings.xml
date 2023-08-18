@@ -22,7 +22,7 @@
     <string name="cb_crop">Beschneiden</string>
 
     <string name="toast_printing">Drucke, bitte warten...</string>
-    <string name="toast_saved">Gespeichert</string>
+    <string name="toast_saved">Gespeichert x</string>
     <string name="toast_saved_txt">TXT gespeichert</string>
 
     <string name="loading">Lade...</string>
@@ -36,11 +36,10 @@
     <string name="png_size">PNG Größe:\u0020</string>
     <string name="images_page">Bilder pro Seite:\u0020</string>
     <string name="language">Sprache (benötigt Neustart):\u0020</string>
-    <string name="showPrint">Show Print button.</string>
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">Kann Basisframe nicht löschen</string>
-    <string name="delete_dialog">Frame löschen\u0020</string>
+    <string name="delete_frame_dialog">Frame löschen\u0020</string>
     <string name="sure_dialog">Sicher?</string>
     <string name="delete">LÖSCHEN</string>
     <string name="cancel">Abbrechen</string>
@@ -119,4 +118,36 @@
     <string name="saved_to_file">In Datei gespeichert</string>
 
     <string name="delete_dialog_gallery">Bild Löschen\u0020</string>
+
+    <string name="menu_savmanager">Speichermanager</string>
+    <string name="file_name">Dateiname:\u0020</string>
+    <string name="paperize_settings">Zeige Button "Thermoprinter Simulation"</string>
+    <string name="paperize_button">Thermoprinter Simulation</string>
+    <string name="saved_paperized_toast">Thermoprinter Simulation gespeichert!</string>
+    <string name="showPrint">Zeige Druckbutton.</string>
+    <string name="permissions_toast">Berechtigungen erteilt.</string>
+    <string name="no_favorites">Keine Favoriten</string>
+    <string name="edit_selected_item">Auswahl bearbeiten</string>
+    <string name="filter_favorites_item">Favoriten filtern</string>
+    <string name="remove_filter_item">Filter entfernen</string>
+    <string name="average_item">Durchschnitt</string>
+    <string name="animate_item">Animieren</string>
+    <string name="json_backup_item">JSON Backup</string>
+    <string name="dialog_close_button">Schließen</string>
+    <string name="select_minimum_toast">Bitte mindestens zwei Bilder auswählen</string>
+    <string name="unselect_all_toast">Auswahl vor dem Filtern entfernen</string>
+    <string name="delete_all_title">Ausgewählte Bilder löschen?</string>
+    <string name="no_selected">Keine Bilder ausgewählt</string>
+    <string name="json_backup_saved">JSON Backup gespeichert!</string>
+    <string name="page_selector_dialog">Seite wählen</string>
+    <string name="hdr_exception">Alle Bilder müssen dieselbe Größe haben.</string>
+    <string name="save_location_hint">PNGs, HDRs und Animationen werden nach \n\u0020 Pictures/GBCamera Manager gespeichert\nAndere Dateien werden nach Download/GBCamera Manager gespeichert.</string>
+
+    <string name="done_dumping_ram">RAM WURDE AUSGELESEN! Schau in den Ordner Download/GBCamera Manager/Save dumps</string>
+    <string name="done_dumping_photo">ROM WURDE AUSGELESEN! Schau in den Ordner Download/GBCamera Manager/PHOTO Rom Dumps</string>
+    <string name="filtered_images">Gefilterte Bilder:\u0020</string>
+    <string name="selected_images">Ausgewählt:\u0020</string>
+
+    <string name="analyzing">Analyse läuft, bitte warten...</string>
+    <string name="done_analyzing">Fertig mit der Analyse!</string>
 </resources>

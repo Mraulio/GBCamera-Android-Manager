@@ -5,14 +5,10 @@ import android.graphics.Bitmap;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
 import java.io.IOException;
-
+import java.util.Arrays;
 
 /**
- * Codec para decodificar y codificar una imagen de mosaico de 8x8 píxeles
- * a un conjunto de datos de bytes y viceversa.
- * <p>
- * Este codec utiliza una paleta de colores indexados para decodificar
- * y codificar los datos de mosaico.
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
  */
 public class TileCodec implements Codec {
 
@@ -20,9 +16,11 @@ public class TileCodec implements Codec {
     public static final int TILE_WIDTH = 8;
     public static final int TILE_HEIGHT = 8;
     public static final int TILE_BYTES_LENGTH = 16;
-    private int paletteIndex;
 
     private IndexedPalette palette;
+
+    public TileCodec() {
+    }
 
     public TileCodec(IndexedPalette palette) {
         this.palette = palette;
@@ -31,26 +29,28 @@ public class TileCodec implements Codec {
     @Override
     public Bitmap decode(byte[] tileData) {
         Bitmap buf = Bitmap.createBitmap(TILE_WIDTH, TILE_HEIGHT, Bitmap.Config.ARGB_8888);
-//        for (int y=0; y<TILE_HEIGHT; y++) {
-//            byte lowByte = reverseBitEndianess(tileData[y*ROW_BYTES]);
-//            byte highByte = reverseBitEndianess(tileData[y*ROW_BYTES+1]);
-//            for (int x=0; x<TILE_WIDTH; x++) {
-//                int paletteIndex = getPaletteIndex(getBit(lowByte, x), getBit(highByte, x));
-//                buf.setPixel(x, y, palette.getRGB(paletteIndex));
-//            }
-//        }
         return buf;
     }
 
     @Override
-    public Bitmap decodeWithPalette(int[] palette, byte[] tileData) {
+    public Bitmap decodeWithPalette(int[] palette, byte[] tileData, boolean invertPalette, boolean isWildFrame) {
+        int[] usedPalette = Arrays.copyOf(palette, palette.length);//Need to create a copy of the array to not change it all the time
+        if (invertPalette) {//Invert order of all colors in the palette
+            int temp = usedPalette[0];
+            usedPalette[0] = usedPalette[3];
+            usedPalette[3] = temp;
+
+            temp = usedPalette[1];
+            usedPalette[1] = usedPalette[2];
+            usedPalette[2] = temp;
+        }
         Bitmap buf = Bitmap.createBitmap(TILE_WIDTH, TILE_HEIGHT, Bitmap.Config.ARGB_8888);
         for (int y = 0; y < TILE_HEIGHT; y++) {
             byte lowByte = reverseBitEndianess(tileData[y * ROW_BYTES]);
             byte highByte = reverseBitEndianess(tileData[y * ROW_BYTES + 1]);
             for (int x = 0; x < TILE_WIDTH; x++) {
                 int paletteIndexx = getPaletteIndex(getBit(lowByte, x), getBit(highByte, x));
-                buf.setPixel(x, y, palette[paletteIndexx]);
+                buf.setPixel(x, y, usedPalette[paletteIndexx]);
             }
         }
         return buf;
@@ -83,7 +83,7 @@ public class TileCodec implements Codec {
     }
 
     @Override
-    public byte[] encodeInternal(Bitmap image) throws IOException {
+    public byte[] encodeInternal(Bitmap image, String paletteId) throws IOException {
         //Not used
         return new byte[0];
     }

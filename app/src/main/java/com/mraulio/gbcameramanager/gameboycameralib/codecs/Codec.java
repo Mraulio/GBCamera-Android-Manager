@@ -7,13 +7,12 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 import java.io.IOException;
 
 /**
- *
- * @author Raúl Miras Vidal
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
  */
 public interface Codec {
     Bitmap decode(byte[] data);
-    Bitmap decodeWithPalette(int[] palette,byte[] data);//Added
+    Bitmap decodeWithPalette(int[] palette,byte[] data, boolean invert, boolean isWildFrame);//Added
     byte[] encode(Bitmap image) throws IOException;
-    byte[] encodeInternal(Bitmap image) throws IOException;//Added
+    byte[] encodeInternal(Bitmap image,String paletteId) throws IOException;//Added
 
 }

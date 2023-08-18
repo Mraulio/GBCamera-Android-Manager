@@ -28,6 +28,7 @@
             android:layout_height="wrap_content"
             android:text="Frame name"
             android:maxLines="1"
+            android:textColor="@color/black"
             android:scrollHorizontally="true"
             android:id="@+id/tvFrameName"></TextView>
 

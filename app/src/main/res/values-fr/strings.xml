@@ -28,11 +28,10 @@
     <string name="png_size">Taille fichier PNG:\u0020</string>
     <string name="images_page">Images par page:\u0020</string>
     <string name="language">Langue (relancer pour activer):\u0020</string>
-    <string name="showPrint">Show Print button.</string>
 
     <string name="cant_delete_base">Bordure par défaut. Ne peut être effacée</string>
-    <string name="delete_dialog">Effacer bordure\u0020</string>
-    <string name="sure_dialog">Confirmer ?</string>
+    <string name="delete_frame_dialog">Effacer bordure\u0020</string>
+    <string name="sure_dialog">Confirmer?</string>
     <string name="delete">EFFACER</string>
     <string name="cancel">Annuler</string>
     <string name="frames_total">Nombre de bordures:\u0020</string>
@@ -94,11 +93,43 @@
     <string name="no_good_dump">\nSauvegarde corrompue.</string>
     <string name="sav_parts">\nSav parties:\u0020</string>
     <string name="rom_name">\nLe nom de la rom est:\u0020</string>
-    <string name="dumping_rom_wait">\nTéléchargement 1MB ROM, attendre environ 45s...\n...</string>
+    <string name="dumping_rom_wait">\nTéléchargement 1MB ROM, attendre environ 45s...</string>
     <string name="dumping_ram_wait">\nTéléchargement RAM, attendre...\n...</string>
     <string name="last_sav_name">\Le nom du dernier fichier SAV est:\u0020</string>
     <string name="size">Taille:\u0020</string>
     <string name="error_file">Erreur de création du fichier:\u0020</string>
     <string name="saved_to_file">Sauvegarder vers fichier</string>
     <string name="delete_dialog_gallery">Effacer image\u0020</string>
+
+    <string name="menu_savmanager">Gestionnaire de sauvegardes</string>
+    <string name="file_name">Nom du fichier:\u0020</string>
+    <string name="paperize_settings">Afficher le bouton "Simulation d'impression thermique"</string>
+    <string name="paperize_button">Simulation d\'impression thermique</string>
+    <string name="saved_paperized_toast">Impression thermique bien cuite !</string>
+    <string name="showPrint">Afficher le bouton imprimer</string>
+    <string name="permissions_toast">Permission accordée</string>
+    <string name="no_favorites">Pas de favoris</string>
+    <string name="edit_selected_item">Editer sélection</string>
+    <string name="filter_favorites_item">Filtrer les favoris</string>
+    <string name="remove_filter_item">Supprimer filtre</string>
+    <string name="average_item">Moyennage/HDR</string>
+    <string name="animate_item">Animer en gif</string>
+    <string name="json_backup_item">Sauvegarder JSON</string>
+    <string name="dialog_close_button">Fermer</string>
+    <string name="select_minimum_toast">Sélectionner au moins deux images</string>
+    <string name="unselect_all_toast">Dé-sélectionner tout avant application du filtre</string>
+    <string name="delete_all_title">Effacer les images sélectionnées ?</string>
+    <string name="no_selected">Pas d\'image sélectionnée</string>
+    <string name="json_backup_saved">JSON sauvegardé !</string>
+    <string name="page_selector_dialog">Sélectionner page</string>
+    <string name="hdr_exception">Toutes les images doivent être de taille identique</string>
+    <string name="save_location_hint">PNGs, HDRs et animations sont sauvegardées dans \n\u0020 Pictures/GBCamera Manager.\nLes autres fichiers sont sauvegardés dans Download/GBCamera Manager.</string>
+
+    <string name="done_dumping_ram">Copie de la ram terminée ! La copie se trouve dans le répertoire Download/GBCamera Manager/Save dumps</string>
+    <string name="done_dumping_photo">Copie de la rom PHOTO terminée ! La copie se trouve dans le répertoire Download/GBCamera Manager/PHOTO Rom Dumps</string>
+    <string name="filtered_images">Images filtrées:\u0020</string>
+    <string name="selected_images">Choisies:\u0020</string>
+
+    <string name="analyzing">Analyse en cours, veuillez patienter...</string>
+    <string name="done_analyzing">Analyse terminée!</string>
 </resources>

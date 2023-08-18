@@ -12,6 +12,7 @@
     <string name="menu_frames">Frames</string>
     <string name="menu_import">Import</string>
     <string name="menu_usbserial">USB Serial</string>
+
     <string name="menu_settings">Settings</string>
 
     <!--Custom_dialog, Gallery Fragment strings-->
@@ -28,18 +29,16 @@
     <string name="total_images">Total of images:\u0020</string>
     <string name="no_images">No images in the gallery. Go to Import tab</string>
 
-
     <!--Settings fragment xml strings-->
     <string name="export_txt">Export as TXT.</string>
     <string name="export_png">Export as PNG.</string>
     <string name="png_size">PNG size:\u0020</string>
     <string name="images_page">Select images per page:\u0020</string>
     <string name="language">Language (needs restart):\u0020</string>
-    <string name="showPrint">Show Print button.</string>
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">Can\'t delete a base frame</string>
-    <string name="delete_dialog">Delete frame\u0020</string>
+    <string name="delete_frame_dialog">Delete frame\u0020</string>
     <string name="sure_dialog">Are you sure?</string>
     <string name="delete">DELETE</string>
     <string name="cancel">Cancel</string>
@@ -110,7 +109,7 @@
     <string name="no_good_dump">\nNOT A GOOD SAVE DUMP.</string>
     <string name="sav_parts">\nSav parts:\u0020</string>
     <string name="rom_name">\nThe ROM name is:\u0020</string>
-    <string name="dumping_rom_wait">\nDumping 1MB ROM, please wait about 45 seconds...\n...</string>
+    <string name="dumping_rom_wait">\nDumping 1MB ROM, please wait about 45 seconds...</string>
     <string name="dumping_ram_wait">\nDumping RAM, please wait...\n...</string>
     <string name="last_sav_name">\nThe name of the last SAV file is:\u0020</string>
     <string name="size">Size:\u0020</string>
@@ -118,6 +117,41 @@
     <string name="saved_to_file">Saved to file</string>
 
     <string name="delete_dialog_gallery">Delete image\u0020</string>
+
+    <string name="menu_savmanager">Save manager</string>
+    <string name="file_name">Name of file:\u0020</string>
+    <string name="paperize_settings">Show paperize button</string>
+    <string name="paperize_button">Paperize</string>
+    <string name="saved_paperized_toast">Saved Paperized!</string>
+    <string name="showPrint">Show Print button.</string>
+    <string name="permissions_toast">Granted permissions.</string>
+    <string name="no_favorites">No favorites</string>
+    <string name="edit_selected_item">Edit selected</string>
+    <string name="filter_favorites_item">Filter favorites</string>
+    <string name="remove_filter_item">Remove filter</string>
+    <string name="average_item">Average</string>
+    <string name="animate_item">Animate</string>
+    <string name="json_backup_item">JSON Backup</string>
+    <string name="dialog_close_button">Close</string>
+    <string name="select_minimum_toast">Select at least 2 images</string>
+    <string name="unselect_all_toast">Unselect all before filtering</string>
+    <string name="delete_all_title">Delete selected images?</string>
+    <string name="no_selected">No images selected</string>
+    <string name="json_backup_saved">JSON Backup saved!</string>
+    <string name="page_selector_dialog">Select page</string>
+    <string name="hdr_exception">All images must have the same size.</string>
+    <string name="save_location_hint">PNGs, HDRs and GIFs are saved into \n\u0020 Pictures/GBCamera Manager. \nOther files are stored in \n\u0020 Download/GBCamera Manager.</string>
+
+    <string name="done_dumping_ram">DONE DUMPING RAM! Check your Download/GBCamera Manager/Save dumps folder</string>
+    <string name="done_dumping_photo">DONE DUMPING PHOTO ROM! Check your Download/GBCamera Manager/PHOTO Rom Dumps folder</string>
+    <string name="filtered_images">Filtered images:\u0020</string>
+    <string name="selected_images">Selected:\u0020</string>
+
+    <string name="analyzing">Analyzing, please wait...</string>
+    <string name="done_analyzing">Finished analyzing!</string>
+
+    <string name="check_magic">Check for valid .sav when importing/extracting</string>
+    <string name="delete_photo_folder_dialog">Delete Photo rom folder?</string>
 
 
 

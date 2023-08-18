@@ -1,6 +1,5 @@
 package com.mraulio.gbcameramanager.gameboycameralib.saveExtractor;
 
-
 import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.*;
 
 import android.graphics.Bitmap;
@@ -22,6 +21,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Modified from https://github.com/KodeMunkie/gameboycameralib
+ */
 public class SaveImageExtractor implements Extractor {
 
     private static final String PNG_FORMAT = "png";
@@ -30,13 +32,13 @@ public class SaveImageExtractor implements Extractor {
     private final ImageCodec smallImageCodec;
 
     public SaveImageExtractor(IndexedPalette palette) {
-        this.imageCodec = new ImageCodec(palette, IMAGE_WIDTH, IMAGE_HEIGHT);
-        this.smallImageCodec = new ImageCodec(palette, SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT);
+        this.imageCodec = new ImageCodec( IMAGE_WIDTH, IMAGE_HEIGHT,false);
+        this.smallImageCodec = new ImageCodec( SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT,false);
     }
 
     @Override
     public List<Bitmap> extract(File file) throws IOException {
-        return extract(Files.readAllBytes(file.toPath()));//Modificado
+        return extract(Files.readAllBytes(file.toPath()));//Modified
     }
 
     @Override
@@ -72,7 +74,7 @@ public class SaveImageExtractor implements Extractor {
 
     @Override
     public List<byte[]> extractBytes(File file) throws IOException {
-        return extractBytes(Files.readAllBytes(file.toPath()));//Modificado
+        return extractBytes(Files.readAllBytes(file.toPath()));//Modified
     }
 
     //Added by Mraulio
@@ -97,7 +99,6 @@ public class SaveImageExtractor implements Extractor {
                 activePhotos++;
             }
         }
-        System.out.println(sb.toString());
         sb.setLength(0);
         int newSize = 0;
         int index = 0;
@@ -116,15 +117,13 @@ public class SaveImageExtractor implements Extractor {
                 index++;
             }
         }
-        System.out.println(sb.toString());
         ArrayList<byte[]> allImages = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0
         for (int i = 0; i < activePhotos; i++) {
             allImages.add(null);//Fill it with null so I can later use the "put" method
         }
         byte[] lastSeenImage = new byte[0];
 
-        //Sort the  noFFarray
-
+        //Sort the noFFarray
         Arrays.sort(noFFarray);
         sb.setLength(0);
         for (byte b : noFFarray) {
@@ -171,7 +170,6 @@ public class SaveImageExtractor implements Extractor {
             // Just print the error and continue to return what images we have
             e.printStackTrace();
         }
-
         return allImages;
     }
 

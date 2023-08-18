@@ -36,11 +36,10 @@
     <string name="png_size">Tamanho do PNG:\u0020</string>
     <string name="images_page">Imagens por página:\u0020</string>
     <string name="language">Idioma (necessário reiniciar):\u0020</string>
-    <string name="showPrint">Mostrar botão Imprimir.</string>
 
     <!--Frames fragment strings-->
     <string name="cant_delete_base">Não é possível deletar a moldura padrão</string>
-    <string name="delete_dialog">Deletar moldura\u0020</string>
+    <string name="delete_frame_dialog">Deletar moldura\u0020</string>
     <string name="sure_dialog">Você tem certeza?</string>
     <string name="delete">DELETAR</string>
     <string name="cancel">Cancelar</string>
@@ -111,7 +110,7 @@
     <string name="no_good_dump">\nNÃO É UMA BOA EXTRAÇÃO DE SAV.</string>
     <string name="sav_parts">\nPartes do Sav:\u0020</string>
     <string name="rom_name">\nO nome da ROM é:\u0020</string>
-    <string name="dumping_rom_wait">\Extraido 1MB ROM, aguarde aproximadamente 45 segundos...\n...</string>
+    <string name="dumping_rom_wait">\Extraido 1MB ROM, aguarde aproximadamente 45 segundos...</string>
     <string name="dumping_ram_wait">\Extraindo RAM, agaurde...\n...</string>
     <string name="last_sav_name">\nO nome do último SAV é:\u0020</string>
     <string name="size">Tamanho:\u0020</string>
@@ -120,6 +119,35 @@
 
     <string name="delete_dialog_gallery">Apagar imagem\u0020</string>
 
+    <string name="menu_savmanager">Gerenciador de Saves</string>
+    <string name="file_name">Nome do arquivo:\u0020</string>
+    <string name="paperize_settings">Mostrar botão paperize</string>
+    <string name="paperize_button">Paperize</string>
+    <string name="saved_paperized_toast">Paperized salvo!</string>
+    <string name="showPrint">Mostrar botão de impressão.</string>
+    <string name="permissions_toast">Permissões concedidas.</string>
+    <string name="no_favorites">Nenhum favorito.</string>
+    <string name="edit_selected_item">Editar selecionados</string>
+    <string name="filter_favorites_item">Filtrar favoritos</string>
+    <string name="remove_filter_item">Remover filtro</string>
+    <string name="average_item">Combinar</string>
+    <string name="animate_item">Animar</string>
+    <string name="json_backup_item">Backup JSON</string>
+    <string name="dialog_close_button">Fechar</string>
+    <string name="select_minimum_toast">Selecione pelo menos 2 imagens</string>
+    <string name="unselect_all_toast">Desmarque tudo antes de filtrar</string>
+    <string name="delete_all_title">Deletar imagens selecionadas?</string>
+    <string name="no_selected">Nenhuma imagem selecionada</string>
+    <string name="json_backup_saved">Backup do JSON salvo!</string>
+    <string name="page_selector_dialog">Selecionar página</string>
+    <string name="hdr_exception">As imagens devem ter o mesmo tamanho.</string>
+    <string name="save_location_hint">PNGs, HDRs e animações são salvas em \n\u0020 Pictures/GBCamera Manager.\nOutros arquivos em Download/GBCamera Manager.</string>
 
+    <string name="filtered_images">Imagens filtradas:\u0020</string>
+    <string name="selected_images">Selecionadas:\u0020</string>
+    <string name="done_dumping_ram">CÓPIA DA RAM COMPLETA! Confira a pasta Download/GBCamera Manager/Save Dumps</string>
+    <string name="done_dumping_photo">CÓPIA DA ROM PHOTO COMPLETA! Confira a pasta Download/GBCamera Manager/PHOTO Rom Dumps</string>
 
+    <string name="analyzing">Analisando, aguarde...</string>
+    <string name="done_analyzing">Análise concluída!</string>
 </resources>

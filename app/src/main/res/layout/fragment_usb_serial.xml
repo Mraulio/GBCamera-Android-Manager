@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
     android:orientation="vertical"
     android:weightSum="6"
     tools:context=".MainActivity">
@@ -34,6 +33,14 @@
                     android:text="Arduino Printer Emulator"></RadioButton>
 
                 <RadioButton
+                    android:id="@+id/rbPrint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginHorizontal="10dp"
+                    android:text="@string/rb_print"></RadioButton>
+
+                <RadioButton
                     android:id="@+id/rbGbx"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -43,15 +50,6 @@
 
                 </RadioButton>
 
-                <RadioButton
-                    android:id="@+id/rbPrint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
-                    android:layout_marginHorizontal="10dp"
-                    android:text="@string/rb_print"
-                    android:textColor="#FF5722"
-                    android:textStyle="bold"></RadioButton>
             </RadioGroup>
         </LinearLayout>
 
@@ -73,9 +71,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:orientation="horizontal"
-                android:weightSum="3"
-                android:gravity="center">
+                android:weightSum="3">
 
                 <Button
                     android:id="@+id/btnDelete"
@@ -86,8 +84,8 @@
                     android:autoSizeMaxTextSize="30sp"
                     android:autoSizeMinTextSize="5sp"
                     android:autoSizeTextType="uniform"
-                    android:backgroundTint="#D64141"
                     android:maxLines="1"
+                    android:backgroundTint="#D64141"
                     android:text="@string/delete"
                     android:textSize="15sp"
                     android:visibility="gone"></Button>
@@ -169,16 +167,6 @@
                 android:textSize="15sp"
                 android:visibility="gone"></Button>
 
-            <!--            <Button-->
-            <!--                android:id="@+id/btnPrintImage"-->
-            <!--                android:layout_width="wrap_content"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:layout_marginHorizontal="5dp"-->
-            <!--                android:backgroundTint="#804F4F"-->
-            <!--                android:text="@string/btn_print_image"-->
-            <!--                android:textSize="15sp"-->
-            <!--                android:visibility="gone"></Button>-->
-
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -210,31 +198,31 @@
 
     </LinearLayout>
 
-    <!--    <LinearLayout-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:orientation="horizontal"-->
-    <!--        android:padding="10dp">-->
+    <LinearLayout
+        android:id="@+id/layout_cb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
 
-    <!--        <TextView-->
-    <!--            android:id="@+id/tvSleepTime"-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:text="@string/tv_sleep_time"-->
-    <!--            android:visibility="gone"></TextView>-->
+        <CheckBox
+            android:id="@+id/cbLastSeen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cb_last_seen"></CheckBox>
 
-    <!--        <Spinner-->
-    <!--            android:id="@+id/spSleepTime"-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:visibility="gone"></Spinner>-->
-    <!--    </LinearLayout>-->
+        <CheckBox
+            android:id="@+id/cbDeletedImages"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cb_deleted_images"></CheckBox>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="6"
-        android:background="#E3E3E3"
+        android:background="#32E3E3E3"
         android:orientation="vertical"
         android:weightSum="4">
 

@@ -28,7 +28,7 @@ import java.util.Locale;
 
 public class SettingsFragment extends Fragment {
     SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
-
+    private boolean userSelect = false;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
@@ -38,6 +38,11 @@ public class SettingsFragment extends Fragment {
         RadioButton rbPng = view.findViewById(R.id.rbPng);
         RadioButton rbTxt = view.findViewById(R.id.rbTxt);
         CheckBox cbPrint = view.findViewById(R.id.cbPrint);
+        CheckBox cbPaperize = view.findViewById(R.id.cbPaperize);
+        CheckBox cbMagicCheck = view.findViewById(R.id.cbMagic);
+        CheckBox cbRotation = view.findViewById(R.id.cbRotation);
+
+        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
 
         cbPrint.setChecked(MainActivity.printingEnabled);
         cbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -53,6 +58,20 @@ public class SettingsFragment extends Fragment {
                 editor.apply();
             }
         });
+        cbPaperize.setChecked(MainActivity.showPaperizeButton);
+        cbPaperize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("show_paperize_button", true);
+                    MainActivity.showPaperizeButton = true;
+                } else {
+                    editor.putBoolean("show_paperize_button", false);
+                    MainActivity.showPaperizeButton = false;
+                }
+                editor.apply();
+            }
+        });
 
         if (MainActivity.exportPng) {
             rbPng.setChecked(true);
@@ -62,7 +81,20 @@ public class SettingsFragment extends Fragment {
             spinnerExport.setEnabled(false);
         }
 
-//        MainActivity.pressBack=false;
+        cbMagicCheck.setChecked(MainActivity.magicCheck);
+        cbMagicCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    MainActivity.magicCheck = true;
+                    editor.putBoolean("magic_check", true);
+                } else {
+                    MainActivity.magicCheck = false;
+                    editor.putBoolean("magic_check", false);
+                }
+                editor.apply();
+            }
+        });
 
         rbPng.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,13 +146,10 @@ public class SettingsFragment extends Fragment {
                 editor.putInt("export_size", sizesInteger.get(position));
                 editor.apply();
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Acción que quieres hacer cuando no se selecciona ningún elemento en el Spinner
             }
         });
-
 
         List<Integer> sizesIntegerImages = new ArrayList<>();
         sizesIntegerImages.add(6);
@@ -137,6 +166,7 @@ public class SettingsFragment extends Fragment {
         sizesImages.add("15");
         sizesImages.add("18");
         sizesImages.add("30");
+
         ArrayAdapter<String> adapterImages = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, sizesImages);
         adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -148,13 +178,13 @@ public class SettingsFragment extends Fragment {
                 // I set the export size on the Main activity int as the selected one
                 MainActivity.imagesPage = sizesIntegerImages.get(position);
                 editor.putInt("images_per_page", sizesIntegerImages.get(position));
-                editor.apply();
                 GalleryFragment.currentPage = 0;
+                editor.putInt("current_page", 0);
+                editor.apply();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Acción que quieres hacer cuando no se selecciona ningún elemento en el Spinner
             }
         });
 
@@ -181,16 +211,34 @@ public class SettingsFragment extends Fragment {
         spinnerLanguage.setAdapter(adapterLanguage);
         spinnerLanguage.setSelection(langs.indexOf(MainActivity.languageCode));
         spinnerLanguage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // I set the export size on the Main activity int as the selected one
-                MainActivity.languageCode = langs.get(position);
-                ChangeLanguage(langs.get(position));
-            }
 
             @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (userSelect) {
+                    // I set the export size on the Main activity int as the selected one
+                    MainActivity.languageCode = langs.get(position);
+                    ChangeLanguage(langs.get(position));
+                } else {
+                    userSelect = true; // Because the spinner executes an item selection on startup
+                }
+            }
+            @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Acción que quieres hacer cuando no se selecciona ningún elemento en el Spinner
+            }
+        });
+
+        cbRotation.setChecked(MainActivity.showRotationButton);
+        cbRotation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("rotation_button", true);
+                    MainActivity.showRotationButton = true;
+                } else {
+                    editor.putBoolean("rotation_button", false);
+                    MainActivity.showRotationButton = false;
+                }
+                editor.apply();
             }
         });
 
@@ -207,7 +255,5 @@ public class SettingsFragment extends Fragment {
         resources.updateConfiguration(configuration, resources.getDisplayMetrics());
         editor.putString("language", languageCode);
         editor.apply();
-
     }
-
 }

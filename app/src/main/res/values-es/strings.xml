@@ -150,5 +150,13 @@
     <string name="done_analyzing">¡Análisis terminado!</string>
 
     <string name="check_magic">Comprobar .sav válido al importar/extraer</string>
-
+    <string name="delete_photo_folder_dialog">¿Borrar directorio de rom Photo?</string>
+    <string name="add_as_frame">Añadir como marco</string>
+    <string name="rotation_button">Mostrar botón Rotar</string>
+    <string name="frame_name">Establecer nombre del marco</string>
+    <string name="cant_add_frame">No se puede añadir esta imagen como marco</string>
+    <string name="no_empty_frame_name">El nombre no debe estar vacío</string>
+    <string name="no_spaces_frame_name">El nombre no debe contener espacios</string>
+    <string name="frame_name_exists">Este nombre de marco ya existe</string>
+    <string name="no_valid_image_file">No es un archivo de imagen válido</string>
 </resources>

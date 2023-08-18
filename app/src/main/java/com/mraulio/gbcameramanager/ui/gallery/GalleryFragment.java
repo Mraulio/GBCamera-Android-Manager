@@ -1266,7 +1266,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             LocalDateTime now = LocalDateTime.now();
 
                             File gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".gif");
-                            File mp4File = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".mp4");
 
                             try (FileOutputStream out = new FileOutputStream(gifFile)) {
 

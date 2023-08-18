@@ -127,7 +127,7 @@
                 android:autoSizeMinTextSize="10sp"
                 android:autoSizeTextType="uniform"
                 android:maxLines="1"
-                android:text="Show Rotation button" />
+                android:text="@string/rotation_button" />
 
             <TextView
                 android:layout_width="match_parent"

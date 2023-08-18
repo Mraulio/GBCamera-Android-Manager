@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/cbAddFrame"
         android:visibility="gone"
-        android:text="Add as frame"
+        android:text="@string/add_as_frame"
         />
     <GridView
         android:id="@+id/gridViewImport"

@@ -313,7 +313,7 @@ public class ImportFragment extends Fragment {
                                     }
                                 } else if (cbAddFrame.isChecked()) {
                                     if (finalListBitmaps.get(0).getHeight() != 144 && finalListBitmaps.get(0).getHeight() != 224) {
-                                        Utils.toast(getContext(), "Can't add this image as a frame");//Add string
+                                        Utils.toast(getContext(), getString(R.string.cant_add_frame));//Add string
                                         btnAddImages.setEnabled(true);
                                     } else frameNameDialog();
                                 }
@@ -337,27 +337,27 @@ public class ImportFragment extends Fragment {
         EditText etFrameName = view.findViewById(R.id.etFrameName);
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(view);
-        AlertDialog alertdialog  = builder.create();
+        AlertDialog alertdialog = builder.create();
 
         etFrameName.setImeOptions(EditorInfo.IME_ACTION_DONE);//When pressing enter
-        builder.setTitle("Set new Frame name");//Add string
+//        builder.setTitle("Set new Frame name");//Add string
         Button btnSaveFrame = view.findViewById(R.id.btnSaveFrame);
         btnSaveFrame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 GbcFrame gbcFrame = new GbcFrame();
                 gbcFrame.setFrameBitmap(filledFrame);
-                if (filledFrame.getHeight()==224){
+                if (filledFrame.getHeight() == 224) {
                     gbcFrame.setWildFrame(true);
                 }
                 List<GbcFrame> newFrameImages = new ArrayList<>();
                 //Add here the dialog for the frame name
                 String frameName = etFrameName.getText().toString();
                 if (frameName.equals("")) {
-                    Utils.toast(getContext(), "Name must not be empty");//Add string
+                    Utils.toast(getContext(), getString(R.string.no_empty_frame_name));
                     etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
                 } else if (frameName.contains(" ")) {
-                    Utils.toast(getContext(), "Text must no contain empty spaces.");//Add string
+                    Utils.toast(getContext(), getString(R.string.no_spaces_frame_name));//Add string
                     etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
                 } else {
                     gbcFrame.setFrameName(frameName);
@@ -367,7 +367,7 @@ public class ImportFragment extends Fragment {
                         if (frame.getFrameName().toLowerCase(Locale.ROOT).equals(gbcFrame.getFrameName())) {
                             alreadyAdded = true;
                             etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
-                            Utils.toast(getContext(), "This frame name already exists.");//Add string
+                            Utils.toast(getContext(), getString(R.string.frame_name_exists));//Add string
                             break;
                         }
                     }
@@ -857,7 +857,7 @@ public class ImportFragment extends Fragment {
 
                                 } else {
                                     tvFileName.setText(getString(R.string.file_name) + fileName);
-                                    tvFileName.setText("Not a valid image file");
+                                    tvFileName.setText(getString(R.string.no_valid_image_file));
                                     btnExtractFile.setVisibility(View.GONE);
                                     btnAddImages.setVisibility(View.GONE);
                                     layoutCb.setVisibility(View.GONE);
@@ -898,7 +898,6 @@ public class ImportFragment extends Fragment {
             listImportedImageBytes = extractor.extractBytes(fileBytes);
             //Check for Magic or FF bytes
             if (!magicIsReal(fileBytes)) {
-                System.out.println("NO VALID FILE///////////////////////");
                 return false;
             }
             int nameIndex = 1;
@@ -917,7 +916,7 @@ public class ImportFragment extends Fragment {
                 String hashHex = Utils.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);
                 ImageCodec imageCodec = new ImageCodec(128, 112, gbcImage.isLockFrame());
-                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false,false);
+                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false, false);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
                     Bitmap framed = Utils.framesList.get(3).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -961,7 +960,7 @@ public class ImportFragment extends Fragment {
             gbcImage.setName(fileName + " " + formattedIndex);
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(160, height, false);
-            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false,false);
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false, false);
             importedImagesBitmaps.add(image);
             importedImagesList.add(gbcImage);
         }

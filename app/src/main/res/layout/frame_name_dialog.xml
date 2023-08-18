@@ -14,7 +14,7 @@
             android:id="@+id/etFrameName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Set frame name"
+            android:hint="@string/frame_name"
             android:singleLine="true" />
 
         <ImageView
@@ -31,6 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="Save frame" />
+            android:text="@string/btn_add_frames"
+            />
     </LinearLayout>
 </ScrollView>

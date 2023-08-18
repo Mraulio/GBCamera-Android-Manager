@@ -152,7 +152,13 @@
 
     <string name="check_magic">Check for valid .sav when importing/extracting</string>
     <string name="delete_photo_folder_dialog">Delete Photo rom folder?</string>
-
-
+    <string name="add_as_frame">Add as frame</string>
+    <string name="rotation_button">Show Rotation button</string>
+    <string name="frame_name">Set frame name</string>
+    <string name="cant_add_frame">Can\'t add this image as a frame</string>
+    <string name="no_empty_frame_name">Name must not be empty</string>
+    <string name="no_spaces_frame_name">Name must not contain empty spaces</string>
+    <string name="frame_name_exists">This frame name already exists</string>
+    <string name="no_valid_image_file">Not a valid image file</string>
 
 </resources>

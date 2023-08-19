@@ -151,11 +151,11 @@
     <string name="analyzing">Analyse läuft, bitte warten...</string>
     <string name="done_analyzing">Fertig mit der Analyse!</string>
 
-    <string name="check_magic">Überprüfen Sie beim Import/Extrahieren, ob eine gültige .sav-Datei vorhanden ist</string>
+    <string name="check_magic">Beim Import/Extrahieren auf gültige .sav Datei prüfen</string>
     <string name="delete_photo_folder_dialog">Photo-ROM-Ordner löschen?</string>
     <string name="add_as_frame">Als Frame hinzufügen</string>
-    <string name="rotation_button">Schaltfläche Rotation anzeigen.</string>
-    <string name="frame_name">Legen Sie den Frame-Namen fest</string>
+    <string name="rotation_button">Zeige Button "Rotation".</string>
+    <string name="frame_name">Frame-Namen festlegen</string>
     <string name="cant_add_frame">Dieses Bild kann nicht als Frame hinzugefügt werden</string>
     <string name="no_empty_frame_name">Der Name darf nicht leer sein</string>
     <string name="no_spaces_frame_name">Der Name darf keine Leerzeichen enthalten</string>

@@ -20,7 +20,7 @@
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
             android:padding="6dp"
-            android:background="#DFDFDF"
+            android:background="@color/imageview_bg"
             android:src="@mipmap/ic_launcher"
             android:scaleType="fitCenter"/>
         <TextView

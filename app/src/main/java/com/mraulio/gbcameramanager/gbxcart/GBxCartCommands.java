@@ -461,7 +461,7 @@ public class GBxCartCommands {
 
             tv.append(context.getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
                     context.getString(R.string.size) + latestFile.length() / 1024 + "KB");
-            readSav(latestFile);
+            readSav(latestFile,0);
             btnAddImages.setVisibility(View.VISIBLE);
             btnDelSav.setVisibility(View.VISIBLE);
             layoutCb.setVisibility(View.VISIBLE);

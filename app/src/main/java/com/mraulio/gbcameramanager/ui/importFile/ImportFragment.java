@@ -426,13 +426,13 @@ public class ImportFragment extends Fragment {
             case SAV: {
                 isGoodSave = extractSavImages();
                 if (isGoodSave) {
-                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount - 1));
-                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount - 1));
-                    lastSeenImage = importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount - 1);
-                    lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount - 1);
-                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount, importedImagesList.size()));
+                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount[0] - 1));
+                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1));
+                    lastSeenImage = importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount[0] - 1);
+                    lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1);
+                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount[0], importedImagesList.size()));
 
-                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount, importedImagesBitmaps.size()));
+                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount[0], importedImagesBitmaps.size()));
                     listDeletedBitmapsRedStroke = new ArrayList<>();
                     Paint paint = new Paint();
                     paint.setColor(Color.RED);
@@ -895,7 +895,7 @@ public class ImportFragment extends Fragment {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         try {
             //Extract the images
-            listImportedImageBytes = extractor.extractBytes(fileBytes);
+            listImportedImageBytes = extractor.extractBytes(fileBytes,0);
             //Check for Magic or FF bytes
             if (!magicIsReal(fileBytes)) {
                 return false;
@@ -904,9 +904,9 @@ public class ImportFragment extends Fragment {
             for (byte[] imageBytes : listImportedImageBytes) {
                 GbcImage gbcImage = new GbcImage();
                 String formattedIndex = String.format("%02d", nameIndex);
-                if (nameIndex == listImportedImageBytes.size() - MainActivity.deletedCount) {//Last seen image
+                if (nameIndex == listImportedImageBytes.size() - MainActivity.deletedCount[0]) {//Last seen image
                     gbcImage.setName(fileName + " [last seen]");
-                } else if (nameIndex > listImportedImageBytes.size() - MainActivity.deletedCount) {//Deleted images
+                } else if (nameIndex > listImportedImageBytes.size() - MainActivity.deletedCount[0]) {//Deleted images
                     gbcImage.setName(fileName + " [deleted]");
                 } else {
                     gbcImage.setName(fileName + " " + formattedIndex);

@@ -131,7 +131,7 @@ public class SaveManagerFragment extends Fragment {
         protected Void doInBackground(Void... voids) {
 
             try {
-                readSav();
+                readSav(0);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -148,7 +148,7 @@ public class SaveManagerFragment extends Fragment {
         }
     }
 
-    private void readSav() {
+    private void readSav(int saveBank) {
         extractedImagesBitmaps.clear();
         extractedImagesList.clear();
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
@@ -158,15 +158,15 @@ public class SaveManagerFragment extends Fragment {
             if (selectedFile.length() / 1024 == 128) {
                 List<byte[]> listExtractedImageBytes = new ArrayList<>();
 
-                listExtractedImageBytes = extractor.extractBytes(selectedFile);
+                listExtractedImageBytes = extractor.extractBytes(selectedFile,saveBank);
                 int nameIndex = 1;
                 String fileName = selectedFile.getName();
                 for (byte[] imageBytes : listExtractedImageBytes) {
                     GbcImage gbcImage = new GbcImage();
                     String formattedIndex = String.format("%02d", nameIndex);
-                    if (nameIndex == listExtractedImageBytes.size() - MainActivity.deletedCount) {//Last seen image
+                    if (nameIndex == listExtractedImageBytes.size() - MainActivity.deletedCount[saveBank]) {//Last seen image
                         gbcImage.setName(fileName + " [last seen]");
-                    } else if (nameIndex > listExtractedImageBytes.size() - MainActivity.deletedCount) {//Deleted images
+                    } else if (nameIndex > listExtractedImageBytes.size() - MainActivity.deletedCount[saveBank]) {//Deleted images
                         gbcImage.setName(fileName + " [deleted]");
                     } else {
                         gbcImage.setName(fileName + " " + formattedIndex);
@@ -189,13 +189,13 @@ public class SaveManagerFragment extends Fragment {
                     extractedImagesBitmaps.add(image);
                     extractedImagesList.add(gbcImage);
                 }
-                listActiveImages = new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount - 1));
-                listActiveBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount - 1));
-                lastSeenImage = extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount - 1);
-                lastSeenBitmap = extractedImagesBitmaps.get(extractedImagesBitmaps.size() - MainActivity.deletedCount - 1);
-                listDeletedImages = new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - MainActivity.deletedCount, extractedImagesList.size()));
+                listActiveImages = new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1));
+                listActiveBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1));
+                lastSeenImage = extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1);
+                lastSeenBitmap = extractedImagesBitmaps.get(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1);
+                listDeletedImages = new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - MainActivity.deletedCount[saveBank], extractedImagesList.size()));
 
-                listDeletedBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount, extractedImagesBitmaps.size()));
+                listDeletedBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank], extractedImagesBitmaps.size()));
                 listDeletedBitmapsRedStroke = new ArrayList<>();
                 Paint paint = new Paint();
                 paint.setColor(Color.RED);

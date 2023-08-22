@@ -73,16 +73,16 @@ public class SaveImageExtractor implements Extractor {
 
 
     @Override
-    public List<byte[]> extractBytes(File file) throws IOException {
-        return extractBytes(Files.readAllBytes(file.toPath()));//Modified
+    public List<byte[]> extractBytes(File file,int saveBank) throws IOException {
+        return extractBytes(Files.readAllBytes(file.toPath()),saveBank);//Modified
     }
 
     //Added by Mraulio
     @Override
-    public List<byte[]> extractBytes(byte[] rawData) {
+    public List<byte[]> extractBytes(byte[] rawData,int saveBank) {
         final int PHOTOS_LOCATION = 0x11B2;
         final int PHOTOS_READ_COUNT = 0x1E;
-        MainActivity.deletedCount = 0;
+        MainActivity.deletedCount[saveBank] = 0;
         byte[] photosPositions = new byte[PHOTOS_READ_COUNT];
         ByteArrayInputStream bais = new ByteArrayInputStream(rawData);
         bais.skip(PHOTOS_LOCATION);
@@ -148,7 +148,7 @@ public class SaveImageExtractor implements Extractor {
                     if (photosPositions[j] == (byte) 0xFF) {
                         if (!isEmptyImage(image)) {//In case the image is not FF, because of the isEmptyImage method
                             deletedImages.add(image);//Can't order it, all are -1 (0xFF)
-                            MainActivity.deletedCount++;
+                            MainActivity.deletedCount[saveBank]++;
                         }
                     } else {//If not a deleted photo
                         //I get the index in the sorted array where the "real" index from the vector is stored

@@ -90,7 +90,8 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean openedSav = false;
     public static UsbManager manager;
-    public static int deletedCount = 0;
+    public static int[] deletedCount = new int[7];
+    ;
     public static AppDatabase db;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
     private UsbDevice device;

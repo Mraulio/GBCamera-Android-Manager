@@ -82,7 +82,7 @@ public class FramesFragment extends Fragment {
                                 if (Utils.gbcImagesList.get(i).getFrameId().equals(Utils.framesList.get(position).getFrameName())) {
                                     Utils.gbcImagesList.get(i).setFrameId("Nintendo_Frame");
                                     //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
-                                    if (Utils.imageBitmapCache.containsKey(Utils.gbcImagesList.get(i).getHashCode())) {
+                                    if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
                                         Bitmap image = null;
                                         try {
                                             GbcImage gbcImage = Utils.gbcImagesList.get(i);

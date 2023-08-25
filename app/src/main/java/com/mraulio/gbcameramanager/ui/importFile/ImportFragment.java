@@ -468,7 +468,6 @@ public class ImportFragment extends Fragment {
 
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
                 break;
-
             }
             case JSON: {
                 receivedList = JsonReader.jsonCheck(fileContent);
@@ -479,8 +478,6 @@ public class ImportFragment extends Fragment {
                 break;
             }
         }
-
-
     }
 
     private class loadDataTask extends AsyncTask<Void, Void, Void> {

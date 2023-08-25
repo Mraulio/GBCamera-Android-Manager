@@ -126,7 +126,7 @@ public class PalettesFragment extends Fragment {
                                     Utils.gbcImagesList.get(i).setInvertFramePalette(false);
 
                                     //If the bitmap cache already has the bitmap, change it.
-                                    if (Utils.imageBitmapCache.containsKey(Utils.gbcImagesList.get(i).getHashCode())) {
+                                    if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode())!= null) {
                                         Bitmap image = paletteChanger("bw", Utils.gbcImagesList.get(i).getImageBytes(), Utils.gbcImagesList.get(i), Utils.gbcImagesList.get(i).isLockFrame(), true, Utils.gbcImagesList.get(i).isInvertPalette());
                                         GalleryFragment.diskCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                         Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);

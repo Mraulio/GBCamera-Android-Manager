@@ -51,20 +51,19 @@ public class ImageCodec implements Codec {
         return image;
     }
 
-    @Override
-    public Bitmap decodeWithPalette(int[] palette, byte[] data, boolean invertPalette, boolean isWildFrame) {
+    public Bitmap decodeWithPalette(int[] imagePalette, int[] framePalette, byte[] data, boolean invertImagePalette, boolean invertFramePalette, boolean isWildFrame) {
         if (keepFrame) {
             int regionWidth = 128;
             int regionHeight = 112;
             int startX = 16;
             int startY = 16;
-            if (isWildFrame) {
+            if (isWildFrame || data.length/40 == 224) {
                 startY = 40;
             }
             Bitmap regionBitmap = Bitmap.createBitmap(regionWidth, regionHeight, Bitmap.Config.ARGB_8888);
             Bitmap externalBitmap = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
 
-            Codec tileCodec = new TileCodec();
+            TileCodec tileCodec = new TileCodec();
 
             Canvas regionCanvas = new Canvas(regionBitmap);
             Canvas externalCanvas = new Canvas(externalBitmap);
@@ -74,16 +73,15 @@ public class ImageCodec implements Codec {
             for (int i = 0; i < data.length; i += TileCodec.TILE_BYTES_LENGTH) {
                 byte[] tileData = new byte[TileCodec.TILE_BYTES_LENGTH];
                 System.arraycopy(data, i, tileData, 0, TileCodec.TILE_BYTES_LENGTH);
-                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData, invertPalette,false);
+                Bitmap tile = tileCodec.decodeWithPalette(imagePalette, tileData, invertImagePalette,false);
 
                 //Draw only on the part to processs
                 if (xPos >= startX && xPos + TileCodec.TILE_WIDTH <= startX + regionWidth &&
                         yPos >= startY && yPos + TileCodec.TILE_HEIGHT <= startY + regionHeight) {
                     regionCanvas.drawBitmap(tile, xPos - startX, yPos - startY, null);
                 } else {
-                    // Draw the frame with the default bw palette
-
-                    externalCanvas.drawBitmap(tileCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), tileData, invertPalette,false), xPos, yPos, null);
+                    // Draw the frame with the palette color
+                    externalCanvas.drawBitmap(tileCodec.decodeWithPalette(framePalette, tileData, invertFramePalette,false), xPos, yPos, null);
                 }
 
                 xPos += TileCodec.TILE_WIDTH;
@@ -107,14 +105,14 @@ public class ImageCodec implements Codec {
         } else {
             Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
 
-            Codec tileCodec = new TileCodec();
+            TileCodec tileCodec = new TileCodec();
             Canvas canvas = new Canvas(image);
             int xPos = 0;
             int yPos = 0;
             for (int i = 0; i < data.length; i += TileCodec.TILE_BYTES_LENGTH) {
                 byte[] tileData = new byte[TileCodec.TILE_BYTES_LENGTH];
                 System.arraycopy(data, i, tileData, 0, TileCodec.TILE_BYTES_LENGTH);
-                Bitmap tile = tileCodec.decodeWithPalette(palette, tileData, invertPalette,false);
+                Bitmap tile = tileCodec.decodeWithPalette(imagePalette, tileData, invertImagePalette,false);
                 canvas.drawBitmap(tile, xPos, yPos, null);
                 xPos += TileCodec.TILE_WIDTH;
                 if (xPos >= imageWidth) {

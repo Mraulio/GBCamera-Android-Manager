@@ -352,7 +352,7 @@ public class ImportFragment extends Fragment {
                 }
                 List<GbcFrame> newFrameImages = new ArrayList<>();
                 //Add here the dialog for the frame name
-                String frameName = etFrameName.getText().toString();
+                String frameName = etFrameName.getText().toString().toLowerCase(Locale.ROOT);
                 if (frameName.equals("")) {
                     Utils.toast(getContext(), getString(R.string.no_empty_frame_name));
                     etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
@@ -363,14 +363,12 @@ public class ImportFragment extends Fragment {
                     gbcFrame.setFrameName(frameName);
                     boolean alreadyAdded = false;
                     //If the palette already exists (by the name) it doesn't add it. Same if it's already added
-                    for (GbcFrame frame : Utils.framesList) {
-                        if (frame.getFrameName().toLowerCase(Locale.ROOT).equals(gbcFrame.getFrameName())) {
-                            alreadyAdded = true;
-                            etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
-                            Utils.toast(getContext(), getString(R.string.frame_name_exists));//Add string
-                            break;
-                        }
+                    if (Utils.hashFrames.containsKey(frameName)) {
+                        alreadyAdded = true;
+                        etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
+                        Utils.toast(getContext(), getString(R.string.frame_name_exists));//Add string
                     }
+
                     if (!alreadyAdded) {
                         newFrameImages.add(gbcFrame);
                     }
@@ -386,8 +384,12 @@ public class ImportFragment extends Fragment {
             }
         });
 
-        builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
-        });
+        builder.setNegativeButton(
+
+                getString(R.string.cancel), (dialog, which) ->
+
+                {
+                });
 
         alertdialog.show();
 
@@ -895,7 +897,7 @@ public class ImportFragment extends Fragment {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         try {
             //Extract the images
-            listImportedImageBytes = extractor.extractBytes(fileBytes,0);
+            listImportedImageBytes = extractor.extractBytes(fileBytes, 0);
             //Check for Magic or FF bytes
             if (!magicIsReal(fileBytes)) {
                 return false;
@@ -916,10 +918,10 @@ public class ImportFragment extends Fragment {
                 String hashHex = Utils.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);
                 ImageCodec imageCodec = new ImageCodec(128, 112, gbcImage.isLockFrame());
-                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false, false);
+                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, false, false, false);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
-                    Bitmap framed = Utils.framesList.get(3).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    Bitmap framed = Utils.hashFrames.get("Nintendo_Frame").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;
@@ -960,7 +962,7 @@ public class ImportFragment extends Fragment {
             gbcImage.setName(fileName + " " + formattedIndex);
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(160, height, false);
-            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false, false);
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false, false, false);
             importedImagesBitmaps.add(image);
             importedImagesList.add(gbcImage);
         }

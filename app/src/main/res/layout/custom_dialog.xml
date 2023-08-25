@@ -54,13 +54,16 @@
             app:icon="@drawable/ic_print"
             app:iconGravity="textStart"
             app:iconPadding="0dp" />
-
-        <CheckBox
-            android:id="@+id/cbInvert"
+        <Button
+            android:id="@+id/btnRotate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="5dp"
             android:layout_weight="1"
-            android:button="@drawable/invert_icon"/>
+            app:icon="@drawable/ic_rotate"
+            app:iconGravity="textStart"
+            android:visibility="gone"/>
+
 
         <CheckBox
             android:id="@+id/cbCrop"
@@ -115,15 +118,12 @@
             android:textSize="10dp"
             android:visibility="gone"/>
 
-        <Button
-            android:id="@+id/btnRotate"
+        <CheckBox
+            android:id="@+id/cbInvert"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="5dp"
             android:layout_weight="1"
-            app:icon="@drawable/ic_rotate"
-            app:iconGravity="textStart"
-            android:visibility="gone"/>
+            android:button="@drawable/invert_icon"/>
 
         <CheckBox
             android:id="@+id/cbFrameKeep"

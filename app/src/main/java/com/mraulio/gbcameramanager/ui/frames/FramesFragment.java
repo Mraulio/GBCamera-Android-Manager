@@ -86,11 +86,12 @@ public class FramesFragment extends Fragment {
                                         Bitmap image = null;
                                         try {
                                             GbcImage gbcImage = Utils.gbcImagesList.get(i);
-                                            image = GalleryFragment.frameChange(gbcImage, Utils.imageBitmapCache.get(gbcImage.getHashCode()), gbcImage.getFrameId(), Utils.gbcImagesList.get(i).isLockFrame());
+                                            image = GalleryFragment.frameChange(gbcImage, Utils.imageBitmapCache.get(gbcImage.getHashCode()), "Nintendo_Frame", Utils.gbcImagesList.get(i).isLockFrame());
+                                            Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
+                                            GalleryFragment.diskCache.put(gbcImage.getHashCode(), image);
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
-                                        Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                     }
                                     new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
@@ -179,7 +180,7 @@ public class FramesFragment extends Fragment {
                 holder.txtTitle.setBackgroundColor(selectedColor);
                 holder.imageItem.setBackgroundColor(selectedColor);
             }
-        if (!showTextView) {
+            if (!showTextView) {
                 holder.txtTitle.setVisibility(View.GONE);
             }
             Bitmap image = data.get(position).getFrameBitmap();

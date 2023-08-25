@@ -1,5 +1,7 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.paletteChanger;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -52,16 +54,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-//import com.mraulio.gbcameramanager.databinding.FragmentSlideshowBinding;
 
 //Using this color picker:https://github.com/QuadFlask/colorpicker
 //Another color picker: https://github.com/yukuku/ambilwarna
 public class PalettesFragment extends Fragment {
 
-    //    private FragmentSlideshowBinding binding;
     CustomGridViewAdapterPalette imageAdapter;
     GridView gridViewPalettes;
-    Fragment fr_createPalette;
     ImageView iv1, iv2, iv3, iv4;
     int lastPicked = Color.rgb(155, 188, 15);
     EditText et1, et2, et3, et4;
@@ -117,20 +116,24 @@ public class PalettesFragment extends Fragment {
                             new SavePaletteAsyncTask(Utils.gbcPalettesList.get(position), false).execute();
                             String paletteToDelete = Utils.gbcPalettesList.get(position).getPaletteId();
                             Utils.gbcPalettesList.remove(position);
-
-                            //I change the palette index of the images that have the deleted one to 0
+                            //If an image has the deleted palette in image or frame the palette is set to to default bw
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
-                                if (Utils.gbcImagesList.get(i).getPaletteId() == paletteToDelete) {
+                                if (Utils.gbcImagesList.get(i).getPaletteId().equals(paletteToDelete) || Utils.gbcImagesList.get(i).getFramePaletteId().equals(paletteToDelete)) {
                                     Utils.gbcImagesList.get(i).setPaletteId("bw");
+                                    Utils.gbcImagesList.get(i).setFramePaletteId("bw");
+                                    Utils.gbcImagesList.get(i).setInvertPalette(false);
+                                    Utils.gbcImagesList.get(i).setInvertFramePalette(false);
+
                                     //If the bitmap cache already has the bitmap, change it.
                                     if (Utils.imageBitmapCache.containsKey(Utils.gbcImagesList.get(i).getHashCode())) {
-                                        ImageCodec imageCodec = new ImageCodec( 160, Utils.gbcImagesList.get(i).getImageBytes().length / 40, false);
-                                        Bitmap image = imageCodec.decodeWithPalette(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), Utils.gbcImagesList.get(i).getImageBytes(),false,Utils.hashFrames.get(Utils.gbcImagesList.get(i).getFrameId()).isWildFrame());//Palette not inverted, for the sake of palette creation
+                                        Bitmap image = paletteChanger("bw", Utils.gbcImagesList.get(i).getImageBytes(), Utils.gbcImagesList.get(i), Utils.gbcImagesList.get(i).isLockFrame(), true, Utils.gbcImagesList.get(i).isInvertPalette());
+                                        GalleryFragment.diskCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                         Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                     }
                                     new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
+
                             }
                             imageAdapter.notifyDataSetChanged();
                         }
@@ -141,7 +144,6 @@ public class PalettesFragment extends Fragment {
                             //No action
                         }
                     });
-                    // Mostrar el diálogo
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 }
@@ -628,13 +630,13 @@ public class PalettesFragment extends Fragment {
         Bitmap upscaledBitmap;
         byte[] imageBytes;
         if (Utils.gbcImagesList.size() == 0 || (Utils.gbcImagesList.get(0).getImageBytes().length / 40 != 144)) {//If there are no images, or they are not 144 height
-            imageBytes = Utils.encodeImage(Utils.framesList.get(1).getFrameBitmap(),"bw");
-            bitmap = imageCodec.decodeWithPalette(palette, imageBytes, false,false);
+            imageBytes = Utils.encodeImage(Utils.framesList.get(1).getFrameBitmap(), "bw");
+            bitmap = imageCodec.decodeWithPalette(palette, null, imageBytes, false, false, false);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Utils.framesList.get(0).getFrameBitmap().getWidth() * 6, Utils.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {
             //Shows first image
             imageBytes = Utils.gbcImagesList.get(0).getImageBytes();
-            bitmap = imageCodec.decodeWithPalette(palette, imageBytes,false,false);
+            bitmap = imageCodec.decodeWithPalette(palette, null, imageBytes, false, false, false);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, 160 * 6, 144 * 6, false);
         }
 

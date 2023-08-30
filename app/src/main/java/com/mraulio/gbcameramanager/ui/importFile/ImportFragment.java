@@ -1,13 +1,12 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
+import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
+import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -26,11 +25,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
 import android.provider.OpenableColumns;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Adapter;
 import android.widget.Button;
@@ -76,6 +73,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -283,37 +281,43 @@ public class ImportFragment extends Fragment {
                             case IMAGE:
                             case SAV: {
                                 if (!cbAddFrame.isChecked()) {
-                                    for (int i = 0; i < finalListImages.size(); i++) {
-                                        GbcImage gbcImage = finalListImages.get(i);
-                                        boolean alreadyAdded = false;
-                                        //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
-                                        for (GbcImage image : Utils.gbcImagesList) {
-                                            if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
-                                                alreadyAdded = true;
-                                                break;
+                                    HashSet transparencyHS = transparencyHashSet(finalListBitmaps.get(0));
+                                    if (transparencyHS.size() > 0) {
+                                        tvFileName.setText("Image has transparency and can't be added");//Add to strings
+                                    } else {
+                                        for (int i = 0; i < finalListImages.size(); i++) {
+                                            GbcImage gbcImage = finalListImages.get(i);
+                                            boolean alreadyAdded = false;
+                                            //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
+                                            for (GbcImage image : Utils.gbcImagesList) {
+                                                if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
+                                                    alreadyAdded = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (!alreadyAdded) {
+                                                GbcImage.numImages++;
+                                                numImagesAdded++;
+                                                ImageData imageData = new ImageData();
+                                                imageData.setImageId(gbcImage.getHashCode());
+                                                imageData.setData(gbcImage.getImageBytes());
+                                                newImageDatas.add(imageData);
+                                                Utils.gbcImagesList.add(gbcImage);
+                                                newGbcImages.add(gbcImage);
+                                                Utils.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
                                             }
                                         }
-                                        if (!alreadyAdded) {
-                                            GbcImage.numImages++;
-                                            numImagesAdded++;
-                                            ImageData imageData = new ImageData();
-                                            imageData.setImageId(gbcImage.getHashCode());
-                                            imageData.setData(gbcImage.getImageBytes());
-                                            newImageDatas.add(imageData);
-                                            Utils.gbcImagesList.add(gbcImage);
-                                            newGbcImages.add(gbcImage);
-                                            Utils.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
+                                        if (newGbcImages.size() > 0) {
+                                            new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
+                                        } else {
+                                            Utils.toast(getContext(), getString(R.string.no_new_images));
+                                            tvFileName.setText(getString(R.string.no_new_images));
                                         }
                                     }
-                                    if (newGbcImages.size() > 0) {
-                                        new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
-                                    } else {
-                                        Utils.toast(getContext(), getString(R.string.no_new_images));
-                                        tvFileName.setText(getString(R.string.no_new_images));
-                                    }
+
                                 } else if (cbAddFrame.isChecked()) {
                                     if (finalListBitmaps.get(0).getHeight() != 144 && finalListBitmaps.get(0).getHeight() != 224) {
-                                        Utils.toast(getContext(), getString(R.string.cant_add_frame));//Add string
+                                        Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
                                     } else frameNameDialog();
                                 }
@@ -332,8 +336,8 @@ public class ImportFragment extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.frame_name_dialog, null);
         ImageView ivFrame = view.findViewById(R.id.ivFrame);
-        Bitmap filledFrame = fillFrame();
-        ivFrame.setImageBitmap(filledFrame);
+//        Bitmap filledFrame = fillFrame();
+        ivFrame.setImageBitmap(finalListBitmaps.get(0));
         EditText etFrameName = view.findViewById(R.id.etFrameName);
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(view);
@@ -346,9 +350,19 @@ public class ImportFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 GbcFrame gbcFrame = new GbcFrame();
-                gbcFrame.setFrameBitmap(filledFrame);
-                if (filledFrame.getHeight() == 224) {
+                gbcFrame.setFrameBitmap(finalListBitmaps.get(0));
+                if (finalListBitmaps.get(0).getHeight() == 224) {
                     gbcFrame.setWildFrame(true);
+                }
+                HashSet transparencyHS = transparencyHashSet(finalListBitmaps.get(0));
+                if (transparencyHS.size() == 0) {
+                    transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+                }
+                gbcFrame.setTransparentPixelPositions(transparencyHS);
+                try {
+                    gbcFrame.setFrameBytes(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 List<GbcFrame> newFrameImages = new ArrayList<>();
                 //Add here the dialog for the frame name
@@ -385,15 +399,11 @@ public class ImportFragment extends Fragment {
         });
 
         builder.setNegativeButton(
-
                 getString(R.string.cancel), (dialog, which) ->
-
                 {
                 });
 
         alertdialog.show();
-
-
     }
 
     //Fills the frame with white
@@ -820,7 +830,8 @@ public class ImportFragment extends Fragment {
                                 for (int y = 0; y < height; y++) {
                                     for (int x = 0; x < width; x++) {
                                         int pixelColor = bitmap.getPixel(x, y);
-                                        if (!containsColor(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), pixelColor)) {
+
+                                        if (!containsColor(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), pixelColor) && Color.alpha(pixelColor) != 0) {
                                             hasAllColors = false;
                                             break;
                                         }
@@ -933,7 +944,6 @@ public class ImportFragment extends Fragment {
                 importedImagesList.add(gbcImage);
             }
         } catch (Exception e) {
-            Utils.toast(getContext(), "Error\n" + e.toString());
             e.printStackTrace();
         }
         return true;

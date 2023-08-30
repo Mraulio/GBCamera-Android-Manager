@@ -1,6 +1,8 @@
 package com.mraulio.gbcameramanager.ui.frames;
 
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -86,7 +88,7 @@ public class FramesFragment extends Fragment {
                                         Bitmap image = null;
                                         try {
                                             GbcImage gbcImage = Utils.gbcImagesList.get(i);
-                                            image = GalleryFragment.frameChange(gbcImage, Utils.imageBitmapCache.get(gbcImage.getHashCode()), "Nintendo_Frame", Utils.gbcImagesList.get(i).isLockFrame());
+                                            image = frameChange(gbcImage,"Nintendo_Frame",gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(),true);
                                             Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                             GalleryFragment.diskCache.put(gbcImage.getHashCode(), image);
                                         } catch (IOException e) {
@@ -96,6 +98,7 @@ public class FramesFragment extends Fragment {
                                     new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
                             }
+                            Utils.hashFrames.remove(Utils.framesList.get(position).getFrameName());
                             Utils.framesList.remove(position);
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }
@@ -141,7 +144,7 @@ public class FramesFragment extends Fragment {
         int layoutResourceId;
         private boolean showTextView, checkDuplicate;
         List<GbcFrame> data = new ArrayList<GbcFrame>();
-        int notSelectedColor = Color.parseColor("#FFFFFF");
+        int notSelectedColor = Color.parseColor("#C7D3D5");
         int selectedColor = Color.parseColor("#8C97B3");
         int lastSelectedPosition = -1; // No selected element initially
 

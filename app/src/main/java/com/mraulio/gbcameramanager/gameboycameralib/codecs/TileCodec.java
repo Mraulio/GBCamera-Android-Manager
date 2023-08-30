@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.gameboycameralib.codecs;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 
@@ -48,8 +49,8 @@ public class TileCodec implements Codec {
             byte lowByte = reverseBitEndianess(tileData[y * ROW_BYTES]);
             byte highByte = reverseBitEndianess(tileData[y * ROW_BYTES + 1]);
             for (int x = 0; x < TILE_WIDTH; x++) {
-                int paletteIndexx = getPaletteIndex(getBit(lowByte, x), getBit(highByte, x));
-                buf.setPixel(x, y, usedPalette[paletteIndexx]);
+                int paletteIndex = getPaletteIndex(getBit(lowByte, x), getBit(highByte, x));
+                buf.setPixel(x, y, usedPalette[paletteIndex]);
             }
         }
         return buf;

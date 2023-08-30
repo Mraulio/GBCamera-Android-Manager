@@ -56,6 +56,10 @@ public class IndexedPalette {
     }
 
     public int getIndex(int rgb) {
+        int alpha = (rgb >> 24) & 0xFF; // Obtener el valor del canal alfa
+        if (alpha == 0) {
+            return -0; // Devolver un valor que indique transparencia total
+        }
         for (int i=0; i<palette.length;++i) {
             if (palette[i] == rgb) {
                 return i;

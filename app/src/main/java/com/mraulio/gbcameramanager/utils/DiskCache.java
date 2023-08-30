@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class DiskCache {
 
-    private static final String CACHE_DIR_NAME = "images_cache";
+    public static final String CACHE_DIR_NAME = "images_cache";
 
     private File cacheDir;
 

@@ -1,5 +1,9 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
+import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
+import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
+
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
@@ -20,6 +24,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -137,7 +142,6 @@ public class JsonReader {
 
                     if (imageJson.has("frame")) {
                         String frameName = imageJson.getString("frame");
-                        System.out.println(frameName + " frame name in the json");
                         if (frameName.equals("null"))
                             gbcImage.setFrameId("");
                         else gbcImage.setFrameId(frameName);
@@ -167,12 +171,7 @@ public class JsonReader {
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-                    System.out.println(gbcImage.getPaletteId() + " paletteId");
-                    System.out.println(gbcImage.getFramePaletteId() + " FramePaletteId");
-
-                    System.out.println(gbcImage.isLockFrame() + " isLockFrame");
-
-                    Bitmap imageBitmap = GalleryFragment.paletteChanger(gbcImage.getPaletteId(), bytes, gbcImage, gbcImage.isLockFrame(), false, gbcImage.isInvertPalette());
+                    Bitmap imageBitmap =  frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(),null);
 
                     ImportFragment.importedImagesList.add(gbcImage);
                     ImportFragment.importedImagesBitmaps.add(imageBitmap);
@@ -248,6 +247,12 @@ public class JsonReader {
                 ImageCodec imageCodec = new ImageCodec(160, height, false);
                 Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), Utils.hashPalettes.get("bw").getPaletteColorsInt(), bytes, false, false, false);//False for now, need to add the wild frame to the json
                 gbcFrame.setFrameBitmap(image);
+                gbcFrame.setFrameBytes(bytes);
+                HashSet<int[]> transparencyHS = transparencyHashSet(gbcFrame.getFrameBitmap());
+                if (transparencyHS.size() == 0) {
+                    transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+                }
+                gbcFrame.setTransparentPixelPositions(transparencyHS);
                 frameList.add(gbcFrame);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
             } catch (JSONException e) {

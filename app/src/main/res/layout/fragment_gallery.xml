@@ -77,7 +77,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="X of X"></TextView>
+            android:text="X / X"></TextView>
 
         <Button
             android:id="@+id/btnNextPage"

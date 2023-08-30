@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 
 import android.content.Context;
@@ -39,7 +40,7 @@ public class GalleryUtils {
         for (int i = 0; i < gbcImages.size(); i++) {
             GbcImage gbcImage = gbcImages.get(i);
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
-            image = rotateBitmap(image,gbcImage);
+            image = rotateBitmap(image, gbcImage);
             String fileName = fileNameBase + GalleryFragment.dtf.format(now);
 
             if (gbcImages.size() > 1) {
@@ -57,7 +58,7 @@ public class GalleryUtils {
                     Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                     scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
                     out.flush();
-                    mediaScanner(file,context);
+                    mediaScanner(file, context);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -67,7 +68,9 @@ public class GalleryUtils {
                 //Saving txt without cropping it
                 try {
                     //Need to change the palette to bw so the encodeImage method works
-                    image = GalleryFragment.paletteChanger("bw", gbcImage.getImageBytes(), GalleryFragment.filteredGbcImages.get(0), false, false, false);
+//                    image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), false,false);
+                    image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+
                     StringBuilder txtBuilder = new StringBuilder();
                     //Appending these commands so the export is compatible with
                     // https://herrzatacke.github.io/gb-printer-web/#/import
@@ -87,13 +90,15 @@ public class GalleryUtils {
                     e.printStackTrace();
                 }
             }
+            image.recycle();
         }
         if (MainActivity.exportPng) {
             Utils.toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved) + MainActivity.exportSize);
-        } else Utils.toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved_txt));
+        } else
+            Utils.toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved_txt));
     }
 
-    public static void mediaScanner(File file, Context context){
+    public static void mediaScanner(File file, Context context) {
         MediaScannerConnection.scanFile(
                 context,
                 new String[]{file.getAbsolutePath()},

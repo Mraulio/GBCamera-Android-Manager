@@ -54,7 +54,7 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
                     if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
-                        image = GalleryFragment.frameChange(GalleryFragment.filteredGbcImages.get(i), Utils.imageBitmapCache.get(GalleryFragment.filteredGbcImages.get(i).getHashCode()), GalleryFragment.filteredGbcImages.get(i).getFrameId(), GalleryFragment.filteredGbcImages.get(i).isLockFrame());
+                        image = GalleryFragment.frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(),true);
                     Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                     GalleryFragment.diskCache.put(imageHash, image);
 

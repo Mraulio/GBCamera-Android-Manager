@@ -4,8 +4,8 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.crop;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.dtf;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filteredGbcImages;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.paletteChanger;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 
 import android.content.Context;
@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.File;
@@ -36,7 +37,14 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
         LocalDateTime now = LocalDateTime.now();
         String date = dtf.format(now);
         for (int i : gbcImagesList) {
-            Bitmap bw_image = paletteChanger("bw", filteredGbcImages.get(i).getImageBytes(), filteredGbcImages.get(i), false, false, filteredGbcImages.get(i).isInvertPalette());
+            GbcImage gbcImage =  filteredGbcImages.get(i);
+            Bitmap bw_image= null;
+            try {
+                bw_image = frameChange(gbcImage, gbcImage.getFrameId(), false, false, false,false);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Bitmap paperized = GalleryUtils.Paperize(bw_image);
             File file = null;
             if (gbcImagesList.size() > 1)

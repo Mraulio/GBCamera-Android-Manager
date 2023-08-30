@@ -1,6 +1,6 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.paletteChanger;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -35,6 +35,7 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
@@ -126,10 +127,15 @@ public class PalettesFragment extends Fragment {
                                     Utils.gbcImagesList.get(i).setInvertFramePalette(false);
 
                                     //If the bitmap cache already has the bitmap, change it.
-                                    if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode())!= null) {
-                                        Bitmap image = paletteChanger("bw", Utils.gbcImagesList.get(i).getImageBytes(), Utils.gbcImagesList.get(i), Utils.gbcImagesList.get(i).isLockFrame(), true, Utils.gbcImagesList.get(i).isInvertPalette());
-                                        GalleryFragment.diskCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
-                                        Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
+                                    if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
+                                        GbcImage gbcImage = Utils.gbcImagesList.get(i);
+                                        try {
+                                            Bitmap imageBitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+                                            GalleryFragment.diskCache.put(Utils.gbcImagesList.get(i).getHashCode(), imageBitmap);
+                                            Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), imageBitmap);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                     new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }

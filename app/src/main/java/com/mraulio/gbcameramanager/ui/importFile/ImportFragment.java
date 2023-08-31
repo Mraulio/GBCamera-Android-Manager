@@ -8,6 +8,7 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.rot
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
+import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -43,7 +44,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
@@ -63,20 +63,16 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
-import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -324,7 +320,7 @@ public class ImportFragment extends Fragment {
                                     if (finalListBitmaps.get(0).getHeight() != 144 && finalListBitmaps.get(0).getHeight() != 224) {
                                         Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
-                                    } else frameNameDialog();
+                                    } else frameImportDialog();
                                 }
                                 break;
                             }
@@ -336,33 +332,32 @@ public class ImportFragment extends Fragment {
         return view;
     }
 
-    private void frameNameDialog() {
+    private void frameImportDialog() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.frame_name_dialog, null);
         ImageView ivFrame = view.findViewById(R.id.ivFrame);
-//        Bitmap filledFrame = fillFrame();
-        ivFrame.setImageBitmap(finalListBitmaps.get(0));
+        GbcFrame gbcFrame = new GbcFrame();
+        gbcFrame.setFrameBitmap(finalListBitmaps.get(0));
+
+        Bitmap bitmapCopy = finalListBitmaps.get(0).copy(finalListBitmaps.get(0).getConfig(),true);
+        Bitmap bitmap= transparentBitmap(bitmapCopy, gbcFrame);
+        gbcFrame.setFrameBitmap(bitmap);
+
+        ivFrame.setImageBitmap(bitmap);
         EditText etFrameName = view.findViewById(R.id.etFrameName);
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(view);
         AlertDialog alertdialog = builder.create();
 
         etFrameName.setImeOptions(EditorInfo.IME_ACTION_DONE);//When pressing enter
-//        builder.setTitle("Set new Frame name");//Add string
         Button btnSaveFrame = view.findViewById(R.id.btnSaveFrame);
         btnSaveFrame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GbcFrame gbcFrame = new GbcFrame();
-                gbcFrame.setFrameBitmap(finalListBitmaps.get(0));
                 if (finalListBitmaps.get(0).getHeight() == 224) {
                     gbcFrame.setWildFrame(true);
                 }
-                HashSet transparencyHS = transparencyHashSet(finalListBitmaps.get(0));
-                if (transparencyHS.size() == 0) {
-                    transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
-                }
-                gbcFrame.setTransparentPixelPositions(transparencyHS);
+
                 try {
                     gbcFrame.setFrameBytes(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
                 } catch (IOException e) {

@@ -83,7 +83,7 @@ public class StartCreation {
 
         whiteFrame.setFrameBitmap(bitmap);
         bitmapCopy = bitmap.copy(bitmap.getConfig(),true);
-        bitmap = transparentBitmap(bitmapCopy, blackFrame);
+        bitmap = transparentBitmap(bitmapCopy, whiteFrame);
         whiteFrame.setFrameBitmap(bitmap);
         try {
             whiteFrame.setFrameBytes(Utils.encodeImage(bitmap, "bw"));

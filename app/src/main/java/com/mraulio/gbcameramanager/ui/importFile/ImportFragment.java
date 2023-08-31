@@ -1,5 +1,10 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.resizeImage;
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.rotateBitmapImport;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
@@ -321,7 +326,6 @@ public class ImportFragment extends Fragment {
                                         btnAddImages.setEnabled(true);
                                     } else frameNameDialog();
                                 }
-
                                 break;
                             }
                         }
@@ -404,27 +408,6 @@ public class ImportFragment extends Fragment {
                 });
 
         alertdialog.show();
-    }
-
-    //Fills the frame with white
-    private Bitmap fillFrame() {
-        Bitmap frame = finalListBitmaps.get(0).copy(Bitmap.Config.ARGB_8888, true);//only doing 1 by 1 for now
-        int innerWidth = 128;
-        int innerHeight = 112;
-        int startX = 16;
-        int startY = 16;
-        if (frame.getHeight() == 224) {
-            startY = 40;
-        }
-
-        Canvas canvas = new Canvas(frame);
-
-        Paint paint = new Paint();
-        paint.setColor(Color.WHITE);
-
-        canvas.drawRect(startX, startY, startX + innerWidth, startY + innerHeight, paint);
-
-        return frame;
     }
 
     private void extractFile() {
@@ -809,7 +792,7 @@ public class ImportFragment extends Fragment {
 
                             } catch (Exception e) {
                             }
-                        } else if (fileName.endsWith("png")) {
+                        } else if (fileName.endsWith("png") || fileName.endsWith("jpg")) {
                             file_type = FILE_TYPE.IMAGE;
                             finalListImages.clear();
                             finalListBitmaps.clear();
@@ -820,60 +803,57 @@ public class ImportFragment extends Fragment {
                                 options.inJustDecodeBounds = true;
                                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-                                int width = bitmap.getWidth();
-                                int height = bitmap.getHeight();
+//                                int width = bitmap.getWidth();
+//                                int height = bitmap.getHeight();
                                 // Verify the dimensions, multiple of 160x144. Need to store the factor somewhere to reduce the bitmap for storing it
                                 //height%8 == 0 so the image has multiple of x tiles
-                                boolean hasDesiredDimensions = (width == 160 && height % 8 == 0);
+//                                boolean hasDesiredDimensions = (width == 160 && height % 8 == 0);
 //                                boolean hasDesiredDimensions = (width % 160 == 0 && height % 144 == 0);
-                                boolean hasAllColors = true;
-                                for (int y = 0; y < height; y++) {
-                                    for (int x = 0; x < width; x++) {
-                                        int pixelColor = bitmap.getPixel(x, y);
-
-                                        if (!containsColor(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), pixelColor) && Color.alpha(pixelColor) != 0) {
-                                            hasAllColors = false;
-                                            break;
-                                        }
-                                    }
-                                    if (!hasAllColors) {
-                                        break;
-                                    }
+                                if (bitmap.getHeight() < bitmap.getWidth()) {
+                                    bitmap = rotateBitmapImport(bitmap);
                                 }
-                                if (hasDesiredDimensions && hasAllColors) {
-                                    GbcImage gbcImage = new GbcImage();
-                                    byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
-                                    gbcImage.setImageBytes(imageBytes);
-                                    byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                                    String hashHex = Utils.bytesToHex(hash);
-                                    gbcImage.setHashCode(hashHex);
-                                    ImageData imageData = new ImageData();
-                                    imageData.setImageId(hashHex);
-                                    imageData.setData(imageBytes);
-                                    importedImageDatas.add(imageData);
-                                    gbcImage.setName(fileName);
-                                    finalListBitmaps.add(bitmap);
-                                    finalListImages.add(gbcImage);
-                                    tvFileName.setText(getString(R.string.file_name) + fileName);
-                                    btnExtractFile.setVisibility(View.GONE);
-                                    btnAddImages.setVisibility(View.VISIBLE);
-                                    btnAddImages.setEnabled(true);
-
-                                    adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
-                                    gridViewImport.setAdapter((ListAdapter) adapter);
-                                    ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-                                    cbAddFrame.setVisibility(View.VISIBLE);
-                                    gridViewImport.setAdapter((ListAdapter) adapter);
-
-                                } else {
-                                    tvFileName.setText(getString(R.string.file_name) + fileName);
-                                    tvFileName.setText(getString(R.string.no_valid_image_file));
-                                    btnExtractFile.setVisibility(View.GONE);
-                                    btnAddImages.setVisibility(View.GONE);
-                                    layoutCb.setVisibility(View.GONE);
-                                    gridViewImport.setAdapter(null);
-                                    bitmap.recycle();
+                                bitmap = resizeImage(bitmap);
+                                boolean hasAllColors = checkPaletteColors(bitmap);
+                                if (!hasAllColors) {
+                                    bitmap = convertToGrayScale(bitmap);
+                                    System.out.println(bitmap.getWidth()+" bitmap width");
+                                    System.out.println(bitmap.getHeight()+" bitmap height");
+                                    bitmap = ditherImage(bitmap);
                                 }
+//                                if (hasDesiredDimensions && hasAllColors) {
+                                GbcImage gbcImage = new GbcImage();
+                                byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
+                                gbcImage.setImageBytes(imageBytes);
+                                byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
+                                String hashHex = Utils.bytesToHex(hash);
+                                gbcImage.setHashCode(hashHex);
+                                ImageData imageData = new ImageData();
+                                imageData.setImageId(hashHex);
+                                imageData.setData(imageBytes);
+                                importedImageDatas.add(imageData);
+                                gbcImage.setName(fileName);
+                                finalListBitmaps.add(bitmap);
+                                finalListImages.add(gbcImage);
+                                tvFileName.setText(getString(R.string.file_name) + fileName);
+                                btnExtractFile.setVisibility(View.GONE);
+                                btnAddImages.setVisibility(View.VISIBLE);
+                                btnAddImages.setEnabled(true);
+
+                                adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
+                                gridViewImport.setAdapter((ListAdapter) adapter);
+                                ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
+                                cbAddFrame.setVisibility(View.VISIBLE);
+                                gridViewImport.setAdapter((ListAdapter) adapter);
+
+//                                } else {
+//                                    tvFileName.setText(getString(R.string.file_name) + fileName);
+//                                    tvFileName.setText(getString(R.string.no_valid_image_file));
+//                                    btnExtractFile.setVisibility(View.GONE);
+//                                    btnAddImages.setVisibility(View.GONE);
+//                                    layoutCb.setVisibility(View.GONE);
+//                                    gridViewImport.setAdapter(null);
+//                                    bitmap.recycle();
+//                                }
                             } catch (IOException e) {
                                 e.printStackTrace();
                             } catch (NoSuchAlgorithmException e) {
@@ -892,14 +872,6 @@ public class ImportFragment extends Fragment {
             }
     );
 
-    private boolean containsColor(int[] colors, int targetColor) {
-        for (int color : colors) {
-            if (color == targetColor) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public boolean extractSavImages() {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));

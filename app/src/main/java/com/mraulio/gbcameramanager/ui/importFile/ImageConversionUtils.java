@@ -1,0 +1,199 @@
+package com.mraulio.gbcameramanager.ui.importFile;
+
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Matrix;
+
+import com.mraulio.gbcameramanager.utils.Utils;
+
+public class ImageConversionUtils {
+
+    public static Bitmap resizeImage(Bitmap originalBitmap) {
+
+        int originalWidth = originalBitmap.getWidth();
+        int originalHeight = originalBitmap.getHeight();
+        System.out.println(originalBitmap.getWidth()+" originalBitmap width");
+        System.out.println(originalBitmap.getHeight()+" originalBitmap height");
+        if (originalWidth != 160 && originalHeight != 144) {
+            int targetWidth = 160;
+
+            // Calculates height adjusted to original image proportions
+            int targetHeight = Math.round((float) originalHeight * targetWidth / originalWidth);
+
+            // Calculates a factor of 16 height
+            int croppedHeight = (targetHeight / 16) * 16;
+
+            // Scales the image to the 160 width, keeping the height in proportion
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, croppedHeight, false);
+            System.out.println(scaledBitmap.getWidth() + " scaledBitmap width");
+            System.out.println(scaledBitmap.getHeight() + " scaledBitmap height");
+            return scaledBitmap;
+        } else return originalBitmap;
+    }
+
+    public static Bitmap convertToGrayScale(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int layers = 0;
+        Bitmap grayScaleBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        if (bitmap.getConfig() == Bitmap.Config.ARGB_8888) {
+            layers = 4; // Red, Green, Blue, Alpha
+        } else if (bitmap.getConfig() == Bitmap.Config.RGB_565) {
+            layers = 3; // Red, Green, Blue (no Alpha)
+        } else {
+            layers = 1; // Grayscale
+        }
+        if (layers > 1) {
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int pixel = bitmap.getPixel(x, y);
+                    int grayValue = (int) (Color.red(pixel) * 0.299 + Color.green(pixel) * 0.587 + Color.blue(pixel) * 0.114);
+                    grayScaleBitmap.setPixel(x, y, Color.rgb(grayValue, grayValue, grayValue));
+                }
+            }
+        }
+        return grayScaleBitmap;
+    }
+
+    /**
+     * Dithering the image to the bw palette using Bayer Matrix, and enhancing the edges.
+     * https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface/blob/5584b0dacc92ee1b9cae5abe3e51ee02d9aa4cbd/Octave_Interface/image_rectifier.m#L32C1-L69C6
+     */
+    public static Bitmap ditherImage(Bitmap originalBitmap) {
+        int[] Dithering_patterns = {
+                0x2A, 0x5E, 0x9B, 0x51, 0x8B, 0xCA, 0x33, 0x69, 0xA6, 0x5A, 0x97, 0xD6, 0x44, 0x7C, 0xBA,
+                0x37, 0x6D, 0xAA, 0x4D, 0x87, 0xC6, 0x40, 0x78, 0xB6, 0x30, 0x65, 0xA2, 0x57, 0x93, 0xD2,
+                0x2D, 0x61, 0x9E, 0x54, 0x8F, 0xCE, 0x4A, 0x84, 0xC2, 0x3D, 0x74, 0xB2, 0x47, 0x80, 0xBE,
+                0x3A, 0x71, 0xAE
+        };
+        int counter = 0;
+        int[][] Bayer_matDG_B = new int[4][4];
+        int[][] Bayer_matLG_DG = new int[4][4];
+        int[][] Bayer_matW_LG = new int[4][4];
+
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                Bayer_matDG_B[y][x] = Dithering_patterns[counter];
+                counter++;
+                Bayer_matLG_DG[y][x] = Dithering_patterns[counter];
+                counter++;
+                Bayer_matW_LG[y][x] = Dithering_patterns[counter];
+                counter++;
+            }
+        }
+
+        int blockHeight = 4;
+        int blockWidth = 4;
+
+        int bitmapHeight = originalBitmap.getHeight();
+        int bitmapWidth = originalBitmap.getWidth();
+
+        originalBitmap = enhanceEdges(originalBitmap);
+
+        int[][] Bayer_matDG_B_2D = new int[bitmapHeight][bitmapWidth];
+        int[][] Bayer_matLG_DG_2D = new int[bitmapHeight][bitmapWidth];
+        int[][] Bayer_matW_LG_2D = new int[bitmapHeight][bitmapWidth];
+
+        for (int y = 0; y < bitmapHeight; y += blockHeight) {
+            for (int x = 0; x < bitmapWidth; x += blockWidth) {
+                for (int blockY = 0; blockY < blockHeight; blockY++) {
+                    for (int blockX = 0; blockX < blockWidth; blockX++) {
+                        int offsetX = x + blockX;
+                        int offsetY = y + blockY;
+                        Bayer_matDG_B_2D[offsetY][offsetX] = Bayer_matDG_B[blockY][blockX];
+                        Bayer_matLG_DG_2D[offsetY][offsetX] = Bayer_matLG_DG[blockY][blockX];
+                        Bayer_matW_LG_2D[offsetY][offsetX] = Bayer_matW_LG[blockY][blockX];
+                    }
+                }
+            }
+        }
+        for (int y = 0; y < bitmapHeight; y++) {
+            for (int x = 0; x < bitmapWidth; x++) {
+                int pixel = Color.red(originalBitmap.getPixel(x, y)); // Get the grayscale value
+
+                int pixel_out;
+                if (pixel < Bayer_matDG_B_2D[y][x]) {
+                    pixel_out = 0;
+                } else if (pixel < Bayer_matLG_DG_2D[y][x]) {
+                    pixel_out = 85;
+                } else if (pixel < Bayer_matW_LG_2D[y][x]) {
+                    pixel_out = 170;
+                } else {
+                    pixel_out = 255;
+                }
+                originalBitmap.setPixel(x, y, Color.rgb(pixel_out, pixel_out, pixel_out));
+            }
+        }
+        return originalBitmap;
+    }
+
+    public static Bitmap enhanceEdges(Bitmap a) {
+        int width = a.getWidth();
+        int height = a.getHeight();
+        double alpha = 0.2;//0 for no enhancement, best up to 0.5
+        Bitmap edge = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (x == 0 || x == width - 1 || y == 0 || y == height - 1) {
+                    edge.setPixel(x, y, a.getPixel(x, y));  //Keep border original pixel
+                } else {
+                    int pixel = a.getPixel(x, y);
+                    int pixelAbove = a.getPixel(x, y - 1);
+                    int pixelBelow = a.getPixel(x, y + 1);
+                    int pixelLeft = a.getPixel(x - 1, y);
+                    int pixelRight = a.getPixel(x + 1, y);
+
+                    //Color.red, blue and green are the same because it's greyscale
+                    int newPixelValue = (int) (Color.red(pixel) + (
+                            ((Color.red(pixel) - Color.red(pixelAbove)) +
+                                    (Color.red(pixel) - Color.red(pixelBelow)) +
+                                    (Color.red(pixel) - Color.red(pixelLeft)) +
+                                    (Color.red(pixel) - Color.red(pixelRight))) * alpha
+                    ));
+
+                    newPixelValue = Math.min(255, Math.max(0, newPixelValue));
+
+                    edge.setPixel(x, y, Color.rgb(newPixelValue, newPixelValue, newPixelValue));
+                }
+            }
+        }
+        return edge;
+    }
+
+    public static boolean containsColor(int[] colors, int targetColor) {
+        for (int color : colors) {
+            if (color == targetColor) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean checkPaletteColors(Bitmap bitmap) {
+        int height = bitmap.getHeight();
+        int width = bitmap.getWidth();
+        boolean hasAllColors = true;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pixelColor = bitmap.getPixel(x, y);
+
+                if (!containsColor(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), pixelColor) && Color.alpha(pixelColor) != 0) {
+                    hasAllColors = false;
+                    break;
+                }
+            }
+            if (!hasAllColors) {
+                break;
+            }
+        }
+        return hasAllColors;
+    }
+
+    public static Bitmap rotateBitmapImport(Bitmap originalBitmap) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, false);
+        return rotatedBitmap;
+    }
+}

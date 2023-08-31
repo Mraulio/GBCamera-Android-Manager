@@ -884,14 +884,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 public void onClick(View v) {
                                     for (int i : selectedImages) {
                                         GbcImage gbcImage = filteredGbcImages.get(i);
-                                        gbcImage.setInvertPalette(cbInvert.isChecked());
                                         if (!keepFrame) {
                                             gbcImage.setInvertPalette(cbInvert.isChecked());
                                         } else
                                             gbcImage.setInvertFramePalette(cbInvert.isChecked());
                                         try {
-                                            Bitmap bitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), keepFrame, true);
-                                            Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), bitmap);
+                                            Bitmap bitmap;
+                                            if (!keepFrame)
+                                                bitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertPalette(), keepFrame, true);
+                                            else
+                                                bitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), keepFrame, true);
+                                            Utils.imageBitmapCache.put(gbcImage.getHashCode(), bitmap);
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
@@ -1577,6 +1580,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     public static Bitmap frameChange(GbcImage gbcImage, String frameId, boolean invertImagePalette, boolean invertFramePalette, boolean keepFrame, Boolean save) throws IOException {
+        Bitmap resultBitmap;
         if ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224) {
             boolean wasWildFrame = Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame();
             //To safecheck, maybe it's an image added with a wild frame size
@@ -1591,7 +1595,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             if (isWildFrameNow) yIndexNewFrame = 40;
 
             Bitmap framed = Utils.hashFrames.get(frameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-            Bitmap resultBitmap = Bitmap.createBitmap(framed.getWidth(), framed.getHeight(), Bitmap.Config.ARGB_8888);
+            resultBitmap = Bitmap.createBitmap(framed.getWidth(), framed.getHeight(), Bitmap.Config.ARGB_8888);
 
             Canvas canvas = new Canvas(resultBitmap);
             String paletteId = gbcImage.getPaletteId();
@@ -1623,17 +1627,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             framed = transparentBitmap(framed, Utils.hashFrames.get(gbcImage.getFrameId()));
 
             canvas.drawBitmap(framed, 0, 0, null);
-            //Because when exporting to json, hex or printing I use this method but don't want to keep the changes
-            if (save!= null && save) {
-                diskCache.put(gbcImage.getHashCode(), resultBitmap);
-                new SaveImageAsyncTask(gbcImage).execute();
-            }
-            return resultBitmap;
         } else {
-            Bitmap setToPalette = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, false, invertImagePalette);
-
-            return setToPalette;
+            gbcImage.setFrameId(frameId);
+            resultBitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, false, invertImagePalette);
         }
+        //Because when exporting to json, hex or printing I use this method but don't want to keep the changes
+        if (save!= null && save) {
+            diskCache.put(gbcImage.getHashCode(), resultBitmap);
+            new SaveImageAsyncTask(gbcImage).execute();
+        }
+        return resultBitmap;
+
     }
 
     //Change palette

@@ -40,12 +40,12 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
             GbcImage gbcImage =  filteredGbcImages.get(i);
             Bitmap bw_image= null;
             try {
-                bw_image = frameChange(gbcImage, gbcImage.getFrameId(), false, false, false,false);
+                bw_image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            Bitmap paperized = GalleryUtils.Paperize(bw_image);
+            Bitmap paperized = GalleryUtils.Paperize(bw_image, context);
             File file = null;
             if (gbcImagesList.size() > 1)
                 file = new File(Utils.IMAGES_FOLDER, "paperized_" + date + "_" + (index) + ".png");

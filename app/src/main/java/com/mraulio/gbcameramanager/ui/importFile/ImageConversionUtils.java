@@ -190,9 +190,9 @@ public class ImageConversionUtils {
         return hasAllColors;
     }
 
-    public static Bitmap rotateBitmapImport(Bitmap originalBitmap) {
+    public static Bitmap rotateBitmapImport(Bitmap originalBitmap,int degrees) {
         Matrix matrix = new Matrix();
-        matrix.postRotate(90);
+        matrix.postRotate(degrees);
         Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, false);
         return rotatedBitmap;
     }

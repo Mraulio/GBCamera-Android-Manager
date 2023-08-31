@@ -805,7 +805,7 @@ public class ImportFragment extends Fragment {
 //                                boolean hasDesiredDimensions = (width == 160 && height % 8 == 0);
 //                                boolean hasDesiredDimensions = (width % 160 == 0 && height % 144 == 0);
                                 if (bitmap.getHeight() < bitmap.getWidth()) {
-                                    bitmap = rotateBitmapImport(bitmap);
+                                    bitmap = rotateBitmapImport(bitmap, 90);
                                 }
                                 bitmap = resizeImage(bitmap);
                                 boolean hasAllColors = checkPaletteColors(bitmap);
@@ -815,8 +815,11 @@ public class ImportFragment extends Fragment {
                                     System.out.println(bitmap.getHeight()+" bitmap height");
                                     bitmap = ditherImage(bitmap);
                                 }
-//                                if (hasDesiredDimensions && hasAllColors) {
                                 GbcImage gbcImage = new GbcImage();
+                                //Add a null frame id for imported images. Need to use a "NO FRAME OPTION, AS IMPORTED"
+//                                if (bitmap.getHeight()!=144){
+//                                    gbcImage.setFrameId(null);
+//                                }
                                 byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
                                 gbcImage.setImageBytes(imageBytes);
                                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);

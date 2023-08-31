@@ -1629,7 +1629,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             canvas.drawBitmap(framed, 0, 0, null);
         } else {
             gbcImage.setFrameId(frameId);
-            resultBitmap = paletteChanger(gbcImage.getPaletteId(), gbcImage.getImageBytes(), gbcImage, keepFrame, false, invertImagePalette);
+            String imagePaletteId = gbcImage.getPaletteId();
+            if (save!= null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
+                imagePaletteId = "bw";
+            resultBitmap = paletteChanger(imagePaletteId, gbcImage.getImageBytes(), gbcImage, keepFrame, false, invertImagePalette);
         }
         //Because when exporting to json, hex or printing I use this method but don't want to keep the changes
         if (save!= null && save) {

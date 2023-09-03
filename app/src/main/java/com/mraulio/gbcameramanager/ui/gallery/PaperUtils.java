@@ -46,14 +46,23 @@ public class PaperUtils {
     public static Bitmap paperize(Bitmap inputBitmap, int paperColor, boolean onlyImage, Context context) {
         int mul = 20;
         int overlapping = 4;
-        int numBorders = 100; // Reemplaza con el número real de imágenes de borde en tu biblioteca
-        int num1 = (int) (Math.random() * numBorders);
+
+        int numBorders = 12;
+        int num1 = (int) (Math.random() * numBorders)+1;
         int num2;
         do {
-            num2 = (int) (Math.random() * numBorders);
+            num2 = (int) (Math.random() * numBorders)+1;
         } while (num1 == num2);
+        String topBorderName = "border_" + num1;
+        String bottomBorderName = "border_" + num2;
 
-        // Calcular el tamaño de speckleImage
+        int topResourceId = context.getResources().getIdentifier(topBorderName, "drawable", context.getPackageName());
+        int bottomnResourceId = context.getResources().getIdentifier(bottomBorderName, "drawable", context.getPackageName());
+        Bitmap topBorder = BitmapFactory.decodeResource(context.getResources(), topResourceId);
+        topBorder = rotateBitmapImport(topBorder, 180);
+        Bitmap bottomBorder = BitmapFactory.decodeResource(context.getResources(), bottomnResourceId);
+
+        //Calcute paperized image size
         int speckleHeight = inputBitmap.getHeight() * (mul - overlapping) + overlapping;
         int speckleWidth = inputBitmap.getWidth() * (mul - overlapping) + overlapping;
         Bitmap paperizedImage = Bitmap.createBitmap(speckleWidth, speckleHeight, Bitmap.Config.ARGB_8888);
@@ -71,24 +80,20 @@ public class PaperUtils {
                 int c = x * (mul - overlapping);
                 int color = inputBitmap.getPixel(x, y);
                 int randomRegionX = random.nextInt(50) * regionSize;
-                // Configurar un Paint para superponer el segundo bitmap
                 //If color is #FFFFFF do nothing, it will be just paper color
                 if (color == Color.parseColor("#AAAAAA")) {
-                    // Color aaaaaa, coger la 3a fila de 20x20 píxeles de pixelSampleBitmap
                     Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 2 * regionSize, regionSize, regionSize);
                     Bitmap baseBitmap = Bitmap.createBitmap(paperizedImage, c, a, 20, 20);
                     Bitmap overlapped = overlap(baseBitmap, regionBitmap);
                     Canvas canvas = new Canvas(paperizedImage);
                     canvas.drawBitmap(overlapped, c, a, null);
                 } else if (color == Color.parseColor("#555555")) {
-                    // Color 555555, coger la 2a fila de 20x20 píxeles de pixelSampleBitmap
                     Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 1 * regionSize, regionSize, regionSize);
                     Bitmap baseBitmap = Bitmap.createBitmap(paperizedImage, c, a, 20, 20);
                     Bitmap overlapped = overlap(baseBitmap, regionBitmap);
                     Canvas canvas = new Canvas(paperizedImage);
                     canvas.drawBitmap(overlapped, c, a, null);
                 } else if (color == Color.parseColor("#000000")) {
-                    // Color 000000, coger la 1a fila de 20x20 píxeles de pixelSampleBitmap
                     Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 0 * regionSize, regionSize, regionSize);
                     Bitmap baseBitmap = Bitmap.createBitmap(paperizedImage, c, a, 20, 20);
                     Bitmap overlapped = overlap(baseBitmap, regionBitmap);
@@ -102,12 +107,13 @@ public class PaperUtils {
             Bitmap.createScaledBitmap(noPaperImage, (int) (noPaperImage.getWidth() * 0.7), (int) (noPaperImage.getHeight() * 0.7), true);
             return noPaperImage;
         }
-        Bitmap border = BitmapFactory.decodeResource(context.getResources(), R.drawable.border);
 
         int paperWidth = (int) (speckleWidth * 1.4);
-        float borderFactor = (float) paperWidth / border.getWidth();
-        border = Bitmap.createScaledBitmap(border, (int) (border.getWidth() * borderFactor), (int) (border.getHeight() * borderFactor), true);
-        int paperHeight = (int) (speckleHeight * 1.4) + (border.getHeight() * 2);
+        float borderFactor = (float) paperWidth / topBorder.getWidth();
+        topBorder = Bitmap.createScaledBitmap(topBorder, (int) (topBorder.getWidth() * borderFactor), (int) (topBorder.getHeight() * borderFactor), true);
+        bottomBorder = Bitmap.createScaledBitmap(bottomBorder, (int) (bottomBorder.getWidth() * borderFactor), (int) (bottomBorder.getHeight() * borderFactor), true);
+
+        int paperHeight = (int) (speckleHeight * 1.4) + (topBorder.getHeight() +bottomBorder.getHeight());
 
         Bitmap paperImage = Bitmap.createBitmap(paperWidth, paperHeight, inputBitmap.getConfig());
         int left = (paperWidth - speckleWidth) / 2;
@@ -116,15 +122,14 @@ public class PaperUtils {
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
 
-        canvas.drawRect(0, border.getHeight(), paperImage.getWidth(), paperImage.getHeight() - border.getHeight(), paint);
-        canvas.drawBitmap(border, 0, paperHeight - border.getHeight(), null);
+        canvas.drawRect(0, topBorder.getHeight(), paperImage.getWidth(), paperImage.getHeight() - topBorder.getHeight(), paint);
 
         float alpha = 0.9f; // Transparency value (0.0f - 1-0f)
         Paint alphaPaint = new Paint();
         alphaPaint.setAlpha((int) (alpha * 255)); // Converts transparency value to 0-255 range
         canvas.drawBitmap(paperizedImage, left, top, alphaPaint);
-        border = rotateBitmapImport(border, 180);
-        canvas.drawBitmap(border, 0, 0, null);
+        canvas.drawBitmap(topBorder, 0, 0, null);
+        canvas.drawBitmap(bottomBorder, 0, paperHeight - topBorder.getHeight(), null);
         paperImage = changeColorPaper(paperImage, paperColor);
         paperImage = Bitmap.createScaledBitmap(paperImage, (int) (paperImage.getWidth() * 0.7), (int) (paperImage.getHeight() * 0.7), true);
         return paperImage;
@@ -189,6 +194,7 @@ public class PaperUtils {
     }
 
     public static void paperDialog(List<Integer> indexToPaperize, Context context) {
+
         //Do a dialog class extending DialogFragment with onDismiss for recycles
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.paperize_dialog);
@@ -287,6 +293,7 @@ public class PaperUtils {
         btnProcessPaper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                btnSavePaper.setEnabled(true);
                 paperizedBitmaps.clear();
                 if (!loadingDialog.isShowing()) {
                     loadingDialog.show();

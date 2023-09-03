@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -46,8 +47,11 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
                 ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
-                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(),Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(),Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame());
-                //Add the bitmap to the cache
+                GbcFrame gbcFrame = Utils.hashFrames.get(gbcImage.getFrameId());
+                if (gbcFrame == null){
+                    gbcFrame= Utils.hashFrames.get("Nintendo_Frame");
+                }
+                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcFrame.isWildFrame());                //Add the bitmap to the cache
                 Utils.imageBitmapCache.put(imageHash, image);
                 GalleryFragment.diskCache.put(imageHash, image);
                 //Do a frameChange to create the Bitmap of the image

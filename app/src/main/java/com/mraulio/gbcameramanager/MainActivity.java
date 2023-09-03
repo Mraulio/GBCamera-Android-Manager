@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     public static String languageCode;
     public static boolean magicCheck;
     public static boolean showRotationButton;
+    public static int customColorPaper;
 
 
     private boolean openedSav = false;
@@ -131,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
         magicCheck = sharedPreferences.getBoolean("magic_check", true);
         showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
+        customColorPaper = sharedPreferences.getInt("custom_paper_color",  Color.WHITE);
+
         String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
 

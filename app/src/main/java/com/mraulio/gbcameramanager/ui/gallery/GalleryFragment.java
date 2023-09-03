@@ -9,6 +9,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
+import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
@@ -346,10 +347,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onClick(View v) {
                             List<Integer> indexToPaperize = new ArrayList<>();
                             indexToPaperize.add(globalImageIndex);
-                            if (!loadingDialog.isShowing()) {
-                                loadingDialog.show();
-                            }
-                            new PaperizeAsyncTask(indexToPaperize, getContext()).execute();
+                            paperDialog(indexToPaperize,getContext());
                         }
                     });
                     rotateButton.setOnClickListener(new View.OnClickListener() {
@@ -836,9 +834,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             btn_paperize.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    if (!loadingDialog.isShowing())
-                                        loadingDialog.show();
-                                    new PaperizeAsyncTask(selectedImages, getContext()).execute();
+//                                    if (!loadingDialog.isShowing())
+//                                        loadingDialog.show();
+//                                    new PaperizeAsyncTask(selectedImages, getContext()).execute();
                                 }
                             });
                             rotateButton.setOnClickListener(new View.OnClickListener() {

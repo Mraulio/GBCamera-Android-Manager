@@ -50,13 +50,13 @@ public class PaperUtils {
         int overlapping = 4;
 
         int numBorders = 12;
-        int num1 = (int) (Math.random() * numBorders)+1;
+        int num1 = (int) (Math.random() * numBorders) + 1;
         int num2;
         do {
-            num2 = (int) (Math.random() * numBorders)+1;
+            num2 = (int) (Math.random() * numBorders) + 1;
         } while (num1 == num2);
         String topBorderName = "border_" + num1;
-        String bottomBorderName = "border_11";
+        String bottomBorderName = "border_" + num2;
 
         int topResourceId = context.getResources().getIdentifier(topBorderName, "drawable", context.getPackageName());
         int bottomnResourceId = context.getResources().getIdentifier(bottomBorderName, "drawable", context.getPackageName());
@@ -88,21 +88,21 @@ public class PaperUtils {
                 matrix.postRotate(degrees);
                 //If color is #FFFFFF do nothing, it will be just paper color
                 if (color == Color.parseColor("#AAAAAA")) {
-                    Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 2 * regionSize, regionSize, regionSize,matrix,false);
+                    Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 2 * regionSize, regionSize, regionSize, matrix, false);
 
                     Bitmap baseBitmap = Bitmap.createBitmap(paperizedImage, c, a, 20, 20);
                     Bitmap overlapped = overlap(baseBitmap, regionBitmap);
                     Canvas canvas = new Canvas(paperizedImage);
                     canvas.drawBitmap(overlapped, c, a, null);
                 } else if (color == Color.parseColor("#555555")) {
-                    Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 1 * regionSize, regionSize, regionSize,matrix,false);
+                    Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 1 * regionSize, regionSize, regionSize, matrix, false);
 
                     Bitmap baseBitmap = Bitmap.createBitmap(paperizedImage, c, a, 20, 20);
                     Bitmap overlapped = overlap(baseBitmap, regionBitmap);
                     Canvas canvas = new Canvas(paperizedImage);
                     canvas.drawBitmap(overlapped, c, a, null);
                 } else if (color == Color.parseColor("#000000")) {
-                    Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 0 * regionSize, regionSize, regionSize,matrix,false);
+                    Bitmap regionBitmap = Bitmap.createBitmap(pixelSampleBitmap, randomRegionX, 0 * regionSize, regionSize, regionSize, matrix, false);
 
                     Bitmap baseBitmap = Bitmap.createBitmap(paperizedImage, c, a, 20, 20);
                     Bitmap overlapped = overlap(baseBitmap, regionBitmap);
@@ -118,7 +118,7 @@ public class PaperUtils {
         }
 
         int paperWidth = topBorder.getWidth();
-        int paperHeight = topBorder.getWidth() + (topBorder.getHeight() +bottomBorder.getHeight());
+        int paperHeight = paperWidth + topBorder.getHeight() + bottomBorder.getHeight();
 
         Bitmap paperImage = Bitmap.createBitmap(paperWidth, paperHeight, inputBitmap.getConfig());
         int left = (paperWidth - speckleWidth) / 2;
@@ -126,16 +126,17 @@ public class PaperUtils {
         Canvas canvas = new Canvas(paperImage);
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
-
-        canvas.drawRect(0, topBorder.getHeight(), paperImage.getWidth(), paperImage.getHeight() - topBorder.getHeight(), paint);
+        canvas.drawRect(0, topBorder.getHeight(), paperImage.getWidth(), paperImage.getHeight() - bottomBorder.getHeight(), paint);
 
         float alpha = 0.9f; // Transparency value (0.0f - 1-0f)
         Paint alphaPaint = new Paint();
         alphaPaint.setAlpha((int) (alpha * 255)); // Converts transparency value to 0-255 range
-        canvas.drawBitmap(paperizedImage, left, top, alphaPaint);
         canvas.drawBitmap(topBorder, 0, 0, null);
+        canvas.drawBitmap(paperizedImage, left, top, alphaPaint);
         canvas.drawBitmap(bottomBorder, 0, paperHeight - bottomBorder.getHeight(), null);
-        paperImage = changeColorPaper(paperImage, paperColor);
+        if (paperColor != Color.WHITE) {
+            paperImage = changeColorPaper(paperImage, paperColor);
+        }
         paperImage = Bitmap.createScaledBitmap(paperImage, (int) (paperImage.getWidth() * 0.7), (int) (paperImage.getHeight() * 0.7), true);
         return paperImage;
     }
@@ -254,8 +255,8 @@ public class PaperUtils {
                                         ivCustomPaperColor.setBackgroundColor(selectedColor);
                                         paperColor[0] = selectedColor;
                                         customColorPaper = selectedColor;
-                                        colorMap.put(lyCustomPaperColor,selectedColor );
-                                        editor.putInt("custom_paper_color",selectedColor);
+                                        colorMap.put(lyCustomPaperColor, selectedColor);
+                                        editor.putInt("custom_paper_color", selectedColor);
                                         editor.apply();
                                     }
                                 })

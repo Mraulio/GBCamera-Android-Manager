@@ -59,10 +59,10 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
         ivPaperized.setImageBitmap(paperizedBitmaps.get(0));
 
         final long imageViewHeight = ivPaperized.getHeight();
-        // Configura la posición inicial fuera de la pantalla
+        // Starting position outside the screen
         ivPaperized.setTranslationY(imageViewHeight);
-        final long slideDuration = 700; // Duración total de la animación en milisegundos
-        final long stopDuration = 700; // Duración de cada parada en milisegundos
+        final long slideDuration = 700; // Total duration of the ending animation
+        final long stopDuration = 700; // Duration of every stop
         final float stopPosition1 = -(imageViewHeight * 0.15f-imageViewHeight);
         final float stopPosition2 = -(imageViewHeight * 0.30f-imageViewHeight);
         final float stopPosition3 = -(imageViewHeight * 0.45f-imageViewHeight);
@@ -70,7 +70,7 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
         final float stopPosition5 = -(imageViewHeight * 0.75f-imageViewHeight);
         final float stopPosition6 = -(imageViewHeight * 0.90f-imageViewHeight);
 
-        // Crea un conjunto de animadores para las paradas intermedias
+        // Create a set of animators for the stops
         AnimatorSet stopAnimation1 = createStopAnimation(ivPaperized, stopPosition1, stopDuration);
         AnimatorSet stopAnimation2 = createStopAnimation(ivPaperized, stopPosition2, stopDuration);
         AnimatorSet stopAnimation3 = createStopAnimation(ivPaperized, stopPosition3, stopDuration);
@@ -79,16 +79,14 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
         AnimatorSet stopAnimation6 = createStopAnimation(ivPaperized, stopPosition6, stopDuration);
 
 
-        // Crea un objeto ObjectAnimator para el movimiento desde abajo hacia arriba
+        // Create ab ObjectAnimator for the movement
         ObjectAnimator slideAnimator = ObjectAnimator.ofFloat(ivPaperized, "translationY", 0);
-        slideAnimator.setDuration(slideDuration); // Duración total de la animación
-        slideAnimator.setInterpolator(new AccelerateInterpolator()); // Ajusta el interpolador según tus preferencias
+        slideAnimator.setDuration(slideDuration);
+        slideAnimator.setInterpolator(new AccelerateInterpolator());
 
-        // Crea un conjunto de animadores para ejecutar todo en secuencia
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playSequentially(stopAnimation1, stopAnimation2, stopAnimation3, stopAnimation4,stopAnimation5,stopAnimation6, slideAnimator);
 
-        // Inicia la animación
         animatorSet.start();
         loadingDialog.dismiss();
     }

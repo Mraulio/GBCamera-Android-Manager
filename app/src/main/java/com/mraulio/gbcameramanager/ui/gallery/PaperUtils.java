@@ -64,9 +64,11 @@ public class PaperUtils {
         topBorder = rotateBitmapImport(topBorder, 180);
         Bitmap bottomBorder = BitmapFactory.decodeResource(context.getResources(), bottomnResourceId);
 
+
         //Calcute paperized image size
         int speckleHeight = inputBitmap.getHeight() * (mul - overlapping) + overlapping;
         int speckleWidth = inputBitmap.getWidth() * (mul - overlapping) + overlapping;
+        System.out.println(speckleWidth+" specklewidth");
         Bitmap paperizedImage = Bitmap.createBitmap(speckleWidth, speckleHeight, Bitmap.Config.ARGB_8888);
         Canvas can = new Canvas(paperizedImage);
         can.drawColor(Color.WHITE);//Fill the canvas with white. If not it won't work (fills everything black)
@@ -112,23 +114,30 @@ public class PaperUtils {
             }
         }
         if (onlyImage) {
-            Bitmap noPaperImage = changeColorPaper(paperizedImage, paperColor);
+            Bitmap noPaperImage;
+            if (paperColor != Color.WHITE) {
+                noPaperImage = changeColorPaper(paperizedImage, paperColor);
+            } else noPaperImage = paperizedImage;
             Bitmap.createScaledBitmap(noPaperImage, (int) (noPaperImage.getWidth() * 0.7), (int) (noPaperImage.getHeight() * 0.7), true);
             return noPaperImage;
         }
-
-        int paperWidth = topBorder.getWidth();
-        int paperHeight = paperWidth + topBorder.getHeight() + bottomBorder.getHeight();
-
+        int borderWidth = 3492;//Border images width
+        int internalImageWidth = 2494;//3492/1.4, being 1.4 the factor of paper/image 38/27.1mm
+        int paperWidth = borderWidth;
+        int imageMargins =998;//3492-2494, same vertical and horizontal margins
+        float internalImageHeightFactor = (float)internalImageWidth/speckleWidth ;
+        int internalImageHeight = (int) (speckleHeight * internalImageHeightFactor);
+        int paperHeight = internalImageHeight+imageMargins + topBorder.getHeight() + bottomBorder.getHeight();
+        paperizedImage = Bitmap.createScaledBitmap(paperizedImage, internalImageWidth, internalImageHeight, false);
         Bitmap paperImage = Bitmap.createBitmap(paperWidth, paperHeight, inputBitmap.getConfig());
-        int left = (paperWidth - speckleWidth) / 2;
-        int top = (paperHeight - speckleHeight) / 2;
+        int left = (paperWidth - internalImageWidth) / 2;
+        int top = (paperHeight - internalImageHeight) / 2;
         Canvas canvas = new Canvas(paperImage);
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
         canvas.drawRect(0, topBorder.getHeight(), paperImage.getWidth(), paperImage.getHeight() - bottomBorder.getHeight(), paint);
 
-        float alpha = 0.9f; // Transparency value (0.0f - 1-0f)
+        float alpha = 0.85f; // Transparency value (0.0f - 1-0f)
         Paint alphaPaint = new Paint();
         alphaPaint.setAlpha((int) (alpha * 255)); // Converts transparency value to 0-255 range
         canvas.drawBitmap(topBorder, 0, 0, null);

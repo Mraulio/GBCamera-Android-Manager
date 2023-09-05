@@ -308,9 +308,9 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-            CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
+            CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
-            tv.append(extractedImagesList.size() + " images.");//Add to strings
+            tv.append(finalListImages.size() + " images.");//Add to strings
             btnAddImages.setVisibility(View.VISIBLE);
         });
         btnFullRom.setOnClickListener(v -> {
@@ -834,8 +834,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     }
 
     public void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
-        extractedImagesBitmaps.clear();
-        extractedImagesList.clear();
+        finalListBitmaps.clear();
+        finalListImages.clear();
         List<String> dataList = HexToTileData.separateData(fileContent);
         String data = "";
         int index = 1;
@@ -851,12 +851,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             imageData.setImageId(hashHex);
             imageData.setData(bytes);
             gbcImage.setName(index++ + "-" + " arduino");
-            gbcImage.setFrameId("Nintendo_Frame");//Could just leave it blank
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(160, height, false);
             Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(),Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false, false,false);
-            extractedImagesBitmaps.add(image);
-            extractedImagesList.add(gbcImage);
+            finalListBitmaps.add(image);
+            finalListImages.add(gbcImage);
         }
     }
 

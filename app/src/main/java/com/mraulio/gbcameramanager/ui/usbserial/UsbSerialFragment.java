@@ -398,9 +398,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             btnPrintBanner.setVisibility(View.GONE);
             ape = true;
             connect();
+            port.setDTR(true);
+            port.setRTS(true);
+            port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
             usbIoManager.start();
             tv.append(getString(R.string.tv_connected));
-            port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         } catch (Exception e) {
             Toast toast = Toast.makeText(getContext(), getString(R.string.error_arduino) + e.toString(), Toast.LENGTH_LONG);
             toast.show();
@@ -770,12 +772,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         UsbSerialDriver driver = availableDrivers.get(0);
         connection = manager.openDevice(driver.getDevice());
 
-
         port = driver.getPorts().get(0); // Most devices have just one port (port 0)
         try {
             if (port.isOpen()) port.close();
             port.open(connection);
-            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+//            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 
         } catch (Exception e) {
             tv.append(e.toString());

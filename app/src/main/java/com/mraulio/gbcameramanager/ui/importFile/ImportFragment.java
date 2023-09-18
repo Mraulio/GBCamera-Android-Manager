@@ -798,21 +798,10 @@ public class ImportFragment extends Fragment {
                                 options.inJustDecodeBounds = true;
                                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-//                                int width = bitmap.getWidth();
-//                                int height = bitmap.getHeight();
-                                // Verify the dimensions, multiple of 160x144. Need to store the factor somewhere to reduce the bitmap for storing it
-                                //height%8 == 0 so the image has multiple of x tiles
-//                                boolean hasDesiredDimensions = (width == 160 && height % 8 == 0);
-//                                boolean hasDesiredDimensions = (width % 160 == 0 && height % 144 == 0);
-                                if (bitmap.getHeight() < bitmap.getWidth()) {
-                                    bitmap = rotateBitmapImport(bitmap, 90);
-                                }
                                 bitmap = resizeImage(bitmap);
                                 boolean hasAllColors = checkPaletteColors(bitmap);
                                 if (!hasAllColors) {
                                     bitmap = convertToGrayScale(bitmap);
-                                    System.out.println(bitmap.getWidth()+" bitmap width");
-                                    System.out.println(bitmap.getHeight()+" bitmap height");
                                     bitmap = ditherImage(bitmap);
                                 }
                                 GbcImage gbcImage = new GbcImage();

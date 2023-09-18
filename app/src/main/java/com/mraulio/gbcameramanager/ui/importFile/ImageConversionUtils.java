@@ -12,23 +12,33 @@ public class ImageConversionUtils {
 
         int originalWidth = originalBitmap.getWidth();
         int originalHeight = originalBitmap.getHeight();
-        System.out.println(originalBitmap.getWidth()+" originalBitmap width");
-        System.out.println(originalBitmap.getHeight()+" originalBitmap height");
-        if (originalWidth != 160 && originalHeight != 144) {
-            int targetWidth = 160;
+        if (originalWidth == 160 && originalHeight == 144 || originalWidth == 160 && originalHeight % 16 == 0) {//Regular image, 160 width and *16 height
+            return originalBitmap;
+        } else {
+            float scaledFactor = originalWidth / 160.0f;
+//            boolean isScaleFactorInteger = scaledFactor == Math.floor(scaledFactor); //To check if it's an integer without decimals
+            if (originalHeight / scaledFactor == 1.0f || originalHeight % (16 * scaledFactor) == 0) {//The image is a regular image scaled
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, (int) (originalWidth / scaledFactor), (int) (originalHeight / scaledFactor), false);
+                return scaledBitmap;
+            } else {
+                if (originalBitmap.getHeight() < originalBitmap.getWidth()) {
+                    originalBitmap = rotateBitmapImport(originalBitmap, 90);
+                }
+                originalWidth = originalBitmap.getWidth();
+                originalHeight = originalBitmap.getHeight();
+                int targetWidth = 160;
 
-            // Calculates height adjusted to original image proportions
-            int targetHeight = Math.round((float) originalHeight * targetWidth / originalWidth);
+                // Calculates height adjusted to original image proportions
+                int targetHeight = Math.round((float) originalHeight * targetWidth / originalWidth);
 
-            // Calculates a factor of 16 height
-            int croppedHeight = (targetHeight / 16) * 16;
+                // Calculates a factor of 16 height
+                int croppedHeight = (targetHeight / 16) * 16;
 
-            // Scales the image to the 160 width, keeping the height in proportion
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, croppedHeight, false);
-            System.out.println(scaledBitmap.getWidth() + " scaledBitmap width");
-            System.out.println(scaledBitmap.getHeight() + " scaledBitmap height");
-            return scaledBitmap;
-        } else return originalBitmap;
+                // Scales the image to the 160 width, keeping the height in proportion
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, croppedHeight, false);
+                return scaledBitmap;
+            }
+        }
     }
 
     public static Bitmap convertToGrayScale(Bitmap bitmap) {
@@ -177,7 +187,7 @@ public class ImageConversionUtils {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int pixelColor = bitmap.getPixel(x, y);
-
+                //Checking with the "bw" palette
                 if (!containsColor(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), pixelColor) && Color.alpha(pixelColor) != 0) {
                     hasAllColors = false;
                     break;
@@ -190,10 +200,11 @@ public class ImageConversionUtils {
         return hasAllColors;
     }
 
-    public static Bitmap rotateBitmapImport(Bitmap originalBitmap,int degrees) {
+    public static Bitmap rotateBitmapImport(Bitmap originalBitmap, int degrees) {
         Matrix matrix = new Matrix();
         matrix.postRotate(degrees);
         Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, false);
         return rotatedBitmap;
     }
+
 }

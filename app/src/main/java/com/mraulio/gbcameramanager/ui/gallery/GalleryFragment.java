@@ -769,8 +769,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 public void onClick(View v) {
                                     try {
                                         connect();
-                                        usbIoManager.start();
                                         port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+                                        usbIoManager.start();
 
                                         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                                         View dialogView = getLayoutInflater().inflate(R.layout.print_dialog, null);

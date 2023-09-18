@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
@@ -232,6 +233,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     } else {
                         globalImageIndex = filteredGbcImages.size() - (itemsPerPage - position);
                     }
+                    //Put the last seen image as this one
+                    lastSeenGalleryImage = globalImageIndex;
+                    editor.putInt("last_seen_gallery_image", globalImageIndex);
+                    editor.apply();
                     final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode())};
                     // Create custom dialog
                     final Dialog dialog = new Dialog(getContext());

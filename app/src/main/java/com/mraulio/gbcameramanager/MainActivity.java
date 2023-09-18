@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean magicCheck;
     public static boolean showRotationButton;
     public static int customColorPaper;
-
+    public static int lastSeenGalleryImage;
 
     private boolean openedSav = false;
     public static UsbManager manager;
@@ -134,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
         magicCheck = sharedPreferences.getBoolean("magic_check", true);
         showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
         customColorPaper = sharedPreferences.getInt("custom_paper_color",  Color.WHITE);
+        lastSeenGalleryImage = sharedPreferences.getInt("last_seen_gallery_image",  0);
 
         String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);

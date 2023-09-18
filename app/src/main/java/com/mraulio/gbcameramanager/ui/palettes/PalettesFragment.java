@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
+import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 
 import android.app.AlertDialog;
@@ -640,8 +641,9 @@ public class PalettesFragment extends Fragment {
             bitmap = imageCodec.decodeWithPalette(palette, null, imageBytes, false, false, false);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Utils.framesList.get(0).getFrameBitmap().getWidth() * 6, Utils.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {
-            //Shows first image
-            imageBytes = Utils.gbcImagesList.get(0).getImageBytes();
+            GbcImage gbcImage = Utils.gbcImagesList.get(lastSeenGalleryImage);
+            bitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+            imageBytes = Utils.encodeImage(bitmap, "bw");
             bitmap = imageCodec.decodeWithPalette(palette, null, imageBytes, false, false, false);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, 160 * 6, 144 * 6, false);
         }

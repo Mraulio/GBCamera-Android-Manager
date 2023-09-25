@@ -120,7 +120,7 @@
 
     <string name="menu_savmanager">Save manager</string>
     <string name="file_name">Name of file:\u0020</string>
-    <string name="paperize_settings">Show paperize button</string>
+    <string name="paperize_settings">Show Paperize button</string>
     <string name="paperize_button">Paperize</string>
     <string name="saved_paperized_toast">Saved Paperized!</string>
     <string name="showPrint">Show Print button.</string>

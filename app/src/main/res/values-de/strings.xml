@@ -161,4 +161,11 @@
     <string name="no_spaces_frame_name">Der Name darf keine Leerzeichen enthalten</string>
     <string name="frame_name_exists">Dieser Framename existiert bereits</string>
     <string name="no_valid_image_file">Keine gültige Bilddatei</string>
+
+    <string name="invalid_transparent_image">Das Bild ist transparent und kann nicht hinzugefügt werden</string>
+    <string name="delete_folder">Lösche Ordner</string>
+    <string name="images">Bilder.</string>
+    <string name="only_image_paper">Nur Bild</string>
+    <string name="process">Verfahren</string>
+    <string name="custom_paper_color">Benutzerdefinierte Papierfarbe:</string>
 </resources>

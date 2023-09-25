@@ -36,8 +36,8 @@ public interface Extractor {
 
 
     //Added by Mraulio
-    List<byte[]> extractBytes(byte[] rawData);
-    List<byte[]> extractBytes(File file) throws IOException;
+    List<byte[]> extractBytes(byte[] rawData,int saveBank);
+    List<byte[]> extractBytes(File file,int saveBank) throws IOException;
 
     /**
      * Extract images from a local file system file and return as PNG byte data

@@ -27,7 +27,8 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
     int layoutResourceId;
     ArrayList<GbcPalette> data = new ArrayList<GbcPalette>();
     private boolean showTextView, checkDuplicate;
-    int lastSelectedPosition = -1; // Inicialmente no hay ningún elemento seleccionado
+    int lastSelectedImagePosition = -1; //No image palette selected initially
+    int lastSelectedFramePosition = -1; //No frame palette selected initially
 
     public CustomGridViewAdapterPalette(Context context, int layoutResourceId,
                                         ArrayList<GbcPalette> data, boolean showTextView, boolean checkDuplicate) {
@@ -44,8 +45,9 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         View row = convertView;
         RecordHolder holder = null;
         int notSelectedColor = Color.parseColor("#FFFFFF");
-        int selectedColor = Color.parseColor("#8C97B3");
-
+        int selectedImageColor = Color.parseColor("#8C97B3");
+        int selectedFrameColor = Color.parseColor("#CEBB8D");
+        int sameSelectedPalette = Color.parseColor("#AE4F4F");
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             row = inflater.inflate(layoutResourceId, parent, false);
@@ -61,9 +63,17 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         holder.cardView.setBackgroundColor(notSelectedColor);
         holder.imageItem.setBackgroundColor(notSelectedColor);
 
-        if (position == lastSelectedPosition) {
-            holder.cardView.setBackgroundColor(selectedColor);
-            holder.imageItem.setBackgroundColor(selectedColor);
+        if (position == lastSelectedImagePosition) {
+            holder.cardView.setBackgroundColor(selectedImageColor);
+            holder.imageItem.setBackgroundColor(selectedImageColor);
+        }
+        if (position == lastSelectedFramePosition) {
+            holder.cardView.setBackgroundColor(selectedFrameColor);
+            holder.imageItem.setBackgroundColor(selectedFrameColor);
+        }
+        if (position == lastSelectedImagePosition && position ==  lastSelectedFramePosition) {
+            holder.cardView.setBackgroundColor(sameSelectedPalette);
+            holder.imageItem.setBackgroundColor(sameSelectedPalette);
         }
         if (!showTextView) {
             holder.txtTitle.setVisibility(View.GONE);
@@ -72,9 +82,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         String name = data.get(position).getPaletteId();
         if (checkDuplicate) {
             for (GbcPalette objeto : Utils.gbcPalettesList) {
-                // Comparar el valor de la propiedad "nombre" de cada objeto con el valor del nuevo objeto
                 if (objeto.getPaletteId().equals(name)) {
-                    // Si el valor es igual, significa que el nombre ya existe en otro objeto de la lista
                     holder.imageItem.setBackgroundColor(context.getResources().getColor(R.color.duplicated));
                 }
             }
@@ -93,8 +101,12 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         ImageView imageItem;
     }
 
-    // Método para actualizar la última posición seleccionada
-    public void setLastSelectedPosition(int position) {
-        lastSelectedPosition = position;
+    // Method to update the last palette used for the image
+    public void setLastSelectedImagePosition(int position) {
+        lastSelectedImagePosition = position;
+    }
+    // Method to update the last palette used for the image
+    public void setLastSelectedFramePosition(int position) {
+        lastSelectedFramePosition = position;
     }
 }

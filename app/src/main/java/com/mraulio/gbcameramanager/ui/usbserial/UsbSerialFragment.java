@@ -1,6 +1,5 @@
 package com.mraulio.gbcameramanager.ui.usbserial;
 
-
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.deleteFolderRecursive;
 
@@ -20,7 +19,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.os.FileUtils;
 import android.os.Handler;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
@@ -73,8 +71,6 @@ import java.util.List;
  * By Mraulio
  */
 public class UsbSerialFragment extends Fragment implements SerialInputOutputManager.Listener {
-    static List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
-    static List<GbcImage> extractedImagesList = new ArrayList<>();
     public static File photoFolder;
     static File latestFile;
     boolean ape = false;
@@ -100,15 +96,17 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     public static RadioButton rbPrint;
     RadioGroup rbGroup;
 
-    static List<GbcImage> listActiveImages = new ArrayList<>();
-    static List<Bitmap> listActiveBitmaps = new ArrayList<>();
-    static List<GbcImage> listDeletedImages;
-    static List<Bitmap> listDeletedBitmaps;
-    static List<Bitmap> listDeletedBitmapsRedStroke;
-    static List<GbcImage> finalListImages;
-    static List<Bitmap> finalListBitmaps;
-    static GbcImage lastSeenImage;
-    static Bitmap lastSeenBitmap;
+    static List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
+    static List<GbcImage> extractedImagesList = new ArrayList<>();
+    static List<List<GbcImage>> listActiveImages = new ArrayList<>();
+    static List<List<GbcImage>> listDeletedImages = new ArrayList<>();
+    static List<List<Bitmap>> listDeletedBitmaps = new ArrayList<>();
+    static List<List<Bitmap>> listDeletedBitmapsRedStroke = new ArrayList<>();
+    static List<GbcImage> finalListImages = new ArrayList<>();
+    static List<List<Bitmap>> listActiveBitmaps = new ArrayList<>();
+    static List<Bitmap> finalListBitmaps = new ArrayList<>();
+    static List<GbcImage> lastSeenImage = new ArrayList<>();
+    static List<Bitmap> lastSeenBitmap = new ArrayList<>();
 
 
     @Override
@@ -283,7 +281,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                         newImageDatas.add(imageData);
                         newGbcImages.add(gbcImage);
                         Utils.gbcImagesList.add(gbcImage);
-                        Utils.imageBitmapCache.put(gbcImage.getHashCode(), extractedImagesBitmaps.get(i));
+                        Utils.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
                     }
                 }
                 if (newGbcImages.size() > 0) {
@@ -310,14 +308,14 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-            CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, extractedImagesList, extractedImagesBitmaps, true, true, false, null);
+            CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
-            tv.append(extractedImagesList.size() + " images.");
+            tv.append(finalListImages.size() + " "+getString(R.string.images));
             btnAddImages.setVisibility(View.VISIBLE);
         });
         btnFullRom.setOnClickListener(v -> {
             isRomExtracted = true;
-            btnDelSav.setText("Delete folder");
+            btnDelSav.setText(getString(R.string.delete_folder));
 
             btnAddImages.setVisibility(View.GONE);
             extractedImagesList.clear();
@@ -400,9 +398,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             btnPrintBanner.setVisibility(View.GONE);
             ape = true;
             connect();
+            port.setDTR(true);
+            port.setRTS(true);
+            port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
             usbIoManager.start();
             tv.append(getString(R.string.tv_connected));
-            port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         } catch (Exception e) {
             Toast toast = Toast.makeText(getContext(), getString(R.string.error_arduino) + e.toString(), Toast.LENGTH_LONG);
             toast.show();
@@ -457,23 +457,24 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         completeReadRomName();
     }
 
-    public static void readSav(File file) {
+    public static void readSav(File file, int saveBank) {
         latestFile = file;
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
-
+        extractedImagesList.clear();
+        extractedImagesBitmaps.clear();
         try {
             if (file.length() / 1024 == 128) {
                 List<byte[]> listExtractedImageBytes;
 
-                listExtractedImageBytes = extractor.extractBytes(file);
+                listExtractedImageBytes = extractor.extractBytes(file, saveBank);
                 int nameIndex = 1;
                 String fileName = file.getName();
                 for (byte[] imageBytes : listExtractedImageBytes) {
                     GbcImage gbcImage = new GbcImage();
                     String formattedIndex = String.format("%02d", nameIndex);
-                    if (nameIndex == listExtractedImageBytes.size() - MainActivity.deletedCount) {//Last seen image
+                    if (nameIndex == listExtractedImageBytes.size() - MainActivity.deletedCount[saveBank]) {//Last seen image
                         gbcImage.setName(fileName + " [last seen]");
-                    } else if (nameIndex > listExtractedImageBytes.size() - MainActivity.deletedCount) {//Deleted images
+                    } else if (nameIndex > listExtractedImageBytes.size() - MainActivity.deletedCount[saveBank]) {//Deleted images
                         gbcImage.setName(fileName + " [deleted]");
                     } else {
                         gbcImage.setName(fileName + " " + formattedIndex);
@@ -483,7 +484,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     String hashHex = Utils.bytesToHex(hash);
                     gbcImage.setHashCode(hashHex);
                     ImageCodec imageCodec = new ImageCodec(128, 112, false);
-                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false,false);
+                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(),Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, false,false, false);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         //I need to use copy because if not it's inmutable bitmap
                         Bitmap framed = Utils.hashFrames.get((gbcImage.getFrameId())).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -497,14 +498,13 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     extractedImagesList.add(gbcImage);
                 }
 
-                listActiveImages = new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount - 1));
-                listActiveBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount - 1));
-                lastSeenImage = extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount - 1);
-                lastSeenBitmap = extractedImagesBitmaps.get(extractedImagesBitmaps.size() - MainActivity.deletedCount - 1);
-                listDeletedImages = new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - MainActivity.deletedCount, extractedImagesList.size()));
+                listActiveImages.add(new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1)));
+                listActiveBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1)));
+                lastSeenImage.add(extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1));
+                lastSeenBitmap.add(extractedImagesBitmaps.get(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1));
+                listDeletedImages.add(new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - MainActivity.deletedCount[saveBank], extractedImagesList.size())));
 
-                listDeletedBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount, extractedImagesBitmaps.size()));
-                listDeletedBitmapsRedStroke = new ArrayList<>();
+                listDeletedBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank], extractedImagesBitmaps.size())));
 
                 Paint paint = new Paint();
                 paint.setColor(Color.RED);
@@ -513,11 +513,12 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 int startY = 0;
                 int endX = 0;
                 int endY = 144;
-                for (Bitmap bitmap : listDeletedBitmaps) {
+                listDeletedBitmapsRedStroke.add(new ArrayList<>());
+                for (Bitmap bitmap : listDeletedBitmaps.get(saveBank)) {
                     Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
                     Canvas canvas = new Canvas(copiedBitmap);
                     canvas.drawLine(startX, startY, endX, endY, paint);
-                    listDeletedBitmapsRedStroke.add(copiedBitmap);
+                    listDeletedBitmapsRedStroke.get(saveBank).add(copiedBitmap);
                 }
             } else {
                 tv.append(gridView.getContext().getString(R.string.no_good_dump));
@@ -530,11 +531,20 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     }
 
     public static void readRomSavs() {
-        extractedImagesBitmaps.clear();
+        listActiveImages.clear();
+        listActiveBitmaps.clear();
+        listDeletedImages.clear();
+        listDeletedBitmaps.clear();
+        listDeletedBitmapsRedStroke.clear();
+        finalListBitmaps.clear();
+        finalListImages.clear();
+        lastSeenImage.clear();
+        lastSeenBitmap.clear();
+
         tv.append(tv.getContext().getString(R.string.sav_parts) + fullRomFileList.size());
         try {
-            for (File file : fullRomFileList) {
-                readSav(file);
+            for (int i = 0; i < fullRomFileList.size(); i++) {
+                readSav(fullRomFileList.get(i), i);
             }
 
             btnAddImages.setVisibility(View.VISIBLE);
@@ -644,6 +654,12 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         handlerRam.postDelayed(new Runnable() {
             @Override
             public void run() {
+                listActiveImages.clear();
+                listActiveBitmaps.clear();
+                listDeletedImages.clear();
+                listDeletedBitmaps.clear();
+                listDeletedBitmapsRedStroke.clear();
+
                 new GBxCartCommands.ReadRamAsyncTask(port, getContext(), tv, latestFile).execute();
             }
         }, 200);
@@ -651,34 +667,59 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
     //Refactor
     public static void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
-        List<Bitmap> bitmapsAdapterList = null;
+        List<Bitmap> bitmapsAdapterList = new ArrayList<>();
+        finalListImages.clear();
+        finalListBitmaps.clear();
         if (!showLastSeen.isChecked() && !showDeleted.isChecked()) {
-            finalListImages = new ArrayList<>(listActiveImages);
-            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+            for (List<GbcImage> gbcImageList : listActiveImages) {
+                finalListImages.addAll(gbcImageList);
+            }
+            for (List<Bitmap> bitmapList : listActiveBitmaps) {
+                finalListBitmaps.addAll(bitmapList);
+            }
+
             bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+
         } else if (showLastSeen.isChecked() && !showDeleted.isChecked()) {
-            finalListImages = new ArrayList<>(listActiveImages);
-            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-            finalListImages.add(lastSeenImage);
-            finalListBitmaps.add(lastSeenBitmap);
+            for (int i = 0; i < listActiveImages.size(); i++) {
+                finalListImages.addAll(listActiveImages.get(i));
+                finalListImages.add(lastSeenImage.get(i));
+            }
+            for (int i = 0; i < listActiveBitmaps.size(); i++) {
+                finalListBitmaps.addAll(listActiveBitmaps.get(i));
+                finalListBitmaps.add(lastSeenBitmap.get(i));
+            }
             bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
 
         } else if (!showLastSeen.isChecked() && showDeleted.isChecked()) {
-            finalListImages = new ArrayList<>(listActiveImages);
-            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
-            finalListImages.addAll(listDeletedImages);
-            finalListBitmaps.addAll(listDeletedBitmaps);
-            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
+            for (int i = 0; i < listActiveImages.size(); i++) {
+                finalListImages.addAll(listActiveImages.get(i));
+                finalListImages.addAll(listDeletedImages.get(i));
+            }
+            for (int i = 0; i < listActiveBitmaps.size(); i++) {
+                finalListBitmaps.addAll(listActiveBitmaps.get(i));
+                bitmapsAdapterList.addAll(listActiveBitmaps.get(i));
+                finalListBitmaps.addAll(listDeletedBitmaps.get(i));
+                bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke.get(i));
+
+            }
         } else if (showLastSeen.isChecked() && showDeleted.isChecked()) {
-            finalListImages = new ArrayList<>(listActiveImages);
-            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-            finalListImages.add(lastSeenImage);
-            finalListImages.addAll(listDeletedImages);
-            finalListBitmaps.add(lastSeenBitmap);
-            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
-            finalListBitmaps.addAll(listDeletedBitmaps);
-            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
+            for (int i = 0; i < listActiveImages.size(); i++) {
+                finalListImages.addAll(listActiveImages.get(i));
+                finalListImages.add(lastSeenImage.get(i));
+                finalListImages.addAll(listDeletedImages.get(i));
+
+            }
+            for (int i = 0; i < listActiveBitmaps.size(); i++) {
+                finalListBitmaps.addAll(listActiveBitmaps.get(i));
+                bitmapsAdapterList.addAll(listActiveBitmaps.get(i));
+
+                finalListBitmaps.add(lastSeenBitmap.get(i));
+                bitmapsAdapterList.add(lastSeenBitmap.get(i));
+
+                finalListBitmaps.addAll(listDeletedBitmaps.get(i));
+                bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke.get(i));
+            }
         }
         gridView.setAdapter((new CustomGridViewAdapterImage(showLastSeen.getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
     }
@@ -731,12 +772,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         UsbSerialDriver driver = availableDrivers.get(0);
         connection = manager.openDevice(driver.getDevice());
 
-
         port = driver.getPorts().get(0); // Most devices have just one port (port 0)
         try {
             if (port.isOpen()) port.close();
             port.open(connection);
-            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+//            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 
         } catch (Exception e) {
             tv.append(e.toString());
@@ -795,6 +835,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     }
 
     public void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
+        finalListBitmaps.clear();
+        finalListImages.clear();
         List<String> dataList = HexToTileData.separateData(fileContent);
         String data = "";
         int index = 1;
@@ -810,12 +852,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             imageData.setImageId(hashHex);
             imageData.setData(bytes);
             gbcImage.setName(index++ + "-" + " arduino");
-            gbcImage.setFrameId("GBCManager_Frame");//Could just leave it blank
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(160, height, false);
-            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false,false);
-            extractedImagesBitmaps.add(image);
-            extractedImagesList.add(gbcImage);
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(),Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false, false,false);
+            finalListBitmaps.add(image);
+            finalListImages.add(gbcImage);
         }
     }
 

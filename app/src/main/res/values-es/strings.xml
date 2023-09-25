@@ -159,4 +159,11 @@
     <string name="no_spaces_frame_name">El nombre no debe contener espacios</string>
     <string name="frame_name_exists">Este nombre de marco ya existe</string>
     <string name="no_valid_image_file">No es un archivo de imagen válido</string>
+
+    <string name="invalid_transparent_image">La imagen tiene transparencia y no se puede añadir</string>
+    <string name="delete_folder">Borrar carpeta</string>
+    <string name="images">imágenes.</string>
+    <string name="only_image_paper">Solo imagen</string>
+    <string name="process">Procesar</string>
+    <string name="custom_paper_color">Otro color de papel:</string>
 </resources>

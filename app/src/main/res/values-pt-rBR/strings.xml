@@ -161,4 +161,11 @@
     <string name="no_spaces_frame_name">O nome não deve conter espaços vazios</string>
     <string name="frame_name_exists">Este nome de moldura já existe</string>
     <string name="no_valid_image_file">Não é um arquivo de imagem válido</string>
+
+    <string name="invalid_transparent_image">A imagem tem transparência e não pode ser adicionada</string>
+    <string name="delete_folder">Deletar pasta</string>
+    <string name="images">imagens.</string>
+    <string name="only_image_paper">Somente imagem</string>
+    <string name="process">Processar</string>
+    <string name="custom_paper_color">Cor personalizada:</string>
 </resources>

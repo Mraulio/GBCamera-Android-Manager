@@ -1,6 +1,8 @@
 package com.mraulio.gbcameramanager.ui.frames;
 
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -82,19 +84,21 @@ public class FramesFragment extends Fragment {
                                 if (Utils.gbcImagesList.get(i).getFrameId().equals(Utils.framesList.get(position).getFrameName())) {
                                     Utils.gbcImagesList.get(i).setFrameId("Nintendo_Frame");
                                     //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
-                                    if (Utils.imageBitmapCache.containsKey(Utils.gbcImagesList.get(i).getHashCode())) {
+                                    if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
                                         Bitmap image = null;
                                         try {
                                             GbcImage gbcImage = Utils.gbcImagesList.get(i);
-                                            image = GalleryFragment.frameChange(gbcImage, Utils.imageBitmapCache.get(gbcImage.getHashCode()), gbcImage.getFrameId(), Utils.gbcImagesList.get(i).isLockFrame());
+                                            image = frameChange(gbcImage,"Nintendo_Frame",gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(),true);
+                                            Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
+                                            GalleryFragment.diskCache.put(gbcImage.getHashCode(), image);
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
-                                        Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                     }
                                     new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
                             }
+                            Utils.hashFrames.remove(Utils.framesList.get(position).getFrameName());
                             Utils.framesList.remove(position);
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }
@@ -140,7 +144,7 @@ public class FramesFragment extends Fragment {
         int layoutResourceId;
         private boolean showTextView, checkDuplicate;
         List<GbcFrame> data = new ArrayList<GbcFrame>();
-        int notSelectedColor = Color.parseColor("#FFFFFF");
+        int notSelectedColor = Color.parseColor("#C7D3D5");
         int selectedColor = Color.parseColor("#8C97B3");
         int lastSelectedPosition = -1; // No selected element initially
 
@@ -179,7 +183,7 @@ public class FramesFragment extends Fragment {
                 holder.txtTitle.setBackgroundColor(selectedColor);
                 holder.imageItem.setBackgroundColor(selectedColor);
             }
-        if (!showTextView) {
+            if (!showTextView) {
                 holder.txtTitle.setVisibility(View.GONE);
             }
             Bitmap image = data.get(position).getFrameBitmap();

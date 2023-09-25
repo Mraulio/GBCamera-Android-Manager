@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -40,18 +41,24 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
                 imageBytes = imageDataDao.getDataByImageId(imageHash);
                 //Set the image bytes to the object
                 gbcImage.setImageBytes(imageBytes);
+                if (gbcImage.getFramePaletteId()==null){
+                    gbcImage.setFramePaletteId("bw");
+                }
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
                 ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
-                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette(),Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame());
-                //Add the bitmap to the cache
+                GbcFrame gbcFrame = Utils.hashFrames.get(gbcImage.getFrameId());
+                if (gbcFrame == null){
+                    gbcFrame= Utils.hashFrames.get("Nintendo_Frame");
+                }
+                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcFrame.isWildFrame());                //Add the bitmap to the cache
                 Utils.imageBitmapCache.put(imageHash, image);
                 GalleryFragment.diskCache.put(imageHash, image);
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
                     if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
-                        image = GalleryFragment.frameChange(GalleryFragment.filteredGbcImages.get(i), Utils.imageBitmapCache.get(GalleryFragment.filteredGbcImages.get(i).getHashCode()), GalleryFragment.filteredGbcImages.get(i).getFrameId(), GalleryFragment.filteredGbcImages.get(i).isLockFrame());
+                        image = GalleryFragment.frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(),true);
                     Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                     GalleryFragment.diskCache.put(imageHash, image);
 

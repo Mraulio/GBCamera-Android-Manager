@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -70,7 +71,6 @@ public class Utils {
             bytes[i] = (byte) ((Character.digit(byteStrings[i].charAt(0), 16) << 4)
                     + Character.digit(byteStrings[i].charAt(1), 16));
         }
-        System.out.println(bytes.length);
         return bytes;
     }
 
@@ -117,5 +117,54 @@ public class Utils {
         matrix.postRotate(ROTATION_VALUES[gbcImage.getRotation()]);
         Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, false);
         return rotatedBitmap;
+    }
+
+    public static Bitmap transparentBitmap(Bitmap bitmap, GbcFrame gbcFrame) {
+        HashSet<int[]> transparencyHS = transparencyHashSet(gbcFrame.getFrameBitmap());
+        if (transparencyHS.size() == 0) {
+            transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+        }
+        gbcFrame.setTransparentPixelPositions(transparencyHS);
+
+        int transparentPixel = Color.argb(0, 0, 0, 0);
+        for (int[] position : transparencyHS) {
+            bitmap.setPixel(position[0], position[1], transparentPixel);
+        }
+        return bitmap;
+    }
+    public static HashSet<int[]> transparencyHashSet(Bitmap bitmap) {
+        HashSet<int[]> transparentPixelPositions = new HashSet<>();
+        // Iterar a través de los píxeles del Bitmap
+        for (int y = 0; y < bitmap.getHeight(); y++) {
+            for (int x = 0; x < bitmap.getWidth(); x++) {
+                int pixel = bitmap.getPixel(x, y);
+                if (Color.alpha(pixel) == 0) {
+                    int[] pos= {x,y};
+                    transparentPixelPositions.add(pos);
+                }
+            }
+        }
+        return transparentPixelPositions;
+    }
+
+    public static HashSet<int[]> generateDefaultTransparentPixelPositions(Bitmap bitmap) {
+        HashSet<int[]> transparentPixelPositions = new HashSet<>();
+
+        int bitmapWidth = 160;
+        int bitmapHeight = bitmap.getHeight();
+        int innerBitmapWidth = 128;
+        int innerBitmapHeight = 112;
+        int startX = 16;
+        int startY = 16;
+        if (bitmapHeight == 224) startY = 40;
+
+        for (int y = startY; y < startY + innerBitmapHeight; y++) {
+            for (int x = startX; x < startX + innerBitmapWidth; x++) {
+                int[] pos = {x, y};
+                transparentPixelPositions.add(pos);
+            }
+        }
+
+        return transparentPixelPositions;
     }
 }

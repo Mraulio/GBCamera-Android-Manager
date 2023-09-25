@@ -29,6 +29,8 @@ import java.util.Locale;
 public class SettingsFragment extends Fragment {
     SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
     private boolean userSelect = false;
+    private boolean userSelectPage = false;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
@@ -175,12 +177,16 @@ public class SettingsFragment extends Fragment {
         spinnerImages.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // I set the export size on the Main activity int as the selected one
-                MainActivity.imagesPage = sizesIntegerImages.get(position);
-                editor.putInt("images_per_page", sizesIntegerImages.get(position));
-                GalleryFragment.currentPage = 0;
-                editor.putInt("current_page", 0);
-                editor.apply();
+                if (userSelectPage) {
+                    // I set the export size on the Main activity int as the selected one
+                    MainActivity.imagesPage = sizesIntegerImages.get(position);
+                    editor.putInt("images_per_page", sizesIntegerImages.get(position));
+                    GalleryFragment.currentPage = 0;
+                    editor.putInt("current_page", 0);
+                    editor.apply();
+                } else {
+                    userSelectPage = true; // Because the spinner executes an item selection on startup
+                }
             }
 
             @Override

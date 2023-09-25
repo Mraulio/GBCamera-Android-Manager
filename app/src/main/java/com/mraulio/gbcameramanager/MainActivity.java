@@ -1,5 +1,7 @@
 package com.mraulio.gbcameramanager;
 
+import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
@@ -48,6 +51,7 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -86,11 +90,13 @@ public class MainActivity extends AppCompatActivity {
     public static String languageCode;
     public static boolean magicCheck;
     public static boolean showRotationButton;
-
+    public static int customColorPaper;
+    public static int lastSeenGalleryImage = 0;
 
     private boolean openedSav = false;
     public static UsbManager manager;
-    public static int deletedCount = 0;
+    public static int[] deletedCount = new int[7];
+
     public static AppDatabase db;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
     private UsbDevice device;
@@ -127,7 +133,9 @@ public class MainActivity extends AppCompatActivity {
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
         magicCheck = sharedPreferences.getBoolean("magic_check", true);
         showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
+        customColorPaper = sharedPreferences.getInt("custom_paper_color",  Color.WHITE);
 
+        String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
 
         //To get the locale on the first startup and set the def value
@@ -137,6 +145,15 @@ public class MainActivity extends AppCompatActivity {
 
         Locale currentLocale = locales.get(0);
 
+        String currentVersion = BuildConfig.VERSION_NAME;
+        if (Float.valueOf(currentVersion) > Float.valueOf(previousVersion)) {
+            //App has been updated, do something if necessary
+            deleteImageCache();
+            // Update version name for future comparisons
+            editor.putString("previous_version", currentVersion);
+            editor.apply();
+
+        }
         if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
                 && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
             languageCode = "en";
@@ -154,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
         fab = findViewById(R.id.fab);
 
         Utils.makeDirs();
-
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -216,6 +232,22 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
+        }
+
+
+    }
+
+    private void deleteImageCache() {
+        //Deleting cache for the next version only
+        File cacheDir = new File(getApplicationContext().getCacheDir(), CACHE_DIR_NAME);
+        // Borra todos los archivos dentro del directorio de caché
+        if (cacheDir != null && cacheDir.isDirectory()) {
+            File[] cacheFiles = cacheDir.listFiles();
+            if (cacheFiles != null) {
+                for (File cacheFile : cacheFiles) {
+                    cacheFile.delete();
+                }
+            }
         }
     }
 
@@ -290,7 +322,6 @@ public class MainActivity extends AppCompatActivity {
             if (frames.size() > 0) {
                 for (GbcFrame gbcFrame : frames) {
                     Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
-
                 }
                 Utils.framesList.addAll(frames);
             } else {
@@ -315,9 +346,11 @@ public class MainActivity extends AppCompatActivity {
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
             gf.updateFromMain();
-
         }
     }
+
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

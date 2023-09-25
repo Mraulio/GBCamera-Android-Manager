@@ -22,11 +22,17 @@ public class GbcImage {
     @ColumnInfo(name = "palette_id")
     private String paletteId;
 
+    @ColumnInfo(name = "frame_palette_id")
+    private String framePaletteId;
+
     @ColumnInfo(name = "lock_frame")
     private boolean lockFrame;
 
     @ColumnInfo(name = "invert_palette")
     private boolean invertPalette;
+
+    @ColumnInfo(name = "invert_frame_palette", defaultValue = "false")
+    private boolean invertFramePalette;
 
     @ColumnInfo(name = "frame_id")
     private String frameId;
@@ -37,7 +43,23 @@ public class GbcImage {
     @ColumnInfo(name = "tags_list")
     private List<String> tags = new ArrayList<>();
 
-    @ColumnInfo(name = "rotation",defaultValue = "0")
+    public String getFramePaletteId() {
+        return framePaletteId;
+    }
+
+    public boolean isInvertFramePalette() {
+        return invertFramePalette;
+    }
+
+    public void setInvertFramePalette(boolean invertFramePalette) {
+        this.invertFramePalette = invertFramePalette;
+    }
+
+    public void setFramePaletteId(String framePaletteId) {
+        this.framePaletteId = framePaletteId;
+    }
+
+    @ColumnInfo(name = "rotation", defaultValue = "0")
     private int rotation;
 
     public static int numImages = 0;
@@ -46,11 +68,13 @@ public class GbcImage {
 
     public GbcImage() {
         this.paletteId = "bw";
+        this.framePaletteId = "bw";
         this.frameId = "Nintendo_Frame";//I set the nintendo frame as the default
         this.lockFrame = false;
         this.invertPalette = false;
+        this.invertFramePalette = false;
         this.creationDate = new Date(System.currentTimeMillis());
-        this.rotation =0;
+        this.rotation = 0;
     }
 
     public int getRotation() {

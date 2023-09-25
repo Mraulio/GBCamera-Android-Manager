@@ -235,8 +235,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     }
                     //Put the last seen image as this one
                     lastSeenGalleryImage = globalImageIndex;
-                    editor.putInt("last_seen_gallery_image", globalImageIndex);
-                    editor.apply();
+
                     final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode())};
                     // Create custom dialog
                     final Dialog dialog = new Dialog(getContext());
@@ -1202,7 +1201,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 if (!selectedImages.isEmpty()) {
                     Collections.sort(selectedImages);
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle(getString(R.string.delete_all_title));//Add to strings
+                    builder.setTitle(getString(R.string.delete_all_title));
 
                     GridView deleteImageGridView = new GridView(getContext());
                     deleteImageGridView.setNumColumns(4);

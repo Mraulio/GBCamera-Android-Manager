@@ -284,7 +284,7 @@ public class ImportFragment extends Fragment {
                                 if (!cbAddFrame.isChecked()) {
                                     HashSet transparencyHS = transparencyHashSet(finalListBitmaps.get(0));
                                     if (transparencyHS.size() > 0) {
-                                        tvFileName.setText("Image has transparency and can't be added");//Add to strings
+                                        tvFileName.setText((getString(R.string.invalid_transparent_image)));
                                     } else {
                                         for (int i = 0; i < finalListImages.size(); i++) {
                                             GbcImage gbcImage = finalListImages.get(i);

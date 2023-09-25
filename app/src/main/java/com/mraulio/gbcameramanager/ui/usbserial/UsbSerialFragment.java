@@ -310,12 +310,12 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             }
             CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
-            tv.append(finalListImages.size() + " images.");//Add to strings
+            tv.append(finalListImages.size() + " "+getString(R.string.images));
             btnAddImages.setVisibility(View.VISIBLE);
         });
         btnFullRom.setOnClickListener(v -> {
             isRomExtracted = true;
-            btnDelSav.setText("Delete folder");//Add to strings
+            btnDelSav.setText(getString(R.string.delete_folder));
 
             btnAddImages.setVisibility(View.GONE);
             extractedImagesList.clear();

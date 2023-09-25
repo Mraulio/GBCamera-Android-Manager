@@ -64,9 +64,6 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
         GalleryFragment.tv.setText(GalleryFragment.tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
         //Reseting the lastSeenGalleryImage to 0 if any image is deleted
         lastSeenGalleryImage = 0;
-        SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
-        editor.putInt("last_seen_gallery_image", 0);
-        editor.apply();
 
         //Update lastPage and CurrentPage after deleting
 

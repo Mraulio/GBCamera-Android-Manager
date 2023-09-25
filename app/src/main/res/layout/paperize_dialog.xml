@@ -174,7 +174,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
-                        android:text="Only image"></CheckBox>
+                        android:text="@string/only_image_paper"></CheckBox>
                 </LinearLayout>
 
                 <LinearLayout
@@ -188,7 +188,7 @@
                         android:id="@+id/btnProcessPaper"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Process"></Button>
+                        android:text="@string/process"></Button>
 
                     <Button
                         android:id="@+id/btnSavePaper"
@@ -196,7 +196,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
                         android:enabled="false"
-                        android:text="Save"></Button>
+                        android:text="@string/btn_save"></Button>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

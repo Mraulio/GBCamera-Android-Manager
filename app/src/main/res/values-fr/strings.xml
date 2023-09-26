@@ -144,10 +144,10 @@
     <string name="frame_name_exists">Ce nom de bordure existe déjà</string>
     <string name="no_valid_image_file">Fichier image non valide</string>
 
-    <string name="invalid_transparent_image">L\'image est transparente et ne peut pas être ajoutée</string>
+    <string name="invalid_transparent_image">Couche transparente, image incompatible</string>
     <string name="delete_folder">Effacer le dossier</string>
     <string name="images">images.</string>
-    <string name="only_image_paper">Seule l\'image</string>
+    <string name="only_image_paper">Image seulement</string>
     <string name="process">Traiter</string>
     <string name="custom_paper_color">Couleur personnalisée:</string>
 </resources>

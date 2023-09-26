@@ -121,8 +121,8 @@
 
     <string name="menu_savmanager">Speichermanager</string>
     <string name="file_name">Dateiname:\u0020</string>
-    <string name="paperize_settings">Zeige Button "Thermoprinter Simulation"</string>
-    <string name="paperize_button">Thermoprinter Simulation</string>
+    <string name="paperize_settings">Zeige Button "Paperize"</string>
+    <string name="paperize_button">Paperize</string>
     <string name="saved_paperized_toast">Thermoprinter Simulation gespeichert!</string>
     <string name="showPrint">Zeige Druckbutton.</string>
     <string name="permissions_toast">Berechtigungen erteilt.</string>

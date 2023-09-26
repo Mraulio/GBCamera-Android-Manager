@@ -103,8 +103,8 @@
 
     <string name="menu_savmanager">Gestionnaire de sauvegardes</string>
     <string name="file_name">Nom du fichier:\u0020</string>
-    <string name="paperize_settings">Afficher le bouton "Simulation d'impression thermique"</string>
-    <string name="paperize_button">Simulation d\'impression thermique</string>
+    <string name="paperize_settings">Afficher le bouton "Paperize"</string>
+    <string name="paperize_button">Paperize</string>
     <string name="saved_paperized_toast">Impression thermique bien cuite !</string>
     <string name="showPrint">Afficher le bouton imprimer</string>
     <string name="permissions_toast">Permission accordée</string>

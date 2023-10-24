@@ -2,7 +2,6 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.customColorPaper;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.crop;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.dtf;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.rotateBitmapImport;
@@ -34,11 +33,15 @@ import com.mraulio.gbcameramanager.utils.Utils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -68,7 +71,7 @@ public class PaperUtils {
         //Calcute paperized image size
         int speckleHeight = inputBitmap.getHeight() * (mul - overlapping) + overlapping;
         int speckleWidth = inputBitmap.getWidth() * (mul - overlapping) + overlapping;
-        System.out.println(speckleWidth+" specklewidth");
+        System.out.println(speckleWidth + " specklewidth");
         Bitmap paperizedImage = Bitmap.createBitmap(speckleWidth, speckleHeight, Bitmap.Config.ARGB_8888);
         Canvas can = new Canvas(paperizedImage);
         can.drawColor(Color.WHITE);//Fill the canvas with white. If not it won't work (fills everything black)
@@ -124,10 +127,10 @@ public class PaperUtils {
         int borderWidth = 3492;//Border images width
         int internalImageWidth = 2494;//3492/1.4, being 1.4 the factor of paper/image 38/27.1mm
         int paperWidth = borderWidth;
-        int imageMargins =998;//3492-2494, same vertical and horizontal margins
-        float internalImageHeightFactor = (float)internalImageWidth/speckleWidth ;
+        int imageMargins = 998;//3492-2494, same vertical and horizontal margins
+        float internalImageHeightFactor = (float) internalImageWidth / speckleWidth;
         int internalImageHeight = (int) (speckleHeight * internalImageHeightFactor);
-        int paperHeight = internalImageHeight+imageMargins + topBorder.getHeight() + bottomBorder.getHeight();
+        int paperHeight = internalImageHeight + imageMargins + topBorder.getHeight() + bottomBorder.getHeight();
         paperizedImage = Bitmap.createScaledBitmap(paperizedImage, internalImageWidth, internalImageHeight, false);
         Bitmap paperImage = Bitmap.createBitmap(paperWidth, paperHeight, inputBitmap.getConfig());
         int left = (paperWidth - internalImageWidth) / 2;
@@ -319,8 +322,19 @@ public class PaperUtils {
         btnSavePaper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LocalDateTime now = LocalDateTime.now();
-                String date = dtf.format(now);
+                LocalDateTime now = null;
+                Date nowDate = new Date();
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    now = LocalDateTime.now();
+                }
+                String date = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                    date = dtf.format(now);
+                } else {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                    date = sdf.format(nowDate);
+                }
                 int index = 1;
                 for (Bitmap paperized : paperizedBitmaps) {
                     File file = null;

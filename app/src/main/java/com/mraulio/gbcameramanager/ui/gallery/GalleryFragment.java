@@ -12,9 +12,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
-import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
-import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.app.AlertDialog;
@@ -98,7 +96,6 @@ import pl.droidsonroids.gif.GifDrawable;
 
 
 public class GalleryFragment extends Fragment implements SerialInputOutputManager.Listener {
-    static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     static UsbManager manager = MainActivity.manager;
     SerialInputOutputManager usbIoManager;
     static UsbDeviceConnection connection;
@@ -351,7 +348,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onClick(View v) {
                             List<Integer> indexToPaperize = new ArrayList<>();
                             indexToPaperize.add(globalImageIndex);
-                            paperDialog(indexToPaperize,getContext());
+                            paperDialog(indexToPaperize, getContext());
                         }
                     });
                     rotateButton.setOnClickListener(new View.OnClickListener() {
@@ -1280,8 +1277,21 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                     }
                     builder.setPositiveButton(getString(R.string.btn_save), (dialog, which) -> {
-                        LocalDateTime now = LocalDateTime.now();
-                        File file = new File(Utils.IMAGES_FOLDER, "HDR" + dtf.format(now) + ".png");
+                        LocalDateTime now = null;
+                        Date nowDate = new Date();
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            now = LocalDateTime.now();
+                        }
+                        File file = null;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+
+                            file = new File(Utils.IMAGES_FOLDER, "HDR" + dtf.format(now) + ".png");
+                        } else {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                            file = new File(Utils.IMAGES_FOLDER, "HDR" + sdf.format(nowDate) + ".png");
+
+                        }
                         if (averaged[0].getHeight() == 144 * 6 && averaged[0].getWidth() == 160 * 6 && crop) {
                             averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 128 * 6, 112 * 6);
                         }
@@ -1376,9 +1386,20 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     builder.setPositiveButton(getString(R.string.btn_save), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            LocalDateTime now = LocalDateTime.now();
+                            LocalDateTime now = null;
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                now = LocalDateTime.now();
+                            }
+                            Date nowDate = new Date();
+                            File gifFile = null;
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                                gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".gif");
+                            } else {
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                                gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + sdf.format(nowDate) + ".gif");
 
-                            File gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".gif");
+                            }
 
                             try (FileOutputStream out = new FileOutputStream(gifFile)) {
 
@@ -1601,7 +1622,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
             Canvas canvas = new Canvas(resultBitmap);
             String paletteId = gbcImage.getPaletteId();
-            if (save!= null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
+            if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
                 paletteId = "bw";
             Bitmap setToPalette = paletteChanger(paletteId, gbcImage.getImageBytes(), gbcImage, keepFrame, false, invertImagePalette);
             Bitmap croppedBitmap = Bitmap.createBitmap(setToPalette, 16, yIndexActualImage, 128, 112); //Getting the internal 128x112 image
@@ -1613,7 +1634,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 invertFramePalette = gbcImage.isInvertPalette();
             }
 
-            if (save!= null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
+            if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
                 framePaletteId = "bw";
 
             GbcFrame gbcFrame = Utils.hashFrames.get(frameId);
@@ -1632,12 +1653,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         } else {
             gbcImage.setFrameId(frameId);
             String imagePaletteId = gbcImage.getPaletteId();
-            if (save!= null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
+            if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
                 imagePaletteId = "bw";
             resultBitmap = paletteChanger(imagePaletteId, gbcImage.getImageBytes(), gbcImage, keepFrame, false, invertImagePalette);
         }
         //Because when exporting to json, hex or printing I use this method but don't want to keep the changes
-        if (save!= null && save) {
+        if (save != null && save) {
             diskCache.put(gbcImage.getHashCode(), resultBitmap);
             new SaveImageAsyncTask(gbcImage).execute();
         }

@@ -24,21 +24,38 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.Deflater;
 
 public class GalleryUtils {
     public static void saveImage(List<GbcImage> gbcImages, Context context) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = null;
+        Date nowDate = new Date();
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            now = LocalDateTime.now();
+        }
+
         String fileNameBase = "gbcImage_";
         String extension = MainActivity.exportPng ? ".png" : ".txt";
         for (int i = 0; i < gbcImages.size(); i++) {
             GbcImage gbcImage = gbcImages.get(i);
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
             image = rotateBitmap(image, gbcImage);
-            String fileName = fileNameBase + GalleryFragment.dtf.format(now);
+            String fileName = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                fileName = fileNameBase + dtf.format(now);
+            }else{
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                fileName = fileNameBase + sdf.format(nowDate);
+            }
 
             if (gbcImages.size() > 1) {
                 fileName += "_" + (i + 1);

@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
         magicCheck = sharedPreferences.getBoolean("magic_check", true);
         showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
-        customColorPaper = sharedPreferences.getInt("custom_paper_color",  Color.WHITE);
+        customColorPaper = sharedPreferences.getInt("custom_paper_color", Color.WHITE);
 
         String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
@@ -141,9 +141,15 @@ public class MainActivity extends AppCompatActivity {
         //To get the locale on the first startup and set the def value
         Resources resources = getResources();
         Configuration configuration = resources.getConfiguration();
-        LocaleList locales = configuration.getLocales();
-
-        Locale currentLocale = locales.get(0);
+        LocaleList locales = null;
+        Locale currentLocale = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            locales = configuration.getLocales();
+            currentLocale = locales.get(0);
+        } else {
+            //For SDK 23 or lower
+            currentLocale = configuration.locale;
+        }
 
         String currentVersion = BuildConfig.VERSION_NAME;
         if (Float.valueOf(currentVersion) > Float.valueOf(previousVersion)) {
@@ -348,8 +354,6 @@ public class MainActivity extends AppCompatActivity {
             gf.updateFromMain();
         }
     }
-
-
 
 
     @Override

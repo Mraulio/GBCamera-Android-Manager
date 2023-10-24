@@ -1292,8 +1292,21 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             file = new File(Utils.IMAGES_FOLDER, "HDR" + sdf.format(nowDate) + ".png");
 
                         }
+                        //Regular image
                         if (averaged[0].getHeight() == 144 * 6 && averaged[0].getWidth() == 160 * 6 && crop) {
                             averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 128 * 6, 112 * 6);
+                        }
+                        //Rotated image
+                        else if(averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 144 * 6 && crop){
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 112 * 6, 128 * 6);
+                        }
+                        //Regular Wild frame
+                        else if(averaged[0].getHeight() == 224 * 6 && averaged[0].getWidth() == 160 * 6 && crop){
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 40 * 6, 128 * 6, 112 * 6);
+                        }
+                        //Rotated Wild frame
+                        else if(averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 224 * 6 && crop){
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 40 * 6, 16 * 6, 112 * 6, 128 * 6);
                         }
                         try (FileOutputStream out = new FileOutputStream(file)) {
                             averaged[0].compress(Bitmap.CompressFormat.PNG, 100, out);

@@ -68,7 +68,7 @@ public class GalleryUtils {
                     image = Bitmap.createBitmap(image, 16, 16, 128, 112);
                 }
                 //For the wild frames
-                else if(image.getHeight() == 224){
+                else if(image.getHeight() == 224 && GalleryFragment.crop){
                     image = Bitmap.createBitmap(image, 16, 40, 128, 112);
                 }
                 //Rotate the image

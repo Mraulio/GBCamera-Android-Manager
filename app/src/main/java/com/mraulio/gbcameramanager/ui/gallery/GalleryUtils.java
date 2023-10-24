@@ -47,7 +47,6 @@ public class GalleryUtils {
         for (int i = 0; i < gbcImages.size(); i++) {
             GbcImage gbcImage = gbcImages.get(i);
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
-            image = rotateBitmap(image, gbcImage);
             String fileName = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
@@ -68,6 +67,13 @@ public class GalleryUtils {
                 if (image.getHeight() == 144 && image.getWidth() == 160 && GalleryFragment.crop) {
                     image = Bitmap.createBitmap(image, 16, 16, 128, 112);
                 }
+                //For the wild frames
+                else if(image.getHeight() == 224){
+                    image = Bitmap.createBitmap(image, 16, 40, 128, 112);
+                }
+                //Rotate the image
+                image = rotateBitmap(image, gbcImage);
+
                 try (FileOutputStream out = new FileOutputStream(file)) {
                     Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                     scaled.compress(Bitmap.CompressFormat.PNG, 100, out);

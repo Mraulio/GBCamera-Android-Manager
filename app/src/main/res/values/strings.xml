@@ -167,5 +167,9 @@
     <string name="print_paper_btn">Print</string>
     <string name="custom_paper_color">Custom Paper color:</string>
 
+    <string name="stitch">Stitch</string>
+    <string name="stitch_bottom">Stitch Bottom</string>
+    <string name="stitch_right">Stitch Right</string>
+
 
 </resources>

@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static com.mraulio.gbcameramanager.MainActivity.exportSize;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
@@ -10,6 +11,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.stitchImages;
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
@@ -46,6 +48,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -1163,7 +1166,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 }
                             });
                             reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, paletteFrameSelButton, adapterPalette, frameAdapter);
-
                         }
 
                     });
@@ -1193,6 +1195,107 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     return true;
                 }
                 break;
+
+            case R.id.action_stitch:
+                if (!selectedImages.isEmpty()) {
+                    final Bitmap[] stitchedImage = new Bitmap[1];
+                    final boolean[] stitchBottom = {true};
+                    LayoutInflater inflater = LayoutInflater.from(getContext());
+                    List<Bitmap> stitchBitmapList = new ArrayList<>();
+                    List<GbcImage> stitchGbcImage = new ArrayList<>();
+                    View stitchView = inflater.inflate(R.layout.stitch_dialog, null);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    ImageView imageView = stitchView.findViewById(R.id.iv_stitch);
+                    GridView gridViewStitch = stitchView.findViewById(R.id.gridViewStitch);
+                    RadioButton rbStitchBottom = stitchView.findViewById(R.id.rbBottom);
+                    RadioButton rbStitchRight = stitchView.findViewById(R.id.rbRight);
+                    rbStitchBottom.setChecked(true);
+                    rbStitchBottom.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            stitchBottom[0] = true;
+                            stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
+                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 6, stitchedImage[0].getHeight() * 6, false);
+                            imageView.setImageBitmap(bitmap);
+                        }
+                    });
+                    rbStitchRight.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            stitchBottom[0] = false;
+                            stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
+                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 6, stitchedImage[0].getHeight() * 6, false);
+                            imageView.setImageBitmap(bitmap);
+                        }
+                    });
+
+                    builder.setView(stitchView);
+                    List<Integer> indexesToLoad = new ArrayList<>();
+                    for (int i : selectedImages) {
+                        String hashCode = filteredGbcImages.get(i).getHashCode();
+                        if (Utils.imageBitmapCache.get(hashCode) == null) {
+                            indexesToLoad.add(i);
+                        }
+                        stitchGbcImage.add(filteredGbcImages.get(i));
+
+                    }
+                    builder.setPositiveButton(getString(R.string.btn_save), (dialog, which) -> {
+                        LocalDateTime now = null;
+                        Date nowDate = new Date();
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            now = LocalDateTime.now();
+                        }
+                        File file = null;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+
+                            file = new File(Utils.IMAGES_FOLDER, "Stitch_" + dtf.format(now) + ".png");
+                        } else {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                            file = new File(Utils.IMAGES_FOLDER, "Stitch_" + sdf.format(nowDate) + ".png");
+                        }
+                        try (FileOutputStream out = new FileOutputStream(file)) {
+                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * exportSize, stitchedImage[0].getHeight() * exportSize, false);
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + getString(R.string.stitch), Toast.LENGTH_LONG);
+                            toast.show();
+                            mediaScanner(file, getContext());
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+                    });
+
+                    loadingDialog.show();
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, new AsyncTaskCompleteListener<Result>() {
+                        @Override
+                        public void onTaskComplete(Result result) {
+                            gridViewStitch.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, stitchGbcImage, stitchBitmapList, false, false, false, null));
+
+                            for (int i : selectedImages) {
+                                Bitmap image = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+//                                image = rotateBitmap(image, (filteredGbcImages.get(i)));//Not rotating them now
+                                stitchBitmapList.add(image);
+                            }
+                            try {
+                                stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
+                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 6, stitchedImage[0].getHeight() * 6, false);
+                                imageView.setImageBitmap(bitmap);
+                                builder.setView(stitchView);
+
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                            } catch (IllegalArgumentException e) {
+                                Utils.toast(getContext(), getString(R.string.hdr_exception));
+                            }
+                        }
+                    });
+                    asyncTask.execute();
+                } else
+                    Utils.toast(getContext(), getString(R.string.no_selected));
+                return true;
 
             case R.id.action_delete:
                 if (!selectedImages.isEmpty()) {
@@ -1297,15 +1400,15 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 128 * 6, 112 * 6);
                         }
                         //Rotated image
-                        else if(averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 144 * 6 && crop){
+                        else if (averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 144 * 6 && crop) {
                             averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 112 * 6, 128 * 6);
                         }
                         //Regular Wild frame
-                        else if(averaged[0].getHeight() == 224 * 6 && averaged[0].getWidth() == 160 * 6 && crop){
+                        else if (averaged[0].getHeight() == 224 * 6 && averaged[0].getWidth() == 160 * 6 && crop) {
                             averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 40 * 6, 128 * 6, 112 * 6);
                         }
                         //Rotated Wild frame
-                        else if(averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 224 * 6 && crop){
+                        else if (averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 224 * 6 && crop) {
                             averaged[0] = Bitmap.createBitmap(averaged[0], 40 * 6, 16 * 6, 112 * 6, 128 * 6);
                         }
                         try (FileOutputStream out = new FileOutputStream(file)) {

@@ -22,6 +22,11 @@
         android:title="@string/animate_item"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_stitch"
+        android:orderInCategory="100"
+        android:title="@string/stitch"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_json"
         android:orderInCategory="100"
         android:title="@string/json_backup_item"

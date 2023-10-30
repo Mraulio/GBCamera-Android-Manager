@@ -6,6 +6,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -51,7 +52,7 @@ public class GalleryUtils {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
                 fileName = fileNameBase + dtf.format(now);
-            }else{
+            } else {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
                 fileName = fileNameBase + sdf.format(nowDate);
             }
@@ -68,7 +69,7 @@ public class GalleryUtils {
                     image = Bitmap.createBitmap(image, 16, 16, 128, 112);
                 }
                 //For the wild frames
-                else if(image.getHeight() == 224 && GalleryFragment.crop){
+                else if (image.getHeight() == 224 && GalleryFragment.crop) {
                     image = Bitmap.createBitmap(image, 16, 40, 128, 112);
                 }
                 //Rotate the image
@@ -250,6 +251,39 @@ public class GalleryUtils {
         return combinedBitmap;
     }
 
+    public static Bitmap stitchImages(List<Bitmap> bitmaps, boolean stitchBottom) {
+        // Make sure all images have the same dimensions
+        int width = bitmaps.get(0).getWidth();
+        int height = bitmaps.get(0).getHeight();
+        for (Bitmap bitmap : bitmaps) {
+            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
+                throw new IllegalArgumentException("All images must have same dimensions.");
+            }
+        }
+        int cropX = 16;
+        int cropY = (height == 224) ? 40 : 16;
+        int newWidth = stitchBottom ? (width-(cropX*2)) : (width-(cropX*2)) * bitmaps.size();
+        int newHeight = stitchBottom ? (height-(cropY*2)) * bitmaps.size() :  (height-(cropY*2));
+
+        Bitmap stitchedImage = Bitmap.createBitmap(newWidth, newHeight, bitmaps.get(0).getConfig());
+        Canvas canvas = new Canvas(stitchedImage);
+        int destX = 0;
+        int destY = 0;
+
+        for (Bitmap bitmap : bitmaps) {
+            Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, cropX, cropY, 128, 112);
+
+            if (stitchBottom) {
+                canvas.drawBitmap(croppedBitmap, 0, destY, null);
+                destY += 112;
+            } else {
+                canvas.drawBitmap(croppedBitmap, destX, 0, null);
+                destX += 128;
+            }
+        }
+
+        return stitchedImage;
+    }
 
     public static String encodeData(String value) {
         byte[] inputBytes = value.getBytes(StandardCharsets.UTF_8);

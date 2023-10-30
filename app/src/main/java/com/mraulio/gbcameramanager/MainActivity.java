@@ -37,6 +37,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
+import com.mraulio.gbcameramanager.utils.UncaughtExceptionHandler;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.utils.StartCreation;
 import com.mraulio.gbcameramanager.databinding.ActivityMainBinding;
@@ -123,6 +124,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Unhandled Exception Manager
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
+
         sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -243,6 +247,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void restartApplication() {
+        Intent intent = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
     private void deleteImageCache() {
         //Deleting cache for the next version only
         File cacheDir = new File(getApplicationContext().getCacheDir(), CACHE_DIR_NAME);

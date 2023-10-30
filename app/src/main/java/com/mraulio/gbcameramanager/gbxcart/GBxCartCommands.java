@@ -60,7 +60,7 @@ public class GBxCartCommands {
             port.write(command, TIMEOUT);//VER LO DE LOS TIMEOUTS
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en PowerOff\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en PowerOff\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -71,7 +71,7 @@ public class GBxCartCommands {
             port.write(command, TIMEOUT);
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -92,7 +92,7 @@ public class GBxCartCommands {
             setFwVariable("CART_MODE", 1, port, context);
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en SetCartType\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en SetCartType\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -125,7 +125,7 @@ public class GBxCartCommands {
         try {
             port.write(byteArray, TIMEOUT);
         } catch (Exception e) {
-            Toast.makeText(context, "ErrorsetFwVariable" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "ErrorsetFwVariable" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -151,7 +151,7 @@ public class GBxCartCommands {
                 port.write(commandByte, TIMEOUT);
             }
         } catch (Exception e) {
-            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
         return buffer;
     }
@@ -166,7 +166,7 @@ public class GBxCartCommands {
             receivedData = (Arrays.copyOf(readLength, len));
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
         return new String(receivedData);
     }
@@ -182,7 +182,7 @@ public class GBxCartCommands {
         try {
             port.write(buffer, TIMEOUT);
         } catch (Exception e) {
-            Toast.makeText(context, "Error en Cart_write\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en Cart_write\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -207,7 +207,7 @@ public class GBxCartCommands {
             port.write(commandByte, TIMEOUT);
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -254,8 +254,8 @@ public class GBxCartCommands {
                     throw new IllegalStateException("Couldn't create dir: " + UsbSerialFragment.photoFolder);
                 }
             } catch (Exception e) {
-                Toast toast = Toast.makeText(context, "Error making directory: " + e.toString(), Toast.LENGTH_SHORT);
-                toast.show();
+//                Toast toast = Toast.makeText(context, "Error making directory: " + e.toString(), Toast.LENGTH_SHORT);
+//                toast.show();
             }
             File file = new File(UsbSerialFragment.photoFolder, fileName);
             // create the new file inside the directory
@@ -264,8 +264,8 @@ public class GBxCartCommands {
                     throw new IllegalStateException("Couldn't create file: " + file);
                 }
             } catch (Exception e) {
-                Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
-                toast.show();
+//                Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
+//                toast.show();
             }
             try {
                 fos = new FileOutputStream(file);

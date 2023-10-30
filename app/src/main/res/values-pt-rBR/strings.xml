@@ -166,6 +166,6 @@
     <string name="delete_folder">Deletar pasta</string>
     <string name="images">imagens.</string>
     <string name="only_image_paper">Somente imagem</string>
-    <string name="process">Processar</string>
+    <string name="print_paper_btn">Imprimir</string>
     <string name="custom_paper_color">Cor personalizada:</string>
 </resources>

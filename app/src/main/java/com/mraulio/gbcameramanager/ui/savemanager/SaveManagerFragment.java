@@ -152,7 +152,6 @@ public class SaveManagerFragment extends Fragment {
         extractedImagesBitmaps.clear();
         extractedImagesList.clear();
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
-        LocalDateTime now = LocalDateTime.now();
         //I get the last file from the directory, which I just dumped
         try {
             if (selectedFile.length() / 1024 == 128) {

@@ -1,7 +1,5 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
-import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
-
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 

@@ -445,14 +445,14 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         try {
             usbIoManager.stop();
         } catch (Exception e) {
-            Toast toast = Toast.makeText(getContext(), "Error in usbio STOP\n" + e.toString(), Toast.LENGTH_LONG);
-            toast.show();
+//            Toast toast = Toast.makeText(getContext(), "Error in usbio STOP\n" + e.toString(), Toast.LENGTH_LONG);
+//            toast.show();
         }
         try {
             port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         } catch (Exception e) {
-            Toast toast = Toast.makeText(getContext(), "Error in gbx\n" + e.toString(), Toast.LENGTH_LONG);
-            toast.show();
+//            Toast toast = Toast.makeText(getContext(), "Error in gbx\n" + e.toString(), Toast.LENGTH_LONG);
+//            toast.show();
         }
         completeReadRomName();
     }

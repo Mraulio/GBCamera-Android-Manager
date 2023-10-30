@@ -166,6 +166,6 @@
     <string name="delete_folder">Lösche Ordner</string>
     <string name="images">Bilder.</string>
     <string name="only_image_paper">Nur Bild</string>
-    <string name="process">Verfahren</string>
+    <string name="print_paper_btn">Drucken</string>
     <string name="custom_paper_color">Benutzerdefinierte Papierfarbe:</string>
 </resources>

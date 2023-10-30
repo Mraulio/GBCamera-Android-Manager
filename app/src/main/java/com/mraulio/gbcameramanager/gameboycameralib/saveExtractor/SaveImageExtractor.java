@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.gameboycameralib.saveExtractor;
 import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.*;
 
 import android.graphics.Bitmap;
+import android.os.Build;
 
 
 import com.mraulio.gbcameramanager.MainActivity;
@@ -12,6 +13,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -32,13 +34,21 @@ public class SaveImageExtractor implements Extractor {
     private final ImageCodec smallImageCodec;
 
     public SaveImageExtractor(IndexedPalette palette) {
-        this.imageCodec = new ImageCodec( IMAGE_WIDTH, IMAGE_HEIGHT,false);
-        this.smallImageCodec = new ImageCodec( SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT,false);
+        this.imageCodec = new ImageCodec(IMAGE_WIDTH, IMAGE_HEIGHT, false);
+        this.smallImageCodec = new ImageCodec(SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT, false);
     }
 
     @Override
     public List<Bitmap> extract(File file) throws IOException {
-        return extract(Files.readAllBytes(file.toPath()));//Modified
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return extract(Files.readAllBytes(file.toPath()));//Modified
+        } else {
+            FileInputStream fis = new FileInputStream(file);
+            byte[] fileBytes = new byte[(int) file.length()];
+            fis.read(fileBytes);
+            fis.close();
+            return extract(fileBytes);
+        }
     }
 
     @Override
@@ -73,13 +83,21 @@ public class SaveImageExtractor implements Extractor {
 
 
     @Override
-    public List<byte[]> extractBytes(File file,int saveBank) throws IOException {
-        return extractBytes(Files.readAllBytes(file.toPath()),saveBank);//Modified
+    public List<byte[]> extractBytes(File file, int saveBank) throws IOException {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return extractBytes(Files.readAllBytes(file.toPath()), saveBank);//Modified
+        } else {
+            FileInputStream fis = new FileInputStream(file);
+            byte[] fileBytes = new byte[(int) file.length()];
+            fis.read(fileBytes);
+            fis.close();
+            return extractBytes(fileBytes, saveBank);
+        }
     }
 
     //Added by Mraulio
     @Override
-    public List<byte[]> extractBytes(byte[] rawData,int saveBank) {
+    public List<byte[]> extractBytes(byte[] rawData, int saveBank) {
         final int PHOTOS_LOCATION = 0x11B2;
         final int PHOTOS_READ_COUNT = 0x1E;
         MainActivity.deletedCount[saveBank] = 0;
@@ -197,12 +215,17 @@ public class SaveImageExtractor implements Extractor {
 
     @Override
     public List<byte[]> extractAsPng(File file) throws IOException {
-        return extract(file).stream().map(this::imageToBytes).collect(Collectors.toList());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return extract(file).stream().map(this::imageToBytes).collect(Collectors.toList());
+        } else return null;
     }
 
     @Override
     public List<byte[]> extractAsPng(byte[] rawData) {
-        return extract(rawData).stream().map(this::imageToBytes).collect(Collectors.toList());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return extract(rawData).stream().map(this::imageToBytes).collect(Collectors.toList());
+        } else return null;
+
     }
 
     //Checks if an image is all the same color. Should change it so it checks if it's all white,

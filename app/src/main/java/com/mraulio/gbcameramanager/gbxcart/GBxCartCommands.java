@@ -9,9 +9,9 @@ import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.readSav
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.showImages;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Process;
 import android.view.View;
 import android.widget.TextView;
@@ -34,11 +34,14 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class GBxCartCommands {
@@ -46,8 +49,6 @@ public class GBxCartCommands {
     //Translated from the code from Lesserkuma
 
     private static final int TIMEOUT = 2000;
-    private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-
     private static FileOutputStream fos = null;
     private static BufferedOutputStream bos = null;
 
@@ -59,7 +60,7 @@ public class GBxCartCommands {
             port.write(command, TIMEOUT);//VER LO DE LOS TIMEOUTS
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en PowerOff\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en PowerOff\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -70,7 +71,7 @@ public class GBxCartCommands {
             port.write(command, TIMEOUT);
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -91,7 +92,7 @@ public class GBxCartCommands {
             setFwVariable("CART_MODE", 1, port, context);
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en SetCartType\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en SetCartType\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -124,7 +125,7 @@ public class GBxCartCommands {
         try {
             port.write(byteArray, TIMEOUT);
         } catch (Exception e) {
-            Toast.makeText(context, "ErrorsetFwVariable" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "ErrorsetFwVariable" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -150,7 +151,7 @@ public class GBxCartCommands {
                 port.write(commandByte, TIMEOUT);
             }
         } catch (Exception e) {
-            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
         return buffer;
     }
@@ -165,7 +166,7 @@ public class GBxCartCommands {
             receivedData = (Arrays.copyOf(readLength, len));
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
         return new String(receivedData);
     }
@@ -181,7 +182,7 @@ public class GBxCartCommands {
         try {
             port.write(buffer, TIMEOUT);
         } catch (Exception e) {
-            Toast.makeText(context, "Error en Cart_write\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en Cart_write\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -206,7 +207,7 @@ public class GBxCartCommands {
             port.write(commandByte, TIMEOUT);
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -227,10 +228,25 @@ public class GBxCartCommands {
         @Override
         protected Void doInBackground(Void... voids) {
             //DUMP 1 MB ROM file
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime now = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                now = LocalDateTime.now();
+            }
+            Date nowDate = new Date();
+
             String fileName = "PhotoFullRom_";
-            String folderName = "PhotoFullRom_" + dtf.format(now);
-            fileName += dtf.format(now) + ".full.gbc";
+
+            String folderName = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                folderName = "PhotoFullRom_" + dtf.format(now);
+                fileName += dtf.format(now) + ".full.gbc";
+            }else{
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                folderName = "PhotoFullRom_" + sdf.format(nowDate);
+                fileName += sdf.format(nowDate) + ".full.gbc";
+            }
+
             UsbSerialFragment.photoFolder = new File(Utils.PHOTO_DUMPS_FOLDER, folderName);
             //I create the new directory if it doesn't exists
             try {
@@ -238,8 +254,8 @@ public class GBxCartCommands {
                     throw new IllegalStateException("Couldn't create dir: " + UsbSerialFragment.photoFolder);
                 }
             } catch (Exception e) {
-                Toast toast = Toast.makeText(context, "Error making directory: " + e.toString(), Toast.LENGTH_SHORT);
-                toast.show();
+//                Toast toast = Toast.makeText(context, "Error making directory: " + e.toString(), Toast.LENGTH_SHORT);
+//                toast.show();
             }
             File file = new File(UsbSerialFragment.photoFolder, fileName);
             // create the new file inside the directory
@@ -248,8 +264,8 @@ public class GBxCartCommands {
                     throw new IllegalStateException("Couldn't create file: " + file);
                 }
             } catch (Exception e) {
-                Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
-                toast.show();
+//                Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
+//                toast.show();
             }
             try {
                 fos = new FileOutputStream(file);
@@ -368,10 +384,23 @@ public class GBxCartCommands {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
-            LocalDateTime now = LocalDateTime.now();
+            Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
+            LocalDateTime now = null;
+            Date nowDate = new Date();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                now = LocalDateTime.now();
+            }
             String fileName = "gbCamera_";
-            fileName += dtf.format(now) + ".sav";
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                fileName += dtf.format(now) + ".sav";
+            } else {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                fileName += sdf.format(nowDate) + ".sav";
+
+            }
+
             File file = new File(Utils.SAVE_FOLDER, fileName);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             //I create the new directory if it doesn't exists
@@ -401,7 +430,7 @@ public class GBxCartCommands {
                         int len = port.read(readLength, TIMEOUT);
 
                         try {
-                            outputStream.write(Arrays.copyOf(readLength,len));
+                            outputStream.write(Arrays.copyOf(readLength, len));
                             outputStream.flush();
                         } catch (IOException e) {
                         }
@@ -450,7 +479,14 @@ public class GBxCartCommands {
             }
             byte[] fileBytes = new byte[0];
             try {
-                fileBytes = Files.readAllBytes(latestFile.toPath());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    fileBytes = Files.readAllBytes(latestFile.toPath());
+                }else{
+                    FileInputStream fis = new FileInputStream(latestFile);
+                    fileBytes = new byte[(int) latestFile.length()];
+                    fis.read(fileBytes);
+                    fis.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -461,7 +497,7 @@ public class GBxCartCommands {
 
             tv.append(context.getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
                     context.getString(R.string.size) + latestFile.length() / 1024 + "KB");
-            readSav(latestFile,0);
+            readSav(latestFile, 0);
             btnAddImages.setVisibility(View.VISIBLE);
             btnDelSav.setVisibility(View.VISIBLE);
             layoutCb.setVisibility(View.VISIBLE);

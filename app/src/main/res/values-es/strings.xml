@@ -164,6 +164,6 @@
     <string name="delete_folder">Borrar carpeta</string>
     <string name="images">imágenes.</string>
     <string name="only_image_paper">Solo imagen</string>
-    <string name="process">Procesar</string>
+    <string name="print_paper_btn">Imprimir</string>
     <string name="custom_paper_color">Otro color de papel:</string>
 </resources>

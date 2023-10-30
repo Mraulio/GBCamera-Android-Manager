@@ -188,7 +188,7 @@
                         android:id="@+id/btnProcessPaper"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/process"></Button>
+                        android:text="@string/print_paper_btn"></Button>
 
                     <Button
                         android:id="@+id/btnSavePaper"

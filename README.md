@@ -38,10 +38,11 @@ Clone this repo, prepare [Android Studio](https://developer.android.com/studio) 
   
 ## Special thanks
 * [Raphaël Boichot](https://github.com/Raphael-Boichot), for testing, French translations and help implementing some of his great projects as features, such as the [Printer Paper Simulation](https://github.com/Raphael-Boichot/GameboyPrinterPaperSimulation) and the [Arduino interface](https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface) to print on real Game Boy Printer hardware. 
-* [Andreas Hahn](https://github.com/HerrZatacke), for inspiration on his [Game Boy Camera Gallery](https://github.com/HerrZatacke/gb-printer-web), [base palettes](https://www.npmjs.com/package/gb-palettes) and many constructive talks about the Game Boy Camera and compatibility with his gallery.
+* [Andreas Hahn](https://github.com/HerrZatacke), for inspiration on his [Game Boy Camera Gallery](https://github.com/HerrZatacke/gb-printer-web), [base palettes](https://www.npmjs.com/package/gb-palettes), German translation and many constructive talks about the Game Boy Camera and compatibility with his gallery.
 * [Lesserkuma](https://github.com/lesserkuma), for the great help with the [GBxCart communication protocol](https://github.com/lesserkuma/FlashGBX/blob/master/FlashGBX/hw_GBxCartRW.py) needed, sharing a [reduced version of the Python code](https://github.com/Mraulio/GBCamera-Android-Manager/blob/main/resourcesGithub/gbxcartrw_gbcamera.py) and guiding me through some issues I encountered.
-* [Rafael Zenaro](https://github.com/zenaro147). for the Brazilian Portuguese translations and printing tests on real hardware.
+* [Rafael Zenaro](https://github.com/zenaro147), for the Brazilian Portuguese translations and printing tests on real hardware.
 * The [Game Boy Camera Club Discord](http://gameboy.camera) community for their continued support and inspiration on the amazing projects they create.
+* [KuestenKeks](https://github.com/KuestenKeks), for German translation and feedback.
 
 ## License
 As the project uses different libraries with different licenses I'll try to adapt it. Please contact me if there is any problem.

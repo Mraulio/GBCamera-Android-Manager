@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static com.mraulio.gbcameramanager.MainActivity.customColorPaper;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.crop;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.rotateBitmapImport;
 
@@ -347,9 +348,10 @@ public class PaperUtils {
                     if (paperized.getHeight() == 144 && paperized.getWidth() == 160 && crop) {
                         paperized = Bitmap.createBitmap(paperized, 16, 16, 128, 112);
                     }
+                    //If make square selected in settings
+                    paperized = makeSquareImage(paperized);
                     try (FileOutputStream out = new FileOutputStream(file)) {
-                        Bitmap scaled = Bitmap.createScaledBitmap(paperized, paperized.getWidth(), paperized.getHeight(), false);
-                        scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
+                        paperized.compress(Bitmap.CompressFormat.PNG, 100, out);
                         mediaScanner(file, context);
 
                     } catch (IOException e) {

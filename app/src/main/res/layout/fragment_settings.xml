@@ -55,7 +55,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"></Spinner>
             </LinearLayout>
-
+            <CheckBox
+                android:id="@+id/cbSquare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:autoSizeMaxTextSize="40sp"
+                android:autoSizeMinTextSize="10sp"
+                android:autoSizeTextType="uniform"
+                android:maxLines="1"
+                android:text="@string/square_download" />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

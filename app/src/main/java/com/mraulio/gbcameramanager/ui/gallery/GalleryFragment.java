@@ -15,6 +15,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.stitchImages;
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.app.AlertDialog;
@@ -575,10 +576,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     shareButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Bitmap image = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode());
-                            Bitmap sharedBitmap = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
+                            GbcImage sharedImage = filteredGbcImages.get(globalImageIndex);
+//                            Bitmap sharedBitmap = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                             List sharedList = new ArrayList();
-                            sharedList.add(sharedBitmap);
+                            sharedList.add(sharedImage);
                             shareImage(sharedList, getContext());
                         }
                     });
@@ -660,15 +661,16 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     int firstImage = selectedImages.get(0);
                     selectedImages.clear();
                     selectedImages.add(globalImageIndex);
-                    int lastImage = selectedImages.get(selectedImages.size() - 1);
                     if (firstImage < globalImageIndex) {
-                        for (int i = firstImage; i < lastImage; i++) {
+                        selectedImages.clear();
+                        for (int i = firstImage; i < globalImageIndex; i++) {
                             if (!selectedImages.contains(i)) {
                                 selectedImages.add(i);
                             }
                         }
+                        selectedImages.add(globalImageIndex);
                     } else if (firstImage > globalImageIndex) {
-                        for (int i = firstImage; i > lastImage; i--) {
+                        for (int i = firstImage; i > globalImageIndex; i--) {
                             if (!selectedImages.contains(i)) {
                                 selectedImages.add(i);
                             }
@@ -1137,11 +1139,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             shareButton.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    List<Bitmap> sharedList = new ArrayList<>();
+                                    List<GbcImage> sharedList = new ArrayList<>();
                                     for (int i : selectedImages) {
-                                        Bitmap image = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
-                                        Bitmap sharedBitmap = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
-                                        sharedList.add(sharedBitmap);
+                                        GbcImage gbcImage =filteredGbcImages.get(i);
+                                        sharedList.add(gbcImage);
                                     }
                                     shareImage(sharedList, getContext());
                                 }
@@ -1198,6 +1199,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
             case R.id.action_stitch:
                 if (!selectedImages.isEmpty()) {
+                    //If there are too many images selected, the resulting image to show will be too big (because of the *6 in the ImageView)
+                    if (selectedImages.size()>40){
+                        toast(getContext(),getString(R.string.stitch_too_many_images));
+                        return true;
+                    }
                     final Bitmap[] stitchedImage = new Bitmap[1];
                     final boolean[] stitchBottom = {true};
                     LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -1206,16 +1212,18 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     View stitchView = inflater.inflate(R.layout.stitch_dialog, null);
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     ImageView imageView = stitchView.findViewById(R.id.iv_stitch);
+//                    imageView.setScaleType();
                     GridView gridViewStitch = stitchView.findViewById(R.id.gridViewStitch);
                     RadioButton rbStitchBottom = stitchView.findViewById(R.id.rbBottom);
                     RadioButton rbStitchRight = stitchView.findViewById(R.id.rbRight);
+
                     rbStitchBottom.setChecked(true);
                     rbStitchBottom.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             stitchBottom[0] = true;
                             stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
-                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 6, stitchedImage[0].getHeight() * 6, false);
+                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 5, stitchedImage[0].getHeight() * 5, false);
                             imageView.setImageBitmap(bitmap);
                         }
                     });
@@ -1224,7 +1232,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onClick(View v) {
                             stitchBottom[0] = false;
                             stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
-                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 6, stitchedImage[0].getHeight() * 6, false);
+                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 5, stitchedImage[0].getHeight() * 5, false);
                             imageView.setImageBitmap(bitmap);
                         }
                     });
@@ -1281,7 +1289,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                             try {
                                 stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
-                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 6, stitchedImage[0].getHeight() * 6, false);
+                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth()* 5, stitchedImage[0].getHeight()* 5, false);
                                 imageView.setImageBitmap(bitmap);
                                 builder.setView(stitchView);
 

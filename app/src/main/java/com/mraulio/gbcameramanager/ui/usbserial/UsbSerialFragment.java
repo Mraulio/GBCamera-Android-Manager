@@ -419,9 +419,11 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             rbGroup.setVisibility(View.GONE);
             btnPrintBanner.setVisibility(View.VISIBLE);
             connect();
+            port.setDTR(true);
+            port.setRTS(true);
+            port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
             usbIoManager.start();
             tv.append(getString(R.string.tv_connected));
-            port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         } catch (Exception e) {
             Toast toast = Toast.makeText(getContext(), getString(R.string.error_arduino) + e.toString(), Toast.LENGTH_LONG);
             toast.show();
@@ -449,7 +451,9 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 //            toast.show();
         }
         try {
-            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_2, UsbSerialPort.PARITY_NONE);
+            port.setDTR(true);
+            port.setRTS(true);
         } catch (Exception e) {
 //            Toast toast = Toast.makeText(getContext(), "Error in gbx\n" + e.toString(), Toast.LENGTH_LONG);
 //            toast.show();

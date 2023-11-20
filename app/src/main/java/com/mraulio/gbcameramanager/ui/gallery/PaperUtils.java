@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.customColorPaper;
+import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.crop;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
@@ -69,10 +70,9 @@ public class PaperUtils {
         Bitmap bottomBorder = BitmapFactory.decodeResource(context.getResources(), bottomnResourceId);
 
 
-        //Calcute paperized image size
+        //Calculate paperized image size
         int speckleHeight = inputBitmap.getHeight() * (mul - overlapping) + overlapping;
         int speckleWidth = inputBitmap.getWidth() * (mul - overlapping) + overlapping;
-        System.out.println(speckleWidth + " specklewidth");
         Bitmap paperizedImage = Bitmap.createBitmap(speckleWidth, speckleHeight, Bitmap.Config.ARGB_8888);
         Canvas can = new Canvas(paperizedImage);
         can.drawColor(Color.WHITE);//Fill the canvas with white. If not it won't work (fills everything black)
@@ -349,7 +349,9 @@ public class PaperUtils {
                         paperized = Bitmap.createBitmap(paperized, 16, 16, 128, 112);
                     }
                     //If make square selected in settings
-                    paperized = makeSquareImage(paperized);
+                    if (exportSquare) {
+                        paperized = makeSquareImage(paperized);
+                    }
                     try (FileOutputStream out = new FileOutputStream(file)) {
                         paperized.compress(Bitmap.CompressFormat.PNG, 100, out);
                         mediaScanner(file, context);

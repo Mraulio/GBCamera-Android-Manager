@@ -12,7 +12,7 @@ Check the [Releases](https://github.com/Mraulio/GBCamera-Android-Manager/release
 I usually share test releases in the [Game Boy Camera Club Discord](http://gameboy.camera).
 
 ## Main features
-* Extracting GB Camera images via [GBxCart](https://www.gbxcart.com/).
+* Extracting GB Camera images via [GBxCart](https://www.gbxcart.com/).(Some recent phones are getting corrupted data, working on fixing that).
 * Extracting GB Camera images via [Arduino Printer Emulator](https://github.com/mofosyne/arduino-gameboy-printer-emulator).
 * Printing to real Game Boy Printer.
 * Importing images, palettes and frames.

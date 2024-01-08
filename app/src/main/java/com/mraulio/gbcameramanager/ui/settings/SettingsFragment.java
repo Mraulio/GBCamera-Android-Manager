@@ -1,5 +1,7 @@
 package com.mraulio.gbcameramanager.ui.settings;
 
+import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
+
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -43,6 +45,7 @@ public class SettingsFragment extends Fragment {
         CheckBox cbPaperize = view.findViewById(R.id.cbPaperize);
         CheckBox cbMagicCheck = view.findViewById(R.id.cbMagic);
         CheckBox cbRotation = view.findViewById(R.id.cbRotation);
+        CheckBox cbSquare = view.findViewById(R.id.cbSquare);
 
         MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
 
@@ -60,6 +63,7 @@ public class SettingsFragment extends Fragment {
                 editor.apply();
             }
         });
+
         cbPaperize.setChecked(MainActivity.showPaperizeButton);
         cbPaperize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -70,6 +74,20 @@ public class SettingsFragment extends Fragment {
                 } else {
                     editor.putBoolean("show_paperize_button", false);
                     MainActivity.showPaperizeButton = false;
+                }
+                editor.apply();
+            }
+        });
+        cbSquare.setChecked(exportSquare);
+        cbSquare.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("export_square", true);
+                    exportSquare = true;
+                } else {
+                    editor.putBoolean("export_square", false);
+                    exportSquare = false;
                 }
                 editor.apply();
             }

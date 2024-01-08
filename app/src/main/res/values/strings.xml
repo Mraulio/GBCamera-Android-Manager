@@ -167,5 +167,11 @@
     <string name="print_paper_btn">Print</string>
     <string name="custom_paper_color">Custom Paper color:</string>
 
+    <string name="stitch">Stitch</string>
+    <string name="stitch_bottom">Stitch Bottom</string>
+    <string name="stitch_right">Stitch Right</string>
+    <string name="stitch_too_many_images">Too many images selected. Stitch would probably fail, resulting image too big.</string>
+    <string name="square_download">Export square image</string>
+
 
 </resources>

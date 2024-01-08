@@ -1,11 +1,13 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -51,7 +53,7 @@ public class GalleryUtils {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
                 fileName = fileNameBase + dtf.format(now);
-            }else{
+            } else {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
                 fileName = fileNameBase + sdf.format(nowDate);
             }
@@ -68,11 +70,16 @@ public class GalleryUtils {
                     image = Bitmap.createBitmap(image, 16, 16, 128, 112);
                 }
                 //For the wild frames
-                else if(image.getHeight() == 224 && GalleryFragment.crop){
+                else if (image.getHeight() == 224 && GalleryFragment.crop) {
                     image = Bitmap.createBitmap(image, 16, 40, 128, 112);
                 }
                 //Rotate the image
                 image = rotateBitmap(image, gbcImage);
+
+                //Make square if checked in settings
+                if (exportSquare) {
+                    image = makeSquareImage(image);
+                }
 
                 try (FileOutputStream out = new FileOutputStream(file)) {
                     Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
@@ -117,6 +124,24 @@ public class GalleryUtils {
             Utils.toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved_txt));
     }
 
+    public static Bitmap makeSquareImage(Bitmap image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        int dimension = Math.max(width, height); // Square side
+
+        Bitmap squaredImage = Bitmap.createBitmap(dimension, dimension, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(squaredImage);
+
+        // Draws original image centered inside the white square
+        int left = (dimension - width) / 2;
+        int top = (dimension - height) / 2;
+        canvas.drawColor(Color.WHITE); // Fills the white backgrond
+        canvas.drawBitmap(image, left, top, null); // Draws original image
+
+        return squaredImage;
+    }
+
     public static void mediaScanner(File file, Context context) {
         MediaScannerConnection.scanFile(
                 context,
@@ -145,21 +170,33 @@ public class GalleryUtils {
         return sb.toString();
     }
 
-    static void shareImage(List<Bitmap> bitmaps, Context context) {
+    static void shareImage(List<GbcImage> gbcImages, Context context) {
         ArrayList<Uri> imageUris = new ArrayList<>();
         FileOutputStream fileOutputStream = null;
 
         try {
-            for (int i = 0; i < bitmaps.size(); i++) {
-                Bitmap bitmap = bitmaps.get(i);
+            for (int i = 0; i < gbcImages.size(); i++) {
+                GbcImage gbcImage = gbcImages.get(i);
+                Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
 
-                if ((bitmap.getHeight() / MainActivity.exportSize) == 144 && (bitmap.getWidth() / MainActivity.exportSize) == 160 && GalleryFragment.crop) {
-                    bitmap = Bitmap.createBitmap(bitmap, 16 * MainActivity.exportSize, 16 * MainActivity.exportSize, 128 * MainActivity.exportSize, 112 * MainActivity.exportSize);
+                if (image.getHeight() == 144 && image.getWidth() == 160 && GalleryFragment.crop) {
+                    image = Bitmap.createBitmap(image, 16, 16, 128, 112);
+                }
+                //For the wild frames
+                else if (image.getHeight() == 224 && GalleryFragment.crop) {
+                    image = Bitmap.createBitmap(image, 16, 40, 128, 112);
+                }
+                //Rotate the image
+                image = rotateBitmap(image, gbcImage);
+
+                //Make square if checked in settings
+                if (exportSquare) {
+                    image = makeSquareImage(image);
                 }
 
                 File file = new File(context.getExternalCacheDir(), "shared_image_" + i + ".png");
                 fileOutputStream = new FileOutputStream(file);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+                image.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
                 fileOutputStream.flush();
                 fileOutputStream.close();
 
@@ -250,6 +287,40 @@ public class GalleryUtils {
         return combinedBitmap;
     }
 
+    public static Bitmap stitchImages(List<Bitmap> bitmaps, boolean stitchBottom) {
+        // Make sure all images have the same dimensions
+        int width = bitmaps.get(0).getWidth();
+        int height = bitmaps.get(0).getHeight();
+
+        for (Bitmap bitmap : bitmaps) {
+            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
+                throw new IllegalArgumentException("All images must have same dimensions.");
+            }
+        }
+        int cropX = 16;
+        int cropY = (height == 224) ? 40 : 16;
+        int newWidth = stitchBottom ? (width - (cropX * 2)) : (width - (cropX * 2)) * bitmaps.size();
+        int newHeight = stitchBottom ? (height - (cropY * 2)) * bitmaps.size() : (height - (cropY * 2));
+
+        Bitmap stitchedImage = Bitmap.createBitmap(newWidth, newHeight, bitmaps.get(0).getConfig());
+        Canvas canvas = new Canvas(stitchedImage);
+        int destX = 0;
+        int destY = 0;
+
+        for (Bitmap bitmap : bitmaps) {
+            Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, cropX, cropY, 128, 112);
+
+            if (stitchBottom) {
+                canvas.drawBitmap(croppedBitmap, 0, destY, null);
+                destY += 112;
+            } else {
+                canvas.drawBitmap(croppedBitmap, destX, 0, null);
+                destX += 128;
+            }
+        }
+
+        return stitchedImage;
+    }
 
     public static String encodeData(String value) {
         byte[] inputBytes = value.getBytes(StandardCharsets.UTF_8);

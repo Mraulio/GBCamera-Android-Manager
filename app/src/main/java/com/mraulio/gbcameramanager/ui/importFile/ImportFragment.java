@@ -339,8 +339,8 @@ public class ImportFragment extends Fragment {
         GbcFrame gbcFrame = new GbcFrame();
         gbcFrame.setFrameBitmap(finalListBitmaps.get(0));
 
-        Bitmap bitmapCopy = finalListBitmaps.get(0).copy(finalListBitmaps.get(0).getConfig(),true);
-        Bitmap bitmap= transparentBitmap(bitmapCopy, gbcFrame);
+        Bitmap bitmapCopy = finalListBitmaps.get(0).copy(finalListBitmaps.get(0).getConfig(), true);
+        Bitmap bitmap = transparentBitmap(bitmapCopy, gbcFrame);
         gbcFrame.setFrameBitmap(bitmap);
 
         ivFrame.setImageBitmap(bitmap);
@@ -670,7 +670,11 @@ public class ImportFragment extends Fragment {
      */
     public void openFileDialog(View view) {
         Intent data = new Intent(Intent.ACTION_GET_CONTENT);
+        data.addCategory(Intent.CATEGORY_OPENABLE);
+
         data.setType("*/*");
+        data.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+
         data = Intent.createChooser(data, "Choose a file");
         sActivityResultLauncher.launch(data);
     }
@@ -705,132 +709,213 @@ public class ImportFragment extends Fragment {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                        Intent data = result.getData();
                         cbAddFrame.setVisibility(View.GONE);
                         cbAddFrame.setChecked(false);
-                        Uri uri = data.getData();
-                        Utils.toast(getContext(), getFileName(uri));
-                        fileName = getFileName(uri);
-                        //I check the extension of the file
-                        if (fileName.endsWith("sav")) {
-                            ByteArrayOutputStream byteStream = null;
-                            file_type = FILE_TYPE.SAV;
+                        Intent data = result.getData();
 
-                            try {
-                                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                byteStream = new ByteArrayOutputStream();
-                                byte[] buffer = new byte[1024];
-                                int len;
-                                while ((len = inputStream.read(buffer)) != -1) {
-                                    byteStream.write(buffer, 0, len);
-                                }
-                                byteStream.close();
-                                inputStream.close();
-                            } catch (Exception e) {
-                            }
+                        if (data != null) {
+                            if (data.getClipData() != null) {
+                                // Multiple files were selected
+                                int count = data.getClipData().getItemCount();
+                                boolean allFilesValid = true;
 
-                            fileBytes = byteStream.toByteArray();
-                            tvFileName.setText(getString(R.string.file_name) + fileName);
-                            btnExtractFile.setVisibility(View.VISIBLE);
-                        } else if (fileName.endsWith("txt")) {
-                            file_type = FILE_TYPE.TXT;
-                            try {
-                                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                StringBuilder stringBuilder = new StringBuilder();
-                                try {
-                                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                                for (int i = 0; i < count; i++) {
+                                    Uri uri = data.getClipData().getItemAt(i).getUri();
 
-                                    String line = bufferedReader.readLine();
-                                    while (line != null) {
-                                        stringBuilder.append(line).append('\n');
-                                        line = bufferedReader.readLine();
+                                    //Verify if it's a valid image
+                                    if (!isImageFile(getFileName(uri))) {
+                                        allFilesValid = false;
+                                        break; //Leave the loop if it finds a non valid file
                                     }
-                                    bufferedReader.close();
-                                    inputStream.close();
-
-                                } catch (FileNotFoundException e) {
-                                    e.printStackTrace();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
                                 }
-                                fileContent = stringBuilder.toString();
-                                fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
-                                tvFileName.setText(getString(R.string.file_name) + fileName);
-                                btnExtractFile.setVisibility(View.VISIBLE);
-                            } catch (Exception e) {
-                            }
-                        } else if (fileName.endsWith("json")) {
-                            file_type = FILE_TYPE.JSON;
+                                if (allFilesValid) {
+                                    finalListImages.clear();
+                                    finalListBitmaps.clear();
+                                    tvFileName.setText("Selected files: " + count);
+                                    for (int i = 0; i < count; i++) {
+                                        Uri uri = data.getClipData().getItemAt(i).getUri();
 
-                            try {
-                                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                StringBuilder stringBuilder = new StringBuilder();
-                                try {
-                                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                                    String line = bufferedReader.readLine();
-                                    while (line != null) {
-                                        stringBuilder.append(line).append('\n');
-                                        line = bufferedReader.readLine();
-                                    }
-                                    bufferedReader.close();
-                                    inputStream.close();
 
-                                } catch (FileNotFoundException e) {
-                                    e.printStackTrace();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                fileContent = stringBuilder.toString();
-                                fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
-                                tvFileName.setText(getString(R.string.file_name) + fileName);
-                                btnExtractFile.setVisibility(View.VISIBLE);
+                                        file_type = FILE_TYPE.IMAGE;
 
-                            } catch (Exception e) {
-                            }
-                        } else if (fileName.endsWith("png") || fileName.endsWith("jpg")|| fileName.endsWith("bmp")) {
-                            file_type = FILE_TYPE.IMAGE;
-                            finalListImages.clear();
-                            finalListBitmaps.clear();
-                            try {
-                                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                                        try {
+                                            InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
 
-                                BitmapFactory.Options options = new BitmapFactory.Options();
-                                options.inJustDecodeBounds = true;
-                                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                                            BitmapFactory.Options options = new BitmapFactory.Options();
+                                            options.inJustDecodeBounds = true;
+                                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-                                bitmap = resizeImage(bitmap);
-                                boolean hasAllColors = checkPaletteColors(bitmap);
-                                if (!hasAllColors) {
-                                    bitmap = convertToGrayScale(bitmap);
-                                    bitmap = ditherImage(bitmap);
-                                }
-                                GbcImage gbcImage = new GbcImage();
-                                //Add a null frame id for imported images. Need to use a "NO FRAME OPTION, AS IMPORTED"
+                                            bitmap = resizeImage(bitmap);
+                                            boolean hasAllColors = checkPaletteColors(bitmap);
+                                            if (!hasAllColors) {
+                                                bitmap = convertToGrayScale(bitmap);
+                                                bitmap = ditherImage(bitmap);
+                                            }
+                                            GbcImage gbcImage = new GbcImage();
+                                            //Add a null frame id for imported images. Need to use a "NO FRAME OPTION, AS IMPORTED"
 //                                if (bitmap.getHeight()!=144){
 //                                    gbcImage.setFrameId(null);
 //                                }
-                                byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
-                                gbcImage.setImageBytes(imageBytes);
-                                byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                                String hashHex = Utils.bytesToHex(hash);
-                                gbcImage.setHashCode(hashHex);
-                                ImageData imageData = new ImageData();
-                                imageData.setImageId(hashHex);
-                                imageData.setData(imageBytes);
-                                importedImageDatas.add(imageData);
-                                gbcImage.setName(fileName);
-                                finalListBitmaps.add(bitmap);
-                                finalListImages.add(gbcImage);
-                                tvFileName.setText(getString(R.string.file_name) + fileName);
-                                btnExtractFile.setVisibility(View.GONE);
-                                btnAddImages.setVisibility(View.VISIBLE);
-                                btnAddImages.setEnabled(true);
+                                            byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
+                                            gbcImage.setImageBytes(imageBytes);
+                                            byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
+                                            String hashHex = Utils.bytesToHex(hash);
+                                            gbcImage.setHashCode(hashHex);
+                                            ImageData imageData = new ImageData();
+                                            imageData.setImageId(hashHex);
+                                            imageData.setData(imageBytes);
+                                            importedImageDatas.add(imageData);
+                                            gbcImage.setName(fileName);
+                                            finalListBitmaps.add(bitmap);
+                                            finalListImages.add(gbcImage);
+//
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        } catch (NoSuchAlgorithmException e) {
+                                            e.printStackTrace();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
 
-                                adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
-                                gridViewImport.setAdapter((ListAdapter) adapter);
-                                ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-                                cbAddFrame.setVisibility(View.VISIBLE);
-                                gridViewImport.setAdapter((ListAdapter) adapter);
+                                    }
+                                    btnExtractFile.setVisibility(View.GONE);
+                                    btnAddImages.setVisibility(View.VISIBLE);
+                                    btnAddImages.setEnabled(true);
+                                    adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
+                                    gridViewImport.setAdapter((ListAdapter) adapter);
+                                    ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
+//                                    cbAddFrame.setVisibility(View.VISIBLE);
+                                    gridViewImport.setAdapter((ListAdapter) adapter);
+
+                                } else {
+                                    // Show error message
+                                    tvFileName.setText("Please, select only valid image files (.jpg, .jpeg, .png, .bmp).");
+
+                                }
+                            } else if (data.getData() != null) {
+                                // Single file was selected
+                                Uri uri = data.getData();
+                                fileName = getFileName(uri);
+                                //I check the extension of the file
+                                if (fileName.endsWith("sav")) {
+                                    ByteArrayOutputStream byteStream = null;
+                                    file_type = FILE_TYPE.SAV;
+
+                                    try {
+                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                                        byteStream = new ByteArrayOutputStream();
+                                        byte[] buffer = new byte[1024];
+                                        int len;
+                                        while ((len = inputStream.read(buffer)) != -1) {
+                                            byteStream.write(buffer, 0, len);
+                                        }
+                                        byteStream.close();
+                                        inputStream.close();
+                                    } catch (Exception e) {
+                                    }
+
+                                    fileBytes = byteStream.toByteArray();
+                                    tvFileName.setText(getString(R.string.file_name) + fileName);
+                                    btnExtractFile.setVisibility(View.VISIBLE);
+                                } else if (fileName.endsWith("txt")) {
+                                    file_type = FILE_TYPE.TXT;
+                                    try {
+                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                                        StringBuilder stringBuilder = new StringBuilder();
+                                        try {
+                                            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+                                            String line = bufferedReader.readLine();
+                                            while (line != null) {
+                                                stringBuilder.append(line).append('\n');
+                                                line = bufferedReader.readLine();
+                                            }
+                                            bufferedReader.close();
+                                            inputStream.close();
+
+                                        } catch (FileNotFoundException e) {
+                                            e.printStackTrace();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        fileContent = stringBuilder.toString();
+                                        fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
+                                        tvFileName.setText(getString(R.string.file_name) + fileName);
+                                        btnExtractFile.setVisibility(View.VISIBLE);
+                                    } catch (Exception e) {
+                                    }
+                                } else if (fileName.endsWith("json")) {
+                                    file_type = FILE_TYPE.JSON;
+
+                                    try {
+                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                                        StringBuilder stringBuilder = new StringBuilder();
+                                        try {
+                                            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                                            String line = bufferedReader.readLine();
+                                            while (line != null) {
+                                                stringBuilder.append(line).append('\n');
+                                                line = bufferedReader.readLine();
+                                            }
+                                            bufferedReader.close();
+                                            inputStream.close();
+
+                                        } catch (FileNotFoundException e) {
+                                            e.printStackTrace();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        fileContent = stringBuilder.toString();
+                                        fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
+                                        tvFileName.setText(getString(R.string.file_name) + fileName);
+                                        btnExtractFile.setVisibility(View.VISIBLE);
+
+                                    } catch (Exception e) {
+                                    }
+                                } else if (fileName.endsWith("png") || fileName.endsWith("jpg") || fileName.endsWith("jpeg") || fileName.endsWith("bmp")) {
+                                    file_type = FILE_TYPE.IMAGE;
+                                    finalListImages.clear();
+                                    finalListBitmaps.clear();
+                                    try {
+                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+
+                                        BitmapFactory.Options options = new BitmapFactory.Options();
+                                        options.inJustDecodeBounds = true;
+                                        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                                        bitmap = resizeImage(bitmap);
+                                        boolean hasAllColors = checkPaletteColors(bitmap);
+                                        if (!hasAllColors) {
+                                            bitmap = convertToGrayScale(bitmap);
+                                            bitmap = ditherImage(bitmap);
+                                        }
+                                        GbcImage gbcImage = new GbcImage();
+                                        //Add a null frame id for imported images. Need to use a "NO FRAME OPTION, AS IMPORTED"
+//                                if (bitmap.getHeight()!=144){
+//                                    gbcImage.setFrameId(null);
+//                                }
+                                        byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
+                                        gbcImage.setImageBytes(imageBytes);
+                                        byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
+                                        String hashHex = Utils.bytesToHex(hash);
+                                        gbcImage.setHashCode(hashHex);
+                                        ImageData imageData = new ImageData();
+                                        imageData.setImageId(hashHex);
+                                        imageData.setData(imageBytes);
+                                        importedImageDatas.add(imageData);
+                                        gbcImage.setName(fileName);
+                                        finalListBitmaps.add(bitmap);
+                                        finalListImages.add(gbcImage);
+                                        tvFileName.setText(getString(R.string.file_name) + fileName);
+                                        btnExtractFile.setVisibility(View.GONE);
+                                        btnAddImages.setVisibility(View.VISIBLE);
+                                        btnAddImages.setEnabled(true);
+
+                                        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
+                                        gridViewImport.setAdapter((ListAdapter) adapter);
+                                        ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
+                                        cbAddFrame.setVisibility(View.VISIBLE);
+                                        gridViewImport.setAdapter((ListAdapter) adapter);
 
 //                                } else {
 //                                    tvFileName.setText(getString(R.string.file_name) + fileName);
@@ -841,23 +926,46 @@ public class ImportFragment extends Fragment {
 //                                    gridViewImport.setAdapter(null);
 //                                    bitmap.recycle();
 //                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } catch (NoSuchAlgorithmException e) {
-                                e.printStackTrace();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    } catch (NoSuchAlgorithmException e) {
+                                        e.printStackTrace();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+
+                                } else {
+                                    btnExtractFile.setVisibility(View.GONE);
+
+                                    tvFileName.setText(getString(R.string.no_valid_file));
+                                }
                             }
-
-                        } else {
-                            btnExtractFile.setVisibility(View.GONE);
-
-                            tvFileName.setText(getString(R.string.no_valid_file));
                         }
+
                     }
+
                 }
             }
     );
+
+    /**
+     * Checks if the selected file are images
+     *
+     * @return true if all are images
+     */
+    private boolean isImageFile(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return false;
+        }
+
+        String[] validExtensions = {".jpg", ".jpeg", ".png", ".bmp"};
+        for (String extension : validExtensions) {
+            if (fileName.toLowerCase().endsWith(extension)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
     public boolean extractSavImages() {

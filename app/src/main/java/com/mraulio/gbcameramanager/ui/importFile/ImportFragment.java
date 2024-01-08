@@ -787,7 +787,7 @@ public class ImportFragment extends Fragment {
 
                             } catch (Exception e) {
                             }
-                        } else if (fileName.endsWith("png") || fileName.endsWith("jpg")) {
+                        } else if (fileName.endsWith("png") || fileName.endsWith("jpg")|| fileName.endsWith("bmp")) {
                             file_type = FILE_TYPE.IMAGE;
                             finalListImages.clear();
                             finalListBitmaps.clear();

@@ -1,10 +1,17 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 
 import com.mraulio.gbcameramanager.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ImageConversionUtils {
 
@@ -21,25 +28,115 @@ public class ImageConversionUtils {
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, (int) (originalWidth / scaledFactor), (int) (originalHeight / scaledFactor), false);
                 return scaledBitmap;
             } else {
-                if (originalBitmap.getHeight() < originalBitmap.getWidth()) {
-                    originalBitmap = rotateBitmapImport(originalBitmap, 90);
+                //For non framed images
+                int noFrameWidth = 128;
+                int noFrameHeight = 112;
+                Bitmap framelessBitmap = null;
+
+                boolean isNonFramed = false;
+
+                if (originalWidth == noFrameWidth && originalHeight == noFrameHeight || originalWidth == 160 && originalHeight % 16 == 0) {//Regular image, 160 width and *16 height
+                    framelessBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
+                    isNonFramed = true;
+                } else {
+                    float scaledFramelessFactor = originalWidth / 128.0f;
+
+                    if (originalHeight / scaledFramelessFactor == 112) {
+                        framelessBitmap = Bitmap.createScaledBitmap(originalBitmap, 128, 112, false);
+                        isNonFramed = true;
+                    }
                 }
-                originalWidth = originalBitmap.getWidth();
-                originalHeight = originalBitmap.getHeight();
-                int targetWidth = 160;
 
-                // Calculates height adjusted to original image proportions
-                int targetHeight = Math.round((float) originalHeight * targetWidth / originalWidth);
+                if (isNonFramed) {
+                    //Adding a frame to the image so it's 160x144
+                    //I need to use copy because if not it's inmutable bitmap
+                    if (hasJoeyJrPalette(framelessBitmap)) {
+                        framelessBitmap = convertJoeyPalette(framelessBitmap);
+                    }
+                    Bitmap framed = Utils.hashFrames.get("Nintendo_Frame").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    Canvas canvas = new Canvas(framed);
+                    canvas.drawBitmap(framelessBitmap, 16, 16, null);
 
-                // Calculates a factor of 16 height
-                int croppedHeight = (targetHeight / 16) * 16;
+                    return framed;
 
-                // Scales the image to the 160 width, keeping the height in proportion
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, croppedHeight, false);
-                return scaledBitmap;
+                } else {
+
+                    if (originalBitmap.getHeight() < originalBitmap.getWidth()) {
+                        originalBitmap = rotateBitmapImport(originalBitmap, 90);
+                    }
+                    originalWidth = originalBitmap.getWidth();
+                    originalHeight = originalBitmap.getHeight();
+                    int targetWidth = 160;
+
+                    // Calculates height adjusted to original image proportions
+                    int targetHeight = Math.round((float) originalHeight * targetWidth / originalWidth);
+
+                    // Calculates a factor of 16 height
+                    int croppedHeight = (targetHeight / 16) * 16;
+
+                    // Scales the image to the 160 width, keeping the height in proportion
+                    Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, croppedHeight, false);
+                    return scaledBitmap;
+                }
             }
         }
     }
+
+    /**
+     * Method to check if an image was  JoeyJr imported image
+     *
+     * @param image Image to be checked
+     * @return
+     */
+    private static boolean hasJoeyJrPalette(Bitmap image) {
+        //
+        Set<String> originalColors = new HashSet<>(Arrays.asList("#000000", "#808080", "#C0C0C0", "#FFFFFF"));
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                int pixelColor = image.getPixel(x, y);
+                String hexColor = String.format("#%06X", (0xFFFFFF & pixelColor));
+                if (!originalColors.contains(hexColor)) {
+                    return false;  // Not a JoeyJr image
+                }
+            }
+        }
+        return true;  // Image has JoeyJr palette
+    }
+
+    /**
+     * Transform JoeyJr image into a valid palette image
+     *
+     * @param image
+     * @return
+     */
+    public static Bitmap convertJoeyPalette(Bitmap image) {
+
+        Bitmap newImage = Bitmap.createBitmap(image.getWidth(), image.getHeight(), image.getConfig());
+
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                int pixelColor = image.getPixel(x, y);
+
+                // Convert to hex
+                String hexColor = String.format("#%06X", (0xFFFFFF & pixelColor));
+
+                String newHexColor;
+                if ("#808080".equals(hexColor)) {
+                    newHexColor = "#555555";
+                } else if ("#C0C0C0".equals(hexColor)) {
+                    newHexColor = "#AAAAAA";
+                } else {
+                    newHexColor = hexColor;
+                }
+
+                int newColor = Color.parseColor(newHexColor);
+                newImage.setPixel(x, y, newColor);
+            }
+        }
+
+        return newImage;
+    }
+
 
     public static Bitmap convertToGrayScale(Bitmap bitmap) {
         int width = bitmap.getWidth();

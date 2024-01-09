@@ -734,8 +734,7 @@ public class ImportFragment extends Fragment {
                                     tvFileName.setText("Selected files: " + count);
                                     for (int i = 0; i < count; i++) {
                                         Uri uri = data.getClipData().getItemAt(i).getUri();
-
-
+                                        fileName = getFileName(uri);
                                         file_type = FILE_TYPE.IMAGE;
 
                                         try {

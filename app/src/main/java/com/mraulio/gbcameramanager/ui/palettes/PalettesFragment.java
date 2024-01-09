@@ -42,7 +42,6 @@ import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
-import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
@@ -171,7 +170,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    jsonCreator();
+                    PaletteJsonCreator();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -208,7 +207,7 @@ public class PalettesFragment extends Fragment {
     }
 
 
-    private void jsonCreator() throws JSONException {
+    private void PaletteJsonCreator() throws JSONException {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
         JSONArray palettesArr = new JSONArray();

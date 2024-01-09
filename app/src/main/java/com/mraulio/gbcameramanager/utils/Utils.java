@@ -38,6 +38,7 @@ public class Utils {
     public static final File IMAGES_JSON = new File(MAIN_FOLDER, "Images json");
     public static final File TXT_FOLDER = new File(MAIN_FOLDER, "Hex images");
     public static final File PALETTES_FOLDER = new File(MAIN_FOLDER, "Palettes json");
+    public static final File FRAMES_FOLDER = new File(MAIN_FOLDER, "Frames json");
     public static final File ARDUINO_HEX_FOLDER = new File(MAIN_FOLDER, "Arduino Printer Hex");
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
 
@@ -82,9 +83,9 @@ public class Utils {
         listFiles.add(IMAGES_JSON);
         listFiles.add(TXT_FOLDER);
         listFiles.add(PALETTES_FOLDER);
+        listFiles.add(FRAMES_FOLDER);
         listFiles.add(ARDUINO_HEX_FOLDER);
         listFiles.add(PHOTO_DUMPS_FOLDER);
-
 
         for (File file : listFiles) {
             try {

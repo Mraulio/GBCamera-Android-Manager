@@ -74,6 +74,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -728,12 +730,33 @@ public class ImportFragment extends Fragment {
                                         break; //Leave the loop if it finds a non valid file
                                     }
                                 }
+
                                 if (allFilesValid) {
+                                    List<Uri> uris = new ArrayList<>();
+
+                                    //Order by name
+                                    for (int i = 0; i < count; i++) {
+                                        Uri uri = data.getClipData().getItemAt(i).getUri();
+                                        uris.add(uri);
+                                    }
+                                    // Ordenar las Uri por el nombre del archivo
+                                    Collections.sort(uris, new Comparator<Uri>() {
+                                        @Override
+                                        public int compare(Uri uri1, Uri uri2) {
+                                            String path1 = getFileName(uri1);
+                                            String path2 = getFileName(uri2);
+
+                                            return path1.compareTo(path2);
+                                        }
+                                    });
+
                                     finalListImages.clear();
                                     finalListBitmaps.clear();
                                     tvFileName.setText("Selected files: " + count);
                                     for (int i = 0; i < count; i++) {
-                                        Uri uri = data.getClipData().getItemAt(i).getUri();
+                                        Uri uri = uris.get(i);
+//                                        Uri uri = data.getClipData().getItemAt(i).getUri();
+
                                         fileName = getFileName(uri);
                                         file_type = FILE_TYPE.IMAGE;
 

@@ -49,7 +49,6 @@ public class ImageConversionUtils {
 
                 if (isNonFramed) {
                     //Adding a frame to the image so it's 160x144
-                    //I need to use copy because if not it's inmutable bitmap
                     if (hasJoeyJrPalette(framelessBitmap)) {
                         framelessBitmap = convertJoeyPalette(framelessBitmap);
                     }

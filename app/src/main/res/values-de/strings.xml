@@ -50,7 +50,7 @@
     <string name="btn_export_json">JSON exportieren</string>
     <string name="long_press_delete_palette">Halten zum löschen</string>
     <string name="cant_delete_base_palette">Kann Basispalette nicht löschen</string>
-    <string name="toast_palettes_json">Paletten im Download-Ordner gespeichert.</string>
+    <string name="toast_palettes_json">Paletten gespeichert.</string>
     <string name="set_palette_name">*Palettenname setzen*</string>
     <string name="sure_dialog_palette">Sicher?\nVor dem Fortsetzen ist ein JSON export empfohlen.</string>
     <string name="delete_dialog_palette">Palette löschen\u0020</string>

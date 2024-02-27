@@ -39,7 +39,7 @@
     <string name="btn_export_json">Exporter Json</string>
     <string name="long_press_delete_palette">Appui long pour effacer</string>
     <string name="cant_delete_base_palette">Palette par défaut. Ne peut être effacée</string>
-    <string name="toast_palettes_json">Palettes Json sauvegardées vers le dossier Download.</string>
+    <string name="toast_palettes_json">Palettes Json sauvegardées.</string>
     <string name="set_palette_name">*Nommer la palette*</string>
     <string name="sure_dialog_palette">Confirmer?\Export préalable en Json recommandé.</string>
     <string name="delete_dialog_palette">Effacer palette\u0020</string>

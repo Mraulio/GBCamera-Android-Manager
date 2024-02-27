@@ -222,7 +222,7 @@ public class ImportFragment extends Fragment {
                             GbcFrame gbcFrame = (GbcFrame) frame;
                             //If the frame already exists (by the name) it doesn't add it. Same if it's already added
                             for (GbcFrame objeto : Utils.framesList) {
-                                if (objeto.getFrameName().toLowerCase(Locale.ROOT).equals(gbcFrame.getFrameName())) {
+                                if (objeto.getFrameName().toLowerCase(Locale.ROOT).equals(gbcFrame.getFrameName().toLowerCase(Locale.ROOT))) {
                                     alreadyAdded = true;
                                     break;
                                 }

@@ -50,7 +50,7 @@
     <string name="btn_export_json">Exportar Json</string>
     <string name="long_press_delete_palette">Toque longo para deletar</string>
     <string name="cant_delete_base_palette">Não é possível deletar a paleta padrão</string>
-    <string name="toast_palettes_json">Json das paletas salvo na pasta de Download.</string>
+    <string name="toast_palettes_json">Json das paletas salvo.</string>
     <string name="set_palette_name">*Nome da paleta*</string>
     <string name="sure_dialog_palette">Você tem certeza?\nÉ recomendado exportar o Json antes de continuar.</string>
     <string name="delete_dialog_palette">Deletar paleta\u0020</string>

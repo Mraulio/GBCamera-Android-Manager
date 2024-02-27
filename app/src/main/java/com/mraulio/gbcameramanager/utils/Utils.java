@@ -121,11 +121,16 @@ public class Utils {
     }
 
     public static Bitmap transparentBitmap(Bitmap bitmap, GbcFrame gbcFrame) {
-        HashSet<int[]> transparencyHS = transparencyHashSet(gbcFrame.getFrameBitmap());
-        if (transparencyHS.size() == 0) {
-            transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+        HashSet<int[]> transparencyHS = null;
+        if (gbcFrame.getTransparentPixelPositions().size()==0){
+            transparencyHS = transparencyHashSet(gbcFrame.getFrameBitmap());
+            if (transparencyHS.size() == 0) {
+                transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+            }
+            gbcFrame.setTransparentPixelPositions(transparencyHS);
+        } else {
+            transparencyHS = gbcFrame.getTransparentPixelPositions();
         }
-        gbcFrame.setTransparentPixelPositions(transparencyHS);
 
         int transparentPixel = Color.argb(0, 0, 0, 0);
         for (int[] position : transparencyHS) {

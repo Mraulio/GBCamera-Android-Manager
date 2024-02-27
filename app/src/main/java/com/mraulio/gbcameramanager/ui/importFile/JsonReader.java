@@ -2,7 +2,9 @@ package com.mraulio.gbcameramanager.ui.importFile;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
+import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -12,12 +14,13 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
-import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -66,7 +69,7 @@ public class JsonReader {
                 }
 
             } else if (stateObject.has("frames")) {
-                return readerFrames(jsonObject, stateObject);
+                return readerFrames(jsonObject,stateObject);
 
             } else if (stateObject.has("images")) {
                 //Images json
@@ -101,7 +104,7 @@ public class JsonReader {
                     String hash = imageJson.getString("hash");
                     stringValues.add(hash);
                     String data = jsonObject.getString(hash);
-                    String decodedData = decodeData(data);
+                    String decodedData = decodeDataImage(data);
                     byte[] bytes = Utils.convertToByteArray(decodedData);
                     GbcImage gbcImage = new GbcImage();
                     gbcImage.setHashCode(hash);
@@ -171,7 +174,7 @@ public class JsonReader {
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-                    Bitmap imageBitmap =  frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(),null);
+                    Bitmap imageBitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), null);
 
                     ImportFragment.importedImagesList.add(gbcImage);
                     ImportFragment.importedImagesBitmaps.add(imageBitmap);
@@ -210,7 +213,102 @@ public class JsonReader {
         return paletteList;
     }
 
-    public static List<GbcFrame> readerFrames(JSONObject jsonObject, JSONObject stateObject) throws
+    public static List<GbcFrame> readerFrames(JSONObject jsonObject,JSONObject stateObject) throws JSONException {
+        if (frameJsonType(stateObject)) {
+            return readerFramesGBCAM(jsonObject,stateObject);
+        } else {
+            return readerFramesWebApp(jsonObject,stateObject);
+        }
+    }
+
+    /**
+     * Checks if the json was created in this app or not
+     * @param stateObject
+     * @return
+     * @throws JSONException
+     */
+    public static boolean frameJsonType(JSONObject stateObject) throws JSONException {
+        JSONArray framesArray = stateObject.getJSONArray("frames");
+        JSONObject frameObj = framesArray.getJSONObject(0);
+        if (frameObj.has("isWildFrame")){
+            return true;
+        }else return false;
+    }
+
+    /**
+     * To extract the frames from a json created with this app
+     * @param stateObject
+     * @return
+     * @throws JSONException
+     */
+    public static List<GbcFrame> readerFramesGBCAM(JSONObject jsonObject,JSONObject stateObject) throws JSONException {
+        //Entering frame json. There are 2 types, old with id, new with hash
+        JSONArray framesArray = stateObject.getJSONArray("frames");
+        if (framesArray.length() == 0) {
+            return null;
+        }
+        List<GbcFrame> frameList = new ArrayList<>();
+
+        for (int i = 0; i < framesArray.length(); i++) {
+            JSONObject frameObj = null;
+            try {
+                frameObj = framesArray.getJSONObject(i);
+                //Verify what type of frames.json it is
+                String name = frameObj.getString("id");
+                GbcFrame gbcFrame = new GbcFrame();
+                gbcFrame.setFrameName(name);
+                boolean isWildFrame = frameObj.getBoolean("isWildFrame");
+                gbcFrame.setWildFrame(isWildFrame);
+                String hash = jsonObject.getString("frame-" + name);
+                String decompHash = decodeDataImage(hash);//Change this for a full image
+                byte[] bytes = Utils.convertToByteArray(decompHash);
+                int height = (decompHash.length() + 1) / 120;//To get the real height of the image
+                ImageCodec imageCodec = new ImageCodec(160, height, false);
+                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), Utils.hashPalettes.get("bw").getPaletteColorsInt(), bytes, false, false, isWildFrame);//False for now, need to add the wild frame to the json
+
+                gbcFrame.setFrameBitmap(image);
+                gbcFrame.setFrameBytes(bytes);
+
+                //Recovering the transparency data
+                String hashTransp = jsonObject.getString("frame-transparency-" + name);
+
+                String data = decodeDataTransparency(hashTransp);
+                HashSet<int[]> hashSet = stringToHashSet(data);
+                gbcFrame.setTransparentPixelPositions(hashSet);
+
+                image = transparentBitmap(image, gbcFrame);
+                gbcFrame.setFrameBitmap(image);
+
+                frameList.add(gbcFrame);
+                ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return frameList;
+
+    }
+    public static String decodeDataTransparency(String compressedString) {
+        byte[] compressedBytes = compressedString.getBytes(StandardCharsets.ISO_8859_1);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Inflater inflater = new Inflater();
+        inflater.setInput(compressedBytes);
+        byte[] buffer = new byte[1024];
+        try {
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, count);
+            }
+        } catch (DataFormatException e) {
+            e.printStackTrace();
+        } finally {
+            inflater.end();
+        }
+        return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+    }
+    public static List<GbcFrame> readerFramesWebApp(JSONObject jsonObject,JSONObject stateObject) throws
             JSONException {
         //Entering frame json. There are 2 types, old with id, new with hash
         JSONArray framesArray = stateObject.getJSONArray("frames");
@@ -240,8 +338,8 @@ public class JsonReader {
                 }
                 GbcFrame gbcFrame = new GbcFrame();
                 gbcFrame.setFrameName(name);
-                String hash = jsonObject.getString("frame-" + id);
-                String decompHash = recreateFrame(hash);
+                String data = jsonObject.getString("frame-" + id);
+                String decompHash = recreateFrame(data);
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
                 ImageCodec imageCodec = new ImageCodec(160, height, false);
@@ -264,7 +362,23 @@ public class JsonReader {
         return frameList;
     }
 
-    public static String decodeData(String value) {
+    public static HashSet<int[]> stringToHashSet(String data) {
+        HashSet<int[]> hashSet = new HashSet<>();
+        //Delete start and end brackets
+        data = data.substring(1, data.length() - 1);
+        String[] arrays = data.split("\\],\\[");
+        for (String arrayStr : arrays) {
+            String[] nums = arrayStr.split(",");
+            int[] array = new int[nums.length];
+            for (int i = 0; i < nums.length; i++) {
+                array[i] = Integer.parseInt(nums[i].trim());
+            }
+            hashSet.add(array);
+        }
+        return hashSet;
+    }
+
+    public static String decodeDataImage(String value) {
         byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
         Inflater inflater = new Inflater();
         inflater.setInput(compressedBytes);

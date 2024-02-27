@@ -2,6 +2,9 @@ package com.mraulio.gbcameramanager.ui.frames;
 
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
+import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
+import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,7 +14,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -19,11 +21,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
@@ -32,9 +36,25 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -49,6 +69,8 @@ public class FramesFragment extends Fragment {
         MainActivity.fab.hide();
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
+        Button btnExportFramesJson = view.findViewById(R.id.btnExportFramesJson);
+
         CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Utils.framesList, true, false);
         TextView tvNumFrames = view.findViewById(R.id.tvNumFrames);
         MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.FRAMES;
@@ -116,11 +138,118 @@ public class FramesFragment extends Fragment {
             }
         });
 
+        btnExportFramesJson.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    FramesJsonCreator();
+                } catch (JSONException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames);
         tvNumFrames.setText(getString(R.string.frames_total) + Utils.framesList.size());
         return view;
     }
+    private void FramesJsonCreator() throws JSONException, IOException {
+        JSONObject json = new JSONObject();
+        JSONObject stateObj = new JSONObject();
+        JSONArray framesArr = new JSONArray();
+        for (GbcFrame gbcFrame : Utils.framesList) {
+            JSONObject frameObj = new JSONObject();
+            frameObj.put("id", gbcFrame.getFrameName());
+
+            //Create hashcode from the frame bitmap
+            frameObj.put("isWildFrame",gbcFrame.isWildFrame());
+            framesArr.put(frameObj);
+        }
+        stateObj.put("frames", framesArr);
+        stateObj.put("lastUpdateUTC", System.currentTimeMillis() / 1000);
+
+        json.put("state", stateObj);
+
+        for (int i = 0; i < Utils.framesList.size(); i++) {
+            GbcFrame gbcFrame = Utils.framesList.get(i);
+
+            String txt = Utils.bytesToHex(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
+            StringBuilder sb = new StringBuilder();
+            for (int j = 0; j < txt.length(); j++) {
+                if (j > 0 && j % 32 == 0) {
+                    sb.append("\n");
+                }
+                sb.append(txt.charAt(j));
+            }
+            String tileData = sb.toString();
+            String deflated = encodeData(tileData);
+            json.put("frame-"+gbcFrame.getFrameName(), deflated);
+
+            //Now put the transparency data
+            HashSet<int[]> transparencyHashSet = Utils.transparencyHashSet(gbcFrame.getFrameBitmap());
+            if (transparencyHashSet.size() == 0) {
+                transparencyHashSet = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+            }
+            String toStringHash =hashSetToString(transparencyHashSet);
+
+            String encodedTransparency = encodeData(toStringHash);
+            json.put("frame-transparency-"+gbcFrame.getFrameName(),encodedTransparency);
+
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+        String fileName = "frames_" + dateFormat.format(new Date()) + ".json";
+        File file = new File(Utils.FRAMES_FOLDER, fileName);
+
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            fileWriter.write(json.toString(2));
+            Utils.toast(getContext(), getString(R.string.toast_frames_json));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static String hashSetToString(HashSet<int[]> hashSet) {
+        StringBuilder sb = new StringBuilder();
+//        sb.append("[");
+        for (int[] array : hashSet) {
+            sb.append(Arrays.toString(array)).append(",");
+        }
+        if (!hashSet.isEmpty()) {
+            sb.deleteCharAt(sb.length() - 1); // Eliminar la última coma
+        }
+//        sb.append("]");
+        return sb.toString();
+    }
+    public static byte[] serializeHashSet(HashSet<int[]> hashSet) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        for (int[] array : hashSet) {
+            for (int num : array) {
+                byteArrayOutputStream.write(num);
+            }
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
+    public static byte[] compress(byte[] data) {
+        Deflater deflater = new Deflater();
+        deflater.setInput(data);
+        deflater.finish();
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        while (!deflater.finished()) {
+            int length = deflater.deflate(buffer);
+            outputStream.write(buffer, 0, length);
+        }
+        deflater.end();
+        return outputStream.toByteArray();
+    }
+    public static String encodeDataByte(byte[] data) {
+        return new String(data, StandardCharsets.ISO_8859_1);
+    }
+
+
 
     private class DeleteFrameAsyncTask extends AsyncTask<Void, Void, Void> {
 

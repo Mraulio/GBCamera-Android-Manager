@@ -384,7 +384,6 @@ public class GBxCartCommands {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
             LocalDateTime now = null;
             Date nowDate = new Date();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

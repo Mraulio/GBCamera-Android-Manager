@@ -182,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
 
         fab = findViewById(R.id.fab);
 
-        Utils.makeDirs();
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -375,6 +374,8 @@ public class MainActivity extends AppCompatActivity {
             //resume tasks needing this permission
             Toast toast = Toast.makeText(this, getString(R.string.permissions_toast), Toast.LENGTH_LONG);
             toast.show();
+            Utils.makeDirs();//If permissions granted, create the folders
+
         }
     }
 

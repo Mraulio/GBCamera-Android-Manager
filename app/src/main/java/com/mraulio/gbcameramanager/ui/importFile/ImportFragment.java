@@ -85,8 +85,6 @@ public class ImportFragment extends Fragment {
     static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
     static List<GbcImage> importedImagesList = new ArrayList<>();
 
-    List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
-    List<GbcImage> extractedImagesList = new ArrayList<>();
     List<List<GbcImage>> listActiveImages = new ArrayList<>();
     List<List<GbcImage>> listDeletedImages = new ArrayList<>();
     List<List<Bitmap>> listDeletedBitmaps = new ArrayList<>();
@@ -96,15 +94,7 @@ public class ImportFragment extends Fragment {
     List<Bitmap> finalListBitmaps = new ArrayList<>();
     List<GbcImage> lastSeenImage = new ArrayList<>();
     List<Bitmap> lastSeenBitmap = new ArrayList<>();
-    //    List<GbcImage> lastSeenImage;
-//    List<Bitmap> lastSeenBitmap;
-//    List<GbcImage> listActiveImages = new ArrayList<>();
-//    List<Bitmap> listActiveBitmaps = new ArrayList<>();
-//    List<GbcImage> listDeletedImages;
-//    List<Bitmap> listDeletedBitmaps;
-//    List<Bitmap> listDeletedBitmapsRedStroke;
-//    List<GbcImage> finalListImages = new ArrayList<>();
-//    List<Bitmap> finalListBitmaps = new ArrayList<>();
+
     public static List<ImageData> importedImageDatas = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
@@ -180,14 +170,14 @@ public class ImportFragment extends Fragment {
         cbLastSeen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showImages2(cbLastSeen, cbDeleted);
+                showImages(cbLastSeen, cbDeleted);
                 gridViewImport.setAdapter((ListAdapter) adapter);
             }
         });
         cbDeleted.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showImages2(cbLastSeen, cbDeleted);
+                showImages(cbLastSeen, cbDeleted);
                 gridViewImport.setAdapter((ListAdapter) adapter);
             }
         });
@@ -431,29 +421,31 @@ public class ImportFragment extends Fragment {
             case SAV: {
                 isGoodSave = extractSavImages();
                 if (isGoodSave) {
-//                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount[0] - 1));
-//                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1));
-//                    lastSeenImage.add(importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount[0] - 1));
-//                    lastSeenBitmap.add(importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1));
-//                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount[0], importedImagesList.size()));
-//
-//                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount[0], importedImagesBitmaps.size()));
-//                    listDeletedBitmapsRedStroke = new ArrayList<>();
-//                    Paint paint = new Paint();
-//                    paint.setColor(Color.RED);
-//                    paint.setStrokeWidth(2);
-//                    int startX = 160;
-//                    int startY = 0;
-//                    int endX = 0;
-//                    int endY = 144;
-//                    for (Bitmap bitmap : listDeletedBitmaps) {
-//                        Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
-//                        Canvas canvas = new Canvas(copiedBitmap);
-//                        canvas.drawLine(startX, startY, endX, endY, paint);
-//                        listDeletedBitmapsRedStroke.add(copiedBitmap);
-//                    }
+                    listActiveImages.add(new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount[0] - 1)));
+                    listActiveBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1)));
+                    lastSeenImage.add(importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount[0] - 1));
+                    lastSeenBitmap.add(importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1));
+                    listDeletedImages.add(new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount[0], importedImagesList.size())));
 
-                    showImages2(cbLastSeen, cbDeleted);
+                    listDeletedBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount[0], importedImagesBitmaps.size())));
+                    listDeletedBitmapsRedStroke = new ArrayList<>();
+                    listDeletedBitmapsRedStroke.add(new ArrayList<>());
+
+                    Paint paint = new Paint();
+                    paint.setColor(Color.RED);
+                    paint.setStrokeWidth(2);
+                    int startX = 160;
+                    int startY = 0;
+                    int endX = 0;
+                    int endY = 144;
+                    for (Bitmap bitmap : listDeletedBitmaps.get(0)) {
+                        Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
+                        Canvas canvas = new Canvas(copiedBitmap);
+                        canvas.drawLine(startX, startY, endX, endY, paint);
+                        listDeletedBitmapsRedStroke.get(0).add(copiedBitmap);
+                    }
+
+                    showImages(cbLastSeen, cbDeleted);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
                 }
                 break;
@@ -470,7 +462,7 @@ public class ImportFragment extends Fragment {
                 listDeletedBitmapsRedStroke =romExtractor.getListDeletedBitmapsRedStroke();
                 importedImagesList = romExtractor.getExtractedImagesList();
                 importedImagesBitmaps = romExtractor.getExtractedImagesBitmaps();
-                showImages2(cbLastSeen, cbDeleted);
+                showImages(cbLastSeen, cbDeleted);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
             case IMAGE: {
                 break;
@@ -576,7 +568,8 @@ public class ImportFragment extends Fragment {
         }
     }
 
-    public void showImages2(CheckBox showLastSeen, CheckBox showDeleted) {
+    //Refactor this with UsbSerialFragment
+    public void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
         List<Bitmap> bitmapsAdapterList = new ArrayList<>();
         finalListImages.clear();
         finalListBitmaps.clear();

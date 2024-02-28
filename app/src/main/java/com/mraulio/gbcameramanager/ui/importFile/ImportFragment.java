@@ -84,7 +84,7 @@ public class ImportFragment extends Fragment {
 
     static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
     static List<GbcImage> importedImagesList = new ArrayList<>();
-
+    int totalImages = 0;
     List<List<GbcImage>> listActiveImages = new ArrayList<>();
     List<List<GbcImage>> listDeletedImages = new ArrayList<>();
     List<List<Bitmap>> listDeletedBitmaps = new ArrayList<>();
@@ -460,8 +460,7 @@ public class ImportFragment extends Fragment {
                 listDeletedImages= romExtractor.getListDeletedImages();
                 listDeletedBitmaps= romExtractor.getListDeletedBitmaps();
                 listDeletedBitmapsRedStroke =romExtractor.getListDeletedBitmapsRedStroke();
-                importedImagesList = romExtractor.getExtractedImagesList();
-                importedImagesBitmaps = romExtractor.getExtractedImagesBitmaps();
+                totalImages = romExtractor.getTotalImages();
                 showImages(cbLastSeen, cbDeleted);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
             case IMAGE: {
@@ -518,7 +517,7 @@ public class ImportFragment extends Fragment {
                         return;
                     }
                     btnAddImages.setEnabled(true);
-                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
+                    tvFileName.setText(totalImages + getString(R.string.images_available));
                     btnAddImages.setText(getString(R.string.btn_add_images));
                     btnAddImages.setVisibility(View.VISIBLE);
                     layoutCb.setVisibility(View.VISIBLE);
@@ -526,7 +525,7 @@ public class ImportFragment extends Fragment {
 
                 case TXT: {
                     btnAddImages.setEnabled(true);
-                    tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
+                    tvFileName.setText(totalImages + getString(R.string.images_available));
                     btnAddImages.setText(getString(R.string.btn_add_images));
                     btnAddImages.setVisibility(View.VISIBLE);
                     layoutCb.setVisibility(View.GONE);
@@ -580,7 +579,6 @@ public class ImportFragment extends Fragment {
             for (List<Bitmap> bitmapList : listActiveBitmaps) {
                 finalListBitmaps.addAll(bitmapList);
             }
-
             bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
 
         } else if (showLastSeen.isChecked() && !showDeleted.isChecked()) {
@@ -624,6 +622,7 @@ public class ImportFragment extends Fragment {
                 bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke.get(i));
             }
         }
+
         adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null);    }
 
     //Refactor, also on UsbSerialFragment
@@ -1131,6 +1130,7 @@ public class ImportFragment extends Fragment {
                 gbcImage.setImageBytes(imageBytes);
                 importedImagesBitmaps.add(image);
                 importedImagesList.add(gbcImage);
+                totalImages = importedImagesList.size();
             }
         } catch (Exception e) {
             e.printStackTrace();

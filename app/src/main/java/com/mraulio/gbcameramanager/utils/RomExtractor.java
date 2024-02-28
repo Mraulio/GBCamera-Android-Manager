@@ -43,7 +43,7 @@ public class RomExtractor {
     List<Bitmap> finalListBitmaps = new ArrayList<>();
     List<GbcImage> lastSeenImage = new ArrayList<>();
     List<Bitmap> lastSeenBitmap = new ArrayList<>();
-
+    int totalImages;
     byte[] fileBytes;
     List<byte[]> romByteList = new ArrayList<>();
     List<String> filePartNames= new ArrayList<>();
@@ -63,7 +63,7 @@ public class RomExtractor {
         int partSize = fileSize / 8; // Divides the file in 8 parts
 
         for (int i = 0; i < 8; i++) {
-            String extension =".gbc";
+            String extension =".sav";
             if (i != 0) {//Because 0 is the actual rom
 
                 int startIndex = i * partSize; // Índice de inicio de la parte actual
@@ -73,7 +73,7 @@ public class RomExtractor {
 
                 if (magicIsReal(filePartBytes)) {
                     romByteList.add(filePartBytes);
-                    filePartNames.add(fileName + extension);
+                    filePartNames.add(fileName +".part_" + i + extension);
                 }
             }
         }
@@ -92,7 +92,8 @@ public class RomExtractor {
 
     public void readSavBytes(byte[] fileBytes, int saveBank, String filePartName) {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
-
+        extractedImagesList.clear();
+        extractedImagesBitmaps.clear();
         try {
             if (fileBytes.length == 131072) {
                 List<byte[]> listExtractedImageBytes;
@@ -127,6 +128,7 @@ public class RomExtractor {
                     gbcImage.setImageBytes(imageBytes);
                     extractedImagesBitmaps.add(image);
                     extractedImagesList.add(gbcImage);
+                    totalImages++;
                 }
 
                 listActiveImages.add(new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1)));
@@ -159,6 +161,46 @@ public class RomExtractor {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+    }
+
+    public int getTotalImages() {
+        return totalImages;
+    }
+
+    public void setTotalImages(int totalImages) {
+        this.totalImages = totalImages;
+    }
+
+    public byte[] getFileBytes() {
+        return fileBytes;
+    }
+
+    public void setFileBytes(byte[] fileBytes) {
+        this.fileBytes = fileBytes;
+    }
+
+    public List<byte[]> getRomByteList() {
+        return romByteList;
+    }
+
+    public void setRomByteList(List<byte[]> romByteList) {
+        this.romByteList = romByteList;
+    }
+
+    public List<String> getFilePartNames() {
+        return filePartNames;
+    }
+
+    public void setFilePartNames(List<String> filePartNames) {
+        this.filePartNames = filePartNames;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public List<Bitmap> getExtractedImagesBitmaps() {

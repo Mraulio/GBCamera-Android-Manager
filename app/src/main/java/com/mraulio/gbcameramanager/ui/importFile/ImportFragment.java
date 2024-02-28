@@ -4,9 +4,7 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.che
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.resizeImage;
-import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.rotateBitmapImport;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
-import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
@@ -52,6 +50,7 @@ import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.utils.RomExtractor;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
@@ -83,23 +82,35 @@ import java.util.Locale;
 
 public class ImportFragment extends Fragment {
 
-    public static List<GbcImage> importedImagesList = new ArrayList<>();
-    public static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
-    GbcImage lastSeenImage;
-    Bitmap lastSeenBitmap;
-    List<GbcImage> listActiveImages = new ArrayList<>();
-    List<Bitmap> listActiveBitmaps = new ArrayList<>();
-    List<GbcImage> listDeletedImages;
-    List<Bitmap> listDeletedBitmaps;
-    List<Bitmap> listDeletedBitmapsRedStroke;
+    static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
+    static List<GbcImage> importedImagesList = new ArrayList<>();
+
+    List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
+    List<GbcImage> extractedImagesList = new ArrayList<>();
+    List<List<GbcImage>> listActiveImages = new ArrayList<>();
+    List<List<GbcImage>> listDeletedImages = new ArrayList<>();
+    List<List<Bitmap>> listDeletedBitmaps = new ArrayList<>();
+    List<List<Bitmap>> listDeletedBitmapsRedStroke = new ArrayList<>();
     List<GbcImage> finalListImages = new ArrayList<>();
+    List<List<Bitmap>> listActiveBitmaps = new ArrayList<>();
     List<Bitmap> finalListBitmaps = new ArrayList<>();
+    List<GbcImage> lastSeenImage = new ArrayList<>();
+    List<Bitmap> lastSeenBitmap = new ArrayList<>();
+    //    List<GbcImage> lastSeenImage;
+//    List<Bitmap> lastSeenBitmap;
+//    List<GbcImage> listActiveImages = new ArrayList<>();
+//    List<Bitmap> listActiveBitmaps = new ArrayList<>();
+//    List<GbcImage> listDeletedImages;
+//    List<Bitmap> listDeletedBitmaps;
+//    List<Bitmap> listDeletedBitmapsRedStroke;
+//    List<GbcImage> finalListImages = new ArrayList<>();
+//    List<Bitmap> finalListBitmaps = new ArrayList<>();
     public static List<ImageData> importedImageDatas = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
     private AlertDialog loadingDialog;
     private Adapter adapter;
-    boolean isGoodSave;
+    boolean isGoodSave = true;
 
     TextView tvFileName;
     static String fileName;
@@ -123,12 +134,13 @@ public class ImportFragment extends Fragment {
 
     public enum FILE_TYPE {
         SAV,
+        PHOTO_ROM,
         JSON,
         TXT,
         IMAGE
     }
 
-    public static FILE_TYPE file_type;
+    public static FILE_TYPE fileType;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -168,14 +180,14 @@ public class ImportFragment extends Fragment {
         cbLastSeen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showImages(cbLastSeen, cbDeleted);
+                showImages2(cbLastSeen, cbDeleted);
                 gridViewImport.setAdapter((ListAdapter) adapter);
             }
         });
         cbDeleted.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showImages(cbLastSeen, cbDeleted);
+                showImages2(cbLastSeen, cbDeleted);
                 gridViewImport.setAdapter((ListAdapter) adapter);
             }
         });
@@ -248,7 +260,7 @@ public class ImportFragment extends Fragment {
                         numImagesAdded = 0;
                         List<GbcImage> newGbcImages = new ArrayList<>();
                         List<ImageData> newImageDatas = new ArrayList<>();
-                        switch (file_type) {
+                        switch (fileType) {
                             case TXT:
                             case JSON: {
                                 for (int i = 0; i < importedImagesList.size(); i++) {
@@ -282,6 +294,7 @@ public class ImportFragment extends Fragment {
                                 break;
                             }
                             case IMAGE:
+                            case PHOTO_ROM:
                             case SAV: {
                                 if (!cbAddFrame.isChecked()) {
                                     HashSet transparencyHS = transparencyHashSet(finalListBitmaps.get(0));
@@ -414,37 +427,51 @@ public class ImportFragment extends Fragment {
         listImportedImageBytes.clear();
         cbLastSeen.setChecked(false);
         cbDeleted.setChecked(false);
-        switch (file_type) {
+        switch (fileType) {
             case SAV: {
                 isGoodSave = extractSavImages();
                 if (isGoodSave) {
-                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount[0] - 1));
-                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1));
-                    lastSeenImage = importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount[0] - 1);
-                    lastSeenBitmap = importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1);
-                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount[0], importedImagesList.size()));
+//                    listActiveImages = new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount[0] - 1));
+//                    listActiveBitmaps = new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1));
+//                    lastSeenImage.add(importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount[0] - 1));
+//                    lastSeenBitmap.add(importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1));
+//                    listDeletedImages = new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount[0], importedImagesList.size()));
+//
+//                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount[0], importedImagesBitmaps.size()));
+//                    listDeletedBitmapsRedStroke = new ArrayList<>();
+//                    Paint paint = new Paint();
+//                    paint.setColor(Color.RED);
+//                    paint.setStrokeWidth(2);
+//                    int startX = 160;
+//                    int startY = 0;
+//                    int endX = 0;
+//                    int endY = 144;
+//                    for (Bitmap bitmap : listDeletedBitmaps) {
+//                        Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
+//                        Canvas canvas = new Canvas(copiedBitmap);
+//                        canvas.drawLine(startX, startY, endX, endY, paint);
+//                        listDeletedBitmapsRedStroke.add(copiedBitmap);
+//                    }
 
-                    listDeletedBitmaps = new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount[0], importedImagesBitmaps.size()));
-                    listDeletedBitmapsRedStroke = new ArrayList<>();
-                    Paint paint = new Paint();
-                    paint.setColor(Color.RED);
-                    paint.setStrokeWidth(2);
-                    int startX = 160;
-                    int startY = 0;
-                    int endX = 0;
-                    int endY = 144;
-                    for (Bitmap bitmap : listDeletedBitmaps) {
-                        Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
-                        Canvas canvas = new Canvas(copiedBitmap);
-                        canvas.drawLine(startX, startY, endX, endY, paint);
-                        listDeletedBitmapsRedStroke.add(copiedBitmap);
-                    }
-
-                    showImages(cbLastSeen, cbDeleted);
+                    showImages2(cbLastSeen, cbDeleted);
                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
                 }
                 break;
             }
+            case PHOTO_ROM:
+                RomExtractor romExtractor = new RomExtractor(fileBytes, fileName);
+                romExtractor.romExtract();
+                listActiveImages = romExtractor.getListActiveImages();
+                listActiveBitmaps = romExtractor.getListActiveBitmaps();
+                lastSeenImage = romExtractor.getLastSeenImage();
+                lastSeenBitmap= romExtractor.getLastSeenBitmap();
+                listDeletedImages= romExtractor.getListDeletedImages();
+                listDeletedBitmaps= romExtractor.getListDeletedBitmaps();
+                listDeletedBitmapsRedStroke =romExtractor.getListDeletedBitmapsRedStroke();
+                importedImagesList = romExtractor.getExtractedImagesList();
+                importedImagesBitmaps = romExtractor.getExtractedImagesBitmaps();
+                showImages2(cbLastSeen, cbDeleted);
+                ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
             case IMAGE: {
                 break;
             }
@@ -486,8 +513,9 @@ public class ImportFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            switch (file_type) {
-                case SAV: {
+            switch (fileType) {
+                case PHOTO_ROM:
+                case SAV:
                     if (!isGoodSave) {
                         tvFileName.setText(getString(R.string.no_valid_file));
                         loadingDialog.dismiss();
@@ -503,7 +531,7 @@ public class ImportFragment extends Fragment {
                     btnAddImages.setVisibility(View.VISIBLE);
                     layoutCb.setVisibility(View.VISIBLE);
                     break;
-                }
+
                 case TXT: {
                     btnAddImages.setEnabled(true);
                     tvFileName.setText(importedImagesList.size() + getString(R.string.images_available));
@@ -548,39 +576,96 @@ public class ImportFragment extends Fragment {
         }
     }
 
-    //Refactor, also on UsbSerialFragment
-    private void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
-        List<Bitmap> bitmapsAdapterList = null;
+    public void showImages2(CheckBox showLastSeen, CheckBox showDeleted) {
+        List<Bitmap> bitmapsAdapterList = new ArrayList<>();
+        finalListImages.clear();
+        finalListBitmaps.clear();
         if (!showLastSeen.isChecked() && !showDeleted.isChecked()) {
-            finalListImages = new ArrayList<>(listActiveImages);
-            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+            for (List<GbcImage> gbcImageList : listActiveImages) {
+                finalListImages.addAll(gbcImageList);
+            }
+            for (List<Bitmap> bitmapList : listActiveBitmaps) {
+                finalListBitmaps.addAll(bitmapList);
+            }
+
             bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+
         } else if (showLastSeen.isChecked() && !showDeleted.isChecked()) {
-            finalListImages = new ArrayList<>(listActiveImages);
-            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-            finalListImages.add(lastSeenImage);
-            finalListBitmaps.add(lastSeenBitmap);
+            for (int i = 0; i < listActiveImages.size(); i++) {
+                finalListImages.addAll(listActiveImages.get(i));
+                finalListImages.add(lastSeenImage.get(i));
+            }
+            for (int i = 0; i < listActiveBitmaps.size(); i++) {
+                finalListBitmaps.addAll(listActiveBitmaps.get(i));
+                finalListBitmaps.add(lastSeenBitmap.get(i));
+            }
             bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
 
         } else if (!showLastSeen.isChecked() && showDeleted.isChecked()) {
-            finalListImages = new ArrayList<>(listActiveImages);
-            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
-            finalListImages.addAll(listDeletedImages);
-            finalListBitmaps.addAll(listDeletedBitmaps);
-            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
+            for (int i = 0; i < listActiveImages.size(); i++) {
+                finalListImages.addAll(listActiveImages.get(i));
+                finalListImages.addAll(listDeletedImages.get(i));
+            }
+            for (int i = 0; i < listActiveBitmaps.size(); i++) {
+                finalListBitmaps.addAll(listActiveBitmaps.get(i));
+                bitmapsAdapterList.addAll(listActiveBitmaps.get(i));
+                finalListBitmaps.addAll(listDeletedBitmaps.get(i));
+                bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke.get(i));
+
+            }
         } else if (showLastSeen.isChecked() && showDeleted.isChecked()) {
-            finalListImages = new ArrayList<>(listActiveImages);
-            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-            finalListImages.add(lastSeenImage);
-            finalListImages.addAll(listDeletedImages);
-            finalListBitmaps.add(lastSeenBitmap);
-            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
-            finalListBitmaps.addAll(listDeletedBitmaps);
-            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
+            for (int i = 0; i < listActiveImages.size(); i++) {
+                finalListImages.addAll(listActiveImages.get(i));
+                finalListImages.add(lastSeenImage.get(i));
+                finalListImages.addAll(listDeletedImages.get(i));
+
+            }
+            for (int i = 0; i < listActiveBitmaps.size(); i++) {
+                finalListBitmaps.addAll(listActiveBitmaps.get(i));
+                bitmapsAdapterList.addAll(listActiveBitmaps.get(i));
+
+                finalListBitmaps.add(lastSeenBitmap.get(i));
+                bitmapsAdapterList.add(lastSeenBitmap.get(i));
+
+                finalListBitmaps.addAll(listDeletedBitmaps.get(i));
+                bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke.get(i));
+            }
         }
-        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null);
-    }
+        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null);    }
+
+    //Refactor, also on UsbSerialFragment
+//    private void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
+//        List<Bitmap> bitmapsAdapterList = null;
+//        if (!showLastSeen.isChecked() && !showDeleted.isChecked()) {
+//            finalListImages = new ArrayList<>(listActiveImages);
+//            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+//            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+//        } else if (showLastSeen.isChecked() && !showDeleted.isChecked()) {
+//            finalListImages = new ArrayList<>(listActiveImages);
+//            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+//            finalListImages.add(lastSeenImage.get(i));
+//            finalListBitmaps.add(lastSeenBitmap);
+//            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+//
+//        } else if (!showLastSeen.isChecked() && showDeleted.isChecked()) {
+//            finalListImages = new ArrayList<>(listActiveImages);
+//            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+//            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+//            finalListImages.addAll(listDeletedImages);
+//            finalListBitmaps.addAll(listDeletedBitmaps);
+//            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
+//        } else if (showLastSeen.isChecked() && showDeleted.isChecked()) {
+//            finalListImages = new ArrayList<>(listActiveImages);
+//            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
+//            finalListImages.add(lastSeenImage);
+//            finalListImages.addAll(listDeletedImages);
+//            finalListBitmaps.add(lastSeenBitmap);
+//            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
+//            finalListBitmaps.addAll(listDeletedBitmaps);
+//            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
+//        }
+//        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null);
+//    }
 
     private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
         List<GbcImage> gbcImagesList;
@@ -758,7 +843,7 @@ public class ImportFragment extends Fragment {
 //                                        Uri uri = data.getClipData().getItemAt(i).getUri();
 
                                         fileName = getFileName(uri);
-                                        file_type = FILE_TYPE.IMAGE;
+                                        fileType = FILE_TYPE.IMAGE;
 
                                         try {
                                             InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
@@ -821,7 +906,7 @@ public class ImportFragment extends Fragment {
                                 //I check the extension of the file
                                 if (fileName.endsWith("sav")) {
                                     ByteArrayOutputStream byteStream = null;
-                                    file_type = FILE_TYPE.SAV;
+                                    fileType = FILE_TYPE.SAV;
 
                                     try {
                                         InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
@@ -834,13 +919,36 @@ public class ImportFragment extends Fragment {
                                         byteStream.close();
                                         inputStream.close();
                                     } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
 
                                     fileBytes = byteStream.toByteArray();
                                     tvFileName.setText(getString(R.string.file_name) + fileName);
                                     btnExtractFile.setVisibility(View.VISIBLE);
+                                } else if (fileName.endsWith("gbc")) {
+                                    ByteArrayOutputStream byteStream = null;
+                                    fileType = FILE_TYPE.PHOTO_ROM;
+
+                                    try {
+                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                                        byteStream = new ByteArrayOutputStream();
+                                        byte[] buffer = new byte[1024];
+                                        int len;
+                                        while ((len = inputStream.read(buffer)) != -1) {
+                                            byteStream.write(buffer, 0, len);
+                                        }
+                                        byteStream.close();
+                                        inputStream.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    fileBytes = byteStream.toByteArray();
+                                    tvFileName.setText(getString(R.string.file_name) + fileName);
+                                    btnExtractFile.setVisibility(View.VISIBLE);
+
                                 } else if (fileName.endsWith("txt")) {
-                                    file_type = FILE_TYPE.TXT;
+                                    fileType = FILE_TYPE.TXT;
                                     try {
                                         InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
                                         StringBuilder stringBuilder = new StringBuilder();
@@ -867,7 +975,7 @@ public class ImportFragment extends Fragment {
                                     } catch (Exception e) {
                                     }
                                 } else if (fileName.endsWith("json")) {
-                                    file_type = FILE_TYPE.JSON;
+                                    fileType = FILE_TYPE.JSON;
 
                                     try {
                                         InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
@@ -895,7 +1003,7 @@ public class ImportFragment extends Fragment {
                                     } catch (Exception e) {
                                     }
                                 } else if (fileName.endsWith("png") || fileName.endsWith("jpg") || fileName.endsWith("jpeg") || fileName.endsWith("bmp")) {
-                                    file_type = FILE_TYPE.IMAGE;
+                                    fileType = FILE_TYPE.IMAGE;
                                     finalListImages.clear();
                                     finalListBitmaps.clear();
                                     try {
@@ -988,7 +1096,6 @@ public class ImportFragment extends Fragment {
         }
         return false;
     }
-
 
     public boolean extractSavImages() {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));

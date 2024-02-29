@@ -175,4 +175,6 @@
 
     <string name="toast_frames_json">Frames Json saved.</string>
     <string name="import_valid_images">Please, select only valid image files (.jpg, .jpeg, .png, .bmp).</string>
+    <string name="no_filtered_images">No available filtered images</string>
+
 </resources>

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -50,6 +51,8 @@ public class Utils {
     public static HashMap<String, Bitmap> imageBitmapCache = new HashMap<>();
     public static HashMap<String, GbcFrame> hashFrames = new HashMap<>();
     public static HashMap<String, GbcPalette> hashPalettes = new HashMap<>();
+
+    public static LinkedHashSet<String> tagsHash = new LinkedHashSet<>();
 
     //Auxiliar method to convert byte[] to hexadecimal String
     public static String bytesToHex(byte[] bytes) {
@@ -96,6 +99,15 @@ public class Utils {
         }
     }
 
+    public static LinkedHashSet<String> retreiveTags(List<GbcImage> gbcImages) {
+        for (GbcImage gbcImage : gbcImages) {
+            for (String tag : gbcImage.getTags()) {
+                tagsHash.add(tag);
+            }
+        }
+        return tagsHash;
+    }
+
     public static void toast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
@@ -122,7 +134,7 @@ public class Utils {
 
     public static Bitmap transparentBitmap(Bitmap bitmap, GbcFrame gbcFrame) {
         HashSet<int[]> transparencyHS = null;
-        if (gbcFrame.getTransparentPixelPositions().size()==0){
+        if (gbcFrame.getTransparentPixelPositions().size() == 0) {
             transparencyHS = transparencyHashSet(gbcFrame.getFrameBitmap());
             if (transparencyHS.size() == 0) {
                 transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
@@ -138,6 +150,7 @@ public class Utils {
         }
         return bitmap;
     }
+
     public static HashSet<int[]> transparencyHashSet(Bitmap bitmap) {
         HashSet<int[]> transparentPixelPositions = new HashSet<>();
         // Iterar a través de los píxeles del Bitmap
@@ -145,7 +158,7 @@ public class Utils {
             for (int x = 0; x < bitmap.getWidth(); x++) {
                 int pixel = bitmap.getPixel(x, y);
                 if (Color.alpha(pixel) == 0) {
-                    int[] pos= {x,y};
+                    int[] pos = {x, y};
                     transparentPixelPositions.add(pos);
                 }
             }
@@ -173,4 +186,6 @@ public class Utils {
 
         return transparentPixelPositions;
     }
+
+
 }

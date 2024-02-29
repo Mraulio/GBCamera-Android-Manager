@@ -11,10 +11,12 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.showFilterDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.stitchImages;
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
+import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
@@ -1141,7 +1143,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 public void onClick(View v) {
                                     List<GbcImage> sharedList = new ArrayList<>();
                                     for (int i : selectedImages) {
-                                        GbcImage gbcImage =filteredGbcImages.get(i);
+                                        GbcImage gbcImage = filteredGbcImages.get(i);
                                         sharedList.add(gbcImage);
                                     }
                                     shareImage(sharedList, getContext());
@@ -1197,11 +1199,18 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 }
                 break;
 
+            case R.id.action_filter_tags:
+                showFilterDialog(getContext(), tagsHash, displayMetrics);
+                for (String st : filterTags) {
+                    System.out.println(st+"       /////////////");
+                }
+                return true;
+
             case R.id.action_stitch:
                 if (!selectedImages.isEmpty()) {
                     //If there are too many images selected, the resulting image to show will be too big (because of the *6 in the ImageView)
-                    if (selectedImages.size()>40){
-                        toast(getContext(),getString(R.string.stitch_too_many_images));
+                    if (selectedImages.size() > 40) {
+                        toast(getContext(), getString(R.string.stitch_too_many_images));
                         return true;
                     }
                     final Bitmap[] stitchedImage = new Bitmap[1];
@@ -1289,7 +1298,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                             try {
                                 stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
-                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth()* 5, stitchedImage[0].getHeight()* 5, false);
+                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 5, stitchedImage[0].getHeight() * 5, false);
                                 imageView.setImageBitmap(bitmap);
                                 builder.setView(stitchView);
 
@@ -2010,9 +2019,20 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         } else {
             filteredGbcImages.clear();
             for (GbcImage gbcImageToFilter : Utils.gbcImagesList) {
-                if (gbcImageToFilter.getTags().contains(filterTags.get(0))) {
+                boolean containsAllTags = true;
+                for (String tag : filterTags) {
+                    if (!gbcImageToFilter.getTags().contains(tag)) {
+                        containsAllTags = false;
+                        break; //Doesn't keep checking the rest of the tags
+                    }
+                }
+                if (containsAllTags) {
                     filteredGbcImages.add(gbcImageToFilter);
                 }
+
+//                if (gbcImageToFilter.getTags().contains(filterTags.get(0))) {
+//                    filteredGbcImages.add(gbcImageToFilter);
+//                }
             }
         }
         imagesForPage = new ArrayList<>();
@@ -2059,7 +2079,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             if (Utils.gbcImagesList.isEmpty()) {
                 tv.setText(tv.getContext().getString(R.string.no_images));
             } else
-                tv.setText(tv.getContext().getString(R.string.no_favorites));
+                tv.setText(tv.getContext().getString(R.string.no_filtered_images));
             tv_page.setText("");
             gridView.setAdapter(null);
         }

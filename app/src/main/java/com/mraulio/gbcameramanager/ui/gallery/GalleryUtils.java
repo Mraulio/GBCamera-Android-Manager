@@ -1,9 +1,15 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -11,6 +17,15 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.core.content.FileProvider;
 
@@ -30,7 +45,11 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.zip.Deflater;
@@ -119,9 +138,9 @@ public class GalleryUtils {
             image.recycle();
         }
         if (MainActivity.exportPng) {
-            Utils.toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved) + MainActivity.exportSize);
+            toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved) + MainActivity.exportSize);
         } else
-            Utils.toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved_txt));
+            toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved_txt));
     }
 
     public static Bitmap makeSquareImage(Bitmap image) {
@@ -210,7 +229,7 @@ public class GalleryUtils {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             context.startActivity(Intent.createChooser(intent, "Share"));
         } catch (Exception e) {
-            Utils.toast(context, "Exception");
+            toast(context, "Exception");
             e.printStackTrace();
         } finally {
             if (fileOutputStream != null) {
@@ -338,5 +357,130 @@ public class GalleryUtils {
         deflater.end();
         byte[] compressedBytes = outputStream.toByteArray();
         return new String(compressedBytes, StandardCharsets.ISO_8859_1);
+    }
+
+//    public static void filterByTags(Context context, DisplayMetrics displayMetrics) {
+//        //Linked because keeps the order
+//
+//        showFilterDialog(context, tagList, displayMetrics);
+//    }
+
+    public static void showFilterDialog(Context context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.tags_dialog, null);
+
+        TextView selectedTagsTextView = dialogView.findViewById(R.id.selectedTagsTextView);
+
+        Dialog dialog = new Dialog(context);
+        dialog.setContentView(dialogView);
+        int screenHeight = displayMetrics.heightPixels;
+        int desiredHeight = (int) (screenHeight * 0.6);
+        Window window = dialog.getWindow();
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, desiredHeight);
+
+        LinearLayout buttonLayout = dialog.findViewById(R.id.buttonLayout);
+
+        List<String> selectedTags = new ArrayList<>(filterTags);
+        Iterator<String> tagIterator = hashTags.iterator();
+        updateSelectedTagsText(selectedTagsTextView, selectedTags);
+        //Dynamically add buttons
+        while (tagIterator.hasNext()) {
+
+            String item = tagIterator.next();
+            CheckBox checkBox = new CheckBox(context);
+            if (selectedTags.contains(item)){
+                checkBox.setBackgroundColor(context.getResources().getColor(R.color.paper_color_blue));
+                checkBox.setChecked(true);
+            }
+            if (item.equals("__filter:favourite__")) {
+                item = "Favourite \u2764\ufe0f";//The heart emoticon
+            }
+            checkBox.setText(item);
+            checkBox.setTextSize(20);
+            checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String selectedTag = ((Button) v).getText().toString();
+                    if (selectedTag.equals("Favourite \u2764\ufe0f")) {
+                        selectedTag = "__filter:favourite__";//Reverse the tag
+                    }
+                    if (selectedTags.contains(selectedTag)) {
+
+                        selectedTags.remove(selectedTag);
+                        updateSelectedTagsText(selectedTagsTextView, selectedTags);
+                        checkBox.setBackgroundColor(context.getResources().getColor(R.color.white));
+
+                    } else {
+                        selectedTags.add(selectedTag);
+                        updateSelectedTagsText(selectedTagsTextView, selectedTags);
+                        checkBox.setBackgroundColor(context.getResources().getColor(R.color.paper_color_blue));
+                    }
+                }
+            });
+            buttonLayout.addView(checkBox);
+        }
+
+        Button btnAccept = dialog.findViewById(R.id.btnAccept);
+        btnAccept.setOnClickListener(v -> {
+            filterTags = selectedTags;
+
+            currentPage = 0;
+            updateGridView(currentPage);
+
+            dialog.dismiss();
+        });
+
+        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+        btnCancel.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    /**
+     * Updates the textview with the selected tags
+     *
+     * @param selectedTagsLayout
+     * @param selectedTags
+     */
+    public static void updateSelectedTagsText(TextView selectedTagsLayout, List<String> selectedTags) {
+        StringBuilder builder = new StringBuilder();
+        for (String tag : selectedTags) {
+            if (tag.equals("__filter:favourite__")) {
+                tag = "Favourite \u2764\ufe0f";
+            }
+            builder.append(tag).append(", ");
+        }
+        String selectedTagsText = builder.toString();
+        if (!selectedTagsText.isEmpty()) {
+            selectedTagsText = selectedTagsText.substring(0, selectedTagsText.length() - 2);
+        }
+        selectedTagsLayout.setText(selectedTagsText);
+    }
+
+    @SuppressLint("NewApi")
+    public static void sortByDate(List<GbcImage> gbcImagesList,boolean descending) {
+        Comparator<GbcImage> comparator = Comparator.comparing(GbcImage::getCreationDate);
+        if (descending) {
+            comparator = comparator.reversed();
+        }
+        Collections.sort(gbcImagesList, comparator);
+    }
+
+    @SuppressLint("NewApi")
+    public static void sortByTitle(List<GbcImage> gbcImagesList) {
+        Collections.sort(gbcImagesList, new Comparator<GbcImage>() {
+            @Override
+            public int compare(GbcImage image1, GbcImage image2) {
+                // Compara los nombres de las imágenes
+                int titleComparison = image1.getName().compareTo(image2.getName());
+                // Si los nombres son iguales, compara las fechas de creación
+                if (titleComparison == 0) {
+                    return image1.getCreationDate().compareTo(image2.getCreationDate());
+                }
+                return titleComparison;
+            }
+        });
     }
 }

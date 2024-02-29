@@ -31,17 +31,23 @@ public class TypeConverters {
     @TypeConverter
     public static String fromList(List<String> tags) {
         StringBuilder sb = new StringBuilder();
-        for (String tag : tags) {
-            sb.append(tag);
-            sb.append(",");
+        for (int i = 0; i < tags.size(); i++) {
+            sb.append(tags.get(i));
+            if (i < tags.size() - 1) { //Verify it's not the last element, so it doesn't add an extra blank tag
+                sb.append(",");
+            }
         }
         return sb.toString();
     }
 
     @TypeConverter
     public static List<String> toList(String data) {
-        String[] tags = data.split(",");
-        return new ArrayList<>(Arrays.asList(tags));
+        if (data == null || data.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            String[] tags = data.split(",");
+            return new ArrayList<>(Arrays.asList(tags));
+        }
     }
 
     @TypeConverter

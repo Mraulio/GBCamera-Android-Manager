@@ -888,7 +888,7 @@ public class ImportFragment extends Fragment {
 
                                 } else {
                                     // Show error message
-                                    tvFileName.setText("Please, select only valid image files (.jpg, .jpeg, .png, .bmp).");
+                                    tvFileName.setText(getString(R.string.import_valid_images));
 
                                 }
                             } else if (data.getData() != null) {
@@ -917,7 +917,7 @@ public class ImportFragment extends Fragment {
                                     fileBytes = byteStream.toByteArray();
                                     tvFileName.setText(getString(R.string.file_name) + fileName);
                                     btnExtractFile.setVisibility(View.VISIBLE);
-                                } else if (fileName.endsWith("gbc")) {
+                                } else if (fileName.toLowerCase().endsWith("gbc")) {
                                     ByteArrayOutputStream byteStream = null;
                                     fileType = FILE_TYPE.PHOTO_ROM;
 

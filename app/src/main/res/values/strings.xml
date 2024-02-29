@@ -174,5 +174,5 @@
     <string name="square_download">Export square image</string>
 
     <string name="toast_frames_json">Frames Json saved.</string>
-
+    <string name="import_valid_images">Please, select only valid image files (.jpg, .jpeg, .png, .bmp).</string>
 </resources>

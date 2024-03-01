@@ -51,6 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/tags_dialog_clear"
+            android:backgroundTint="@color/listview_selected"
             android:layout_marginEnd="10dp"
             />
         <Button
@@ -65,10 +66,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OK"
+            android:backgroundTint="@color/save_color"
             android:layout_marginStart="10dp"
             />
-
-
 
     </LinearLayout>
 </LinearLayout>

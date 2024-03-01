@@ -21,6 +21,7 @@
     <color name="paper_color_green">#DCFAD2</color>
     <color name="paper_color_pink">#FFDDE8</color>
     <color name="paper_color_purple">#F2E6FF</color>
+    <color name="save_color">#69BF6C</color>
 
 
 </resources>

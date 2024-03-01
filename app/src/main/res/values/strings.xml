@@ -184,5 +184,9 @@
     <string name="sort_ascending">Ascending</string>
     <string name="sort_descending">Descending</string>
 
+    <string name="rbEditTags">Edit tags</string>
+    <string name="rbMisc">Misc.</string>
+
+
 
 </resources>

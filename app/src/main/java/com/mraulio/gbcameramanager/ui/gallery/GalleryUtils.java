@@ -454,7 +454,7 @@ public class GalleryUtils {
         Dialog dialog = new Dialog(context);
         dialog.setContentView(dialogView);
         int screenHeight = displayMetrics.heightPixels;
-        int desiredHeight = (int) (screenHeight * 0.6);
+        int desiredHeight = (int) (screenHeight * 0.8);
         Window window = dialog.getWindow();
         window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, desiredHeight);
 
@@ -598,5 +598,21 @@ public class GalleryUtils {
         Collections.sort(gbcImagesList, comparator);
     }
 
+
+    public static boolean compareTags(List<String> list1, List<String> list2) {
+        boolean editingTags = false;
+        System.out.println("1: "+list1.size()+" 2:"+list2.size());
+        if (list1.size() != list2.size()) {
+            editingTags = true;
+        } else {
+            for (String st : list1) {
+                if (!list2.contains(st)) {
+                    editingTags = true;
+                    break;//Don't keep checking
+                }
+            }
+        }
+        return editingTags;
+    }
 
 }

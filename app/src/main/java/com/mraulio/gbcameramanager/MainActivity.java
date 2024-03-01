@@ -169,14 +169,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String currentVersion = BuildConfig.VERSION_NAME;
+
         if (Float.valueOf(currentVersion) > Float.valueOf(previousVersion)) {
             //App has been updated, do something if necessary
             deleteImageCache();
             // Update version name for future comparisons
             editor.putString("previous_version", currentVersion);
             editor.apply();
-
         }
+
         if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
                 && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
             languageCode = "en";
@@ -269,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
     private void deleteImageCache() {
         //Deleting cache for the next version only
         File cacheDir = new File(getApplicationContext().getCacheDir(), CACHE_DIR_NAME);
-        // Borra todos los archivos dentro del directorio de caché
+        // Delete all files within the cache directory
         if (cacheDir != null && cacheDir.isDirectory()) {
             File[] cacheFiles = cacheDir.listFiles();
             if (cacheFiles != null) {

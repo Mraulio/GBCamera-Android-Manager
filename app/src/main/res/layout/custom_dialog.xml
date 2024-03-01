@@ -79,7 +79,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
             android:layout_weight="1"
-            android:backgroundTint="#69BF6C"
+            android:backgroundTint="@color/save_color"
             app:icon="@drawable/ic_download"
             app:iconGravity="textStart"
             app:iconPadding="0dp" />

@@ -5,10 +5,10 @@ import static android.view.View.VISIBLE;
 
 import static com.mraulio.gbcameramanager.MainActivity.exportSize;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
-import static com.mraulio.gbcameramanager.MainActivity.selectedTags;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.compareTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
@@ -50,14 +50,17 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -385,7 +388,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             @Override
                             public void run() {
                                 //Single tap action
-                                showCustomDialog(globalImageIndex);
+                                showBigImageDialog(globalImageIndex, imageView);
                                 clickCount = 0;
                             }
                         };
@@ -1804,7 +1807,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     //To show the "big" Image dialog when doing a simple tap on the image
-    private void showCustomDialog(int globalImageIndex) {
+    private void showBigImageDialog(int globalImageIndex, ImageView previousImageView) {
         Bitmap bitmap = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode());
         bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
         final Dialog dialog = new Dialog(getContext());
@@ -1817,8 +1820,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
         ImageView imageView = dialog.findViewById(R.id.imageView);
         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false));
-        TextView tvImageName = dialog.findViewById(R.id.tv_imageName);
-        tvImageName.setText(filteredGbcImages.get(globalImageIndex).getName());
+        EditText etImageName = dialog.findViewById(R.id.etImageName);
+        etImageName.setText(filteredGbcImages.get(globalImageIndex).getName());
+
+        Button btnSaveTags = dialog.findViewById(R.id.btnSaveTags);
+
         imageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -1827,16 +1833,126 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
         });
 
+        final boolean[] editingTags = {false};
+        final boolean[] editingName = {false};
+        RadioButton rbEditTags = dialog.findViewById(R.id.rbEditTags);
+        RadioButton rbMisc = dialog.findViewById(R.id.rbMisc);
+
+        LinearLayout tagsLayout = dialog.findViewById(R.id.tagsCheckBoxes);
+        List<String> originalTags =  new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags());
+        List<String> tempTags = new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags());
+        String originalName = new String(filteredGbcImages.get(globalImageIndex).getName());
+        String modifiedName = new String(filteredGbcImages.get(globalImageIndex).getName());
+
+        TextView tvEditing = dialog.findViewById(R.id.tvEditing);;
+
+        Spinner spAvailableTags = dialog.findViewById(R.id.spAvailableTags);
+        List<String> availableTotalTags = new ArrayList<>(tagsHash);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, availableTotalTags);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spAvailableTags.setSelection(3);
+        spAvailableTags.setAdapter(adapter);
+
+        spAvailableTags.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!tempTags.contains(adapter.getItem(position))){
+                    //Generate dynamically new checkboxes
+                    createTagCheckBox(adapter.getItem(position),tagsLayout);
+                }
+
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+
+        StringBuilder sb = new StringBuilder();
+        String editing = "Editing: ";
+
+        for (String tag : filteredGbcImages.get(globalImageIndex).getTags()) {
+
+            CheckBox tagCb = new CheckBox(getContext());
+            String cbText;
+            if (tag.equals("__filter:favourite__")) {
+                cbText = "Favourite \u2764\ufe0f";
+            } else cbText = tag;
+
+            tagCb.setText(cbText);
+            tagCb.setChecked(true);
+
+            String finalTag = tag;
+            tagCb.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (tagCb.isChecked()) {
+                        if (!tempTags.contains(finalTag))
+                            tempTags.add(finalTag);
+                    } else {
+                        if (tempTags.contains(finalTag))
+                            tempTags.remove(finalTag);
+                    }
+
+                    editingTags[0] = compareTags(originalTags, tempTags);
+                    if (editingTags[0]){
+                        sb.setLength(0);
+                        sb.append(editing);
+                        sb.append("tags, ");
+                        tvEditing.setText(sb.toString());
+                    } else tvEditing.setText("");
+
+                    if (editingTags[0] || editingName[0]){
+                        btnSaveTags.setEnabled(true);
+                    }else  btnSaveTags.setEnabled(false);
+                }
+            });
+
+            tagsLayout.addView(tagCb);
+        }
+        btnSaveTags.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (tempTags.contains("__filter:favourite__")) {
+                    previousImageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+                } else{
+                    previousImageView.setBackgroundColor(getContext().getColor(R.color.imageview_bg));
+                }
+                filteredGbcImages.get(globalImageIndex).setTags(tempTags);
+                new SaveImageAsyncTask(filteredGbcImages.get(globalImageIndex)).execute();
+            }
+        });
+
         Button closeButton = dialog.findViewById(R.id.button_close);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                updateGridView(currentPage);
                 dialog.dismiss();
             }
         });
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);
+    }
+
+    /**
+     * For the tags checkboxes
+     * @param tag
+     */
+    private void createTagCheckBox(String tag, LinearLayout tagsLayout) {
+        CheckBox checkBox = new CheckBox(getContext());
+        checkBox.setText(tag);
+        checkBox.setChecked(true);
+        checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Implementa la lógica que necesites para el CheckBox, si es necesario
+            }
+        });
+        tagsLayout.addView(checkBox);
     }
 
     private void prevPage() {

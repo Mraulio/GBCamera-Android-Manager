@@ -160,7 +160,6 @@ public class PalettesFragment extends Fragment {
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                newPaletteName = getString(R.string.set_palette_name);
                 palette = Utils.gbcPalettesList.get(0).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
                 paletteDialog(palette, newPaletteName);
             }
@@ -279,7 +278,22 @@ public class PalettesFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Este método se llama cuando el texto cambia.
+                placeholderString = etPaletteName.getText().toString();
+                if (!placeholderString.equals("")) {
+
+                    for (GbcPalette palette : Utils.gbcPalettesList) {
+                        if (palette.getPaletteId().toLowerCase(Locale.ROOT).equals(placeholderString.trim().toLowerCase(Locale.ROOT))) {
+                            etPaletteName.setBackgroundColor(Color.parseColor("#FF0000"));
+                            break;
+                        } else {
+                            etPaletteName.setBackgroundColor(Color.parseColor("#FFFFFF"));
+
+                        }
+                    }
+                }else{
+                    etPaletteName.setHint(getString(R.string.set_palette_name));
+                }
+
             }
 
             @Override
@@ -595,28 +609,29 @@ public class PalettesFragment extends Fragment {
         btnSavePalette.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean alreadyExists = false;
+                boolean addPaleteName = false;
                 newPaletteName = etPaletteName.getText().toString();
-                for (GbcPalette paleta : Utils.gbcPalettesList) {
-                    if (paleta.getPaletteId().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {
-                        alreadyExists = true;
-                        etPaletteName.setBackgroundColor(Color.parseColor("#FF0000"));
-                        Utils.toast(getContext(), getString(R.string.toast_palettes_error));
-                        break;
+                if (!newPaletteName.equals("")) {
+                    for (GbcPalette paleta : Utils.gbcPalettesList) {
+                        if (paleta.getPaletteId().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {
+                            addPaleteName = true;
+                            Utils.toast(getContext(), getString(R.string.toast_palettes_error));
+                            break;
+                        }
                     }
-                }
-                if (!alreadyExists) {
-                    GbcPalette newPalette = new GbcPalette();
-                    newPalette.setPaletteId(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
-                    newPalette.setPaletteColors(palette);
-                    Utils.gbcPalettesList.add(newPalette);
-                    Utils.hashPalettes.put(newPalette.getPaletteId(), newPalette);
-                    gridViewPalettes.setAdapter(imageAdapter);
-                    Utils.toast(getContext(), getString(R.string.palette_added));
-                    dialog.hide();
-                    //To add it to the database
-                    new SavePaletteAsyncTask(newPalette, true).execute();//Adding the new palette to the database
+                    if (!addPaleteName) {
+                        GbcPalette newPalette = new GbcPalette();
+                        newPalette.setPaletteId(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
+                        newPalette.setPaletteColors(palette);
+                        Utils.gbcPalettesList.add(newPalette);
+                        Utils.hashPalettes.put(newPalette.getPaletteId(), newPalette);
+                        gridViewPalettes.setAdapter(imageAdapter);
+                        Utils.toast(getContext(), getString(R.string.palette_added));
+                        dialog.hide();
+                        //To add it to the database
+                        new SavePaletteAsyncTask(newPalette, true).execute();//Adding the new palette to the database
 
+                    }
                 }
             }
         });

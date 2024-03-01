@@ -17,6 +17,7 @@
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
+            android:hint="@string/set_palette_name"
             android:singleLine="true"></EditText>
 
         <ImageView

@@ -184,8 +184,11 @@
     <string name="sort_ascending">Ascending</string>
     <string name="sort_descending">Descending</string>
 
-    <string name="rbEditTags">Edit tags</string>
-    <string name="rbMisc">Misc.</string>
+    <string name="rb_edit_tags">Edit tags</string>
+    <string name="rb_misc">Misc.</string>
+    <string name="btn_update_tags">Update tags</string>
+    <string name="sp_select_tags">Select tags:</string>
+    <string name="et_write_tag">Write tag</string>
 
 
 

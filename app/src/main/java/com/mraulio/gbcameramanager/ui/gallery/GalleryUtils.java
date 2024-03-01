@@ -416,7 +416,7 @@ public class GalleryUtils {
             @Override
             public void onClick(View view) {
                 sortDescending = false;
-                editor.putBoolean("order_descending", false);
+                editor.putBoolean("sort_descending", false);
                 editor.apply();
                 checkSorting();
                 updateGridView(currentPage);
@@ -427,7 +427,7 @@ public class GalleryUtils {
             @Override
             public void onClick(View view) {
                 sortDescending = true;
-                editor.putBoolean("order_descending", true);
+                editor.putBoolean("sort_descending", true);
                 editor.apply();
                 checkSorting();
                 updateGridView(currentPage);

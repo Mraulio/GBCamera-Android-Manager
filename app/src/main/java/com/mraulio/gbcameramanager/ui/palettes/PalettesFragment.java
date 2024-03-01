@@ -316,7 +316,6 @@ public class PalettesFragment extends Fragment {
                     // El usuario ha confirmado la escritura.
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(etPaletteName.getWindowToken(), 0);
-//                            etPaletteName.setText("Esto se ha cerrado");
 
                     return true;
                 }
@@ -610,7 +609,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 boolean addPaleteName = false;
-                newPaletteName = etPaletteName.getText().toString();
+                newPaletteName = etPaletteName.getText().toString().trim();
                 if (!newPaletteName.equals("")) {
                     for (GbcPalette paleta : Utils.gbcPalettesList) {
                         if (paleta.getPaletteId().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {

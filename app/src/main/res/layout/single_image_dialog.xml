@@ -10,7 +10,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
+        android:autoSizeMaxTextSize="30sp"
+        android:autoSizeMinTextSize="5sp"
+        android:autoSizeTextType="uniform"
         android:background="@color/white"
+        android:drawableEnd="@drawable/ic_edit"
+        android:singleLine="true"
         android:textSize="20dp"></EditText>
 
     <ScrollView
@@ -38,81 +43,141 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:text="@string/rbEditTags"></RadioButton>
+            android:text="@string/rb_edit_tags"></RadioButton>
 
         <RadioButton
             android:id="@+id/rbMisc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:text="@string/rbMisc"></RadioButton>
+            android:text="@string/rb_misc"></RadioButton>
     </RadioGroup>
 
-    <EditText
+    <LinearLayout
+        android:id="@+id/editTagsLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:background="@color/white"></EditText>
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:text="Select tags:"/>
-    <Spinner
-        android:id="@+id/spAvailableTags"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-    </Spinner>
-
-</LinearLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/tagsCheckBoxes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginHorizontal="20dp"
-            android:orientation="vertical"></LinearLayout>
+            android:orientation="horizontal"
+            android:weightSum="10">
 
-    </ScrollView>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_weight="3"
+                android:text="@string/et_write_tag"
+                android:textSize="20sp" />
+
+            <AutoCompleteTextView
+                android:id="@+id/etWriteTag"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:autoSizeMaxTextSize="30sp"
+                android:autoSizeMinTextSize="5sp"
+                android:autoSizeTextType="uniform"
+                android:background="@color/white"
+                android:completionThreshold="1"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textSize="20dp"></AutoCompleteTextView>
+
+            <Button
+                android:id="@+id/btnOkWriteTag"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="OK"></Button>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sp_select_tags"
+                android:textSize="20sp" />
+
+            <Spinner
+                android:id="@+id/spAvailableTags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            </Spinner>
+
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <LinearLayout
+                android:id="@+id/tagsCheckBoxes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginHorizontal="20dp"
+                android:orientation="vertical"></LinearLayout>
+
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/btnSaveTags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="@string/btn_update_tags" />
+
+        </LinearLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="right">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/miscLayout"
+        android:visibility="gone">
 
-        <TextView
-            android:id="@+id/tvEditing"
-            android:text="Editing: "
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginRight="5dp"
-            android:textSize="20sp"
-            android:background="@color/listview_back">
-        </TextView>
-
-        <Button
-            android:id="@+id/btnSaveTags"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="OK"
-            android:enabled="false"/>
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Creation date: "></TextView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tvCreationDate">
+
+            </TextView>
+        </LinearLayout>
+
+
 
     </LinearLayout>
-
     <Button
         android:id="@+id/button_close"
         android:layout_width="match_parent"

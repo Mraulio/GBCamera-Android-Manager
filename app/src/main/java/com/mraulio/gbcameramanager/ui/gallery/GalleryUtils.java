@@ -601,7 +601,6 @@ public class GalleryUtils {
 
     public static boolean compareTags(List<String> list1, List<String> list2) {
         boolean editingTags = false;
-        System.out.println("1: "+list1.size()+" 2:"+list2.size());
         if (list1.size() != list2.size()) {
             editingTags = true;
         } else {

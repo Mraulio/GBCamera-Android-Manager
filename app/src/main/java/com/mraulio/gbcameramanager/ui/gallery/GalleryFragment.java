@@ -39,7 +39,10 @@ import android.hardware.usb.UsbManager;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,8 +52,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -1813,6 +1819,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         final Dialog dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.single_image_dialog);
 
+        List<String> originalTags = new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags());
+        List<String> tempTags = new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags());
+
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(dialog.getWindow().getAttributes());
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
@@ -1822,8 +1831,32 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false));
         EditText etImageName = dialog.findViewById(R.id.etImageName);
         etImageName.setText(filteredGbcImages.get(globalImageIndex).getName());
-
         Button btnSaveTags = dialog.findViewById(R.id.btnSaveTags);
+
+        //Autocomplete text view Text Write tag
+        AutoCompleteTextView autoCAddTag = dialog.findViewById(R.id.etWriteTag);
+//        autoCAddTag.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        List<String> availableTotalTags = new ArrayList<>(tagsHash);
+
+        ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_dropdown_item_1line, availableTotalTags);
+
+        autoCAddTag.setAdapter(adapterAutoComplete);
+        autoCAddTag.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(autoCAddTag.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        Button btnOkWriteTag = dialog.findViewById(R.id.btnOkWriteTag);
+        boolean[] editingTags = {false};
+        boolean editingName = false;
 
         imageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -1833,94 +1866,104 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
         });
 
-        final boolean[] editingTags = {false};
-        final boolean[] editingName = {false};
+
         RadioButton rbEditTags = dialog.findViewById(R.id.rbEditTags);
         RadioButton rbMisc = dialog.findViewById(R.id.rbMisc);
+        rbEditTags.setChecked(true);
+        TextView tvCreationDate = dialog.findViewById(R.id.tvCreationDate);
+
+        tvCreationDate.setText(filteredGbcImages.get(globalImageIndex).getCreationDate().toString());
+        LinearLayout editTagsLayout = dialog.findViewById(R.id.editTagsLayout);
+        LinearLayout miscLayout = dialog.findViewById(R.id.miscLayout);
+
+        rbEditTags.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editTagsLayout.setVisibility(VISIBLE);
+                miscLayout.setVisibility(GONE);
+
+            }
+        });
+        rbMisc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editTagsLayout.setVisibility(GONE);
+                miscLayout.setVisibility(VISIBLE);
+
+            }
+        });
 
         LinearLayout tagsLayout = dialog.findViewById(R.id.tagsCheckBoxes);
-        List<String> originalTags =  new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags());
-        List<String> tempTags = new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags());
         String originalName = new String(filteredGbcImages.get(globalImageIndex).getName());
         String modifiedName = new String(filteredGbcImages.get(globalImageIndex).getName());
 
-        TextView tvEditing = dialog.findViewById(R.id.tvEditing);;
-
         Spinner spAvailableTags = dialog.findViewById(R.id.spAvailableTags);
-        List<String> availableTotalTags = new ArrayList<>(tagsHash);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, availableTotalTags);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spAvailableTags.setSelection(3);
         spAvailableTags.setAdapter(adapter);
+        final boolean[] isSpinnerTouched = {false};
+        btnOkWriteTag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String newTag = autoCAddTag.getText().toString().trim();
+                if (!tempTags.contains(newTag)) {
+                    //Generate dynamically new checkboxes
+                    createTagCheckBox(newTag, tagsLayout, tempTags, originalTags, editingTags, editingName, btnSaveTags);
+                    tempTags.add(newTag);
+                    editingTags[0] = compareTags(originalTags, tempTags);
 
+                    if (editingTags[0] || editingName) {
+                        btnSaveTags.setEnabled(true);
+                    } else btnSaveTags.setEnabled(false);
+                }
+            }
+        });
+        spAvailableTags.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                isSpinnerTouched[0] = true;
+                return false;
+            }
+        });
         spAvailableTags.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (!tempTags.contains(adapter.getItem(position))){
+                if (!isSpinnerTouched[0]) return;
+                String selectedTag = adapter.getItem(position);
+                if (!tempTags.contains(selectedTag)) {
                     //Generate dynamically new checkboxes
-                    createTagCheckBox(adapter.getItem(position),tagsLayout);
-                }
+                    createTagCheckBox(adapter.getItem(position), tagsLayout, tempTags, originalTags, editingTags, editingName, btnSaveTags);
+                    tempTags.add(selectedTag);
+                    editingTags[0] = compareTags(originalTags, tempTags);
 
+                    if (editingTags[0] || editingName) {
+                        btnSaveTags.setEnabled(true);
+                    } else btnSaveTags.setEnabled(false);
+                }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
 
-
-        StringBuilder sb = new StringBuilder();
-        String editing = "Editing: ";
-
         for (String tag : filteredGbcImages.get(globalImageIndex).getTags()) {
+            createTagCheckBox(tag, tagsLayout, tempTags, originalTags, editingTags, editingName, btnSaveTags);
 
-            CheckBox tagCb = new CheckBox(getContext());
-            String cbText;
-            if (tag.equals("__filter:favourite__")) {
-                cbText = "Favourite \u2764\ufe0f";
-            } else cbText = tag;
-
-            tagCb.setText(cbText);
-            tagCb.setChecked(true);
-
-            String finalTag = tag;
-            tagCb.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (tagCb.isChecked()) {
-                        if (!tempTags.contains(finalTag))
-                            tempTags.add(finalTag);
-                    } else {
-                        if (tempTags.contains(finalTag))
-                            tempTags.remove(finalTag);
-                    }
-
-                    editingTags[0] = compareTags(originalTags, tempTags);
-                    if (editingTags[0]){
-                        sb.setLength(0);
-                        sb.append(editing);
-                        sb.append("tags, ");
-                        tvEditing.setText(sb.toString());
-                    } else tvEditing.setText("");
-
-                    if (editingTags[0] || editingName[0]){
-                        btnSaveTags.setEnabled(true);
-                    }else  btnSaveTags.setEnabled(false);
-                }
-            });
-
-            tagsLayout.addView(tagCb);
         }
         btnSaveTags.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (tempTags.contains("__filter:favourite__")) {
                     previousImageView.setBackgroundColor(getContext().getColor(R.color.favorite));
-                } else{
+                } else {
                     previousImageView.setBackgroundColor(getContext().getColor(R.color.imageview_bg));
                 }
                 filteredGbcImages.get(globalImageIndex).setTags(tempTags);
                 new SaveImageAsyncTask(filteredGbcImages.get(globalImageIndex)).execute();
+                retrieveTags(gbcImagesList);
             }
         });
 
@@ -1940,19 +1983,52 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     /**
      * For the tags checkboxes
+     *
      * @param tag
      */
-    private void createTagCheckBox(String tag, LinearLayout tagsLayout) {
-        CheckBox checkBox = new CheckBox(getContext());
-        checkBox.setText(tag);
-        checkBox.setChecked(true);
-        checkBox.setOnClickListener(new View.OnClickListener() {
+    private void createTagCheckBox(String tag, LinearLayout tagsLayout, List<String> tempTags, List<String> originalTags, boolean[] editingTags, boolean editingName, Button btnSaveTags) {
+        CheckBox tagCb = new CheckBox(getContext());
+        String cbText;
+        if (tag.equals("__filter:favourite__")) {
+            cbText = "Favourite \u2764\ufe0f";
+        } else cbText = tag;
+
+        tagCb.setText(cbText);
+        tagCb.setChecked(true);
+
+        String finalTag = tag;
+        tagCb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Implementa la lógica que necesites para el CheckBox, si es necesario
+                if (tagCb.isChecked()) {
+                    if (!tempTags.contains(finalTag))
+                        tempTags.add(finalTag);
+                } else {
+                    if (tempTags.contains(finalTag))
+                        tempTags.remove(finalTag);
+                }
+
+                editingTags[0] = compareTags(originalTags, tempTags);
+
+                if (editingTags[0] || editingName) {
+                    btnSaveTags.setEnabled(true);
+                } else btnSaveTags.setEnabled(false);
             }
         });
-        tagsLayout.addView(checkBox);
+
+        tagsLayout.addView(tagCb);
+
+
+//        CheckBox checkBox = new CheckBox(getContext());
+//        checkBox.setText(tag);
+//        checkBox.setChecked(true);
+//        checkBox.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                // Implementa la lógica que necesites para el CheckBox, si es necesario
+//            }
+//        });
+//        tagsLayout.addView(checkBox);
     }
 
     private void prevPage() {

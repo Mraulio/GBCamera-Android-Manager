@@ -1,13 +1,18 @@
 package com.mraulio.gbcameramanager.utils;
 
 
+import static com.mraulio.gbcameramanager.MainActivity.selectedTags;
+import static com.mraulio.gbcameramanager.MainActivity.sharedPreferences;
+
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -99,13 +104,36 @@ public class Utils {
         }
     }
 
-    public static LinkedHashSet<String> retreiveTags(List<GbcImage> gbcImages) {
+    public static LinkedHashSet<String> retrieveTags(List<GbcImage> gbcImages) {
+        tagsHash.clear();
         for (GbcImage gbcImage : gbcImages) {
             for (String tag : gbcImage.getTags()) {
                 tagsHash.add(tag);
             }
         }
         return tagsHash;
+    }
+
+    public static void saveTagsSet(List<String> tagsList) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        String setString = TextUtils.join(",", tagsList);
+
+        editor.putString("selected_tags", setString);
+        editor.apply();
+    }
+
+    public static List<String> getSelectedTags() {
+        String setString = selectedTags;
+
+        List<String> listSelectedTags = new ArrayList<>();
+        if (!TextUtils.isEmpty(setString)) {
+            String[] items = setString.split(",");
+            for (String item : items) {
+                listSelectedTags.add(item);
+            }
+        }
+        return listSelectedTags;
     }
 
     public static void toast(Context context, String message) {
@@ -186,6 +214,7 @@ public class Utils {
 
         return transparentPixelPositions;
     }
+
 
 
 }

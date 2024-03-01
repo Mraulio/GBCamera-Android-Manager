@@ -114,6 +114,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_usb_serial, container, false);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.USB_SERIAL;
 
         gridView = view.findViewById(R.id.gridView);
         gridView.setNumColumns(2);//To see the images bigger in case there is corruption extracting with gbxcart

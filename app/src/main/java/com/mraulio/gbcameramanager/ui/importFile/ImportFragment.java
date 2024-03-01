@@ -5,6 +5,8 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.con
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.resizeImage;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
+import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
+import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
@@ -277,6 +279,7 @@ public class ImportFragment extends Fragment {
                                 }
                                 if (newGbcImages.size() > 0) {
                                     new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
+                                    retrieveTags(gbcImagesList);
                                 } else {
                                     Utils.toast(getContext(), getString(R.string.no_new_images));
                                     tvFileName.setText(getString(R.string.no_new_images));

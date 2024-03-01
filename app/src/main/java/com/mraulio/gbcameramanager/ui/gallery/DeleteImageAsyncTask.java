@@ -2,8 +2,10 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.reloadTags;
+import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
+import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
 import com.mraulio.gbcameramanager.MainActivity;
@@ -46,10 +48,10 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
             int image = listImagesIndexes.get(index - 1);
             String imageHash = GalleryFragment.filteredGbcImages.get(image).getHashCode();
             GalleryFragment.filteredGbcImages.remove(image);
-            for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
-                GbcImage gbcImage = Utils.gbcImagesList.get(i);
+            for (int i = 0; i < gbcImagesList.size(); i++) {
+                GbcImage gbcImage = gbcImagesList.get(i);
                 if (gbcImage.getHashCode().equals(imageHash)) {
-                    Utils.gbcImagesList.remove(i);
+                    gbcImagesList.remove(i);
                 }
             }
         }
@@ -62,7 +64,7 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
         GalleryFragment.selectedImages.clear();
         GalleryFragment.selectionMode = false;
         GalleryFragment.tv.setText(GalleryFragment.tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
-        //Reseting the lastSeenGalleryImage to 0 if any image is deleted
+        //Resetting the lastSeenGalleryImage to 0 if any image is deleted
         lastSeenGalleryImage = 0;
 
         //Update lastPage and CurrentPage after deleting
@@ -75,6 +77,8 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
         }
         GalleryFragment.tv_page.setText((GalleryFragment.currentPage + 1) + " / " + (GalleryFragment.lastPage + 1));
         MainActivity.fab.hide();
+        retrieveTags(gbcImagesList);
+        reloadTags();
         GalleryFragment.loadingDialog.dismiss();
         GalleryFragment.updateGridView(GalleryFragment.currentPage);
     }

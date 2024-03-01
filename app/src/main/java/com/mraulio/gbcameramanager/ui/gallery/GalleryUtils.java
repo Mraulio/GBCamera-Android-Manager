@@ -1,17 +1,23 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
+import static com.mraulio.gbcameramanager.MainActivity.sortByDate;
+import static com.mraulio.gbcameramanager.MainActivity.sortDescending;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
+import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
+import static com.mraulio.gbcameramanager.utils.Utils.saveTagsSet;
+import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -25,6 +31,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import androidx.core.content.FileProvider;
@@ -359,11 +366,84 @@ public class GalleryUtils {
         return new String(compressedBytes, StandardCharsets.ISO_8859_1);
     }
 
-//    public static void filterByTags(Context context, DisplayMetrics displayMetrics) {
-//        //Linked because keeps the order
-//
-//        showFilterDialog(context, tagList, displayMetrics);
-//    }
+    public static void sortImages(Context context, DisplayMetrics displayMetrics) {
+        SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.sort_dialog, null);
+        Dialog dialog = new Dialog(context);
+        dialog.setContentView(dialogView);
+        int screenHeight = displayMetrics.heightPixels;
+        int desiredHeight = (int) (screenHeight * 0.3);
+        Window window = dialog.getWindow();
+        window.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, desiredHeight);
+
+        RadioButton sortDate = dialog.findViewById(R.id.rbSortDate);
+        RadioButton sortTitle = dialog.findViewById(R.id.rbSortTitle);
+        RadioButton sortAsc = dialog.findViewById(R.id.rbSortAsc);
+        RadioButton sortDesc = dialog.findViewById(R.id.rbSortDesc);
+
+        if (sortByDate) {
+            sortDate.setChecked(true);
+        } else {
+            sortTitle.setChecked(true);
+        }
+        if (!sortDescending) {
+            sortAsc.setChecked(true);
+        } else {
+            sortDesc.setChecked(true);
+        }
+        sortDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sortByDate(gbcImagesList, sortDescending);
+                editor.putBoolean("sort_by_date", true);
+                editor.apply();
+                updateGridView(currentPage);
+
+            }
+        });
+        sortTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sortByTitle(gbcImagesList, sortDescending);
+                editor.putBoolean("sort_by_date", false);
+                editor.apply();
+                updateGridView(currentPage);
+            }
+        });
+        sortAsc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sortDescending = false;
+                editor.putBoolean("order_descending", false);
+                editor.apply();
+                checkSorting();
+                updateGridView(currentPage);
+
+            }
+        });
+        sortDesc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sortDescending = true;
+                editor.putBoolean("order_descending", true);
+                editor.apply();
+                checkSorting();
+                updateGridView(currentPage);
+
+            }
+        });
+
+        dialog.show();
+
+    }
+
+    public static void checkSorting() {
+        if (sortByDate) {
+            sortByDate(gbcImagesList, sortDescending);//Sort by ascending date on startup
+        } else sortByTitle(gbcImagesList, sortDescending);
+    }
 
     public static void showFilterDialog(Context context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -381,14 +461,16 @@ public class GalleryUtils {
         LinearLayout buttonLayout = dialog.findViewById(R.id.buttonLayout);
 
         List<String> selectedTags = new ArrayList<>(filterTags);
+
         Iterator<String> tagIterator = hashTags.iterator();
         updateSelectedTagsText(selectedTagsTextView, selectedTags);
+        List<CheckBox> checkBoxList = new ArrayList<>();
         //Dynamically add buttons
         while (tagIterator.hasNext()) {
 
             String item = tagIterator.next();
             CheckBox checkBox = new CheckBox(context);
-            if (selectedTags.contains(item)){
+            if (selectedTags.contains(item)) {
                 checkBox.setBackgroundColor(context.getResources().getColor(R.color.paper_color_blue));
                 checkBox.setChecked(true);
             }
@@ -417,13 +499,27 @@ public class GalleryUtils {
                     }
                 }
             });
+            checkBoxList.add(checkBox);
             buttonLayout.addView(checkBox);
         }
 
+        Button btnClear = dialog.findViewById(R.id.btnClear);
+        btnClear.setOnClickListener(v -> {
+            selectedTags.clear();
+            for (CheckBox cb : checkBoxList) {
+                cb.setChecked(false);
+                cb.setBackgroundColor(context.getResources().getColor(R.color.white));
+
+            }
+            updateSelectedTagsText(selectedTagsTextView, selectedTags);
+
+        });
+
         Button btnAccept = dialog.findViewById(R.id.btnAccept);
         btnAccept.setOnClickListener(v -> {
-            filterTags = selectedTags;
 
+            filterTags = selectedTags;
+            saveTagsSet(selectedTags);
             currentPage = 0;
             updateGridView(currentPage);
 
@@ -437,6 +533,20 @@ public class GalleryUtils {
 
         dialog.show();
     }
+
+    /**
+     * To check the tags after deleting images
+     */
+    public static void reloadTags() {
+
+        //If the list of tags contains a tag that doesn't exist anymore, delete it from the list
+        for (String tag : filterTags) {
+            if (!tagsHash.contains(tag)) {
+                filterTags.remove(tag);
+            }
+        }
+    }
+
 
     /**
      * Updates the textview with the selected tags
@@ -460,7 +570,7 @@ public class GalleryUtils {
     }
 
     @SuppressLint("NewApi")
-    public static void sortByDate(List<GbcImage> gbcImagesList,boolean descending) {
+    public static void sortByDate(List<GbcImage> gbcImagesList, boolean descending) {
         Comparator<GbcImage> comparator = Comparator.comparing(GbcImage::getCreationDate);
         if (descending) {
             comparator = comparator.reversed();
@@ -469,18 +579,24 @@ public class GalleryUtils {
     }
 
     @SuppressLint("NewApi")
-    public static void sortByTitle(List<GbcImage> gbcImagesList) {
-        Collections.sort(gbcImagesList, new Comparator<GbcImage>() {
+    public static void sortByTitle(List<GbcImage> gbcImagesList, boolean descending) {
+        Comparator<GbcImage> comparator = new Comparator<GbcImage>() {
             @Override
             public int compare(GbcImage image1, GbcImage image2) {
-                // Compara los nombres de las imágenes
                 int titleComparison = image1.getName().compareTo(image2.getName());
-                // Si los nombres son iguales, compara las fechas de creación
+                // If names are the same, compare by date
                 if (titleComparison == 0) {
                     return image1.getCreationDate().compareTo(image2.getCreationDate());
                 }
                 return titleComparison;
             }
-        });
+        };
+
+        if (descending) {
+            comparator = Collections.reverseOrder(comparator);
+        }
+        Collections.sort(gbcImagesList, comparator);
     }
+
+
 }

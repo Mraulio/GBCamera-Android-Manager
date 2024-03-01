@@ -2,20 +2,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_filter_tags"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_filter"
+        android:title=""
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_sort"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_sort"
+        android:title=""
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_multi_edit"
         android:orderInCategory="100"
         android:title="@string/edit_selected_item"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/action_filter_favorite"
-        android:orderInCategory="100"
-        android:title="@string/filter_favorites_item"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_filter_tags"
-        android:orderInCategory="100"
-        android:title="Filter tags"
-        app:showAsAction="never" />
+
     <item
         android:id="@+id/action_average"
         android:orderInCategory="100"

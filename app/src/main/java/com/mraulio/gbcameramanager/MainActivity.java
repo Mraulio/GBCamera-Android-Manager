@@ -1,10 +1,11 @@
 package com.mraulio.gbcameramanager;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortByDate;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortByTitle;
 import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
-import static com.mraulio.gbcameramanager.utils.Utils.retreiveTags;
+import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -98,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
     public static int customColorPaper;
     public static int lastSeenGalleryImage = 0;
     public static boolean exportSquare = false;
+    public static boolean sortByDate = true;
+    public static boolean sortDescending = false;
+    public static String selectedTags = new String();
 
     private boolean openedSav = false;
     public static UsbManager manager;
@@ -144,6 +148,9 @@ public class MainActivity extends AppCompatActivity {
         showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
         customColorPaper = sharedPreferences.getInt("custom_paper_color", Color.WHITE);
         exportSquare = sharedPreferences.getBoolean("export_square", false);
+        sortByDate = sharedPreferences.getBoolean("sort_by_date", true);
+        sortDescending = sharedPreferences.getBoolean("sort_descending", false);
+        selectedTags = sharedPreferences.getString("selected_tags", "");
 
         String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
@@ -248,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         }
-
+        Utils.makeDirs();//If permissions granted, create the folders(Keep this for the updated versions with already permissions, to create the frame json folder)
 
     }
 
@@ -258,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
     private void deleteImageCache() {
         //Deleting cache for the next version only
         File cacheDir = new File(getApplicationContext().getCacheDir(), CACHE_DIR_NAME);
@@ -366,17 +374,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
-            retreiveTags(gbcImagesList);
 
-            for (GbcImage objeto : gbcImagesList) {
-                System.out.println(objeto.getCreationDate());
-            }
-            System.out.println("**************************************************************************************************************");
-            sortByDate(gbcImagesList,true);
-            sortByTitle(gbcImagesList);
-            for (GbcImage objeto : gbcImagesList) {
-                System.out.println(objeto.getCreationDate());
-            }
             gf.updateFromMain();
         }
     }
@@ -390,7 +388,6 @@ public class MainActivity extends AppCompatActivity {
             Toast toast = Toast.makeText(this, getString(R.string.permissions_toast), Toast.LENGTH_LONG);
             toast.show();
             Utils.makeDirs();//If permissions granted, create the folders
-
         }
     }
 

@@ -4,6 +4,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/tagsTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:gravity="center"
+        android:textSize="25sp"
+        android:text="@string/tags_dialog_title"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"/>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -36,19 +47,28 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnAccept"
+            android:id="@+id/btnClear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="OK"
-            android:layout_marginEnd="20dp"
+            android:text="@string/tags_dialog_clear"
+            android:layout_marginEnd="10dp"
             />
-
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_marginHorizontal="10dp"
             android:text="@string/cancel" />
+
+        <Button
+            android:id="@+id/btnAccept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OK"
+            android:layout_marginStart="10dp"
+            />
+
+
 
     </LinearLayout>
 </LinearLayout>

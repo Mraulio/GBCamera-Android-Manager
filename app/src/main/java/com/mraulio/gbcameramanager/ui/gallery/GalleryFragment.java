@@ -5,16 +5,22 @@ import static android.view.View.VISIBLE;
 
 import static com.mraulio.gbcameramanager.MainActivity.exportSize;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
+import static com.mraulio.gbcameramanager.MainActivity.selectedTags;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.showFilterDialog;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.stitchImages;
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
+import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
+import static com.mraulio.gbcameramanager.utils.Utils.getSelectedTags;
+import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
@@ -28,7 +34,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-import android.graphics.Color;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 
@@ -91,7 +96,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -1180,29 +1184,19 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                 return true;
 
-            case R.id.action_filter_favorite:
+            case R.id.action_filter_tags:
                 if (selectionMode) {
                     Utils.toast(getContext(), getString(R.string.unselect_all_toast));
                 } else {
-                    if (filterTags.isEmpty()) {
-                        filterTags.add("__filter:favourite__");
-                        item.setTitle(getString(R.string.remove_filter_item));
-
-                    } else {
-                        filterTags.clear();
-                        item.setTitle(getString(R.string.filter_favorites_item));
-
-                    }
-                    currentPage = 0;
-                    updateGridView(currentPage);
-                    return true;
+                    showFilterDialog(getContext(), tagsHash, displayMetrics);
                 }
-                break;
+                return true;
 
-            case R.id.action_filter_tags:
-                showFilterDialog(getContext(), tagsHash, displayMetrics);
-                for (String st : filterTags) {
-                    System.out.println(st+"       /////////////");
+            case R.id.action_sort:
+                if (selectionMode) {
+                    Utils.toast(getContext(), getString(R.string.unselect_all_toast));
+                } else {
+                    sortImages(getContext(), displayMetrics);
                 }
                 return true;
 
@@ -1221,7 +1215,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     View stitchView = inflater.inflate(R.layout.stitch_dialog, null);
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     ImageView imageView = stitchView.findViewById(R.id.iv_stitch);
-//                    imageView.setScaleType();
                     GridView gridViewStitch = stitchView.findViewById(R.id.gridViewStitch);
                     RadioButton rbStitchBottom = stitchView.findViewById(R.id.rbBottom);
                     RadioButton rbStitchRight = stitchView.findViewById(R.id.rbRight);
@@ -2001,8 +1994,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     public void updateFromMain() {
         if (Utils.gbcImagesList.size() > 0) {
+            retrieveTags(gbcImagesList);
+            checkSorting();
+            filterTags = getSelectedTags();
             updateGridView(currentPage);
-            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
+            updateTitleText();
+
+//            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
             tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
 
         } else {

@@ -176,5 +176,13 @@
     <string name="toast_frames_json">Frames Json saved.</string>
     <string name="import_valid_images">Please, select only valid image files (.jpg, .jpeg, .png, .bmp).</string>
     <string name="no_filtered_images">No available filtered images</string>
+    <string name="tags_dialog_title">Select tags</string>
+    <string name="tags_dialog_clear">Clear</string>
+    <string name="sort_dialog_title">Select sorting options</string>
+    <string name="sort_by_date">Sort by date</string>
+    <string name="sort_by_title">Sort by title</string>
+    <string name="sort_ascending">Ascending</string>
+    <string name="sort_descending">Descending</string>
+
 
 </resources>

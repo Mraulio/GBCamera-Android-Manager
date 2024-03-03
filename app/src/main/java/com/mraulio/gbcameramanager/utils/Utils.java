@@ -118,7 +118,6 @@ public class Utils {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         String setString = TextUtils.join(",", tagsList);
-
         editor.putString("selected_tags", setString);
         editor.apply();
     }

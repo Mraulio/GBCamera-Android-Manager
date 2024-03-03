@@ -22,6 +22,6 @@
     <color name="paper_color_pink">#FFDDE8</color>
     <color name="paper_color_purple">#F2E6FF</color>
     <color name="save_color">#69BF6C</color>
-
+    <color name="update_image_color">#CCEDE8</color>
 
 </resources>

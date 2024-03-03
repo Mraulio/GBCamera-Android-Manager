@@ -272,7 +272,6 @@ public class PalettesFragment extends Fragment {
         etPaletteName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Este método se llama antes de que el texto cambie.
                 placeholderString = etPaletteName.getText().toString();
             }
 
@@ -298,7 +297,6 @@ public class PalettesFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                // Este método se llama después de que el texto cambie.
             }
         });
 

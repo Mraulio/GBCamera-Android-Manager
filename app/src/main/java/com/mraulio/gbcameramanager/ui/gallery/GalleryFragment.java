@@ -35,6 +35,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
+import android.graphics.Color;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 
@@ -79,6 +80,7 @@ import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.model.GbcFrame;
+import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.usbserial.PrintOverArduino;
 
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
@@ -1831,9 +1833,49 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
         ImageView imageView = dialog.findViewById(R.id.imageView);
         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false));
+        Button btnOkWriteTag = dialog.findViewById(R.id.btnOkWriteTag);
+        RadioButton rbEditTags = dialog.findViewById(R.id.rbEditTags);
+        RadioButton rbMisc = dialog.findViewById(R.id.rbMisc);
+        Button btnUpdateImage = dialog.findViewById(R.id.btnSaveTags);
+
+        //EditText Image Name
         EditText etImageName = dialog.findViewById(R.id.etImageName);
         etImageName.setText(filteredGbcImages.get(globalImageIndex).getName());
-        Button btnSaveTags = dialog.findViewById(R.id.btnSaveTags);
+        String originalName = new String(filteredGbcImages.get(globalImageIndex).getName());
+        final String[] newName = {""};
+        final boolean[] editingName = {false};
+        boolean[] editingTags = {false};
+
+        etImageName.addTextChangedListener(new TextWatcher() {
+            String placeholderString = "";
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                placeholderString = etImageName.getText().toString();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                placeholderString = etImageName.getText().toString().trim();
+
+                if (!originalName.equals(placeholderString.trim().toLowerCase(Locale.ROOT))) {
+                    etImageName.setBackgroundColor(getContext().getColor(R.color.update_image_color));
+                    editingName[0] = true;
+                    newName[0] = new String(placeholderString);
+                } else {
+                    etImageName.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    editingName[0] = false;
+                }
+                if (editingTags[0] || editingName[0]) {
+                    btnUpdateImage.setEnabled(true);
+                } else btnUpdateImage.setEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
 
         //Autocomplete text view Text Write tag
         AutoCompleteTextView autoCAddTag = dialog.findViewById(R.id.etWriteTag);
@@ -1862,9 +1904,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             }
         });
 
-        Button btnOkWriteTag = dialog.findViewById(R.id.btnOkWriteTag);
-        boolean[] editingTags = {false};
-        boolean editingName = false;
 
         imageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -1875,8 +1914,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         });
 
 
-        RadioButton rbEditTags = dialog.findViewById(R.id.rbEditTags);
-        RadioButton rbMisc = dialog.findViewById(R.id.rbMisc);
         rbEditTags.setChecked(true);
         TextView tvCreationDate = dialog.findViewById(R.id.tvCreationDate);
 
@@ -1902,11 +1939,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         });
 
         LinearLayout tagsLayout = dialog.findViewById(R.id.tagsCheckBoxes);
-        String originalName = new String(filteredGbcImages.get(globalImageIndex).getName());
-        String modifiedName = new String(filteredGbcImages.get(globalImageIndex).getName());
 
         Spinner spAvailableTags = dialog.findViewById(R.id.spAvailableTags);
-
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, availableTotalTagsFav);
@@ -1914,23 +1948,30 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         spAvailableTags.setSelection(3);
         spAvailableTags.setAdapter(adapter);
         final boolean[] isSpinnerTouched = {false};
+
         btnOkWriteTag.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String newTag = autoCAddTag.getText().toString().trim();
+                if (newTag.isEmpty())
+                    return;
                 if (newTag.equals("Favourite \u2764\ufe0f")) {
                     newTag = "__filter:favourite__";//Reverse the tag
                 }
                 if (!tempTags.contains(newTag)) {
                     //Generate dynamically new checkboxes
-                    createTagCheckBox(newTag, tagsLayout, tempTags, globalImageIndex, editingTags, editingName, btnSaveTags);
+                    createTagCheckBox(newTag, tagsLayout, tempTags, globalImageIndex, editingTags, editingName[0], btnUpdateImage);
 
                     tempTags.add(newTag);
                     editingTags[0] = compareTags(originalTags[0], tempTags);
-
-                    if (editingTags[0] || editingName) {
-                        btnSaveTags.setEnabled(true);
-                    } else btnSaveTags.setEnabled(false);
+                    if (editingTags[0]) {
+                        tagsLayout.setBackgroundColor(getContext().getColor(R.color.update_image_color));
+                    } else {
+                        tagsLayout.setBackgroundColor(getContext().getColor(R.color.white));
+                    }
+                    if (editingTags[0] || editingName[0]) {
+                        btnUpdateImage.setEnabled(true);
+                    } else btnUpdateImage.setEnabled(false);
                 }
             }
         });
@@ -1953,13 +1994,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 }
                 if (!tempTags.contains(selectedTag)) {
                     //Generate dynamically new checkboxes
-                    createTagCheckBox(adapter.getItem(position), tagsLayout, tempTags, globalImageIndex, editingTags, editingName, btnSaveTags);
+                    createTagCheckBox(adapter.getItem(position), tagsLayout, tempTags, globalImageIndex, editingTags, editingName[0], btnUpdateImage);
                     tempTags.add(selectedTag);
                     editingTags[0] = compareTags(originalTags[0], tempTags);
-
-                    if (editingTags[0] || editingName) {
-                        btnSaveTags.setEnabled(true);
-                    } else btnSaveTags.setEnabled(false);
+                    if (editingTags[0]) {
+                        tagsLayout.setBackgroundColor(getContext().getColor(R.color.update_image_color));
+                    } else {
+                        tagsLayout.setBackgroundColor(getContext().getColor(R.color.white));
+                    }
+                    if (editingTags[0] || editingName[0]) {
+                        btnUpdateImage.setEnabled(true);
+                    } else btnUpdateImage.setEnabled(false);
                 }
             }
 
@@ -1969,24 +2014,34 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         });
 
         for (String tag : filteredGbcImages.get(globalImageIndex).getTags()) {
-            createTagCheckBox(tag, tagsLayout, tempTags, globalImageIndex, editingTags, editingName, btnSaveTags);
+            createTagCheckBox(tag, tagsLayout, tempTags, globalImageIndex, editingTags, editingName[0], btnUpdateImage);
 
         }
-        btnSaveTags.setOnClickListener(new View.OnClickListener() {
+        btnUpdateImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (tempTags.contains("__filter:favourite__")) {
-                    previousImageView.setBackgroundColor(getContext().getColor(R.color.favorite));
-                } else {
-                    previousImageView.setBackgroundColor(getContext().getColor(R.color.imageview_bg));
+                GbcImage gbcImageToUpdate = filteredGbcImages.get(globalImageIndex);
+                if (editingName[0]) {
+                    gbcImageToUpdate.setName(newName[0]);
                 }
-                List<String> tagsToSave = new ArrayList<>(tempTags);//So it doesn't follow the temptags if I select another
-                filteredGbcImages.get(globalImageIndex).setTags(tagsToSave);
-                new SaveImageAsyncTask(filteredGbcImages.get(globalImageIndex)).execute();
+                if(editingTags[0]){
+                    if (tempTags.contains("__filter:favourite__")) {
+                        previousImageView.setBackgroundColor(getContext().getColor(R.color.favorite));
+                    } else {
+                        previousImageView.setBackgroundColor(getContext().getColor(R.color.imageview_bg));
+                    }
+                    List<String> tagsToSave = new ArrayList<>(tempTags);//So it doesn't follow the temptags if I select another
+                    gbcImageToUpdate.setTags(tagsToSave);
+                }
+
+                new SaveImageAsyncTask(gbcImageToUpdate).execute();
                 retrieveTags(gbcImagesList);
                 originalTags[0] = new ArrayList<>(tempTags);
 
-                btnSaveTags.setEnabled(false);
+                tagsLayout.setBackgroundColor(getContext().getColor(R.color.white));
+                etImageName.setBackgroundColor(getContext().getColor(R.color.white));
+
+                btnUpdateImage.setEnabled(false);
             }
         });
 
@@ -2009,7 +2064,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
      *
      * @param tag
      */
-    private void createTagCheckBox(String tag, LinearLayout tagsLayout, List<String> tempTags, int imageIndex, boolean[] editingTags, boolean editingName, Button btnSaveTags) {
+    private void createTagCheckBox(String tag, LinearLayout tagsLayout, List<String> tempTags, int imageIndex, boolean[] editingTags, boolean editingName, Button btnUpdateImages) {
         CheckBox tagCb = new CheckBox(getContext());
         String cbText;
         if (tag.equals("__filter:favourite__")) {
@@ -2033,13 +2088,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 }
 
                 editingTags[0] = compareTags(originalTags, tempTags);
-
+                if (editingTags[0]) {
+                    tagsLayout.setBackgroundColor(getContext().getColor(R.color.update_image_color));
+                } else {
+                    tagsLayout.setBackgroundColor(getContext().getColor(R.color.white));
+                }
                 if (editingTags[0] || editingName) {
-                    btnSaveTags.setEnabled(true);
-                } else btnSaveTags.setEnabled(false);
-                System.out.println("Tempt tags" +tempTags.toString());
-                System.out.println("Original tags!2" +originalTags.toString());
-                System.out.println("*************************************");
+                    btnUpdateImages.setEnabled(true);
+                } else btnUpdateImages.setEnabled(false);
             }
         });
 

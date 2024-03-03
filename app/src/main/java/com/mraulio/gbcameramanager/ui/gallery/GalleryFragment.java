@@ -11,6 +11,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.compareTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.reloadTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.showFilterDialog;
@@ -428,6 +429,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 clickCount = 0;
                                 //To save the image with the favorite tag to the database
                                 new SaveImageAsyncTask(filteredGbcImages.get(globalImageIndex)).execute();
+                                reloadTags();
                                 updateGridView(currentPage);
                             }
                         }
@@ -1819,7 +1821,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         final Dialog dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.single_image_dialog);
 
-        List<String> originalTags = new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags());
+        final List<String>[] originalTags = new List[]{new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags())};
         List<String> tempTags = new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags());
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -1835,11 +1837,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
         //Autocomplete text view Text Write tag
         AutoCompleteTextView autoCAddTag = dialog.findViewById(R.id.etWriteTag);
-//        autoCAddTag.setImeOptions(EditorInfo.IME_ACTION_DONE);
         List<String> availableTotalTags = new ArrayList<>(tagsHash);
+        List<String> availableTotalTagsFav = new ArrayList<>();
+        for (String tag : availableTotalTags) {
+            if (tag.equals("__filter:favourite__")) {
+                tag = "Favourite \u2764\ufe0f";
+            }
+            availableTotalTagsFav.add(tag);
+        }
 
         ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_dropdown_item_1line, availableTotalTags);
+                android.R.layout.simple_dropdown_item_1line, availableTotalTagsFav);
 
         autoCAddTag.setAdapter(adapterAutoComplete);
         autoCAddTag.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -1898,8 +1906,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         String modifiedName = new String(filteredGbcImages.get(globalImageIndex).getName());
 
         Spinner spAvailableTags = dialog.findViewById(R.id.spAvailableTags);
+
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_spinner_item, availableTotalTags);
+                android.R.layout.simple_spinner_item, availableTotalTagsFav);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spAvailableTags.setSelection(3);
         spAvailableTags.setAdapter(adapter);
@@ -1908,11 +1918,15 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             @Override
             public void onClick(View view) {
                 String newTag = autoCAddTag.getText().toString().trim();
+                if (newTag.equals("Favourite \u2764\ufe0f")) {
+                    newTag = "__filter:favourite__";//Reverse the tag
+                }
                 if (!tempTags.contains(newTag)) {
                     //Generate dynamically new checkboxes
-                    createTagCheckBox(newTag, tagsLayout, tempTags, originalTags, editingTags, editingName, btnSaveTags);
+                    createTagCheckBox(newTag, tagsLayout, tempTags, globalImageIndex, editingTags, editingName, btnSaveTags);
+
                     tempTags.add(newTag);
-                    editingTags[0] = compareTags(originalTags, tempTags);
+                    editingTags[0] = compareTags(originalTags[0], tempTags);
 
                     if (editingTags[0] || editingName) {
                         btnSaveTags.setEnabled(true);
@@ -1920,7 +1934,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 }
             }
         });
+
         spAvailableTags.setOnTouchListener(new View.OnTouchListener() {
+            //So the first item is not added on spinner startup
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 isSpinnerTouched[0] = true;
@@ -1932,11 +1948,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (!isSpinnerTouched[0]) return;
                 String selectedTag = adapter.getItem(position);
+                if (selectedTag.equals("Favourite \u2764\ufe0f")) {
+                    selectedTag = "__filter:favourite__";//Reverse the tag
+                }
                 if (!tempTags.contains(selectedTag)) {
                     //Generate dynamically new checkboxes
-                    createTagCheckBox(adapter.getItem(position), tagsLayout, tempTags, originalTags, editingTags, editingName, btnSaveTags);
+                    createTagCheckBox(adapter.getItem(position), tagsLayout, tempTags, globalImageIndex, editingTags, editingName, btnSaveTags);
                     tempTags.add(selectedTag);
-                    editingTags[0] = compareTags(originalTags, tempTags);
+                    editingTags[0] = compareTags(originalTags[0], tempTags);
 
                     if (editingTags[0] || editingName) {
                         btnSaveTags.setEnabled(true);
@@ -1950,7 +1969,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         });
 
         for (String tag : filteredGbcImages.get(globalImageIndex).getTags()) {
-            createTagCheckBox(tag, tagsLayout, tempTags, originalTags, editingTags, editingName, btnSaveTags);
+            createTagCheckBox(tag, tagsLayout, tempTags, globalImageIndex, editingTags, editingName, btnSaveTags);
 
         }
         btnSaveTags.setOnClickListener(new View.OnClickListener() {
@@ -1961,9 +1980,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 } else {
                     previousImageView.setBackgroundColor(getContext().getColor(R.color.imageview_bg));
                 }
-                filteredGbcImages.get(globalImageIndex).setTags(tempTags);
+                List<String> tagsToSave = new ArrayList<>(tempTags);//So it doesn't follow the temptags if I select another
+                filteredGbcImages.get(globalImageIndex).setTags(tagsToSave);
                 new SaveImageAsyncTask(filteredGbcImages.get(globalImageIndex)).execute();
                 retrieveTags(gbcImagesList);
+                originalTags[0] = new ArrayList<>(tempTags);
+
+                btnSaveTags.setEnabled(false);
             }
         });
 
@@ -1986,7 +2009,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
      *
      * @param tag
      */
-    private void createTagCheckBox(String tag, LinearLayout tagsLayout, List<String> tempTags, List<String> originalTags, boolean[] editingTags, boolean editingName, Button btnSaveTags) {
+    private void createTagCheckBox(String tag, LinearLayout tagsLayout, List<String> tempTags, int imageIndex, boolean[] editingTags, boolean editingName, Button btnSaveTags) {
         CheckBox tagCb = new CheckBox(getContext());
         String cbText;
         if (tag.equals("__filter:favourite__")) {
@@ -2000,6 +2023,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         tagCb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                List<String> originalTags = new ArrayList<>(filteredGbcImages.get(imageIndex).getTags());
                 if (tagCb.isChecked()) {
                     if (!tempTags.contains(finalTag))
                         tempTags.add(finalTag);
@@ -2013,22 +2037,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 if (editingTags[0] || editingName) {
                     btnSaveTags.setEnabled(true);
                 } else btnSaveTags.setEnabled(false);
+                System.out.println("Tempt tags" +tempTags.toString());
+                System.out.println("Original tags!2" +originalTags.toString());
+                System.out.println("*************************************");
             }
         });
 
         tagsLayout.addView(tagCb);
-
-
-//        CheckBox checkBox = new CheckBox(getContext());
-//        checkBox.setText(tag);
-//        checkBox.setChecked(true);
-//        checkBox.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                // Implementa la lógica que necesites para el CheckBox, si es necesario
-//            }
-//        });
-//        tagsLayout.addView(checkBox);
     }
 
     private void prevPage() {
@@ -2220,9 +2235,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     filteredGbcImages.add(gbcImageToFilter);
                 }
 
-//                if (gbcImageToFilter.getTags().contains(filterTags.get(0))) {
-//                    filteredGbcImages.add(gbcImageToFilter);
-//                }
             }
         }
         imagesForPage = new ArrayList<>();

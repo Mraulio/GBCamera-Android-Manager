@@ -8,6 +8,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
+import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.saveTagsSet;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
@@ -538,13 +539,14 @@ public class GalleryUtils {
      * To check the tags after deleting images
      */
     public static void reloadTags() {
-
+        retrieveTags(gbcImagesList);
         //If the list of tags contains a tag that doesn't exist anymore, delete it from the list
         for (String tag : filterTags) {
             if (!tagsHash.contains(tag)) {
                 filterTags.remove(tag);
             }
         }
+        saveTagsSet(filterTags);
     }
 
 

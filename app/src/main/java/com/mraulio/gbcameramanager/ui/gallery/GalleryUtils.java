@@ -4,6 +4,7 @@ import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.MainActivity.sortByDate;
 import static com.mraulio.gbcameramanager.MainActivity.sortDescending;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
@@ -521,6 +522,7 @@ public class GalleryUtils {
 
             filterTags = selectedTags;
             saveTagsSet(selectedTags);
+            editor.putInt("current_page", 0).apply();
             currentPage = 0;
             updateGridView(currentPage);
 

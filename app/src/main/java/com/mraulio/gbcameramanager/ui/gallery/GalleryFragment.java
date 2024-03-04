@@ -382,7 +382,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             public void run() {
                                 //Single tap action
                                 BigImageDialog bigImageDialog = new BigImageDialog(filteredGbcImages, getContext(), currentPage, getActivity());
-                                bigImageDialog.showBigImageDialog(globalImageIndex, imageView);
+                                bigImageDialog.showBigImageDialogSingleImage(globalImageIndex, imageView);
                                 clickCount = 0;
                             }
                         };
@@ -944,7 +944,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     public void run() {
                                         //Single tap action
                                         BigImageDialog bigImageDialog = new BigImageDialog(filteredGbcImages, getContext(), currentPage, getActivity());
-                                        bigImageDialog.showBigImageDialog(globalImageIndex[0], imageView);
+                                        bigImageDialog.showBigImageDialogMultipleImages(selectedImages, imageView);
 
                                         clickCount = 0;
                                     }

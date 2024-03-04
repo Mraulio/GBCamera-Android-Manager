@@ -63,7 +63,7 @@ public class BigImageDialog {
         Bitmap bitmap = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode());
         bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
         final Dialog dialog = new Dialog(context);
-        dialog.setContentView(R.layout.single_image_dialog);
+        dialog.setContentView(R.layout.big_image_dialog);
 
         final List<String>[] originalTags = new List[]{new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags())};
         List<String> tempTags = new ArrayList<>(filteredGbcImages.get(globalImageIndex).getTags());
@@ -155,28 +155,50 @@ public class BigImageDialog {
             }
         });
 
-
-        rbEditTags.setChecked(true);
         TextView tvCreationDate = dialog.findViewById(R.id.tvCreationDate);
 
         tvCreationDate.setText(filteredGbcImages.get(globalImageIndex).getCreationDate().toString());
         LinearLayout editTagsLayout = dialog.findViewById(R.id.editTagsLayout);
         LinearLayout miscLayout = dialog.findViewById(R.id.miscLayout);
 
+
+        final boolean[] rbEditWasSelected = {false};
+        final boolean[] rbMiscWasSelected = {false};
+
         rbEditTags.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
-                editTagsLayout.setVisibility(VISIBLE);
-                miscLayout.setVisibility(GONE);
+
+                if (!rbEditWasSelected[0]) {
+                    rbEditWasSelected[0] = true;
+                    rbMiscWasSelected[0] = false;
+                    editTagsLayout.setVisibility(VISIBLE);
+                    miscLayout.setVisibility(GONE);
+                } else {
+                    editTagsLayout.setVisibility(GONE);
+                    rbEditTags.setChecked(false);
+                    rbEditWasSelected[0] = false;
+
+                }
 
             }
         });
         rbMisc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editTagsLayout.setVisibility(GONE);
-                miscLayout.setVisibility(VISIBLE);
+                if (!rbMiscWasSelected[0]) {
+                    rbMiscWasSelected[0] = true;
+                    rbEditWasSelected[0] = false;
 
+                    editTagsLayout.setVisibility(GONE);
+                    miscLayout.setVisibility(VISIBLE);
+                } else {
+                    rbMisc.setChecked(false);
+                    miscLayout.setVisibility(GONE);
+                    rbMiscWasSelected[0] = false;
+
+                }
             }
         });
 
@@ -187,7 +209,6 @@ public class BigImageDialog {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
                 android.R.layout.simple_spinner_item, availableTotalTagsFav);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spAvailableTags.setSelection(3);
         spAvailableTags.setAdapter(adapter);
         final boolean[] isSpinnerTouched = {false};
 

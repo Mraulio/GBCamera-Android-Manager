@@ -664,6 +664,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     globalImageIndex = filteredGbcImages.size() - (itemsPerPage - position);
                 }
                 if (selectionMode) {
+
                     Collections.sort(selectedImages);
 
                     int firstImage = selectedImages.get(0);
@@ -685,6 +686,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                     }
                     alreadyMultiSelect = true;
+                    if (selectedImages.size() > 1) {
+                        showEditMenuButton = true;
+                    } else {
+                        showEditMenuButton = false;
+                    }
+                    getActivity().invalidateOptionsMenu();
                     updateTitleText();
 
                 } else {

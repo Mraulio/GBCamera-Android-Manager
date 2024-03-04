@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         SAVE_MANAGER,
         SETTINGS
     }
-
+    public static boolean showEditMenuButton = false;
     public static CURRENT_FRAGMENT current_fragment;
 
     public static FloatingActionButton fab;
@@ -287,6 +287,9 @@ public class MainActivity extends AppCompatActivity {
             case GALLERY:
                 menu.clear(); // Cleans the current menu
                 getMenuInflater().inflate(R.menu.gallery_menu, menu); // Inflates the menu
+                if (showEditMenuButton){
+                    menu.getItem(0).setVisible(true);
+                }
                 break;
 
             case PALETTES:
@@ -299,7 +302,6 @@ public class MainActivity extends AppCompatActivity {
                 fab.hide();
                 menu.close();
                 break;
-
         }
         return super.onPrepareOptionsMenu(menu);
     }

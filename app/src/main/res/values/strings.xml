@@ -190,6 +190,8 @@
     <string name="sp_select_tags">Select tags:</string>
     <string name="et_write_tag">Write tag: </string>
 
+    <string name="menu_filter">Filter by tag</string>
+    <string name="menu_sort">Sort</string>
 
 
 </resources>

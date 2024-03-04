@@ -86,6 +86,7 @@
                 android:completionThreshold="1"
                 android:inputType="text"
                 android:singleLine="true"
+                android:backgroundTint="@color/imageview_bg"
                 android:textSize="20dp"></AutoCompleteTextView>
 
             <Button
@@ -101,18 +102,16 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:background="@color/imageview_bg"
+            android:padding="3dp"
             android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sp_select_tags"
-                android:textSize="20sp" />
 
             <Spinner
                 android:id="@+id/spAvailableTags"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+               >
 
             </Spinner>
 
@@ -152,10 +151,10 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/miscLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:id="@+id/miscLayout"
         android:visibility="gone">
 
         <LinearLayout
@@ -169,16 +168,16 @@
                 android:text="Creation date: "></TextView>
 
             <TextView
+                android:id="@+id/tvCreationDate"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/tvCreationDate">
+                android:layout_height="wrap_content">
 
             </TextView>
         </LinearLayout>
 
 
-
     </LinearLayout>
+
     <Button
         android:id="@+id/button_close"
         android:layout_width="match_parent"

@@ -122,16 +122,21 @@ public class BigImageDialog {
         //Autocomplete text view Text Write tag
         AutoCompleteTextView autoCAddTag = dialog.findViewById(R.id.etWriteTag);
         List<String> availableTotalTags = new ArrayList<>(tagsHash);
-        List<String> availableTotalTagsFav = new ArrayList<>();
+        List<String> availableTotalTagsSpinner = new ArrayList<>();
+        List<String> availableTotalTagsAutoComplete = new ArrayList<>();
+
+
         for (String tag : availableTotalTags) {
             if (tag.equals("__filter:favourite__")) {
                 tag = "Favourite \u2764\ufe0f";
             }
-            availableTotalTagsFav.add(tag);
+            availableTotalTagsAutoComplete.add(tag);
         }
+        availableTotalTagsSpinner.add(context.getString(R.string.tags_dialog_title));
+        availableTotalTagsSpinner.addAll(availableTotalTagsAutoComplete);
 
         ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(context,
-                android.R.layout.simple_dropdown_item_1line, availableTotalTagsFav);
+                android.R.layout.simple_dropdown_item_1line, availableTotalTagsAutoComplete);
 
         autoCAddTag.setAdapter(adapterAutoComplete);
         autoCAddTag.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -181,9 +186,9 @@ public class BigImageDialog {
                     rbEditWasSelected[0] = false;
 
                 }
-
             }
         });
+
         rbMisc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -197,7 +202,6 @@ public class BigImageDialog {
                     rbMisc.setChecked(false);
                     miscLayout.setVisibility(GONE);
                     rbMiscWasSelected[0] = false;
-
                 }
             }
         });
@@ -205,9 +209,9 @@ public class BigImageDialog {
         LinearLayout tagsLayout = dialog.findViewById(R.id.tagsCheckBoxes);
 
         Spinner spAvailableTags = dialog.findViewById(R.id.spAvailableTags);
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
-                android.R.layout.simple_spinner_item, availableTotalTagsFav);
+                android.R.layout.simple_spinner_item, availableTotalTagsSpinner);
+
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spAvailableTags.setAdapter(adapter);
         final boolean[] isSpinnerTouched = {false};
@@ -239,18 +243,16 @@ public class BigImageDialog {
             }
         });
 
-        spAvailableTags.setOnTouchListener(new View.OnTouchListener() {
-            //So the first item is not added on spinner startup
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                isSpinnerTouched[0] = true;
-                return false;
-            }
-        });
         spAvailableTags.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (!isSpinnerTouched[0]) return;
+                if (!isSpinnerTouched[0]) {
+                    isSpinnerTouched[0] = true;
+                    return;
+                }
+                if (position == 0) {
+                    return;
+                }
                 String selectedTag = adapter.getItem(position);
                 if (selectedTag.equals("Favourite \u2764\ufe0f")) {
                     selectedTag = "__filter:favourite__";//Reverse the tag

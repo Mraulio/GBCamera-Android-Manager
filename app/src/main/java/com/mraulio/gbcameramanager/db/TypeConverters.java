@@ -5,6 +5,9 @@ import android.graphics.BitmapFactory;
 
 import androidx.room.TypeConverter;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,25 +32,19 @@ public class TypeConverters {
     }
 
     @TypeConverter
-    public static String fromList(List<String> tags) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < tags.size(); i++) {
-            sb.append(tags.get(i));
-            if (i < tags.size() - 1) { //Verify it's not the last element, so it doesn't add an extra blank tag
-                sb.append(",");
-            }
+    public static ArrayList<String> toList(String value) {
+        try {
+            return new Gson().fromJson(value, new TypeToken<ArrayList<String>>() {}.getType());
+        } catch (Exception e) {
+            return new ArrayList<>();
         }
-        return sb.toString();
     }
 
     @TypeConverter
-    public static List<String> toList(String data) {
-        if (data == null || data.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            String[] tags = data.split(",");
-            return new ArrayList<>(Arrays.asList(tags));
-        }
+    public static String fromList(List<String> list) {
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        return json;
     }
 
     @TypeConverter

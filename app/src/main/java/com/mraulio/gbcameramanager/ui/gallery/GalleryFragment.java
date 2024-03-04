@@ -613,7 +613,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     dialog.show();
                 } else {
 
-
                     int globalImageIndex;
                     if (currentPage != lastPage) {
                         globalImageIndex = position + (currentPage * itemsPerPage);
@@ -625,15 +624,18 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                     } else if (!selectedImages.contains(globalImageIndex)) {
                         selectedImages.add(globalImageIndex);
-
                     }
-                    updateTitleText();
-                    if (selectedImages.size() > 1) {
-                        showEditMenuButton = true;
-                    } else {
-                        showEditMenuButton = false;
+                    if (selectedImages.size()==0){
+                        hideSelectionOptions();
+                    }else{
+                        updateTitleText();
+                        if (selectedImages.size() > 1) {
+                            showEditMenuButton = true;
+                        } else {
+                            showEditMenuButton = false;
+                        }
+                        getActivity().invalidateOptionsMenu();
                     }
-                    getActivity().invalidateOptionsMenu();
                     customGridViewAdapterImage.notifyDataSetChanged();
                 }
             }
@@ -651,13 +653,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     MainActivity.fab.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            showEditMenuButton = false;
-                            selectedImages.clear();
-                            selectionMode = false;
-                            gridView.setAdapter(customGridViewAdapterImage);
-                            MainActivity.fab.hide();
-                            updateTitleText();
-                            getActivity().invalidateOptionsMenu();
+                            hideSelectionOptions();
                         }
                     });
                 }
@@ -2072,5 +2068,15 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     @Override
     public void onRunError(Exception e) {
+    }
+
+    private void hideSelectionOptions(){
+        showEditMenuButton = false;
+        selectedImages.clear();
+        selectionMode = false;
+        gridView.setAdapter(customGridViewAdapterImage);
+        MainActivity.fab.hide();
+        updateTitleText();
+        getActivity().invalidateOptionsMenu();
     }
 }

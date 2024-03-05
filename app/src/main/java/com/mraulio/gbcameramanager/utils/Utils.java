@@ -24,6 +24,8 @@ import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,6 +50,8 @@ public class Utils {
     public static final File ARDUINO_HEX_FOLDER = new File(MAIN_FOLDER, "Arduino Printer Hex");
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
 
+
+    public static HashMap<String,String> frameGroupsNames = new HashMap<>();
 
     public static final int[] ROTATION_VALUES = {0, 90, 180, 270};
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
@@ -124,7 +128,8 @@ public class Utils {
 
     public static ArrayList<String> getSelectedTags() {
         try {
-            return new Gson().fromJson(selectedTags, new TypeToken<ArrayList<String>>() {}.getType());
+            return new Gson().fromJson(selectedTags, new TypeToken<ArrayList<String>>() {
+            }.getType());
         } catch (Exception e) {
             return new ArrayList<>();
         }
@@ -203,9 +208,19 @@ public class Utils {
                 int[] pos = {x, y};
                 transparentPixelPositions.add(pos);
             }
-
+        }
         return transparentPixelPositions;
     }
 
+    public static String generateHashFromBytes(byte[] bytes) throws NoSuchAlgorithmException {
+        byte[] hash = MessageDigest.getInstance("SHA-256").digest(bytes);
+        String hashHex = Utils.bytesToHex(hash);
+        return hashHex;
+    }
 
+
+    public static String removeNumbersFromEnd(String input) {
+        return input.replaceAll("\\d+$", "");
+    }
 }
+

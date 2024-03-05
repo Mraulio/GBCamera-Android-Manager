@@ -49,7 +49,7 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
                 ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
                 GbcFrame gbcFrame = Utils.hashFrames.get(gbcImage.getFrameId());
                 if (gbcFrame == null){
-                    gbcFrame= Utils.hashFrames.get("Nintendo_Frame");
+                    gbcFrame= Utils.hashFrames.get("nintendo_frame");
                 }
                 image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcFrame.isWildFrame());                //Add the bitmap to the cache
                 Utils.imageBitmapCache.put(imageHash, image);

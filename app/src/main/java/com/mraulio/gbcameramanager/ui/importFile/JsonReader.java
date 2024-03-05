@@ -125,14 +125,14 @@ public class JsonReader {
                         if (!Utils.hashPalettes.containsKey(imageJson.getString("palette"))) {
                             gbcImage.setPaletteId("bw");
                         } else
-                            gbcImage.setPaletteId(imageJson.getString("palette"));//To get the palette from the json
+                            gbcImage.setPaletteId(imageJson.getString("palette").toLowerCase());//To get the palette from the json
                     }
 
                     if (imageJson.has("framePalette")) {
                         if (!Utils.hashPalettes.containsKey(imageJson.getString("framePalette"))) {
                             gbcImage.setFramePaletteId("bw");
                         } else
-                            gbcImage.setFramePaletteId(imageJson.getString("framePalette"));//To get the palette from the json
+                            gbcImage.setFramePaletteId(imageJson.getString("framePalette").toLowerCase());//To get the palette from the json
                     }
                     if (imageJson.has("rotation")) {
                         try {
@@ -147,9 +147,9 @@ public class JsonReader {
                         String frameName = imageJson.getString("frame");
                         if (frameName.equals("null"))
                             gbcImage.setFrameId("");
-                        else gbcImage.setFrameId(frameName);
+                        else gbcImage.setFrameId(frameName.toLowerCase());
                         if (!Utils.hashFrames.containsKey(gbcImage.getFrameId())) {
-                            gbcImage.setFrameId("Nintendo_Frame");
+                            gbcImage.setFrameId("nintendo_frame");
                         }
                     }
 
@@ -182,7 +182,6 @@ public class JsonReader {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
         ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
         return finalValues;
@@ -254,12 +253,16 @@ public class JsonReader {
             try {
                 frameObj = framesArray.getJSONObject(i);
                 //Verify what type of frames.json it is
-                String name = frameObj.getString("id");
+                String frameId = frameObj.getString("id");
                 GbcFrame gbcFrame = new GbcFrame();
-                gbcFrame.setFrameName(name);
+                gbcFrame.setFrameId(frameId);
+                String frameName = frameObj.getString("name");
+                gbcFrame.setFrameName(frameName);
                 boolean isWildFrame = frameObj.getBoolean("isWildFrame");
+                String frameHash = frameObj.getString("hash");
+                gbcFrame.setFrameHash(frameHash);
                 gbcFrame.setWildFrame(isWildFrame);
-                String hash = jsonObject.getString("frame-" + name);
+                String hash = jsonObject.getString("frame-" + frameHash);
                 String decompHash = decodeDataImage(hash);//Change this for a full image
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
@@ -270,7 +273,7 @@ public class JsonReader {
                 gbcFrame.setFrameBytes(bytes);
 
                 //Recovering the transparency data
-                String hashTransp = jsonObject.getString("frame-transparency-" + name);
+                String hashTransp = jsonObject.getString("frame-transparency-" + frameHash);
 
                 String data = decodeDataTransparency(hashTransp);
                 HashSet<int[]> hashSet = stringToHashSet(data);

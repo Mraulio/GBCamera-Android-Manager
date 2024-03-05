@@ -5,7 +5,9 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.con
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.resizeImage;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
+import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
+import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
@@ -13,6 +15,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -31,11 +34,15 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
 import android.provider.OpenableColumns;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -43,6 +50,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.db.ImageDao;
@@ -342,7 +350,7 @@ public class ImportFragment extends Fragment {
 
     private void frameImportDialog() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        View view = inflater.inflate(R.layout.frame_name_dialog, null);
+        View view = inflater.inflate(R.layout.frame_import_dialog, null);
         ImageView ivFrame = view.findViewById(R.id.ivFrame);
         GbcFrame gbcFrame = new GbcFrame();
         gbcFrame.setFrameBitmap(finalListBitmaps.get(0));
@@ -350,6 +358,37 @@ public class ImportFragment extends Fragment {
         Bitmap bitmapCopy = finalListBitmaps.get(0).copy(finalListBitmaps.get(0).getConfig(), true);
         Bitmap bitmap = transparentBitmap(bitmapCopy, gbcFrame);
         gbcFrame.setFrameBitmap(bitmap);
+
+        //SET THE ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        AutoCompleteTextView autoCAddTag = view.findViewById(R.id.etFrameId);
+        Spinner spFrameGroup = view.findViewById(R.id.spFrameGroups);
+
+        List<String> frameGroupsNamesList = new ArrayList<>(frameGroupsNames.keySet());
+
+        ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_dropdown_item_1line, frameGroupsNamesList);
+
+        autoCAddTag.setAdapter(adapterAutoComplete);
+        autoCAddTag.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(autoCAddTag.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        try {
+            byte[] gbFrameBytes = Utils.encodeImage(bitmap, "bw");
+            gbcFrame.setFrameBytes(gbFrameBytes);
+            String gbFrameHash = generateHashFromBytes(gbFrameBytes);
+            gbcFrame.setFrameHash(gbFrameHash);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         ivFrame.setImageBitmap(bitmap);
         EditText etFrameName = view.findViewById(R.id.etFrameName);
@@ -459,10 +498,10 @@ public class ImportFragment extends Fragment {
                 listActiveImages = romExtractor.getListActiveImages();
                 listActiveBitmaps = romExtractor.getListActiveBitmaps();
                 lastSeenImage = romExtractor.getLastSeenImage();
-                lastSeenBitmap= romExtractor.getLastSeenBitmap();
-                listDeletedImages= romExtractor.getListDeletedImages();
-                listDeletedBitmaps= romExtractor.getListDeletedBitmaps();
-                listDeletedBitmapsRedStroke =romExtractor.getListDeletedBitmapsRedStroke();
+                lastSeenBitmap = romExtractor.getLastSeenBitmap();
+                listDeletedImages = romExtractor.getListDeletedImages();
+                listDeletedBitmaps = romExtractor.getListDeletedBitmaps();
+                listDeletedBitmapsRedStroke = romExtractor.getListDeletedBitmapsRedStroke();
                 totalImages = romExtractor.getTotalImages();
                 showImages(cbLastSeen, cbDeleted);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
@@ -626,7 +665,8 @@ public class ImportFragment extends Fragment {
             }
         }
 
-        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null);    }
+        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null);
+    }
 
     //Refactor, also on UsbSerialFragment
 //    private void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
@@ -1120,7 +1160,7 @@ public class ImportFragment extends Fragment {
                 Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, false, false, false);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
-                    Bitmap framed = Utils.hashFrames.get("Nintendo_Frame").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    Bitmap framed = Utils.hashFrames.get("nintendo_frame").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;

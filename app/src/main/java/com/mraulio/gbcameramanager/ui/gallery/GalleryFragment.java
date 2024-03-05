@@ -1976,7 +1976,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             updateGridView(currentPage);
             updateTitleText();
 
-//            tv.setText(tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
             tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
 
         } else {
@@ -1988,6 +1987,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static void updateGridView(int page) {
         //Bitmap list to store current page bitmaps
         filteredGbcImages = new ArrayList<>();
+
         if (filterTags.isEmpty()) {
             filteredGbcImages = Utils.gbcImagesList;
         } else {

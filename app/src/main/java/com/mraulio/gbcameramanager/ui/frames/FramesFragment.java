@@ -4,7 +4,6 @@ package com.mraulio.gbcameramanager.ui.frames;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
-import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -24,10 +24,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
@@ -40,7 +40,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -54,18 +53,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.zip.Deflater;
-import java.util.zip.Inflater;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class FramesFragment extends Fragment {
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
+        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.FRAMES;
         MainActivity.fab.hide();
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
@@ -73,7 +68,14 @@ public class FramesFragment extends Fragment {
 
         CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Utils.framesList, true, false);
         TextView tvNumFrames = view.findViewById(R.id.tvNumFrames);
-        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.FRAMES;
+
+        Spinner spAvailableTags = view.findViewById(R.id.spFrameGroups);
+
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+//                android.R.layout.simple_spinner_item, availableTotalTagsSpinner);
+
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spAvailableTags.setAdapter(adapter);
 
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -86,13 +88,11 @@ public class FramesFragment extends Fragment {
                     builder.setTitle(getString(R.string.delete_frame_dialog) + Utils.framesList.get(position).getFrameName() + "?");
                     builder.setMessage(getString(R.string.sure_dialog));
 
-                    // Crear un ImageView y establecer la imagen deseada
                     ImageView imageView = new ImageView(getContext());
                     imageView.setAdjustViewBounds(true);
                     imageView.setPadding(30, 10, 30, 10);
                     imageView.setImageBitmap(Utils.framesList.get(position).getFrameBitmap());
 
-                    // Agregar el ImageView al diseño del diálogo
                     builder.setView(imageView);
 
                     builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
@@ -104,13 +104,13 @@ public class FramesFragment extends Fragment {
                             //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
                             for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
                                 if (Utils.gbcImagesList.get(i).getFrameId().equals(Utils.framesList.get(position).getFrameName())) {
-                                    Utils.gbcImagesList.get(i).setFrameId("Nintendo_Frame");
+                                    Utils.gbcImagesList.get(i).setFrameId("nintendo_frame");
                                     //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
                                     if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
                                         Bitmap image = null;
                                         try {
                                             GbcImage gbcImage = Utils.gbcImagesList.get(i);
-                                            image = frameChange(gbcImage,"Nintendo_Frame",gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(),true);
+                                            image = frameChange(gbcImage, "nintendo_frame", gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
                                             Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                             GalleryFragment.diskCache.put(gbcImage.getHashCode(), image);
                                         } catch (IOException e) {
@@ -155,20 +155,24 @@ public class FramesFragment extends Fragment {
         tvNumFrames.setText(getString(R.string.frames_total) + Utils.framesList.size());
         return view;
     }
+
     private void FramesJsonCreator() throws JSONException, IOException {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
         JSONArray framesArr = new JSONArray();
         for (GbcFrame gbcFrame : Utils.framesList) {
             JSONObject frameObj = new JSONObject();
-            frameObj.put("id", gbcFrame.getFrameName());
-
-            //Create hashcode from the frame bitmap
-            frameObj.put("isWildFrame",gbcFrame.isWildFrame());
+            frameObj.put("id", gbcFrame.getFrameId());
+            frameObj.put("name", gbcFrame.getFrameName());
+            frameObj.put("hash", gbcFrame.getFrameHash());
+            frameObj.put("isWildFrame", gbcFrame.isWildFrame());
             framesArr.put(frameObj);
         }
         stateObj.put("frames", framesArr);
         stateObj.put("lastUpdateUTC", System.currentTimeMillis() / 1000);
+
+        //Need to put the frame group names!!!!!!!!!!!!!!!
+
 
         json.put("state", stateObj);
 
@@ -185,17 +189,17 @@ public class FramesFragment extends Fragment {
             }
             String tileData = sb.toString();
             String deflated = encodeData(tileData);
-            json.put("frame-"+gbcFrame.getFrameName(), deflated);
+            json.put("frame-" + gbcFrame.getFrameHash(), deflated);
 
             //Now put the transparency data
             HashSet<int[]> transparencyHashSet = Utils.transparencyHashSet(gbcFrame.getFrameBitmap());
             if (transparencyHashSet.size() == 0) {
                 transparencyHashSet = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
             }
-            String toStringHash =hashSetToString(transparencyHashSet);
+            String toStringHash = hashSetToString(transparencyHashSet);
 
             String encodedTransparency = encodeData(toStringHash);
-            json.put("frame-transparency-"+gbcFrame.getFrameName(),encodedTransparency);
+            json.put("frame-transparency-" + gbcFrame.getFrameHash(), encodedTransparency);
 
         }
 
@@ -210,6 +214,7 @@ public class FramesFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
     public static String hashSetToString(HashSet<int[]> hashSet) {
         StringBuilder sb = new StringBuilder();
 //        sb.append("[");
@@ -222,6 +227,7 @@ public class FramesFragment extends Fragment {
 //        sb.append("]");
         return sb.toString();
     }
+
     public static byte[] serializeHashSet(HashSet<int[]> hashSet) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         for (int[] array : hashSet) {
@@ -231,6 +237,7 @@ public class FramesFragment extends Fragment {
         }
         return byteArrayOutputStream.toByteArray();
     }
+
     public static byte[] compress(byte[] data) {
         Deflater deflater = new Deflater();
         deflater.setInput(data);
@@ -245,10 +252,10 @@ public class FramesFragment extends Fragment {
         deflater.end();
         return outputStream.toByteArray();
     }
+
     public static String encodeDataByte(byte[] data) {
         return new String(data, StandardCharsets.ISO_8859_1);
     }
-
 
 
     private class DeleteFrameAsyncTask extends AsyncTask<Void, Void, Void> {

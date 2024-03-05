@@ -12,8 +12,8 @@ import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class TypeConverters {
@@ -61,5 +61,21 @@ public class TypeConverters {
     public static String fromDate(Date date) {
         SimpleDateFormat format = new SimpleDateFormat(FORMAT);
         return format.format(date);
+    }
+
+    @TypeConverter
+    public static HashMap<String, String> fromString(String value) {
+        if (value == null) {
+            return null;
+        }
+        return new Gson().fromJson(value, HashMap.class);
+    }
+
+    @TypeConverter
+    public static String fromMap(HashMap<String, String> map) {
+        if (map == null) {
+            return null;
+        }
+        return new Gson().toJson(map);
     }
 }

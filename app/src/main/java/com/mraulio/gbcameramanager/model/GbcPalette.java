@@ -16,6 +16,10 @@ public class GbcPalette {
     @NonNull
     private String paletteId;
 
+    @ColumnInfo(name = "palette_name")
+
+    private String paletteName;
+
     @ColumnInfo(name = "palette_colors")
     private String paletteColors;
 
@@ -60,6 +64,14 @@ public class GbcPalette {
 
     public void setPaletteId(String paletteId) {
         this.paletteId = paletteId;
+    }
+
+    public String getPaletteName() {
+        return paletteName;
+    }
+
+    public void setPaletteName(String paletteName) {
+        this.paletteName = paletteName;
     }
 
     public Bitmap paletteViewer() {

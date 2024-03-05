@@ -1,11 +1,7 @@
 package com.mraulio.gbcameramanager;
 
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortByDate;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortByTitle;
 import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
-import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
-import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -72,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
 
-    public static enum CURRENT_FRAGMENT {
+    public enum CURRENT_FRAGMENT {
         GALLERY,
         PALETTES,
         FRAMES,
@@ -323,7 +319,8 @@ public class MainActivity extends AppCompatActivity {
                     Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
                 Utils.gbcPalettesList.addAll(palettes);
-            } else {
+            }
+            else {
                 StringBuilder stringBuilder = new StringBuilder();
                 int resourcePalettes = R.raw.palettes;
                 try {
@@ -355,13 +352,15 @@ public class MainActivity extends AppCompatActivity {
                 for (GbcFrame gbcFrame : frames) {
                     Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
                 }
+                Utils.frameGroupsNames = hashFrames.get("nintendo_frame").getFrameGroupsNames();
+
                 Utils.framesList.addAll(frames);
             } else {
                 //First time add it to the database
                 StartCreation.addFrames(getBaseContext());
                 for (Map.Entry<String, GbcFrame> entry : Utils.hashFrames.entrySet()) {
                     GbcFrame value = entry.getValue();
-                    frameDao.insert(value);
+                    frameDao.insert(value);//Saving frames to database
                 }
             }
             //Now that I have palettes and frames, I can add images:

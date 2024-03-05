@@ -1,6 +1,5 @@
 package com.mraulio.gbcameramanager.utils;
 
-
 import static com.mraulio.gbcameramanager.MainActivity.selectedTags;
 import static com.mraulio.gbcameramanager.MainActivity.sharedPreferences;
 
@@ -12,10 +11,11 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
-import android.text.TextUtils;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.Codec;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -116,23 +116,18 @@ public class Utils {
 
     public static void saveTagsSet(List<String> tagsList) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        String setString = TextUtils.join(",", tagsList);
-        editor.putString("selected_tags", setString);
+        Gson gson = new Gson();
+        String json = gson.toJson(tagsList);
+        editor.putString("selected_tags", json);
         editor.apply();
     }
 
-    public static List<String> getSelectedTags() {
-        String setString = selectedTags;
-
-        List<String> listSelectedTags = new ArrayList<>();
-        if (!TextUtils.isEmpty(setString)) {
-            String[] items = setString.split(",");
-            for (String item : items) {
-                listSelectedTags.add(item);
-            }
+    public static ArrayList<String> getSelectedTags() {
+        try {
+            return new Gson().fromJson(selectedTags, new TypeToken<ArrayList<String>>() {}.getType());
+        } catch (Exception e) {
+            return new ArrayList<>();
         }
-        return listSelectedTags;
     }
 
     public static void toast(Context context, String message) {
@@ -180,7 +175,7 @@ public class Utils {
 
     public static HashSet<int[]> transparencyHashSet(Bitmap bitmap) {
         HashSet<int[]> transparentPixelPositions = new HashSet<>();
-        // Iterar a través de los píxeles del Bitmap
+        // Iterate through the bitmap pixels
         for (int y = 0; y < bitmap.getHeight(); y++) {
             for (int x = 0; x < bitmap.getWidth(); x++) {
                 int pixel = bitmap.getPixel(x, y);
@@ -196,7 +191,6 @@ public class Utils {
     public static HashSet<int[]> generateDefaultTransparentPixelPositions(Bitmap bitmap) {
         HashSet<int[]> transparentPixelPositions = new HashSet<>();
 
-        int bitmapWidth = 160;
         int bitmapHeight = bitmap.getHeight();
         int innerBitmapWidth = 128;
         int innerBitmapHeight = 112;
@@ -209,11 +203,9 @@ public class Utils {
                 int[] pos = {x, y};
                 transparentPixelPositions.add(pos);
             }
-        }
 
         return transparentPixelPositions;
     }
-
 
 
 }

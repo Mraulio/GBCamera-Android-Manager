@@ -221,7 +221,7 @@ public class GalleryUtils {
                 if (exportSquare) {
                     image = makeSquareImage(image);
                 }
-
+                image = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                 File file = new File(context.getExternalCacheDir(), "shared_image_" + i + ".png");
                 fileOutputStream = new FileOutputStream(file);
                 image.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);

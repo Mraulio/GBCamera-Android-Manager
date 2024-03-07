@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.utils;
 
+import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
@@ -30,9 +31,8 @@ public class StartCreation {
         GbcFrame nintendoFrame = new GbcFrame();
         nintendoFrame.setFrameName("nintendo_frame");
         nintendoFrame.setFrameId("gbcam01");
-        HashMap<String,String> frameGroupNamesHash = new HashMap<>();
-        frameGroupNamesHash.put("gbc","Default frames");
-        nintendoFrame.setFrameGroupsNames(frameGroupNamesHash);
+        frameGroupsNames.put("gbcam","GBCamera Android Manager");
+        nintendoFrame.setFrameGroupsNames(frameGroupsNames);
         nintendoFrame.setFrameBitmap(bitmap);
         try {
             byte[] nintendoFrameBytes =  Utils.encodeImage(bitmap, "bw");
@@ -49,7 +49,7 @@ public class StartCreation {
             transparencyHS = generateDefaultTransparentPixelPositions(bitmap);
         }
         nintendoFrame.setTransparentPixelPositions(transparencyHS);
-        Utils.hashFrames.put(nintendoFrame.getFrameName(),nintendoFrame);
+        Utils.hashFrames.put(nintendoFrame.getFrameId(),nintendoFrame);
         Utils.framesList.add(nintendoFrame);
 
         //Own frame from drawable-nodpi resource (so it is not automatically scaled to the dpi)
@@ -75,7 +75,7 @@ public class StartCreation {
             transparencyHS = generateDefaultTransparentPixelPositions(bitmap);
         }
         myframe.setTransparentPixelPositions(transparencyHS);
-        Utils.hashFrames.put(myframe.getFrameName(),myframe);
+        Utils.hashFrames.put(myframe.getFrameId(),myframe);
         Utils.framesList.add(myframe);
 
         Arrays.fill(pixels, Color.BLACK);
@@ -98,7 +98,7 @@ public class StartCreation {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        Utils.hashFrames.put(blackFrame.getFrameName(),blackFrame);
+        Utils.hashFrames.put(blackFrame.getFrameId(),blackFrame);
         Utils.framesList.add(blackFrame);
 
         //White frame
@@ -122,7 +122,7 @@ public class StartCreation {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        Utils.hashFrames.put(whiteFrame.getFrameName(),whiteFrame);
+        Utils.hashFrames.put(whiteFrame.getFrameId(),whiteFrame);
         Utils.framesList.add(whiteFrame);
 
     }

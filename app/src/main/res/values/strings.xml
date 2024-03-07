@@ -193,5 +193,6 @@
     <string name="menu_sort">Sort</string>
 
     <string name="et_frame_group_name">Set frame group name</string>
+    <string name="tv_frame_index">Frame index: </string>
 
 </resources>

@@ -52,7 +52,7 @@ public class ImageConversionUtils {
                     if (hasJoeyJrPalette(framelessBitmap)) {
                         framelessBitmap = convertJoeyPalette(framelessBitmap);
                     }
-                    Bitmap framed = Utils.hashFrames.get("nintendo_frame").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    Bitmap framed = Utils.hashFrames.get("gbcam01").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(framelessBitmap, 16, 16, null);
 

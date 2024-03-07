@@ -8,8 +8,8 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 @Entity
 public class GbcFrame {
@@ -31,7 +31,7 @@ public class GbcFrame {
     boolean isWildFrame;
 
     @ColumnInfo(name = "frame_groups_names")
-    HashMap<String, String> frameGroupsNames;
+    LinkedHashMap<String, String> frameGroupsNames;
 
     @Ignore
     HashSet<int[]> transparentPixelPositions = new HashSet<>();
@@ -110,11 +110,11 @@ public class GbcFrame {
         this.frameBytes = frameBytes;
     }
 
-    public HashMap<String, String> getFrameGroupsNames() {
+    public LinkedHashMap<String, String> getFrameGroupsNames() {
         return frameGroupsNames;
     }
 
-    public void setFrameGroupsNames(HashMap<String, String> frameGroupsNames) {
+    public void setFrameGroupsNames(LinkedHashMap<String, String> frameGroupsNames) {
         this.frameGroupsNames = frameGroupsNames;
     }
 }

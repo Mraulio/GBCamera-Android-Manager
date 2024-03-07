@@ -17,7 +17,6 @@
 
         <AutoCompleteTextView
             android:id="@+id/etFrameId"
-            android:hint="Write frame group name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="5"
@@ -25,6 +24,7 @@
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
             android:completionThreshold="1"
+            android:hint="Frame group Id"
             android:inputType="text"
             android:singleLine="true"
             android:textSize="20dp"></AutoCompleteTextView>
@@ -33,12 +33,62 @@
             android:id="@+id/etFrameGroupName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
             android:hint="@string/et_frame_group_name"
             android:singleLine="true" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:autoSizeMaxTextSize="30sp"
+                android:autoSizeMinTextSize="5sp"
+                android:text="Frame index: "
+                android:textSize="20sp"></TextView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/decrementButton"
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+                <EditText
+                    android:id="@+id/numberEditText"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="1"
+                    android:textAlignment="center" />
+
+                <Button
+                    android:id="@+id/incrementButton"
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:text="+" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
         <EditText
             android:id="@+id/etFrameName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
             android:hint="@string/frame_name"
             android:singleLine="true" />
 

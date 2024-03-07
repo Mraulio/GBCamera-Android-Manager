@@ -425,7 +425,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Utils.framesList, false, false);
                     int frameIndex = 0;
                     for (int i = 0; i < Utils.framesList.size(); i++) {
-                        if (Utils.framesList.get(i).getFrameName().equals(filteredGbcImages.get(globalImageIndex).getFrameId())) {
+                        if (Utils.framesList.get(i).getFrameId().equals(filteredGbcImages.get(globalImageIndex).getFrameId())) {
                             frameIndex = i;
                             break;
                         }
@@ -446,7 +446,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             //Action when clicking a frame inside the Dialog
                             GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
                             try {
-                                Bitmap bitmap = frameChange(gbcImage, framesList.get(selectedFrameIndex).getFrameName(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), keepFrame, true);
+                                Bitmap bitmap = frameChange(gbcImage, framesList.get(selectedFrameIndex).getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), keepFrame, true);
                                 Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
                                 bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
                                 imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
@@ -927,7 +927,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             });
                             int frameIndex = 0;
                             for (int i = 0; i < Utils.framesList.size(); i++) {
-                                if (Utils.framesList.get(i).getFrameName().equals(filteredGbcImages.get(globalImageIndex[0]).getFrameId())) {
+                                if (Utils.framesList.get(i).getFrameId().equals(filteredGbcImages.get(globalImageIndex[0]).getFrameId())) {
                                     frameIndex = i;
                                     break;
                                 }
@@ -1054,7 +1054,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         for (int i : selectedImages) {
 
                                             GbcImage gbcImage = filteredGbcImages.get(i);
-                                            Bitmap framed = frameChange(gbcImage, framesList.get(selectedFrameIndex).getFrameName(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
+                                            Bitmap framed = frameChange(gbcImage, framesList.get(selectedFrameIndex).getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
                                             Utils.imageBitmapCache.put(filteredGbcImages.get(i).getHashCode(), framed);
 
                                         }
@@ -1954,7 +1954,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     adapterPalette.notifyDataSetChanged();
                     int frameIndex = 0;
                     for (int i = 0; i < Utils.framesList.size(); i++) {
-                        if (Utils.framesList.get(i).getFrameName().equals(filteredGbcImages.get(globalImageIndex[0]).getFrameId())) {
+                        if (Utils.framesList.get(i).getFrameId().equals(filteredGbcImages.get(globalImageIndex[0]).getFrameId())) {
                             frameIndex = i;
                             break;
                         }

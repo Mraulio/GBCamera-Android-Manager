@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.frames;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
+import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 
 import android.app.Activity;
@@ -50,8 +51,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.zip.Deflater;
 
 public class FramesFragment extends Fragment {
@@ -103,14 +106,14 @@ public class FramesFragment extends Fragment {
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
                             for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
-                                if (Utils.gbcImagesList.get(i).getFrameId().equals(Utils.framesList.get(position).getFrameName())) {
-                                    Utils.gbcImagesList.get(i).setFrameId("nintendo_frame");
+                                if (Utils.gbcImagesList.get(i).getFrameId().equals(Utils.framesList.get(position).getFrameId())) {
+                                    Utils.gbcImagesList.get(i).setFrameId("gbcam01");
                                     //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
                                     if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
                                         Bitmap image = null;
                                         try {
                                             GbcImage gbcImage = Utils.gbcImagesList.get(i);
-                                            image = frameChange(gbcImage, "nintendo_frame", gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
+                                            image = frameChange(gbcImage, "gbcam01", gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
                                             Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                                             GalleryFragment.diskCache.put(gbcImage.getHashCode(), image);
                                         } catch (IOException e) {
@@ -120,7 +123,7 @@ public class FramesFragment extends Fragment {
                                     new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
                             }
-                            Utils.hashFrames.remove(Utils.framesList.get(position).getFrameName());
+                            Utils.hashFrames.remove(Utils.framesList.get(position).getFrameId());
                             Utils.framesList.remove(position);
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }
@@ -169,9 +172,20 @@ public class FramesFragment extends Fragment {
             framesArr.put(frameObj);
         }
         stateObj.put("frames", framesArr);
-        stateObj.put("lastUpdateUTC", System.currentTimeMillis() / 1000);
 
-        //Need to put the frame group names!!!!!!!!!!!!!!!
+        JSONArray frameGroupNamesArr = new JSONArray();
+        for (Map.Entry<String, String> entry : frameGroupsNames.entrySet()) {
+            JSONObject frameObj = new JSONObject();
+            String key = entry.getKey();
+            String value = entry.getValue();
+            frameObj.put("id", key);
+            frameObj.put("name", value);
+            frameGroupNamesArr.put(frameObj);
+        }
+
+        stateObj.put("frameGroupNames", frameGroupNamesArr);
+
+        stateObj.put("lastUpdateUTC", System.currentTimeMillis() / 1000);
 
 
         json.put("state", stateObj);
@@ -324,10 +338,10 @@ public class FramesFragment extends Fragment {
             }
             Bitmap image = data.get(position).getFrameBitmap();
             String name = data.get(position).getFrameName();
-
+            String id = data.get(position).getFrameId();
             if (checkDuplicate) {
                 for (GbcFrame objeto : Utils.framesList) {
-                    if (objeto.getFrameName().equals(name)) {
+                    if (objeto.getFrameId().equals(id)) {
                         holder.imageItem.setBackgroundColor(context.getResources().getColor(R.color.duplicated));
                     }
                 }

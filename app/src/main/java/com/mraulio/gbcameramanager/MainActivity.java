@@ -350,9 +350,9 @@ public class MainActivity extends AppCompatActivity {
 
             if (frames.size() > 0) {
                 for (GbcFrame gbcFrame : frames) {
-                    Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
+                    Utils.hashFrames.put(gbcFrame.getFrameId(), gbcFrame);
                 }
-                Utils.frameGroupsNames = hashFrames.get("nintendo_frame").getFrameGroupsNames();
+                Utils.frameGroupsNames = hashFrames.get("gbcam01").getFrameGroupsNames();
 
                 Utils.framesList.addAll(frames);
             } else {

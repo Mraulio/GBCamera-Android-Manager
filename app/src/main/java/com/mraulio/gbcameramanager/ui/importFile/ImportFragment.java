@@ -1,5 +1,7 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
+import static com.mraulio.gbcameramanager.MainActivity.db;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.compareTags;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
@@ -8,6 +10,7 @@ import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsRea
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
@@ -34,6 +37,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
 import android.provider.OpenableColumns;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +46,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -85,6 +91,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -94,6 +101,7 @@ public class ImportFragment extends Fragment {
 
     static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
     static List<GbcImage> importedImagesList = new ArrayList<>();
+    static HashMap<String,String> importedFrameGroupIdNames = new HashMap<>();
     int totalImages = 0;
     List<List<GbcImage>> listActiveImages = new ArrayList<>();
     List<List<GbcImage>> listDeletedImages = new ArrayList<>();
@@ -234,7 +242,7 @@ public class ImportFragment extends Fragment {
                             GbcFrame gbcFrame = (GbcFrame) frame;
                             //If the frame already exists (by the name) it doesn't add it. Same if it's already added
                             for (GbcFrame objeto : Utils.framesList) {
-                                if (objeto.getFrameName().toLowerCase(Locale.ROOT).equals(gbcFrame.getFrameName().toLowerCase(Locale.ROOT))) {
+                                if (objeto.getFrameId().toLowerCase(Locale.ROOT).equals(gbcFrame.getFrameId().toLowerCase(Locale.ROOT))) {
                                     alreadyAdded = true;
                                     break;
                                 }
@@ -246,9 +254,9 @@ public class ImportFragment extends Fragment {
                         if (newFrames.size() > 0) {
                             Utils.framesList.addAll(newFrames);
                             for (GbcFrame gbcFrame : newFrames) {
-                                Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
+                                Utils.hashFrames.put(gbcFrame.getFrameId(), gbcFrame);
                             }
-                            new SaveFrameAsyncTask(newFrames).execute();//TEST THIS
+                            new SaveFrameAsyncTask(newFrames).execute();
                         } else {
                             Utils.toast(getContext(), getString(R.string.no_new_frames));
                             tvFileName.setText(getString(R.string.no_new_frames));
@@ -359,25 +367,121 @@ public class ImportFragment extends Fragment {
         Bitmap bitmap = transparentBitmap(bitmapCopy, gbcFrame);
         gbcFrame.setFrameBitmap(bitmap);
 
-        //SET THE ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        AutoCompleteTextView autoCAddTag = view.findViewById(R.id.etFrameId);
+        EditText etFrameGroupName = view.findViewById(R.id.etFrameGroupName);
+
         Spinner spFrameGroup = view.findViewById(R.id.spFrameGroups);
 
-        List<String> frameGroupsNamesList = new ArrayList<>(frameGroupsNames.keySet());
+        List<String> frameGroupsNamesList = new ArrayList<>();
+        List<String> frameGroupsIdsList = new ArrayList<>();
+
+        for (String key : frameGroupsNames.keySet()) {
+            frameGroupsIdsList.add(key);
+            frameGroupsNamesList.add(frameGroupsNames.get(key));
+        }
+
+        List<String> spFrameGroupNamesList = new ArrayList<>();
+        spFrameGroupNamesList.add("New Frame Group");
+        spFrameGroupNamesList.addAll(frameGroupsNamesList);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, spFrameGroupNamesList);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spFrameGroup.setAdapter(adapter);
+        AutoCompleteTextView autoCompNewId = view.findViewById(R.id.etFrameId);
+
 
         ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_dropdown_item_1line, frameGroupsNamesList);
+                android.R.layout.simple_dropdown_item_1line, frameGroupsIdsList);
 
-        autoCAddTag.setAdapter(adapterAutoComplete);
-        autoCAddTag.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        autoCompNewId.setAdapter(adapterAutoComplete);
+        autoCompNewId.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(autoCAddTag.getWindowToken(), 0);
+                    imm.hideSoftInputFromWindow(autoCompNewId.getWindowToken(), 0);
                     return true;
                 }
                 return false;
+            }
+        });
+
+        final String[] newFrameGroupPlaceholder = {""};
+        final boolean[] idChangedInSpinner = {false};
+        etFrameGroupName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    newFrameGroupPlaceholder[0] = etFrameGroupName.getText().toString().trim();
+                }
+            }
+        });
+
+        autoCompNewId.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//                placeholderString = etImageName.getText().toString();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (idChangedInSpinner[0]) return;
+                String placeHolder = autoCompNewId.getText().toString().trim();
+                idChangedInSpinner[0] = false;
+                autoCompNewId.showDropDown();
+                if (frameGroupsIdsList.contains(placeHolder)) {
+                    String groupName = frameGroupsNames.get(autoCompNewId.getText().toString().trim());
+                    etFrameGroupName.setText(groupName);
+                    etFrameGroupName.setEnabled(false);//An existing frame group
+                    spFrameGroup.setSelection(frameGroupsNamesList.indexOf(groupName)+1);
+                } else {
+                    etFrameGroupName.setText(newFrameGroupPlaceholder[0]);
+                    etFrameGroupName.setEnabled(true);
+                    spFrameGroup.setSelection(0);
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        etFrameGroupName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    newFrameGroupPlaceholder[0] = etFrameGroupName.getText().toString().trim();
+                }
+            }
+        });
+
+
+        spFrameGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    etFrameGroupName.setEnabled(true);
+                    autoCompNewId.setEnabled(true);
+                    etFrameGroupName.setText(newFrameGroupPlaceholder[0]);
+                    autoCompNewId.setText("");
+                } else {
+                    autoCompNewId.showDropDown();
+                    String groupName = spFrameGroupNamesList.get(position);
+                    etFrameGroupName.setText(groupName);
+                    etFrameGroupName.setEnabled(false);//An existing frame group
+                    autoCompNewId.setText(frameGroupsIdsList.get(position - 1));
+                    idChangedInSpinner[0] = true;
+                    autoCompNewId.dismissDropDown();
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
             }
         });
 
@@ -386,7 +490,7 @@ public class ImportFragment extends Fragment {
             gbcFrame.setFrameBytes(gbFrameBytes);
             String gbFrameHash = generateHashFromBytes(gbFrameBytes);
             gbcFrame.setFrameHash(gbFrameHash);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -435,7 +539,7 @@ public class ImportFragment extends Fragment {
                     if (newFrameImages.size() > 0) {
                         Utils.framesList.addAll(newFrameImages);
                         for (GbcFrame frame : newFrameImages) {
-                            Utils.hashFrames.put(frame.getFrameName(), frame);
+                            Utils.hashFrames.put(frame.getFrameId(), frame);
                         }
                         new SaveFrameAsyncTask(newFrameImages).execute();
                         alertdialog.dismiss();
@@ -768,6 +872,10 @@ public class ImportFragment extends Fragment {
             for (GbcFrame gbcFrame : gbcFramesList) {
                 frameDao.insert(gbcFrame);
             }
+            GbcFrame frameWithFrameGroupNames = hashFrames.get("gbcam01");
+            frameGroupsNames.putAll(importedFrameGroupIdNames);
+            frameWithFrameGroupNames.setFrameGroupsNames(frameGroupsNames);
+            frameDao.update(frameWithFrameGroupNames);
             return null;
         }
 
@@ -1108,7 +1216,6 @@ public class ImportFragment extends Fragment {
                         }
 
                     }
-
                 }
             }
     );
@@ -1160,7 +1267,7 @@ public class ImportFragment extends Fragment {
                 Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, false, false, false);
                 if (image.getHeight() == 112 && image.getWidth() == 128) {
                     //I need to use copy because if not it's inmutable bitmap
-                    Bitmap framed = Utils.hashFrames.get("nintendo_frame").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    Bitmap framed = Utils.hashFrames.get("gbcam01").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(image, 16, 16, null);
                     image = framed;

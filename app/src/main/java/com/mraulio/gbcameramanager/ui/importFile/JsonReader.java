@@ -1,6 +1,9 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
+import static com.mraulio.gbcameramanager.MainActivity.db;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
+import static com.mraulio.gbcameramanager.ui.importFile.ImportFragment.importedFrameGroupIdNames;
+import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
@@ -19,7 +22,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -69,7 +71,7 @@ public class JsonReader {
                 }
 
             } else if (stateObject.has("frames")) {
-                return readerFrames(jsonObject,stateObject);
+                return readerFrames(jsonObject, stateObject);
 
             } else if (stateObject.has("images")) {
                 //Images json
@@ -149,7 +151,7 @@ public class JsonReader {
                             gbcImage.setFrameId("");
                         else gbcImage.setFrameId(frameName.toLowerCase());
                         if (!Utils.hashFrames.containsKey(gbcImage.getFrameId())) {
-                            gbcImage.setFrameId("nintendo_frame");
+                            gbcImage.setFrameId("gbcam01");
                         }
                     }
 
@@ -212,16 +214,17 @@ public class JsonReader {
         return paletteList;
     }
 
-    public static List<GbcFrame> readerFrames(JSONObject jsonObject,JSONObject stateObject) throws JSONException {
+    public static List<GbcFrame> readerFrames(JSONObject jsonObject, JSONObject stateObject) throws JSONException {
         if (frameJsonType(stateObject)) {
-            return readerFramesGBCAM(jsonObject,stateObject);
+            return readerFramesGBCAM(jsonObject, stateObject);
         } else {
-            return readerFramesWebApp(jsonObject,stateObject);
+            return readerFramesWebApp(jsonObject, stateObject);
         }
     }
 
     /**
      * Checks if the json was created in this app or not
+     *
      * @param stateObject
      * @return
      * @throws JSONException
@@ -229,18 +232,19 @@ public class JsonReader {
     public static boolean frameJsonType(JSONObject stateObject) throws JSONException {
         JSONArray framesArray = stateObject.getJSONArray("frames");
         JSONObject frameObj = framesArray.getJSONObject(0);
-        if (frameObj.has("isWildFrame")){
+        if (frameObj.has("isWildFrame")) {
             return true;
-        }else return false;
+        } else return false;
     }
 
     /**
      * To extract the frames from a json created with this app
+     *
      * @param stateObject
      * @return
      * @throws JSONException
      */
-    public static List<GbcFrame> readerFramesGBCAM(JSONObject jsonObject,JSONObject stateObject) throws JSONException {
+    public static List<GbcFrame> readerFramesGBCAM(JSONObject jsonObject, JSONObject stateObject) throws JSONException {
         //Entering frame json. There are 2 types, old with id, new with hash
         JSONArray framesArray = stateObject.getJSONArray("frames");
         if (framesArray.length() == 0) {
@@ -290,9 +294,22 @@ public class JsonReader {
                 e.printStackTrace();
             }
         }
+        try {
+            JSONArray framesGroupNamesArray = stateObject.getJSONArray("frameGroupNames");
+            for (int i = 0; i < framesGroupNamesArray.length(); i++) {
+                JSONObject frameNameObj = framesArray.getJSONObject(i);
+                String frameGroupId = frameNameObj.getString("id");
+                String frameGroupName = frameNameObj.getString("name");
+                importedFrameGroupIdNames.put(frameGroupId, frameGroupName);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return frameList;
 
     }
+
     public static String decodeDataTransparency(String compressedString) {
         byte[] compressedBytes = compressedString.getBytes(StandardCharsets.ISO_8859_1);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -311,7 +328,8 @@ public class JsonReader {
         }
         return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
     }
-    public static List<GbcFrame> readerFramesWebApp(JSONObject jsonObject,JSONObject stateObject) throws
+
+    public static List<GbcFrame> readerFramesWebApp(JSONObject jsonObject, JSONObject stateObject) throws
             JSONException {
         //Entering frame json. There are 2 types, old with id, new with hash
         JSONArray framesArray = stateObject.getJSONArray("frames");
@@ -329,19 +347,23 @@ public class JsonReader {
                 String id;
                 if (frameObj.has("id") && frameObj.has("name") && !frameObj.has("hash") && !frameObj.has("tempId")) {
                     //Old type
-                    name = frameObj.getString("id");
+                    name = frameObj.getString("name");
                     id = frameObj.getString("id");
 
                 } else if (frameObj.has("id") && frameObj.has("name") && frameObj.has("hash")) {//tempId sometimes is not present
                     //New type with hash
-                    name = frameObj.getString("id");
-                    id = frameObj.getString("hash");
+                    name = frameObj.getString("name");
+                    id = frameObj.getString("id");
                 } else {
                     return null;
                 }
                 GbcFrame gbcFrame = new GbcFrame();
+                String frameHash = frameObj.getString("hash");
+                gbcFrame.setFrameHash(frameHash);
                 gbcFrame.setFrameName(name);
-                String data = jsonObject.getString("frame-" + id);
+                gbcFrame.setFrameId(id);
+
+                String data = jsonObject.getString("frame-" + frameHash);
                 String decompHash = recreateFrame(data);
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
@@ -362,6 +384,20 @@ public class JsonReader {
                 e.printStackTrace();
             }
         }
+
+        try {
+            JSONArray framesGroupNamesArray = stateObject.getJSONArray("frameGroupNames");
+            for (int i = 0; i < framesGroupNamesArray.length(); i++) {
+                JSONObject frameNameObj = framesGroupNamesArray.getJSONObject(i);
+                String frameGroupId = frameNameObj.getString("id");
+                String frameGroupName = frameNameObj.getString("name");
+                importedFrameGroupIdNames.put(frameGroupId, frameGroupName);
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return frameList;
     }
 

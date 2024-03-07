@@ -29,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class Utils {
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
 
 
-    public static HashMap<String,String> frameGroupsNames = new HashMap<>();
+    public static LinkedHashMap<String,String> frameGroupsNames = new LinkedHashMap<>();
 
     public static final int[] ROTATION_VALUES = {0, 90, 180, 270};
     public static List<GbcImage> gbcImagesList = new ArrayList<>();

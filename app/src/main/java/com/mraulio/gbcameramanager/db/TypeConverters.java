@@ -13,7 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class TypeConverters {
@@ -64,15 +64,15 @@ public class TypeConverters {
     }
 
     @TypeConverter
-    public static HashMap<String, String> fromString(String value) {
+    public static LinkedHashMap<String, String> fromString(String value) {
         if (value == null) {
             return null;
         }
-        return new Gson().fromJson(value, HashMap.class);
+        return new Gson().fromJson(value, LinkedHashMap.class);
     }
 
     @TypeConverter
-    public static String fromMap(HashMap<String, String> map) {
+    public static String fromMap(LinkedHashMap<String, String> map) {
         if (map == null) {
             return null;
         }

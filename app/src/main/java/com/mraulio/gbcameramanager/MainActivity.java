@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean exportSquare = false;
     public static boolean sortByDate = true;
     public static boolean sortDescending = false;
-    public static String selectedTags = new String();
+    public static String selectedTags = "";
 
     private boolean openedSav = false;
     public static UsbManager manager;
@@ -353,7 +353,6 @@ public class MainActivity extends AppCompatActivity {
                     Utils.hashFrames.put(gbcFrame.getFrameId(), gbcFrame);
                 }
                 Utils.frameGroupsNames = hashFrames.get("gbcam01").getFrameGroupsNames();
-
                 Utils.framesList.addAll(frames);
             } else {
                 //First time add it to the database

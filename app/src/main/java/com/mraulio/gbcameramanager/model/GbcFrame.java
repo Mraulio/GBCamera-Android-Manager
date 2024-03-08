@@ -15,11 +15,12 @@ import java.util.LinkedHashMap;
 public class GbcFrame {
 
     @PrimaryKey
-    @NonNull
-    String frameName;
-
     @ColumnInfo(name = "frame_id")
+    @NonNull
     String frameId;
+
+    @ColumnInfo(name = "frame_name")
+    String frameName;
 
     @ColumnInfo(name = "frame_hash")
     String frameHash;

@@ -33,11 +33,12 @@ public interface Extractor {
     List<Bitmap> extract(byte[] rawData);
 
 
-
-
     //Added by Mraulio
     List<byte[]> extractBytes(byte[] rawData,int saveBank);
-    List<byte[]> extractBytes(File file,int saveBank) throws IOException;
+
+    List<byte[]> extractImageMetadata(byte[] rawData);
+
+    List<byte[]> extractBytes(File file, int saveBank) throws IOException;
 
     /**
      * Extract images from a local file system file and return as PNG byte data

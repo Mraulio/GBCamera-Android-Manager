@@ -1,7 +1,5 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
-import static com.mraulio.gbcameramanager.MainActivity.db;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.compareTags;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
@@ -59,6 +57,7 @@ import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.internal.bind.util.ISO8601Utils;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.ImageData;
@@ -101,7 +100,7 @@ public class ImportFragment extends Fragment {
 
     static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
     static List<GbcImage> importedImagesList = new ArrayList<>();
-    static HashMap<String,String> importedFrameGroupIdNames = new HashMap<>();
+    static HashMap<String, String> importedFrameGroupIdNames = new HashMap<>();
     int totalImages = 0;
     List<List<GbcImage>> listActiveImages = new ArrayList<>();
     List<List<GbcImage>> listDeletedImages = new ArrayList<>();
@@ -356,206 +355,6 @@ public class ImportFragment extends Fragment {
         return view;
     }
 
-    private void frameImportDialog() {
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        View view = inflater.inflate(R.layout.frame_import_dialog, null);
-        ImageView ivFrame = view.findViewById(R.id.ivFrame);
-        GbcFrame gbcFrame = new GbcFrame();
-        gbcFrame.setFrameBitmap(finalListBitmaps.get(0));
-
-        Bitmap bitmapCopy = finalListBitmaps.get(0).copy(finalListBitmaps.get(0).getConfig(), true);
-        Bitmap bitmap = transparentBitmap(bitmapCopy, gbcFrame);
-        gbcFrame.setFrameBitmap(bitmap);
-
-        EditText etFrameGroupName = view.findViewById(R.id.etFrameGroupName);
-
-        Spinner spFrameGroup = view.findViewById(R.id.spFrameGroups);
-
-        List<String> frameGroupsNamesList = new ArrayList<>();
-        List<String> frameGroupsIdsList = new ArrayList<>();
-
-        for (String key : frameGroupsNames.keySet()) {
-            frameGroupsIdsList.add(key);
-            frameGroupsNamesList.add(frameGroupsNames.get(key));
-        }
-
-        List<String> spFrameGroupNamesList = new ArrayList<>();
-        spFrameGroupNamesList.add("New Frame Group");
-        spFrameGroupNamesList.addAll(frameGroupsNamesList);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_spinner_item, spFrameGroupNamesList);
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        spFrameGroup.setAdapter(adapter);
-        AutoCompleteTextView autoCompNewId = view.findViewById(R.id.etFrameId);
-
-
-        ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_dropdown_item_1line, frameGroupsIdsList);
-
-        autoCompNewId.setAdapter(adapterAutoComplete);
-        autoCompNewId.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(autoCompNewId.getWindowToken(), 0);
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        final String[] newFrameGroupPlaceholder = {""};
-        final boolean[] idChangedInSpinner = {false};
-        etFrameGroupName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (!hasFocus) {
-                    newFrameGroupPlaceholder[0] = etFrameGroupName.getText().toString().trim();
-                }
-            }
-        });
-
-        autoCompNewId.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//                placeholderString = etImageName.getText().toString();
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (idChangedInSpinner[0]) return;
-                String placeHolder = autoCompNewId.getText().toString().trim();
-                idChangedInSpinner[0] = false;
-                autoCompNewId.showDropDown();
-                if (frameGroupsIdsList.contains(placeHolder)) {
-                    String groupName = frameGroupsNames.get(autoCompNewId.getText().toString().trim());
-                    etFrameGroupName.setText(groupName);
-                    etFrameGroupName.setEnabled(false);//An existing frame group
-                    spFrameGroup.setSelection(frameGroupsNamesList.indexOf(groupName)+1);
-                } else {
-                    etFrameGroupName.setText(newFrameGroupPlaceholder[0]);
-                    etFrameGroupName.setEnabled(true);
-                    spFrameGroup.setSelection(0);
-                }
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        etFrameGroupName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (!hasFocus) {
-                    newFrameGroupPlaceholder[0] = etFrameGroupName.getText().toString().trim();
-                }
-            }
-        });
-
-
-        spFrameGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0) {
-                    etFrameGroupName.setEnabled(true);
-                    autoCompNewId.setEnabled(true);
-                    etFrameGroupName.setText(newFrameGroupPlaceholder[0]);
-                    autoCompNewId.setText("");
-                } else {
-                    autoCompNewId.showDropDown();
-                    String groupName = spFrameGroupNamesList.get(position);
-                    etFrameGroupName.setText(groupName);
-                    etFrameGroupName.setEnabled(false);//An existing frame group
-                    autoCompNewId.setText(frameGroupsIdsList.get(position - 1));
-                    idChangedInSpinner[0] = true;
-                    autoCompNewId.dismissDropDown();
-
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
-        try {
-            byte[] gbFrameBytes = Utils.encodeImage(bitmap, "bw");
-            gbcFrame.setFrameBytes(gbFrameBytes);
-            String gbFrameHash = generateHashFromBytes(gbFrameBytes);
-            gbcFrame.setFrameHash(gbFrameHash);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        ivFrame.setImageBitmap(bitmap);
-        EditText etFrameName = view.findViewById(R.id.etFrameName);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setView(view);
-        AlertDialog alertdialog = builder.create();
-
-        etFrameName.setImeOptions(EditorInfo.IME_ACTION_DONE);//When pressing enter
-        Button btnSaveFrame = view.findViewById(R.id.btnSaveFrame);
-        btnSaveFrame.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (finalListBitmaps.get(0).getHeight() == 224) {
-                    gbcFrame.setWildFrame(true);
-                }
-
-                try {
-                    gbcFrame.setFrameBytes(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                List<GbcFrame> newFrameImages = new ArrayList<>();
-                //Add here the dialog for the frame name
-                String frameName = etFrameName.getText().toString().toLowerCase(Locale.ROOT);
-                if (frameName.equals("")) {
-                    Utils.toast(getContext(), getString(R.string.no_empty_frame_name));
-                    etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
-                } else if (frameName.contains(" ")) {
-                    Utils.toast(getContext(), getString(R.string.no_spaces_frame_name));//Add string
-                    etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
-                } else {
-                    gbcFrame.setFrameName(frameName);
-                    boolean alreadyAdded = false;
-                    //If the palette already exists (by the name) it doesn't add it. Same if it's already added
-                    if (Utils.hashFrames.containsKey(frameName)) {
-                        alreadyAdded = true;
-                        etFrameName.setBackgroundColor(Color.parseColor("#FF0000"));
-                        Utils.toast(getContext(), getString(R.string.frame_name_exists));//Add string
-                    }
-
-                    if (!alreadyAdded) {
-                        newFrameImages.add(gbcFrame);
-                    }
-                    if (newFrameImages.size() > 0) {
-                        Utils.framesList.addAll(newFrameImages);
-                        for (GbcFrame frame : newFrameImages) {
-                            Utils.hashFrames.put(frame.getFrameId(), frame);
-                        }
-                        new SaveFrameAsyncTask(newFrameImages).execute();
-                        alertdialog.dismiss();
-                    }
-                }
-            }
-        });
-
-        builder.setNegativeButton(
-                getString(R.string.cancel), (dialog, which) ->
-                {
-                });
-
-        alertdialog.show();
-    }
-
     private void extractFile() {
         //I clear the lists in case I choose several files without leaving
         importedImagesList.clear();
@@ -771,40 +570,6 @@ public class ImportFragment extends Fragment {
 
         adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null);
     }
-
-    //Refactor, also on UsbSerialFragment
-//    private void showImages(CheckBox showLastSeen, CheckBox showDeleted) {
-//        List<Bitmap> bitmapsAdapterList = null;
-//        if (!showLastSeen.isChecked() && !showDeleted.isChecked()) {
-//            finalListImages = new ArrayList<>(listActiveImages);
-//            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-//            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
-//        } else if (showLastSeen.isChecked() && !showDeleted.isChecked()) {
-//            finalListImages = new ArrayList<>(listActiveImages);
-//            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-//            finalListImages.add(lastSeenImage.get(i));
-//            finalListBitmaps.add(lastSeenBitmap);
-//            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
-//
-//        } else if (!showLastSeen.isChecked() && showDeleted.isChecked()) {
-//            finalListImages = new ArrayList<>(listActiveImages);
-//            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-//            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
-//            finalListImages.addAll(listDeletedImages);
-//            finalListBitmaps.addAll(listDeletedBitmaps);
-//            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
-//        } else if (showLastSeen.isChecked() && showDeleted.isChecked()) {
-//            finalListImages = new ArrayList<>(listActiveImages);
-//            finalListBitmaps = new ArrayList<>(listActiveBitmaps);
-//            finalListImages.add(lastSeenImage);
-//            finalListImages.addAll(listDeletedImages);
-//            finalListBitmaps.add(lastSeenBitmap);
-//            bitmapsAdapterList = new ArrayList<>(finalListBitmaps);
-//            finalListBitmaps.addAll(listDeletedBitmaps);
-//            bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
-//        }
-//        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null);
-//    }
 
     private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
         List<GbcImage> gbcImagesList;
@@ -1327,4 +1092,334 @@ public class ImportFragment extends Fragment {
         }
         return bytes;
     }
+
+    private void frameImportDialog() {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View view = inflater.inflate(R.layout.frame_import_dialog, null);
+        ImageView ivFrame = view.findViewById(R.id.ivFrame);
+        GbcFrame gbcFrame = new GbcFrame();
+        gbcFrame.setFrameBitmap(finalListBitmaps.get(0));
+
+        Button btnIncrement = view.findViewById(R.id.decrementButton);
+        Button btnDecrement = view.findViewById(R.id.incrementButton);
+        EditText etFrameIndex = view.findViewById(R.id.numberEditText);
+        AutoCompleteTextView autoCompNewId = view.findViewById(R.id.etFrameId);
+
+
+        final String[] frameName = {""};
+        final boolean[] validId = {false};
+        final int MIN_INDEX = 1;
+        final int MAX_INDEX = 99;
+
+        final int[] index = {1};
+        final String[] frameId = {""};
+        btnIncrement.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (index[0] > MIN_INDEX) {
+                    index[0]--;
+                    etFrameIndex.setText(String.valueOf(index[0]));
+                    frameId[0] = generateFrameId(autoCompNewId.getText().toString().trim(), index[0]);
+                    validId[0] = checkExistingIdIndex(frameId[0]);
+                    if (!validId[0]) {
+                        etFrameIndex.setError(getContext().getString(R.string.et_frame_id_error));
+                    }
+                }
+            }
+        });
+
+        etFrameIndex.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String text = s.toString();
+                if (!text.isEmpty()) {
+                    if (!text.matches("^[1-9][0-9]?$|^(100)$")) {
+                        etFrameIndex.setError(getContext().getString(R.string.et_frame_index_error));
+                    } else {
+                        etFrameIndex.setError(null);
+                        index[0] = Integer.valueOf(text);
+                    }
+                }
+                frameId[0] = generateFrameId(autoCompNewId.getText().toString().trim(), index[0]);
+                validId[0] = checkExistingIdIndex(frameId[0]);
+                if (!validId[0]) {
+                    etFrameIndex.setError(getContext().getString(R.string.et_frame_id_error));
+                }
+            }
+        });
+
+        btnDecrement.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (index[0] < MAX_INDEX) {
+                    index[0]++;
+                    etFrameIndex.setText(String.valueOf(index[0]));
+                    frameId[0] = generateFrameId(autoCompNewId.getText().toString().trim(), index[0]);
+                    validId[0] = checkExistingIdIndex(frameId[0]);
+                    if (!validId[0]) {
+                        etFrameIndex.setError(getContext().getString(R.string.et_frame_id_error));
+                    }
+                }
+            }
+        });
+
+        Bitmap bitmapCopy = finalListBitmaps.get(0).copy(finalListBitmaps.get(0).getConfig(), true);
+        Bitmap bitmap = transparentBitmap(bitmapCopy, gbcFrame);
+        gbcFrame.setFrameBitmap(bitmap);
+
+        EditText etFrameGroupName = view.findViewById(R.id.etFrameGroupName);
+
+        Spinner spFrameGroup = view.findViewById(R.id.spFrameGroups);
+
+        List<String> frameGroupsNamesList = new ArrayList<>();
+        List<String> frameGroupsIdsList = new ArrayList<>();
+
+        for (String key : frameGroupsNames.keySet()) {
+            frameGroupsIdsList.add(key);
+            frameGroupsNamesList.add(frameGroupsNames.get(key));
+        }
+
+        List<String> spFrameGroupNamesList = new ArrayList<>();
+        spFrameGroupNamesList.add("New Frame Group");
+        spFrameGroupNamesList.addAll(frameGroupsNamesList);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, spFrameGroupNamesList);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spFrameGroup.setAdapter(adapter);
+        autoCompNewId.dismissDropDown();//Disabled at the beginning
+
+        ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_dropdown_item_1line, frameGroupsIdsList);
+
+        autoCompNewId.setAdapter(adapterAutoComplete);
+        autoCompNewId.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(autoCompNewId.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        final String[] newFrameGroupPlaceholder = {""};
+//        final boolean[] idChangedInSpinner = {false};
+        etFrameGroupName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    newFrameGroupPlaceholder[0] = etFrameGroupName.getText().toString().trim();
+                }
+            }
+        });
+
+        final String[] frameGroupId = {""};
+        autoCompNewId.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//                placeholderString = etImageName.getText().toString();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                if (idChangedInSpinner[0]) return;
+                String placeHolder = autoCompNewId.getText().toString().trim();
+                if (!placeHolder.isEmpty()) {
+                    if (!placeHolder.matches("^[a-z]{2,}$")) {
+                        autoCompNewId.setError(getContext().getString(R.string.et_frame_group_id_error));
+                        validId[0] = false;
+                    } else {
+                        frameGroupId[0] = placeHolder;
+                        autoCompNewId.setError(null);
+                        //                idChangedInSpinner[0] = false;
+                        if (frameGroupsIdsList.contains(placeHolder)) {
+                            String groupName = frameGroupsNames.get(autoCompNewId.getText().toString().trim());
+                            etFrameGroupName.setText(groupName);
+                            etFrameGroupName.setEnabled(false);//An existing frame group
+                            spFrameGroup.setSelection(frameGroupsNamesList.indexOf(groupName) + 1);
+                        } else {
+                            etFrameGroupName.setText(newFrameGroupPlaceholder[0]);
+                            etFrameGroupName.setEnabled(true);
+                            spFrameGroup.setSelection(0);
+                        }
+                        frameId[0] = generateFrameId(autoCompNewId.getText().toString().trim(), index[0]);
+                        validId[0] = checkExistingIdIndex(frameId[0]);
+                        if (!validId[0]) {
+                            etFrameIndex.setError(getContext().getString(R.string.et_frame_id_error));
+                        } else{
+                            etFrameIndex.setError(null);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        autoCompNewId.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (hasFocus) {
+                    autoCompNewId.showDropDown();
+                } else {
+                    autoCompNewId.dismissDropDown();
+                }
+            }
+        });
+
+        etFrameGroupName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    newFrameGroupPlaceholder[0] = etFrameGroupName.getText().toString().trim();
+                }
+            }
+        });
+
+        spFrameGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    etFrameGroupName.setEnabled(true);
+                    autoCompNewId.setEnabled(true);
+                    etFrameGroupName.setText(newFrameGroupPlaceholder[0]);
+//                    autoCompNewId.setText("");
+                } else {
+                    String groupName = spFrameGroupNamesList.get(position);
+                    etFrameGroupName.setText(groupName);
+                    etFrameGroupName.setEnabled(false);//An existing frame group
+                    autoCompNewId.setText(frameGroupsIdsList.get(position - 1));
+//                    idChangedInSpinner[0] = true;
+                    autoCompNewId.setSelection(autoCompNewId.getText().length());
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        try {
+            byte[] gbFrameBytes = Utils.encodeImage(bitmap, "bw");
+            gbcFrame.setFrameBytes(gbFrameBytes);
+            String gbFrameHash = generateHashFromBytes(gbFrameBytes);
+            gbcFrame.setFrameHash(gbFrameHash);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ivFrame.setImageBitmap(bitmap);
+        EditText etFrameName = view.findViewById(R.id.etFrameName);
+        etFrameName.requestFocus();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setView(view);
+        AlertDialog alertdialog = builder.create();
+
+        etFrameName.setImeOptions(EditorInfo.IME_ACTION_DONE);//When pressing enter
+
+        etFrameName.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//                placeholderString = etImageName.getText().toString();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                frameName[0] = etFrameName.getText().toString().trim();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        Button btnSaveFrame = view.findViewById(R.id.btnSaveFrame);
+        btnSaveFrame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (finalListBitmaps.get(0).getHeight() == 224) {
+                    gbcFrame.setWildFrame(true);
+                }
+                try {
+                    gbcFrame.setFrameBytes(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                List<GbcFrame> newFrameImages = new ArrayList<>();
+                //Add here the dialog for the frame name
+                if (frameId.equals("")) {
+                    etFrameName.setError(getString(R.string.no_empty_frame_name));
+                } else {
+                    gbcFrame.setFrameId(frameId[0]);
+                    gbcFrame.setFrameName(frameName[0]);
+                    boolean alreadyAdded = false;
+                    //If the frame already exists (by the id) it doesn't add it. Same if it's already added
+                    if (!validId[0]) {
+                        alreadyAdded = true;
+                    }
+
+                    if (!alreadyAdded) {
+                        newFrameImages.add(gbcFrame);
+                    }
+                    if (newFrameImages.size() > 0) {
+                        Utils.framesList.addAll(newFrameImages);
+                        for (GbcFrame frame : newFrameImages) {
+                            Utils.hashFrames.put(frame.getFrameId(), frame);
+                        }
+                        if (!importedFrameGroupIdNames.containsKey(frameGroupId[0])){
+                            importedFrameGroupIdNames.put(frameGroupId[0], newFrameGroupPlaceholder[0]);
+                        }
+                        new SaveFrameAsyncTask(newFrameImages).execute();
+                        alertdialog.dismiss();
+                    }
+                }
+            }
+        });
+
+        builder.setNegativeButton(
+                getString(R.string.cancel), (dialog, which) ->
+                {
+                });
+        alertdialog.show();
+    }
+
+    private String generateFrameId(String groupId, int frameIndex) {
+        String frameId = new String(groupId);
+        if (frameIndex < 10) {
+            frameId += "0" + frameIndex;
+        } else {
+            frameId += String.valueOf(frameIndex);
+        }
+        return frameId;
+    }
+
+
+    private boolean checkExistingIdIndex(String frameId) {
+        for (HashMap.Entry<String, GbcFrame> entry : hashFrames.entrySet()) {
+            if (entry.getValue().getFrameId().equals(frameId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

@@ -195,4 +195,11 @@
     <string name="et_frame_group_name">Set frame group name</string>
     <string name="tv_frame_index">Frame index: </string>
 
+    <string name="et_frame_index_error">Value must be between 1 and 99</string>
+    <string name="et_frame_id_error">Already existing frame id</string>
+
+    <string name="et_frame_group_id_error">Only lowercase allowed, min 2 char</string>
+    <string name="sp_all_frame_groups">All frames</string>
+
+
 </resources>

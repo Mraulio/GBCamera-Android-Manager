@@ -15,10 +15,10 @@ public interface FrameDao {
     @Query("SELECT * FROM gbcframe")
     List<GbcFrame> getAll();
 
-    @Query("SELECT * FROM gbcframe WHERE frameName IN (:frameNameIds)")
+    @Query("SELECT * FROM gbcframe WHERE frame_id IN (:frameNameIds)")
     List<GbcFrame> loadAllByIds(int[] frameNameIds);
 
-    @Query("SELECT * FROM gbcframe WHERE frameName LIKE :first LIMIT 1")
+    @Query("SELECT * FROM gbcframe WHERE frame_id LIKE :first LIMIT 1")
     GbcFrame findByName(String first);
 
     @Insert

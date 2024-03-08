@@ -4,7 +4,10 @@ package com.mraulio.gbcameramanager.ui.frames;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
+import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -40,6 +43,7 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -50,7 +54,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -69,63 +75,87 @@ public class FramesFragment extends Fragment {
         MainActivity.pressBack = false;
         Button btnExportFramesJson = view.findViewById(R.id.btnExportFramesJson);
 
-        CustomGridViewAdapterFrames customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Utils.framesList, true, false);
+        final List<GbcFrame>[] currentlyShowingFrames = new List[]{Utils.framesList};
+        final CustomGridViewAdapterFrames[] customGridViewAdapterFrames = {new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false)};
         TextView tvNumFrames = view.findViewById(R.id.tvNumFrames);
 
-        Spinner spAvailableTags = view.findViewById(R.id.spFrameGroups);
+        Spinner spFrameGroups = view.findViewById(R.id.spFrameGroups);
 
-//        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
-//                android.R.layout.simple_spinner_item, availableTotalTagsSpinner);
+        List<String> frameGroupList = new ArrayList<>();
+        frameGroupList.add(getString(R.string.sp_all_frame_groups));
+        List<String> frameGroupIds = new ArrayList<>();//To access with index
+        for (LinkedHashMap.Entry<String, String> entry : frameGroupsNames.entrySet()) {
+            frameGroupList.add(entry.getValue() + " (" + entry.getKey() + ")");
+            frameGroupIds.add(entry.getKey());
+        }
 
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        spAvailableTags.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, frameGroupList);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spFrameGroups.setAdapter(adapter);
+
+        spFrameGroups.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == 0) {
+                    //Show all frames
+                    currentlyShowingFrames[0] = Utils.framesList;
+                } else {
+                    String frameGroupId = frameGroupIds.get(i - 1);
+                    List<GbcFrame> currentGroupList = new ArrayList<>();
+                    for (GbcFrame gbcFrame : Utils.framesList) {
+                        String gbcFrameGroup = gbcFrame.getFrameId().substring(0, gbcFrame.getFrameId().length() - 2);//To remove the numbers at the end, always going to be 2 numbers
+                        if (gbcFrameGroup.equals(frameGroupId)) {
+                            currentGroupList.add(gbcFrame);
+                        }
+                    }
+                    currentlyShowingFrames[0] = currentGroupList;
+                }
+                customGridViewAdapterFrames[0] = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false);
+                gridView.setAdapter(customGridViewAdapterFrames[0]);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                GbcFrame clickedFrame = currentlyShowingFrames[0].get(i);
+            }
+        });
 
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position <= 3) {
+
+                GbcFrame selectedFrame = currentlyShowingFrames[0].get(position);
+
+                if (selectedFrame.getFrameId().equals("gbcam01") || selectedFrame.getFrameId().equals("gbcam02") || selectedFrame.getFrameId().equals("gbcam03") || selectedFrame.getFrameId().equals("gbcam04")) {
                     Utils.toast(getContext(), getString(R.string.cant_delete_base));
-                }
-                if (position > 3) {
+                } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle(getString(R.string.delete_frame_dialog) + Utils.framesList.get(position).getFrameName() + "?");
+                    builder.setTitle(getString(R.string.delete_frame_dialog) + selectedFrame.getFrameName() + "(" + selectedFrame.getFrameId() + ")?");
                     builder.setMessage(getString(R.string.sure_dialog));
 
                     ImageView imageView = new ImageView(getContext());
                     imageView.setAdjustViewBounds(true);
                     imageView.setPadding(30, 10, 30, 10);
-                    imageView.setImageBitmap(Utils.framesList.get(position).getFrameBitmap());
+                    imageView.setImageBitmap(selectedFrame.getFrameBitmap());
 
                     builder.setView(imageView);
 
                     builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            new DeleteFrameAsyncTask(Utils.framesList.get(position)).execute();
+                            new DeleteFrameAsyncTask(selectedFrame, spFrameGroups, frameGroupList, adapter, frameGroupIds, tvNumFrames, customGridViewAdapterFrames[0], gridView, currentlyShowingFrames[0]).execute();
                             //I change the frame index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
-                            for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
-                                if (Utils.gbcImagesList.get(i).getFrameId().equals(Utils.framesList.get(position).getFrameId())) {
-                                    Utils.gbcImagesList.get(i).setFrameId("gbcam01");
-                                    //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
-                                    if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
-                                        Bitmap image = null;
-                                        try {
-                                            GbcImage gbcImage = Utils.gbcImagesList.get(i);
-                                            image = frameChange(gbcImage, "gbcam01", gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
-                                            Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
-                                            GalleryFragment.diskCache.put(gbcImage.getHashCode(), image);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                    new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
-                                }
-                            }
-                            Utils.hashFrames.remove(Utils.framesList.get(position).getFrameId());
-                            Utils.framesList.remove(position);
-                            customGridViewAdapterFrames.notifyDataSetChanged();
+
                         }
                     });
                     builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -152,9 +182,8 @@ public class FramesFragment extends Fragment {
             }
         });
 
-
         // Inflate the layout for this fragment
-        gridView.setAdapter(customGridViewAdapterFrames);
+        gridView.setAdapter(customGridViewAdapterFrames[0]);
         tvNumFrames.setText(getString(R.string.frames_total) + Utils.framesList.size());
         return view;
     }
@@ -276,16 +305,118 @@ public class FramesFragment extends Fragment {
 
         //To add the new palette as a parameter
         private final GbcFrame gbcFrame;
+        private Spinner spFrameGroups;
+        private List<String> frameGroupList;
+        private List<String> frameGroupIds;
+        private TextView tvNumFrames;
+        private CustomGridViewAdapterFrames customGridViewAdapterFrames;
+        private ArrayAdapter<String> adapter;
+        private GridView gridView;
+        private List<GbcFrame> currentlyShowingFrames;
 
-        public DeleteFrameAsyncTask(GbcFrame gbcFrame) {
+        boolean putSpToCero = false;
+
+        public DeleteFrameAsyncTask(GbcFrame gbcFrame, Spinner spFrameGroups, List<String> frameGroupList, ArrayAdapter<String> adapter, List<String> frameGroupIds, TextView tvNumFrames, CustomGridViewAdapterFrames customGridViewAdapterFrames,
+                                    GridView gridView, List<GbcFrame> currentlyShowingFrames) {
             this.gbcFrame = gbcFrame;
+            this.spFrameGroups = spFrameGroups;
+            this.frameGroupList = frameGroupList;
+            this.adapter = adapter;
+            this.frameGroupIds = frameGroupIds;
+            this.tvNumFrames = tvNumFrames;
+            this.customGridViewAdapterFrames = customGridViewAdapterFrames;
+            this.gridView = gridView;
+            this.currentlyShowingFrames = currentlyShowingFrames;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             FrameDao frameDao = MainActivity.db.frameDao();
             frameDao.delete(gbcFrame);
+
+            String deletedFrameGroupId = gbcFrame.getFrameId().substring(0, gbcFrame.getFrameId().length() - 2);
+            int numberOfFramesInId = 0;
+
+            Utils.hashFrames.remove(gbcFrame.getFrameId());
+            for (GbcFrame gbcFrame : framesList) {
+                if (gbcFrame.getFrameId().substring(0, gbcFrame.getFrameId().length() - 2).equals(deletedFrameGroupId)) {
+                    numberOfFramesInId++;
+                }
+            }
+            //If it's the last frame from the group, delete the group too and update the frame holding the group names
+            if (numberOfFramesInId < 2) {
+                putSpToCero = true;
+                for (Iterator<String> iterator = frameGroupList.iterator(); iterator.hasNext(); ) {
+                    String currentGroup = iterator.next();
+                    String deletedGroupName = frameGroupsNames.get(deletedFrameGroupId) + " (" + deletedFrameGroupId + ")";
+                    if (currentGroup.equals(deletedGroupName)) {
+                        iterator.remove();
+                        break;
+                    }
+                }
+
+                for (Iterator<String> iterator = frameGroupIds.iterator(); iterator.hasNext(); ) {
+                    String currentGroup = iterator.next();
+                    if (currentGroup.equals(deletedFrameGroupId)) {
+                        iterator.remove();
+                        break;
+                    }
+                }
+
+                frameGroupsNames.remove(deletedFrameGroupId);
+                GbcFrame frameWithFrameGroupNames = hashFrames.get("gbcam01");
+                frameWithFrameGroupNames.setFrameGroupsNames(frameGroupsNames);
+                frameDao.update(frameWithFrameGroupNames);
+            }
+
+            //Delete the frame from the list of frames
+            for (Iterator<GbcFrame> iterator = framesList.iterator(); iterator.hasNext(); ) {
+                GbcFrame checkFrame = iterator.next();
+                if (gbcFrame.getFrameId().equals(checkFrame.getFrameId())) {
+                    iterator.remove();
+                    break;
+                }
+            }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            adapter.notifyDataSetChanged();
+            for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
+                if (Utils.gbcImagesList.get(i).getFrameId().equals(gbcFrame.getFrameId())) {
+                    Utils.gbcImagesList.get(i).setFrameId("gbcam01");
+                    //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
+                    if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
+                        Bitmap image = null;
+                        try {
+                            GbcImage gbcImage = Utils.gbcImagesList.get(i);
+                            image = frameChange(gbcImage, "gbcam01", gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
+                            Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
+                            GalleryFragment.diskCache.put(gbcImage.getHashCode(), image);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
+                }
+            }
+            if (putSpToCero) {
+                spFrameGroups.setSelection(0);//Select all frames list
+            }
+            for (Iterator<GbcFrame> iterator = currentlyShowingFrames.iterator(); iterator.hasNext(); ) {
+                GbcFrame frame = iterator.next();
+                if (frame.getFrameId().equals(gbcFrame.getFrameId())) {
+                    iterator.remove();
+                    break;
+                }
+            }
+
+            customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames, true, false);
+
+            gridView.setAdapter(customGridViewAdapterFrames);
+            tvNumFrames.setText(getString(R.string.frames_total) + Utils.framesList.size());
+            customGridViewAdapterFrames.notifyDataSetChanged();
         }
     }
 

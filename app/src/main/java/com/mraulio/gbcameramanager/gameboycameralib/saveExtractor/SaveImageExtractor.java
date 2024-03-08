@@ -63,15 +63,8 @@ public class SaveImageExtractor implements Extractor {
                 if (i != 0 && isEmptyImage(image)) {//FOR THE DELETED IMAGES, CHECK THIS
                     continue;
                 }
-//                if (i == 0){
-//                    i += NEXT_IMAGE_START_OFFSET;//0 means it's the last seen, then we need to continue on 0x2000
-//                }
                 images.add(imageCodec.decode(image));
 
-                // The thumbs
-//                byte[] thumbImage = new byte[SMALL_IMAGE_LENGTH];
-//                System.arraycopy(rawData, i + SMALL_IMAGE_START_OFFSET, thumbImage, 0, SMALL_IMAGE_LENGTH);
-//                images.add(smallImageCodec.decode(thumbImage));
             }
 
         } catch (Exception e) {
@@ -81,6 +74,20 @@ public class SaveImageExtractor implements Extractor {
         return images;
     }
 
+    @Override
+    public List<byte[]> extractImageMetadata(byte[] rawData) {
+        List<byte[]> imageMetadatas = new ArrayList<>();
+        try {
+            for (int i = IMAGE_START_LOCATION; i < rawData.length; i += NEXT_IMAGE_START_OFFSET) {
+                byte[] imageMetadata = new byte[IMAGE_METADATA_LENGTH];
+                System.arraycopy(rawData, i + IMAGE_METADATA_OFFSET, imageMetadata, 0, IMAGE_METADATA_LENGTH);
+                imageMetadatas.add(imageMetadata);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return imageMetadatas;
+    }
 
     @Override
     public List<byte[]> extractBytes(File file, int saveBank) throws IOException {

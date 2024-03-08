@@ -52,7 +52,7 @@ public class Utils {
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
 
 
-    public static LinkedHashMap<String,String> frameGroupsNames = new LinkedHashMap<>();
+    public static LinkedHashMap<String, String> frameGroupsNames = new LinkedHashMap<>();
 
     public static final int[] ROTATION_VALUES = {0, 90, 180, 270};
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
@@ -129,9 +129,17 @@ public class Utils {
 
     public static ArrayList<String> getSelectedTags() {
         try {
-            return new Gson().fromJson(selectedTags, new TypeToken<ArrayList<String>>() {
-            }.getType());
+            ArrayList<String> arrayList;
+
+            if (!selectedTags.isEmpty()) {
+                arrayList = new Gson().fromJson(selectedTags, new TypeToken<ArrayList<String>>() {
+                }.getType());
+            } else {
+                arrayList = new ArrayList<>();
+            }
+            return arrayList;
         } catch (Exception e) {
+            e.printStackTrace();
             return new ArrayList<>();
         }
     }

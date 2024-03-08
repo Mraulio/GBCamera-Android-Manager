@@ -31,6 +31,9 @@ public class GbcImage {
     @ColumnInfo(name = "invert_palette")
     private boolean invertPalette;
 
+    @ColumnInfo(name = "image_metadata")
+    private byte[] imageMetadata;
+
     @ColumnInfo(name = "invert_frame_palette", defaultValue = "false")
     private boolean invertFramePalette;
 
@@ -65,6 +68,14 @@ public class GbcImage {
     public static int numImages = 0;
 
     private byte[] imageBytes;
+
+    public byte[] getImageMetadata() {
+        return imageMetadata;
+    }
+
+    public void setImageMetadata(byte[] imageMetadata) {
+        this.imageMetadata = imageMetadata;
+    }
 
     public GbcImage() {
         this.paletteId = "bw";

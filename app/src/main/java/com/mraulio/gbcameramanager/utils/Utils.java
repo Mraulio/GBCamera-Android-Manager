@@ -307,7 +307,7 @@ public class Utils {
         File directory = new File(DB_BACKUP_FOLDER.toURI());
         if (!directory.isDirectory()) {
             //If DB backup directory is empty
-            toast(context, "No DB backup availables");
+            toast(context, context.getString(R.string.no_db_backup));
             return;
 
         }

@@ -209,5 +209,6 @@
     <string name="toast_restore_db">Database restore finished</string>
     <string name="dialog_restore_db_title">Select database to restore</string>
     <string name="dialog_confirm_restore_db">Restoring a database will reset all settings.\nMaking a database backup is recommended.\nApp will reset.\nAre you sure? </string>
+    <string name="no_db_backup">Restoring a database will reset all settings.\nMaking a database backup is recommended.\nApp will reset.\nAre you sure? </string>
 
 </resources>

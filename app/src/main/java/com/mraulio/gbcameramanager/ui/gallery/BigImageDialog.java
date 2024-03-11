@@ -2,6 +2,8 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.compareTags;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
@@ -35,6 +37,7 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
@@ -51,7 +54,8 @@ public class BigImageDialog {
     Context context;
     int currentPage;
     Activity activity;
-
+    boolean hideAllMultipleImage;
+    List<String> removedTags = new ArrayList<>();
 
     public BigImageDialog(List<GbcImage> filteredGbcImages, Context context, int currentPage, Activity activity) {
         this.filteredGbcImages = filteredGbcImages;
@@ -325,7 +329,7 @@ public class BigImageDialog {
     }
 
     //To show the "big" Image dialog when doing a simple tap on the image
-    public void showBigImageDialogMultipleImages(List<Integer> selectedImages, ImageView previousImageView) {
+    public void showBigImageDialogMultipleImages(List<Integer> selectedImages, ImageView previousImageView, boolean[] selectionMode, Dialog previousDialog) {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.big_image_dialog);
 
@@ -452,7 +456,6 @@ public class BigImageDialog {
         rbEditTags.setChecked(true);
 
         final boolean[] rbEditWasSelected = {false};
-
 //        rbEditTags.setOnClickListener(new View.OnClickListener() {
 //
 //            @Override
@@ -589,6 +592,18 @@ public class BigImageDialog {
 
                 tagsLayout.setBackgroundColor(context.getColor(R.color.white));
                 etImageName.setBackgroundColor(context.getColor(R.color.white));
+
+                //If one of the tags removed from the image is in the tags filtered, clear selected images, hide fab, hide dialog...
+
+                if (checkIfTagsHide(filterTags, removedTags)) {
+                    selectedImages.clear();
+                    showEditMenuButton = false;
+                    MainActivity.fab.hide();
+                    selectionMode[0] = false;
+                    activity.invalidateOptionsMenu();
+                    previousDialog.dismiss();
+                }
+
                 updateGridView(currentPage);
                 dialog.dismiss();
             }
@@ -658,7 +673,6 @@ public class BigImageDialog {
      * @param tag
      */
     private void createTagCheckBoxMultipleImages(String tag, LinearLayout tagsLayout, List<String> tempTags, boolean[] editingTags, Button btnUpdateImages, boolean autoCheck) {
-        System.out.println("temp tags: " + tempTags.toString());
         CheckBox tagCb = new CheckBox(context);
         if (autoCheck) {
             tagCb.setButtonDrawable(android.R.drawable.checkbox_on_background);
@@ -674,7 +688,6 @@ public class BigImageDialog {
 
         tagCb.setText(cbText);
         tagCb.setChecked(true);
-
         String finalTag = tag;
         tagCb.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -683,12 +696,15 @@ public class BigImageDialog {
                     tempTags.add(finalTag);
                     tagCb.setBackgroundColor(context.getColor(R.color.save_color));
                     tagCb.setButtonDrawable(android.R.drawable.checkbox_on_background);
-
+                    if (removedTags.contains(finalTag)) {
+                        removedTags.remove(finalTag);
+                    }
                 } else if (tempTags.contains(finalTag)) {
+                    hideAllMultipleImage = true;
                     tempTags.remove(finalTag);
+                    removedTags.add(finalTag);
                     tagCb.setBackgroundColor(context.getColor(R.color.listview_selected));
                     tagCb.setButtonDrawable(android.R.drawable.checkbox_off_background);
-
                 }
                 editingTags[0] = true;
 //                editingTags[0] = compareTags(originalTags, tempTags);
@@ -703,7 +719,16 @@ public class BigImageDialog {
                 btnUpdateImages.setEnabled(true);
             }
         });
-
         tagsLayout.addView(tagCb);
     }
+
+    private boolean checkIfTagsHide(List<String> filteredTags, List<String> removedTags) {
+        boolean hideBool = false;
+        for (String tag : filteredTags) {
+            if (removedTags.contains(tag))
+                return true;
+        }
+        return hideBool;
+    }
+
 }

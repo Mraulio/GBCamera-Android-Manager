@@ -136,7 +136,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     DisplayMetrics displayMetrics;
     public static DiskCache diskCache;
 
-    static boolean selectionMode = false;
+    static boolean[] selectionMode = {false};
     static boolean alreadyMultiSelect = false;
     static AlertDialog deleteDialog;
 
@@ -230,7 +230,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                if (!selectionMode) {
+                if (!selectionMode[0]) {
                     crop = false;
                     keepFrame = false;
                     //Obtain selected image
@@ -419,6 +419,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     filteredGbcImages.get(globalImageIndex).addTag("__filter:favourite__");
                                     imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                                 }
+                                retrieveTags(gbcImagesList);
+
                                 clickCount = 0;
                                 //To save the image with the favorite tag to the database
                                 new SaveImageAsyncTask(filteredGbcImages.get(globalImageIndex)).execute();
@@ -704,7 +706,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                if (!selectionMode) MainActivity.fab.show();
+                if (!selectionMode[0]) MainActivity.fab.show();
 
                 //I have to do this here, on onCreateView there was a crash
                 if (MainActivity.fab != null && !MainActivity.fab.hasOnClickListeners()) {
@@ -721,7 +723,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 } else {
                     globalImageIndex = filteredGbcImages.size() - (itemsPerPage - position);
                 }
-                if (selectionMode) {
+                if (selectionMode[0]) {
 
                     Collections.sort(selectedImages);
 
@@ -754,7 +756,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                 } else {
                     selectedImages.add(globalImageIndex);
-                    selectionMode = true;
+                    selectionMode[0] = true;
                     alreadyMultiSelect = false;
                     updateTitleText();
                 }
@@ -797,7 +799,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_multi_edit:
-                if (selectionMode && selectedImages.size() > 1) {
+                if (selectionMode[0] && selectedImages.size() > 1) {
                     Collections.sort(selectedImages);
                     List<Integer> indexesToLoad = new ArrayList<>();
                     for (int i : selectedImages) {
@@ -1002,7 +1004,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     public void run() {
                                         //Single tap action
                                         BigImageDialog bigImageDialog = new BigImageDialog(filteredGbcImages, getContext(), currentPage, getActivity());
-                                        bigImageDialog.showBigImageDialogMultipleImages(selectedImages, imageView);
+                                        bigImageDialog.showBigImageDialogMultipleImages(selectedImages, imageView, selectionMode,dialog);
 
                                         clickCount = 0;
                                     }
@@ -1024,8 +1026,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                             if (isFav) {
                                                 List<String> tags = filteredGbcImages.get(i).getTags();
                                                 for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
-                                                    String nombre = iter.next();
-                                                    if (nombre.equals("__filter:favourite__")) {
+                                                    String tag = iter.next();
+                                                    if (tag.equals("__filter:favourite__")) {
                                                         iter.remove();
                                                     }
                                                     filteredGbcImages.get(i).setTags(tags);
@@ -1037,20 +1039,22 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                                 filteredGbcImages.get(i).addTag("__filter:favourite__");
                                                 imageView.setBackgroundColor(getContext().getColor(R.color.favorite));
                                             }
-
+                                            retrieveTags(gbcImagesList);
                                             //To save the image with the favorite tag to the database
                                             new SaveImageAsyncTask(filteredGbcImages.get(i)).execute();
                                         }
                                         if (!filterTags.isEmpty()) {
                                             dialog.dismiss();
                                         }
-                                        if (selectionMode && !filterTags.isEmpty()) {
+                                        if (selectionMode[0] && !filterTags.isEmpty()) {
                                             for (int i = indexesToRemove.size(); i > 0; i--) {
                                                 filteredGbcImages.remove(indexesToRemove.get(i - 1));
                                             }
                                             selectedImages.clear();
+                                            showEditMenuButton = false;
                                             MainActivity.fab.hide();
-                                            selectionMode = false;
+                                            selectionMode[0] = false;
+                                            getActivity().invalidateOptionsMenu();
                                         }
 
                                         reloadLayout(layoutSelected, imageView, cbFrameKeep, cbInvert, paletteFrameSelButton, adapterPalette, frameAdapter);
@@ -1065,7 +1069,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 cbFrameKeep.setVisibility(GONE);
                                 paletteFrameSelButton.setVisibility(GONE);
                             }
-
 
                             cbFrameKeep.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -1255,7 +1258,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 return true;
 
             case R.id.action_filter_tags:
-                if (selectionMode) {
+                if (selectionMode[0]) {
                     Utils.toast(getContext(), getString(R.string.unselect_all_toast));
                 } else {
                     showFilterDialog(getContext(), tagsHash, displayMetrics);
@@ -1263,7 +1266,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 return true;
 
             case R.id.action_sort:
-                if (selectionMode) {
+                if (selectionMode[0]) {
                     Utils.toast(getContext(), getString(R.string.unselect_all_toast));
                 } else {
                     sortImages(getContext(), displayMetrics);
@@ -2138,7 +2141,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     private void hideSelectionOptions() {
         showEditMenuButton = false;
         selectedImages.clear();
-        selectionMode = false;
+        selectionMode[0] = false;
         gridView.setAdapter(customGridViewAdapterImage);
         MainActivity.fab.hide();
         updateTitleText();

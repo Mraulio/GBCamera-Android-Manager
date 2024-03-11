@@ -70,7 +70,7 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         GalleryFragment.itemsPerPage = MainActivity.imagesPage;//Because it's changed when going to the last page on the updateGridView
         GalleryFragment.selectedImages.clear();
-        GalleryFragment.selectionMode = false;
+        GalleryFragment.selectionMode[0] = false;
         GalleryFragment.tv.setText(GalleryFragment.tv.getContext().getString(R.string.total_images) + GbcImage.numImages);
         //Resetting the lastSeenGalleryImage to 0 if any image is deleted
         lastSeenGalleryImage = 0;

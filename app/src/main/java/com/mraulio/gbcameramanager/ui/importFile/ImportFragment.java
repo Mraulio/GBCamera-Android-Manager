@@ -9,6 +9,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.restartApplication;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
@@ -161,7 +162,6 @@ public class ImportFragment extends Fragment {
         cbLastSeen = view.findViewById(R.id.cbLastSeen);
         cbDeleted = view.findViewById(R.id.cbDeletedImages);
         cbAddFrame = view.findViewById(R.id.cbAddFrame);
-
         layoutCb = view.findViewById(R.id.layout_cb);
         btnAddImages = view.findViewById(R.id.btnAddImages);
         btnAddImages.setVisibility(View.GONE);

@@ -1,6 +1,9 @@
 package com.mraulio.gbcameramanager.ui.settings;
 
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
+import static com.mraulio.gbcameramanager.utils.Utils.backupDatabase;
+import static com.mraulio.gbcameramanager.utils.Utils.restoreDatabase;
+import static com.mraulio.gbcameramanager.utils.Utils.showDbBackups;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -11,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
@@ -46,6 +50,8 @@ public class SettingsFragment extends Fragment {
         CheckBox cbMagicCheck = view.findViewById(R.id.cbMagic);
         CheckBox cbRotation = view.findViewById(R.id.cbRotation);
         CheckBox cbSquare = view.findViewById(R.id.cbSquare);
+        Button btnExportDB = view.findViewById(R.id.btnExportDB);
+        Button btnRestoreDB = view.findViewById(R.id.btnRestoreDB);
 
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
 
@@ -166,6 +172,7 @@ public class SettingsFragment extends Fragment {
                 editor.putInt("export_size", sizesInteger.get(position));
                 editor.apply();
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
@@ -246,6 +253,7 @@ public class SettingsFragment extends Fragment {
                     userSelect = true; // Because the spinner executes an item selection on startup
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
@@ -266,7 +274,18 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-
+        btnExportDB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                backupDatabase(getContext());
+            }
+        });
+        btnRestoreDB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDbBackups(getContext(), getActivity());
+            }
+        });
         return view;
     }
 

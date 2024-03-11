@@ -2,20 +2,35 @@ package com.mraulio.gbcameramanager.utils;
 
 import static com.mraulio.gbcameramanager.MainActivity.selectedTags;
 import static com.mraulio.gbcameramanager.MainActivity.sharedPreferences;
+import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
 
+import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.Codec;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -23,16 +38,22 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Class with puclic static variables and methods that are shared alongside the app
@@ -51,7 +72,11 @@ public class Utils {
     public static final File FRAMES_FOLDER = new File(MAIN_FOLDER, "Frames json");
     public static final File ARDUINO_HEX_FOLDER = new File(MAIN_FOLDER, "Arduino Printer Hex");
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
+    public static final File DB_BACKUP_FOLDER = new File(MAIN_FOLDER, "DB Backup");
 
+    private static final String DB_NAME = "Database";
+    private static final String DB_NAME_SHM = "Database-shm";
+    private static final String DB_NAME_WAL = "Database-wal";
 
     public static LinkedHashMap<String, String> frameGroupsNames = new LinkedHashMap<>();
 
@@ -233,5 +258,192 @@ public class Utils {
     public static String removeNumbersFromEnd(String input) {
         return input.replaceAll("\\d+$", "");
     }
+
+    public static void backupDatabase(Context context) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+            Date date = new Date();
+            File backupDir = new File(DB_BACKUP_FOLDER + "/" + sdf.format(date));
+
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
+            }
+
+            File dataDir = Environment.getDataDirectory();
+            File currentDB = new File(dataDir, "/data/" + context.getPackageName() + "/databases/" + DB_NAME);
+            File backupDB = new File(backupDir, DB_NAME);
+            File currentDB_shm = new File(dataDir, "/data/" + context.getPackageName() + "/databases/" + DB_NAME_SHM);
+            File backupDB_shm = new File(backupDir, DB_NAME_SHM);
+            File currentDB_wal = new File(dataDir, "/data/" + context.getPackageName() + "/databases/" + DB_NAME_WAL);
+            File backupDB_wal = new File(backupDir, DB_NAME_WAL);
+
+            FileChannel src = new FileInputStream(currentDB).getChannel();
+            FileChannel dst = new FileOutputStream(backupDB).getChannel();
+            dst.transferFrom(src, 0, src.size());
+            src.close();
+            dst.close();
+
+            src = new FileInputStream(currentDB_shm).getChannel();
+            dst = new FileOutputStream(backupDB_shm).getChannel();
+            dst.transferFrom(src, 0, src.size());
+            src.close();
+            dst.close();
+
+            src = new FileInputStream(currentDB_wal).getChannel();
+            dst = new FileOutputStream(backupDB_wal).getChannel();
+            dst.transferFrom(src, 0, src.size());
+            src.close();
+            dst.close();
+
+            toast(context, context.getString(R.string.toast_backup_db));
+        } catch (IOException e) {
+            e.printStackTrace();
+            toast(context, "Error creating DB backup");
+        }
+    }
+
+    public static void showDbBackups(Context context, Activity activity) {
+
+        File directory = new File(DB_BACKUP_FOLDER.toURI());
+        if (!directory.isDirectory()) {
+            //If DB backup directory is empty
+            toast(context, "No DB backup availables");
+            return;
+
+        }
+        final List<File> directories = new ArrayList<>();
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    directories.add(file);
+                }
+            }
+        }
+        final List<String> directoriesNames = new ArrayList<>();
+        File[] filesNames = directory.listFiles();
+        if (filesNames != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    directoriesNames.add(file.getName());
+                }
+            }
+        }
+
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.restore_db_dialog);
+
+        final File[] selectedDirectory = {null};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, directoriesNames);
+        ListView listView = dialog.findViewById(R.id.listViewRestoreDb);
+        listView.setAdapter(adapter);
+        Button btnCancelRestoreDb = dialog.findViewById(R.id.btnCancelRestoreDb);
+        btnCancelRestoreDb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+        Button btnOkRestoreDb = dialog.findViewById(R.id.btnOkRestoreDb);
+        btnOkRestoreDb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (selectedDirectory[0] == null) {
+                    return;
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setMessage(context.getString(R.string.dialog_confirm_restore_db))
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                restoreDatabase(context, selectedDirectory[0], activity);
+                            }
+                        })
+                        .setNegativeButton(context.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .show();
+            }
+        });
+
+        dialog.show();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectedDirectory[0] = directories.get(position);
+            }
+        });
+    }
+
+    public static void restoreDatabase(Context context, File backupDir, Activity activity) {
+        try {
+            File dataDir = Environment.getDataDirectory();
+            File currentDB = new File(dataDir, "/data/" + context.getPackageName() + "/databases/" + DB_NAME);
+            File backupDB = new File(backupDir, DB_NAME);
+            File currentDB_shm = new File(dataDir, "/data/" + context.getPackageName() + "/databases/" + DB_NAME_SHM);
+            File backupDB_shm = new File(backupDir, DB_NAME_SHM);
+            File currentDB_wal = new File(dataDir, "/data/" + context.getPackageName() + "/databases/" + DB_NAME_WAL);
+            File backupDB_wal = new File(backupDir, DB_NAME_WAL);
+
+            FileChannel src = new FileInputStream(backupDB).getChannel();
+            FileChannel dst = new FileOutputStream(currentDB).getChannel();
+            dst.transferFrom(src, 0, src.size());
+            src.close();
+            dst.close();
+
+            src = new FileInputStream(backupDB_shm).getChannel();
+            dst = new FileOutputStream(currentDB_shm).getChannel();
+            dst.transferFrom(src, 0, src.size());
+            src.close();
+            dst.close();
+
+            src = new FileInputStream(backupDB_wal).getChannel();
+            dst = new FileOutputStream(currentDB_wal).getChannel();
+            dst.transferFrom(src, 0, src.size());
+            src.close();
+            dst.close();
+
+            //Clear shared preferences and cache
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            editor.apply();
+            deleteImageCache(context);
+            toast(context, context.getString(R.string.toast_restore_db));
+            restartApplication(context);
+        } catch (IOException e) {
+            e.printStackTrace();
+            toast(context, "Error restoring DB backup");
+        }
+    }
+
+    public static void deleteImageCache(Context context) {
+        //Deleting cache for the next version only
+        File cacheDir = new File(context.getCacheDir(), CACHE_DIR_NAME);
+        // Delete all files within the cache directory
+        if (cacheDir != null && cacheDir.isDirectory()) {
+            File[] cacheFiles = cacheDir.listFiles();
+            if (cacheFiles != null) {
+                for (File cacheFile : cacheFiles) {
+                    cacheFile.delete();
+                }
+            }
+        }
+    }
+
+    public static void restartApplication(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
+        ComponentName componentName = intent.getComponent();
+        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
+        // Required for API 34 and later
+        // Ref: https://developer.android.com/about/versions/14/behavior-changes-14#safer-intents
+        mainIntent.setPackage(context.getPackageName());
+        context.startActivity(mainIntent);
+        Runtime.getRuntime().exit(0);
+    }
+
 }
 

@@ -1,7 +1,9 @@
 package com.mraulio.gbcameramanager;
 
-import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
+import static com.mraulio.gbcameramanager.utils.Utils.backupDatabase;
+import static com.mraulio.gbcameramanager.utils.Utils.deleteImageCache;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.restoreDatabase;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -180,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (Float.valueOf(currentVersion) > Float.valueOf(previousVersion)) {
             //App has been updated, do something if necessary
-            deleteImageCache();
+            deleteImageCache(getBaseContext());
             // Update version name for future comparisons
             editor.putString("previous_version", currentVersion);
             editor.apply();
@@ -275,20 +277,6 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    private void deleteImageCache() {
-        //Deleting cache for the next version only
-        File cacheDir = new File(getApplicationContext().getCacheDir(), CACHE_DIR_NAME);
-        // Delete all files within the cache directory
-        if (cacheDir != null && cacheDir.isDirectory()) {
-            File[] cacheFiles = cacheDir.listFiles();
-            if (cacheFiles != null) {
-                for (File cacheFile : cacheFiles) {
-                    cacheFile.delete();
-                }
-            }
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         switch (currentFragment) {
@@ -318,6 +306,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
+
             PaletteDao paletteDao = db.paletteDao();
             FrameDao frameDao = db.frameDao();
             ImageDao imageDao = db.imageDao();
@@ -388,7 +377,6 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
-
             gf.updateFromMain();
         }
     }

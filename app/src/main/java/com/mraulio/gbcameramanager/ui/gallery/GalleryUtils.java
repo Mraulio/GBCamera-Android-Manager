@@ -1,14 +1,17 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.MainActivity.SORT_MODE.*;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
-import static com.mraulio.gbcameramanager.MainActivity.sortByDate;
 import static com.mraulio.gbcameramanager.MainActivity.sortDescending;
+import static com.mraulio.gbcameramanager.MainActivity.sortMode;
+import static com.mraulio.gbcameramanager.MainActivity.sortModeEnum;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
+import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesListHolder;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.saveTagsSet;
@@ -376,41 +379,69 @@ public class GalleryUtils {
         Dialog dialog = new Dialog(context);
         dialog.setContentView(dialogView);
         int screenHeight = displayMetrics.heightPixels;
-        int desiredHeight = (int) (screenHeight * 0.3);
+        int desiredHeight = (int) (screenHeight * 0.5);
         Window window = dialog.getWindow();
         window.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, desiredHeight);
 
-        RadioButton sortDate = dialog.findViewById(R.id.rbSortDate);
+        RadioButton sortCreationDate = dialog.findViewById(R.id.rbSortDate);
         RadioButton sortTitle = dialog.findViewById(R.id.rbSortTitle);
+        RadioButton sortImportDate = dialog.findViewById(R.id.rbSortImportDate);
         RadioButton sortAsc = dialog.findViewById(R.id.rbSortAsc);
         RadioButton sortDesc = dialog.findViewById(R.id.rbSortDesc);
 
-        if (sortByDate) {
-            sortDate.setChecked(true);
-        } else {
-            sortTitle.setChecked(true);
+        switch (sortModeEnum) {
+            case CREATION_DATE:
+                sortCreationDate.setChecked(true);
+                break;
+
+            case IMPORT_DATE:
+                sortImportDate.setChecked(true);
+                break;
+
+            case TITLE:
+                sortTitle.setChecked(true);
+                break;
         }
+
         if (!sortDescending) {
             sortAsc.setChecked(true);
         } else {
             sortDesc.setChecked(true);
         }
-        sortDate.setOnClickListener(new View.OnClickListener() {
+        sortCreationDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sortByDate(gbcImagesList, sortDescending);
-                editor.putBoolean("sort_by_date", true);
+                sortMode = CREATION_DATE.name();
+                sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
+                editor.putString("sort_by_date", CREATION_DATE.name());
                 editor.apply();
+                checkSorting();
                 updateGridView(currentPage);
 
+            }
+        });
+        sortImportDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sortByTitle(gbcImagesList, sortDescending);
+                sortMode = IMPORT_DATE.name();
+                sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
+                editor.putString("sort_by_date", IMPORT_DATE.name());
+                editor.apply();
+                checkSorting();
+                updateGridView(currentPage);
             }
         });
         sortTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sortByTitle(gbcImagesList, sortDescending);
-                editor.putBoolean("sort_by_date", false);
+                sortMode = TITLE.name();
+                sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
+                editor.putString("sort_by_date", TITLE.name());
                 editor.apply();
+                checkSorting();
                 updateGridView(currentPage);
             }
         });
@@ -436,15 +467,26 @@ public class GalleryUtils {
 
             }
         });
-
         dialog.show();
-
     }
 
     public static void checkSorting() {
-        if (sortByDate) {
-            sortByDate(gbcImagesList, sortDescending);//Sort by ascending date on startup
-        } else sortByTitle(gbcImagesList, sortDescending);
+        switch (sortModeEnum) {
+            case CREATION_DATE:
+                sortByDate(gbcImagesList, sortDescending);
+                break;
+            case IMPORT_DATE:
+                gbcImagesList.clear();
+                gbcImagesList.addAll(gbcImagesListHolder);
+                if (sortDescending){
+                    Collections.reverse(gbcImagesList);
+                }
+                break;
+            case TITLE:
+                sortByTitle(gbcImagesList, sortDescending);
+
+                break;
+        }
     }
 
     public static void showFilterDialog(Context context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
@@ -467,7 +509,7 @@ public class GalleryUtils {
         Iterator<String> tagIterator = hashTags.iterator();
         updateSelectedTagsText(selectedTagsTextView, selectedTags);
         List<CheckBox> checkBoxList = new ArrayList<>();
-        //Dynamically add buttons
+        //Dynamically add checkboxes
         while (tagIterator.hasNext()) {
 
             String item = tagIterator.next();
@@ -550,7 +592,6 @@ public class GalleryUtils {
         }
         saveTagsSet(filterTags);
     }
-
 
     /**
      * Updates the textview with the selected tags

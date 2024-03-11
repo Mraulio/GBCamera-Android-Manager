@@ -32,6 +32,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 
 import android.provider.OpenableColumns;
@@ -57,7 +58,6 @@ import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.gson.internal.bind.util.ISO8601Utils;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.ImageData;
@@ -80,6 +80,7 @@ import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,6 +91,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -165,7 +167,7 @@ public class ImportFragment extends Fragment {
         btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
         loadingDialog = Utils.loadingDialog(getContext());
-        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.IMPORT;
+        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.IMPORT;
 
         tvFileName = view.findViewById(R.id.tvFileName);
         gridViewImport = view.findViewById(R.id.gridViewImport);
@@ -288,6 +290,8 @@ public class ImportFragment extends Fragment {
                                         imageData.setData(gbcImage.getImageBytes());
                                         newImageDatas.add(imageData);
                                         Utils.gbcImagesList.add(gbcImage);
+                                        Utils.gbcImagesListHolder.add(gbcImage);
+
                                         newGbcImages.add(gbcImage);
                                         Utils.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
                                     }
@@ -327,6 +331,7 @@ public class ImportFragment extends Fragment {
                                                 imageData.setData(gbcImage.getImageBytes());
                                                 newImageDatas.add(imageData);
                                                 Utils.gbcImagesList.add(gbcImage);
+                                                Utils.gbcImagesListHolder.add(gbcImage);
                                                 newGbcImages.add(gbcImage);
                                                 Utils.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
                                             }
@@ -360,6 +365,13 @@ public class ImportFragment extends Fragment {
         importedImagesList.clear();
         importedImagesBitmaps.clear();
         listImportedImageBytes.clear();
+        listActiveImages.clear();
+        listActiveBitmaps.clear();
+        lastSeenImage.clear();
+        lastSeenBitmap.clear();
+        listDeletedImages.clear();
+        listDeletedBitmaps.clear();
+        listDeletedBitmapsRedStroke.clear();
         cbLastSeen.setChecked(false);
         cbDeleted.setChecked(false);
         switch (fileType) {
@@ -732,7 +744,6 @@ public class ImportFragment extends Fragment {
                                         Uri uri = data.getClipData().getItemAt(i).getUri();
                                         uris.add(uri);
                                     }
-                                    // Ordenar las Uri por el nombre del archivo
                                     Collections.sort(uris, new Comparator<Uri>() {
                                         @Override
                                         public int compare(Uri uri1, Uri uri2) {
@@ -811,10 +822,12 @@ public class ImportFragment extends Fragment {
                                 // Single file was selected
                                 Uri uri = data.getData();
                                 fileName = getFileName(uri);
+
                                 //I check the extension of the file
                                 if (fileName.endsWith("sav")) {
                                     ByteArrayOutputStream byteStream = null;
                                     fileType = FILE_TYPE.SAV;
+
 
                                     try {
                                         InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
@@ -979,7 +992,6 @@ public class ImportFragment extends Fragment {
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -1261,7 +1273,7 @@ public class ImportFragment extends Fragment {
                         validId[0] = checkExistingIdIndex(frameId[0]);
                         if (!validId[0]) {
                             etFrameIndex.setError(getContext().getString(R.string.et_frame_id_error));
-                        } else{
+                        } else {
                             etFrameIndex.setError(null);
                         }
                     }
@@ -1385,7 +1397,7 @@ public class ImportFragment extends Fragment {
                         for (GbcFrame frame : newFrameImages) {
                             Utils.hashFrames.put(frame.getFrameId(), frame);
                         }
-                        if (!importedFrameGroupIdNames.containsKey(frameGroupId[0])){
+                        if (!importedFrameGroupIdNames.containsKey(frameGroupId[0])) {
                             importedFrameGroupIdNames.put(frameGroupId[0], newFrameGroupPlaceholder[0]);
                         }
                         new SaveFrameAsyncTask(newFrameImages).execute();

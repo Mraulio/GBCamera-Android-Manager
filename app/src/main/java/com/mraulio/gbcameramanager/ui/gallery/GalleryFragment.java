@@ -18,6 +18,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.showFilterDial
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.stitchImages;
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
+import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.getSelectedTags;
@@ -47,6 +48,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
@@ -55,6 +57,7 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -94,6 +97,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -141,7 +145,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.GALLERY;
+        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.GALLERY;
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;
         displayMetrics = new DisplayMetrics();
@@ -242,7 +246,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode())};
                     // Create custom dialog
                     final Dialog dialog = new Dialog(getContext());
-                    dialog.setContentView(R.layout.custom_dialog);
+                    dialog.setContentView(R.layout.image_main_dialog);
                     dialog.setCancelable(true);//So it closes when clicking outside or back button
 
                     ImageView imageView = dialog.findViewById(R.id.image_view);
@@ -271,6 +275,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     CheckBox cbFrameKeep = dialog.findViewById(R.id.cbFrameKeep);
                     CheckBox cbCrop = dialog.findViewById(R.id.cbCrop);
                     CheckBox cbInvert = dialog.findViewById(R.id.cbInvert);
+                    Spinner spFrameGroupsImage = dialog.findViewById(R.id.spFrameGroupsImage);
+
                     if (MainActivity.showRotationButton) {
                         rotateButton.setVisibility(VISIBLE);
                     }
@@ -422,7 +428,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                     });
 
-                    FramesFragment.CustomGridViewAdapterFrames frameAdapter = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, Utils.framesList, false, false);
+                    final List<GbcFrame>[] currentlyShowingFrames = new List[]{Utils.framesList};
+
+                    final FramesFragment.CustomGridViewAdapterFrames[] frameAdapter = {new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], false, false)};
                     int frameIndex = 0;
                     for (int i = 0; i < Utils.framesList.size(); i++) {
                         if (Utils.framesList.get(i).getFrameId().equals(filteredGbcImages.get(globalImageIndex).getFrameId())) {
@@ -431,8 +439,55 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                     }
 
-                    frameAdapter.setLastSelectedPosition(frameIndex);
-                    gridViewFrames.setAdapter(frameAdapter);
+                    frameAdapter[0].setLastSelectedPosition(frameIndex);
+                    gridViewFrames.setAdapter(frameAdapter[0]);
+                    List<String> frameGroupList = new ArrayList<>();
+                    frameGroupList.add(getString(R.string.sp_all_frame_groups));
+                    List<String> frameGroupIds = new ArrayList<>();//To access with index
+                    for (LinkedHashMap.Entry<String, String> entry : frameGroupsNames.entrySet()) {
+                        frameGroupList.add(entry.getValue() + " (" + entry.getKey() + ")");
+                        frameGroupIds.add(entry.getKey());
+                    }
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                            android.R.layout.simple_spinner_item, frameGroupList);
+
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spFrameGroupsImage.setAdapter(adapter);
+                    spFrameGroupsImage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            if (i == 0) {
+                                //Show all frames
+                                currentlyShowingFrames[0] = Utils.framesList;
+                            } else {
+                                String frameGroupId = frameGroupIds.get(i - 1);
+                                List<GbcFrame> currentGroupList = new ArrayList<>();
+                                for (GbcFrame gbcFrame : Utils.framesList) {
+                                    String gbcFrameGroup = gbcFrame.getFrameId().substring(0, gbcFrame.getFrameId().length() - 2);//To remove the numbers at the end, always going to be 2 numbers
+                                    if (gbcFrameGroup.equals(frameGroupId)) {
+                                        currentGroupList.add(gbcFrame);
+                                    }
+                                }
+                                currentlyShowingFrames[0] = currentGroupList;
+                            }
+
+                            frameAdapter[0] = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false);
+
+                            //Set the selected frame if it's in the selected group
+                            GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                            for (int x = 0; x < currentlyShowingFrames[0].size(); x++) {
+                                if(currentlyShowingFrames[0].get(x).getFrameId().equals(gbcImage.getFrameId())){
+                                    frameAdapter[0].setLastSelectedPosition(x);
+                                }
+                            }
+                            gridViewFrames.setAdapter(frameAdapter[0]);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+                        }
+                    });
+
 
                     //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
                     if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
@@ -445,14 +500,15 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onItemClick(AdapterView<?> parent, View view, int selectedFrameIndex, long id) {
                             //Action when clicking a frame inside the Dialog
                             GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+
                             try {
-                                Bitmap bitmap = frameChange(gbcImage, framesList.get(selectedFrameIndex).getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), keepFrame, true);
+                                Bitmap bitmap = frameChange(gbcImage, currentlyShowingFrames[0].get(selectedFrameIndex).getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), keepFrame, true);
                                 Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
                                 bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
                                 imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
 
-                                frameAdapter.setLastSelectedPosition(selectedFrameIndex);
-                                frameAdapter.notifyDataSetChanged();
+                                frameAdapter[0].setLastSelectedPosition(selectedFrameIndex);
+                                frameAdapter[0].notifyDataSetChanged();
                                 updateGridView(currentPage);
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -521,12 +577,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 paletteFrameSelButton.setText(getString(R.string.btn_show_palettes));
                                 gridViewPalette.setVisibility(GONE);
                                 gridViewFrames.setVisibility(VISIBLE);
+                                spFrameGroupsImage.setVisibility(VISIBLE);
 
                             } else {
                                 showPalettes = true;
                                 paletteFrameSelButton.setText(getString(R.string.btn_show_frames));
                                 gridViewFrames.setVisibility(GONE);
                                 gridViewPalette.setVisibility(VISIBLE);
+                                spFrameGroupsImage.setVisibility(GONE);
                             }
                         }
                     });
@@ -625,9 +683,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     } else if (!selectedImages.contains(globalImageIndex)) {
                         selectedImages.add(globalImageIndex);
                     }
-                    if (selectedImages.size()==0){
+                    if (selectedImages.size() == 0) {
                         hideSelectionOptions();
-                    }else{
+                    } else {
                         updateTitleText();
                         if (selectedImages.size() > 1) {
                             showEditMenuButton = true;
@@ -763,7 +821,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode())};
                             // Create custom dialog
-                            dialog.setContentView(R.layout.custom_dialog);
+                            dialog.setContentView(R.layout.image_main_dialog);
                             dialog.setCancelable(true);//So it closes when clicking outside or back button
                             ImageView imageView = dialog.findViewById(R.id.image_view);
                             LinearLayout layoutSelected = dialog.findViewById(R.id.ly_selected_images);
@@ -2077,7 +2135,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public void onRunError(Exception e) {
     }
 
-    private void hideSelectionOptions(){
+    private void hideSelectionOptions() {
         showEditMenuButton = false;
         selectedImages.clear();
         selectionMode = false;

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_margin="20dp">
+    android:padding="10dp">
 
     <TextView
         android:id="@+id/sortTitle"
@@ -24,36 +24,42 @@
         android:orientation="vertical">
 
 
-            <RadioGroup
-                android:id="@+id/rbGroupSortDateTitle"
-                android:layout_width="match_parent"
+        <RadioGroup
+            android:id="@+id/rbGroupSortDateTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border_layout"
+            android:gravity="center">
+
+            <RadioButton
+                android:id="@+id/rbSortDate"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:gravity="center"
-                android:orientation="horizontal">
+                android:layout_marginHorizontal="10dp"
+                android:text="@string/sort_by_date" />
 
-                <RadioButton
-                    android:id="@+id/rbSortDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="10dp"
-                    android:text="@string/sort_by_date" />
+            <RadioButton
+                android:id="@+id/rbSortImportDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginHorizontal="10dp"
+                android:text="@string/sort_by_import_date" />
 
-                <RadioButton
-                    android:id="@+id/rbSortTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="10dp"
-                    android:text="@string/sort_by_title" />
-
-            </RadioGroup>
-
+            <RadioButton
+                android:id="@+id/rbSortTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:text="@string/sort_by_title" />
+        </RadioGroup>
 
         <RadioGroup
             android:id="@+id/rbGroupSortAscDesc"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/border_layout"
             android:gravity="center"
             android:orientation="horizontal">
 

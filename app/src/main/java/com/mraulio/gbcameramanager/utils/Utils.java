@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,6 +56,7 @@ public class Utils {
     public static LinkedHashMap<String, String> frameGroupsNames = new LinkedHashMap<>();
 
     public static final int[] ROTATION_VALUES = {0, 90, 180, 270};
+    public static List<GbcImage> gbcImagesListHolder = new ArrayList<>();
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
@@ -64,7 +66,7 @@ public class Utils {
 
     public static LinkedHashSet<String> tagsHash = new LinkedHashSet<>();
 
-    //Auxiliar method to convert byte[] to hexadecimal String
+    //Auxiliary method to convert byte[] to hexadecimal String
     public static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {

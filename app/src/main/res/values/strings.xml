@@ -179,8 +179,10 @@
     <string name="tags_dialog_title">~Select tags~</string>
     <string name="tags_dialog_clear">Clear</string>
     <string name="sort_dialog_title">Select sorting options</string>
-    <string name="sort_by_date">Sort by date</string>
-    <string name="sort_by_title">Sort by title</string>
+    <string name="sort_by_date">By creation date</string>
+    <string name="sort_by_import_date">By import date</string>
+
+    <string name="sort_by_title">By title</string>
     <string name="sort_ascending">Ascending</string>
     <string name="sort_descending">Descending</string>
 
@@ -200,6 +202,6 @@
 
     <string name="et_frame_group_id_error">Only lowercase allowed, min 2 char</string>
     <string name="sp_all_frame_groups">All frames</string>
-
+    <string name="cb_use_mod_date">Use modification date</string>
 
 </resources>

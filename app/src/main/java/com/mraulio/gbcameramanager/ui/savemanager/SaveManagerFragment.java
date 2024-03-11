@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.savemanager;
 
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -12,6 +13,7 @@ import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -20,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ListView;
 
@@ -34,16 +37,16 @@ import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtra
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
-import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,12 +56,13 @@ public class SaveManagerFragment extends Fragment {
     private List<String> fileList;
     private String saveName;
     private Button btnDelete, btnAdd;
+    private CheckBox cbModDate;
     private AlertDialog loadingDialog;
     private File selectedFile;
     private CustomGridViewAdapterImage gridAdapter;
     private ArrayAdapter<String> listViewAdapter;
     private int numImagesAdded = 0;
-
+    private int currentPosition = 0;
     List<GbcImage> listActiveImages = new ArrayList<>();
     List<Bitmap> listActiveBitmaps = new ArrayList<>();
     List<GbcImage> listDeletedImages = new ArrayList<>();
@@ -71,6 +75,7 @@ public class SaveManagerFragment extends Fragment {
     List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
     List<GbcImage> extractedImagesList = new ArrayList<>();
     List<Bitmap> bitmapsAdapterList = null;
+    Date lastModDate;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -85,8 +90,9 @@ public class SaveManagerFragment extends Fragment {
         gridviewSaves = view.findViewById(R.id.gridViewSaves);
         btnDelete = view.findViewById(R.id.btnDelete);
         btnAdd = view.findViewById(R.id.btnAdd);
+        cbModDate =view.findViewById(R.id.cbModDate);
         loadingDialog = Utils.loadingDialog(getContext());
-        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
+        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
 
 
         fileList = new ArrayList<>();
@@ -94,17 +100,21 @@ public class SaveManagerFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                currentPosition = position;
                 loadingDialog.show();
                 saveName = (String) parent.getItemAtPosition(position);
-
                 selectedFile = new File(Utils.SAVE_FOLDER, saveName);
+                lastModDate = new Date(selectedFile.lastModified());
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss", Locale.getDefault());
+                String dateString = dateFormat.format(lastModDate);
+                cbModDate.setText(getString(R.string.cb_use_mod_date)+": "+dateString);
                 new loadDataTask().execute();
             }
         });
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createDialog();
+                createDeleteDialog();
             }
         });
 
@@ -132,6 +142,8 @@ public class SaveManagerFragment extends Fragment {
                         imageData.setData(gbcImage.getImageBytes());
                         newImageDatas.add(imageData);
                         Utils.gbcImagesList.add(gbcImage);
+                        Utils.gbcImagesListHolder.add(gbcImage);
+
                         newGbcImages.add(gbcImage);
                         Utils.imageBitmapCache.put(gbcImage.getHashCode(), extractedImagesBitmaps.get(i));
                     }
@@ -153,6 +165,7 @@ public class SaveManagerFragment extends Fragment {
     private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
         List<GbcImage> gbcImagesList;
         List<ImageData> imageDataList;
+
         public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<ImageData> imageDataList) {
             this.gbcImagesList = gbcImagesList;
             this.imageDataList = imageDataList;
@@ -165,9 +178,15 @@ public class SaveManagerFragment extends Fragment {
             ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
             //Need to insert first the gbcImage because of the Foreign Key
             try {
-
+                int dateIndex = 0;
                 for (GbcImage gbcImage : gbcImagesList) {
+                    if (cbModDate.isChecked()){
+                        long lastModifiedTime = selectedFile.lastModified()+dateIndex++;
+                        lastModDate = new Date(lastModifiedTime);
+                        gbcImage.setCreationDate(lastModDate);
+                    }
                     imageDao.insert(gbcImage);
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -204,6 +223,7 @@ public class SaveManagerFragment extends Fragment {
             listViewAdapter = new ArrayAdapter<>(getContext(),
                     android.R.layout.simple_list_item_1, fileList);
             listView.setAdapter(listViewAdapter);
+            listView.setSelection(currentPosition);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -254,6 +274,7 @@ public class SaveManagerFragment extends Fragment {
                 String fileName = selectedFile.getName();
                 for (byte[] imageBytes : listExtractedImageBytes) {
                     GbcImage gbcImage = new GbcImage();
+
                     String formattedIndex = String.format("%02d", nameIndex);
                     if (nameIndex == listExtractedImageBytes.size() - MainActivity.deletedCount[saveBank]) {//Last seen image
                         gbcImage.setName(fileName + " [last seen]");
@@ -334,7 +355,7 @@ public class SaveManagerFragment extends Fragment {
         gridAdapterSI = (CustomGridViewAdapterImage) gridviewSaves.getAdapter();
     }
 
-    private void createDialog() {
+    private void createDeleteDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getString(R.string.delete) + " " + saveName + "?");
 
@@ -355,8 +376,10 @@ public class SaveManagerFragment extends Fragment {
                 //Try to delete the file
                 if (selectedFile.delete()) {
                     Utils.toast(getContext(), getString(R.string.toast_sav_deleted));
-                    gridAdapter.clear();
-                    gridAdapter.notifyDataSetChanged();
+                    if (gridAdapter != null) {
+                        gridAdapter.clear();
+                        gridAdapter.notifyDataSetChanged();
+                    }
                     loadFileNames();
                     listViewAdapter.notifyDataSetChanged();
                     btnDelete.setEnabled(false);

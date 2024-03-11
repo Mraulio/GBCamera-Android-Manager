@@ -7,7 +7,6 @@ import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
-import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -31,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
@@ -43,7 +43,6 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,9 +51,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -69,7 +66,7 @@ public class FramesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
-        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.FRAMES;
+        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.FRAMES;
         MainActivity.fab.hide();
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
@@ -175,7 +172,7 @@ public class FramesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    FramesJsonCreator();
+                    framesJsonCreator();
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
@@ -188,7 +185,7 @@ public class FramesFragment extends Fragment {
         return view;
     }
 
-    private void FramesJsonCreator() throws JSONException, IOException {
+    private void framesJsonCreator() throws JSONException, IOException {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
         JSONArray framesArr = new JSONArray();
@@ -259,16 +256,7 @@ public class FramesFragment extends Fragment {
     }
 
     public static String hashSetToString(HashSet<int[]> hashSet) {
-        StringBuilder sb = new StringBuilder();
-//        sb.append("[");
-        for (int[] array : hashSet) {
-            sb.append(Arrays.toString(array)).append(",");
-        }
-        if (!hashSet.isEmpty()) {
-            sb.deleteCharAt(sb.length() - 1); // Eliminar la última coma
-        }
-//        sb.append("]");
-        return sb.toString();
+        return new Gson().toJson(hashSet);
     }
 
     public static byte[] serializeHashSet(HashSet<int[]> hashSet) {

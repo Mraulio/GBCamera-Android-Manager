@@ -12,6 +12,8 @@ import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -24,6 +26,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -392,7 +395,6 @@ public class JsonReader {
                 String frameGroupId = frameNameObj.getString("id");
                 String frameGroupName = frameNameObj.getString("name");
                 importedFrameGroupIdNames.put(frameGroupId, frameGroupName);
-
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -402,19 +404,8 @@ public class JsonReader {
     }
 
     public static HashSet<int[]> stringToHashSet(String data) {
-        HashSet<int[]> hashSet = new HashSet<>();
-        //Delete start and end brackets
-        data = data.substring(1, data.length() - 1);
-        String[] arrays = data.split("\\],\\[");
-        for (String arrayStr : arrays) {
-            String[] nums = arrayStr.split(",");
-            int[] array = new int[nums.length];
-            for (int i = 0; i < nums.length; i++) {
-                array[i] = Integer.parseInt(nums[i].trim());
-            }
-            hashSet.add(array);
-        }
-        return hashSet;
+        Type type = new TypeToken<HashSet<int[]>>() {}.getType();
+        return new Gson().fromJson(data, type);
     }
 
     public static String decodeDataImage(String value) {

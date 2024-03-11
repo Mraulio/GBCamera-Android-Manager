@@ -47,7 +47,7 @@ public class SettingsFragment extends Fragment {
         CheckBox cbRotation = view.findViewById(R.id.cbRotation);
         CheckBox cbSquare = view.findViewById(R.id.cbSquare);
 
-        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
+        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
 
         cbPrint.setChecked(MainActivity.printingEnabled);
         cbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

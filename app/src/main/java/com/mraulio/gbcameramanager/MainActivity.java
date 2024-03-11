@@ -56,6 +56,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         SETTINGS
     }
     public static boolean showEditMenuButton = false;
-    public static CURRENT_FRAGMENT current_fragment;
+    public static CURRENT_FRAGMENT currentFragment;
 
     public static FloatingActionButton fab;
 
@@ -95,7 +96,15 @@ public class MainActivity extends AppCompatActivity {
     public static int customColorPaper;
     public static int lastSeenGalleryImage = 0;
     public static boolean exportSquare = false;
-    public static boolean sortByDate = true;
+
+    public enum SORT_MODE {
+        CREATION_DATE,
+        IMPORT_DATE,
+        TITLE
+    }
+    public static SORT_MODE sortModeEnum = SORT_MODE.CREATION_DATE;
+    public static String sortMode ="";
+
     public static boolean sortDescending = false;
     public static String selectedTags = "";
 
@@ -144,7 +153,10 @@ public class MainActivity extends AppCompatActivity {
         showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
         customColorPaper = sharedPreferences.getInt("custom_paper_color", Color.WHITE);
         exportSquare = sharedPreferences.getBoolean("export_square", false);
-        sortByDate = sharedPreferences.getBoolean("sort_by_date", true);
+        sortMode = sharedPreferences.getString("sort_by_date", SORT_MODE.CREATION_DATE.name());
+        if (sortMode != null) {
+            sortModeEnum = SORT_MODE.valueOf(sortMode);
+        }
         sortDescending = sharedPreferences.getBoolean("sort_descending", false);
         selectedTags = sharedPreferences.getString("selected_tags", "");
 
@@ -279,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        switch (current_fragment) {
+        switch (currentFragment) {
             case GALLERY:
                 menu.clear(); // Cleans the current menu
                 getMenuInflater().inflate(R.menu.gallery_menu, menu); // Inflates the menu
@@ -366,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
             if (imagesFromDao.size() > 0) {
                 //I need to add them to the gbcImagesList(GbcImage)
                 Utils.gbcImagesList.addAll(imagesFromDao);
+                Utils.gbcImagesListHolder = new ArrayList<>(Utils.gbcImagesList);
                 GbcImage.numImages += Utils.gbcImagesList.size();
             } else anyImage = false;
             return null;

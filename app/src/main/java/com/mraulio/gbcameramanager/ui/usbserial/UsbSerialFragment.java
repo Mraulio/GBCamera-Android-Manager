@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.usbserial;
 
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.deleteFolderRecursive;
 
 import android.app.AlertDialog;
@@ -383,6 +384,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            checkSorting();
             tv.append("\n" + numImagesAdded + getString(R.string.done_adding_images));
             Utils.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
         }

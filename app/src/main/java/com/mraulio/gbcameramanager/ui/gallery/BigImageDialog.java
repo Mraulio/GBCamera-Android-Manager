@@ -5,6 +5,7 @@ import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.compareTags;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
@@ -310,6 +311,8 @@ public class BigImageDialog {
                 tagsLayout.setBackgroundColor(context.getColor(R.color.white));
                 etImageName.setBackgroundColor(context.getColor(R.color.white));
 
+                checkSorting();
+                updateGridView(currentPage);
                 btnUpdateImage.setEnabled(false);
             }
         });
@@ -319,7 +322,6 @@ public class BigImageDialog {
             @Override
             public void onClick(View v) {
 
-                updateGridView(currentPage);
                 dialog.dismiss();
             }
         });

@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
@@ -200,7 +201,6 @@ public class ImportFragment extends Fragment {
                 gridViewImport.setAdapter((ListAdapter) adapter);
             }
         });
-
 
         btnAddImages.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -609,6 +609,7 @@ public class ImportFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             tvFileName.setText(numImagesAdded + getString(R.string.done_adding_images));
+            checkSorting();
             Utils.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
         }
     }

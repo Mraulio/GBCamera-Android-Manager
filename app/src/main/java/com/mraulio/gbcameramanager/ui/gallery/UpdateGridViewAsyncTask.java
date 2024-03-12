@@ -60,7 +60,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
-                    if ((image.getHeight() == 144 || image.getHeight() == 160) && !gbcImage.getFrameId().equals("") /*&& !gbcImage.getFrameId().equals("Nintendo_Frame")*/)
+                    if ((image.getHeight() == 144 || image.getHeight() == 160) && !gbcImage.getFrameId().equals(""))
                         image = GalleryFragment.frameChange(gbcImage, gbcImage.getFrameId(),gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(),gbcImage.isLockFrame(),true);
                     Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                     GalleryFragment.diskCache.put(imageHash, image);

@@ -13,7 +13,6 @@ import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -186,7 +185,6 @@ public class SaveManagerFragment extends Fragment {
                         gbcImage.setCreationDate(lastModDate);
                     }
                     imageDao.insert(gbcImage);
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();

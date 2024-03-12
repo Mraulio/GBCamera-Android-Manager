@@ -26,13 +26,16 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.documentfile.provider.DocumentFile;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,12 +46,12 @@ public class ImagesImportDialog {
     Activity activity;
     TextView tvFileName;
     int numImagesAdded;
-    String fileName;
+    DocumentFile file;
 
-    public ImagesImportDialog(String fileName, List<GbcImage> newGbcImages, List<ImageData> newImageDatas, Context context, Activity activity, TextView tvFileName, int numImagesAdded) {
-        this.fileName = fileName;
+    public ImagesImportDialog(List<GbcImage> newGbcImages, List<ImageData> newImageDatas, DocumentFile file, Context context, Activity activity, TextView tvFileName, int numImagesAdded) {
         this.newGbcImages = newGbcImages;
         this.newImageDatas = newImageDatas;
+        this.file = file;
         this.context = context;
         this.activity = activity;
         this.tvFileName = tvFileName;
@@ -60,6 +63,12 @@ public class ImagesImportDialog {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.images_import_dialog);
 
+        CheckBox cbUseModDate = dialog.findViewById(R.id.cbUseModDate);
+        final String[] fileName = {file.getName()};
+        long lastModifiedTime = file.lastModified();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss", Locale.getDefault());
+        String dateString = dateFormat.format(lastModifiedTime);
+        cbUseModDate.setText(context.getString(R.string.cb_use_mod_date)+": "+dateString);
         List<ImageView> imageViewList = new ArrayList<>();
 
         LinearLayout layoutSelected = dialog.findViewById(R.id.lyMultipleImagesImport);
@@ -91,7 +100,7 @@ public class ImagesImportDialog {
         //EditText Image Name
         EditText etImageName = dialog.findViewById(R.id.etImageNameImport);
 
-        etImageName.setText(fileName);
+        etImageName.setText(fileName[0]);
 
         final boolean[] editingName = {false};
         boolean[] editingTags = {false};
@@ -110,7 +119,7 @@ public class ImagesImportDialog {
 
                 etImageName.setBackgroundColor(context.getColor(R.color.update_image_color));
                 editingName[0] = true;
-                fileName = new String(placeholderString);
+                fileName[0] = new String(placeholderString);
             }
 
             @Override
@@ -226,14 +235,20 @@ public class ImagesImportDialog {
                 int numDigits = String.valueOf(maxIndex).length();
 
                 String formatString = "%0" + numDigits + "d";
+                int dateIndex = 0;
+                Date lastModDate;
                 for (GbcImage gbcImageToAdd : newGbcImages) {
-
+                    if (cbUseModDate.isChecked()) {
+                        long lastModifiedTime = file.lastModified() + dateIndex++;
+                        lastModDate = new Date(lastModifiedTime);
+                        gbcImageToAdd.setCreationDate(lastModDate);
+                    }
                     if (editingName[0]) {
                         if (maxIndex > 1) {
                             String formattedIndex = String.format(formatString, nameIndex);
-                            gbcImageToAdd.setName(fileName + "_" + formattedIndex);
+                            gbcImageToAdd.setName(fileName[0] + "_" + formattedIndex);
                         } else {
-                            gbcImageToAdd.setName(fileName);
+                            gbcImageToAdd.setName(fileName[0]);
                         }
                         nameIndex++;
                     }
@@ -261,7 +276,6 @@ public class ImagesImportDialog {
         dialog.getWindow().
 
                 setAttributes(lp);
-
     }
 
     private void createTagsCheckBox(String tag, LinearLayout tagsLayout, List<String> tempTags) {

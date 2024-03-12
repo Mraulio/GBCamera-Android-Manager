@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="10dp">
 
     <EditText
         android:id="@+id/etImageNameImport"
@@ -17,6 +17,12 @@
         android:drawableEnd="@drawable/ic_edit"
         android:singleLine="true"
         android:textSize="20dp"></EditText>
+
+    <CheckBox
+        android:id="@+id/cbUseModDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cb_use_mod_date"/>
 
     <HorizontalScrollView
         android:id="@+id/hSVMultipleImagesImport"
@@ -142,8 +148,8 @@
             android:id="@+id/btnAddImagesImport"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/save_color"
             android:layout_marginHorizontal="10dp"
+            android:backgroundTint="@color/save_color"
             android:text="@string/btn_add_images" />
 
     </LinearLayout>

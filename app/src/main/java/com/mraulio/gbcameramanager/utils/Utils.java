@@ -21,9 +21,11 @@ import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -177,14 +179,17 @@ public class Utils {
 
     public static AlertDialog loadingDialog(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        ProgressBar progressBar = new ProgressBar(context);
         builder.setCancelable(false);
 
-        builder.setView(progressBar);
+        ImageView imageView = new ImageView(context);
+        imageView.setImageResource(R.mipmap.ic_launcher);
+        builder.setView(imageView);
 
         AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        imageView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.custom_progressbar));
+
         return dialog;
     }
 

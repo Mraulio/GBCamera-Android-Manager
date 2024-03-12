@@ -114,7 +114,7 @@ public class ImportFragment extends Fragment {
     List<Bitmap> finalListBitmaps = new ArrayList<>();
     List<GbcImage> lastSeenImage = new ArrayList<>();
     List<Bitmap> lastSeenBitmap = new ArrayList<>();
-
+    DocumentFile selectedFile;
     public static List<ImageData> importedImageDatas = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
     byte[] fileBytes;
@@ -337,7 +337,7 @@ public class ImportFragment extends Fragment {
                                             }
                                         }
                                         if (newGbcImages.size() > 0) {
-                                            ImagesImportDialog imagesImportDialog = new ImagesImportDialog(fileName, newGbcImages, newImageDatas, getContext(), getActivity(), tvFileName, numImagesAdded);
+                                            ImagesImportDialog imagesImportDialog = new ImagesImportDialog(newGbcImages, newImageDatas, selectedFile, getContext(), getActivity(), tvFileName, numImagesAdded);
                                             imagesImportDialog.createImagesImportDialog();
 
                                         } else {
@@ -794,6 +794,7 @@ public class ImportFragment extends Fragment {
                             } else if (data.getData() != null) {
                                 // Single file was selected
                                 Uri uri = data.getData();
+                                selectedFile = DocumentFile.fromSingleUri(getContext(), uri);
                                 fileName = getFileName(uri);
 
                                 //I check the extension of the file

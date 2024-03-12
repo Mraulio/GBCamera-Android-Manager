@@ -173,11 +173,4 @@ public class GbcImage {
         this.frameId = frameId;
     }
 
-    public static int getNumImages() {
-        return numImages;
-    }
-
-    public static void setNumImages(int numImages) {
-        GbcImage.numImages = numImages;
-    }
 }

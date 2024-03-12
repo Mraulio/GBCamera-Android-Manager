@@ -313,7 +313,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             }
             CustomGridViewAdapterImage customGridViewAdapterImage = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
             gridView.setAdapter(customGridViewAdapterImage);
-            tv.append(finalListImages.size() + " "+getString(R.string.images));
+            tv.append(finalListImages.size() + " " + getString(R.string.images));
             btnAddImages.setVisibility(View.VISIBLE);
         });
         btnFullRom.setOnClickListener(v -> {
@@ -492,7 +492,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     String hashHex = Utils.bytesToHex(hash);
                     gbcImage.setHashCode(hashHex);
                     ImageCodec imageCodec = new ImageCodec(128, 112, false);
-                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(),Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, false,false, false);
+                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         //I need to use copy because if not it's inmutable bitmap
                         Bitmap framed = Utils.hashFrames.get((gbcImage.getFrameId())).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -862,7 +862,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             gbcImage.setName(index++ + "-" + " arduino");
             int height = (data.length() + 1) / 120;//To get the real height of the image
             ImageCodec imageCodec = new ImageCodec(160, height, false);
-            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(),Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false, false,false);
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false);
             finalListBitmaps.add(image);
             finalListImages.add(gbcImage);
         }

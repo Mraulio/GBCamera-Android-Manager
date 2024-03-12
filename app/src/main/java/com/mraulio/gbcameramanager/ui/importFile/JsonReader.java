@@ -100,7 +100,7 @@ public class JsonReader {
         List<String> stringValues = new ArrayList<>();
         List<String> finalValues = new ArrayList<>();
 
-        // Acces JSON values
+        // Access JSON values
         JSONArray images = jsonObject.getJSONObject("state").getJSONArray("images");
         for (int i = 0; i < images.length(); i++) {
             JSONObject imageJson = images.getJSONObject(i);
@@ -114,9 +114,7 @@ public class JsonReader {
                     GbcImage gbcImage = new GbcImage();
                     gbcImage.setHashCode(hash);
                     gbcImage.setImageBytes(bytes);
-//                    if (!imageJson.getString("title").equals("")) {
                     gbcImage.setName(imageJson.getString("title"));
-//                    } else gbcImage.setName("*No title*");
                     JSONArray tagsArray = imageJson.getJSONArray("tags");
                     if (tagsArray.length() > 0) {
                         List<String> tagsStrings = new ArrayList<>();
@@ -149,12 +147,16 @@ public class JsonReader {
                     }
 
                     if (imageJson.has("frame")) {
-                        String frameName = imageJson.getString("frame");
-                        if (frameName.equals("null"))
-                            gbcImage.setFrameId("");
-                        else gbcImage.setFrameId(frameName.toLowerCase());
-                        if (!Utils.hashFrames.containsKey(gbcImage.getFrameId())) {
-                            gbcImage.setFrameId("gbcam01");
+                        String frameId = imageJson.getString("frame");
+
+                        gbcImage.setFrameId(frameId.toLowerCase());
+                        if (frameId.equals("null")) {
+                            gbcImage.setFrameId(null);
+                        } else {
+                            gbcImage.setFrameId(frameId.toLowerCase());
+                            if (!Utils.hashFrames.containsKey(frameId)) {
+                                gbcImage.setFrameId("gbcam01");
+                            }
                         }
                     }
 
@@ -274,7 +276,7 @@ public class JsonReader {
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
                 ImageCodec imageCodec = new ImageCodec(160, height, false);
-                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), Utils.hashPalettes.get("bw").getPaletteColorsInt(), bytes, false, false, isWildFrame);//False for now, need to add the wild frame to the json
+                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), bytes, false);//False for now, need to add the wild frame to the json
 
                 gbcFrame.setFrameBitmap(image);
                 gbcFrame.setFrameBytes(bytes);
@@ -371,7 +373,7 @@ public class JsonReader {
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
                 ImageCodec imageCodec = new ImageCodec(160, height, false);
-                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), Utils.hashPalettes.get("bw").getPaletteColorsInt(), bytes, false, false, false);//False for now, need to add the wild frame to the json
+                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), bytes, false);//False for now, need to add the wild frame to the json
                 gbcFrame.setFrameBitmap(image);
                 gbcFrame.setFrameBytes(bytes);
                 HashSet<int[]> transparencyHS = transparencyHashSet(gbcFrame.getFrameBitmap());
@@ -404,7 +406,8 @@ public class JsonReader {
     }
 
     public static HashSet<int[]> stringToHashSet(String data) {
-        Type type = new TypeToken<HashSet<int[]>>() {}.getType();
+        Type type = new TypeToken<HashSet<int[]>>() {
+        }.getType();
         return new Gson().fromJson(data, type);
     }
 

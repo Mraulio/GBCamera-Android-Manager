@@ -649,13 +649,13 @@ public class PalettesFragment extends Fragment {
         byte[] imageBytes;
         if (Utils.gbcImagesList.size() == 0 || (Utils.gbcImagesList.get(0).getImageBytes().length / 40 != 144)) {//If there are no images, or they are not 144 height
             imageBytes = Utils.encodeImage(Utils.framesList.get(1).getFrameBitmap(), "bw");
-            bitmap = imageCodec.decodeWithPalette(palette, null, imageBytes, false, false, false);
+            bitmap = imageCodec.decodeWithPalette(palette, imageBytes, false);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Utils.framesList.get(0).getFrameBitmap().getWidth() * 6, Utils.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {
             GbcImage gbcImage = Utils.gbcImagesList.get(lastSeenGalleryImage);
             bitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
             imageBytes = Utils.encodeImage(bitmap, "bw");
-            bitmap = imageCodec.decodeWithPalette(palette, null, imageBytes, false, false, false);
+            bitmap = imageCodec.decodeWithPalette(palette, imageBytes, false);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, 160 * 6, 144 * 6, false);
         }
 

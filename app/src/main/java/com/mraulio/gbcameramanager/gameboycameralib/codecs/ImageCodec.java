@@ -51,7 +51,7 @@ public class ImageCodec implements Codec {
         return image;
     }
 
-    public Bitmap decodeWithPalette(int[] imagePalette, int[] framePalette, byte[] data, boolean invertImagePalette, boolean invertFramePalette, boolean isWildFrame) {
+    public Bitmap decodeWithPalette(int[] imagePalette, byte[] data, boolean invertImagePalette) {
 
         Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
 

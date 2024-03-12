@@ -51,7 +51,7 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
                 if (gbcFrame == null){
                     gbcFrame= Utils.hashFrames.get("gbcam01");
                 }
-                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcFrame.isWildFrame());                //Add the bitmap to the cache
+                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette());//Add the bitmap to the cache
                 Utils.imageBitmapCache.put(imageHash, image);
                 GalleryFragment.diskCache.put(imageHash, image);
                 //Do a frameChange to create the Bitmap of the image

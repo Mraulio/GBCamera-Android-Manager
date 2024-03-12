@@ -46,7 +46,7 @@ public class RomExtractor {
     int totalImages;
     byte[] fileBytes;
     List<byte[]> romByteList = new ArrayList<>();
-    List<String> filePartNames= new ArrayList<>();
+    List<String> filePartNames = new ArrayList<>();
     String fileName;
 
     public RomExtractor(byte[] fileBytes, String fileName) {
@@ -54,16 +54,17 @@ public class RomExtractor {
         this.fileName = fileName;
     }
 
-    public void romExtract(){
+    public void romExtract() {
         romSplitter();
         readRomSavs();
     }
+
     public void romSplitter() {
         int fileSize = fileBytes.length;
         int partSize = fileSize / 8; // Divides the file in 8 parts
 
         for (int i = 0; i < 8; i++) {
-            String extension =".sav";
+            String extension = ".sav";
             if (i != 0) {//Because 0 is the actual rom
 
                 int startIndex = i * partSize; // Índice de inicio de la parte actual
@@ -73,7 +74,7 @@ public class RomExtractor {
 
                 if (magicIsReal(filePartBytes)) {
                     romByteList.add(filePartBytes);
-                    filePartNames.add(fileName +".part_" + i + extension);
+                    filePartNames.add(fileName + ".part_" + i + extension);
                 }
             }
         }
@@ -82,7 +83,7 @@ public class RomExtractor {
     public void readRomSavs() {
         try {
             for (int i = 0; i < romByteList.size(); i++) {
-                readSavBytes(romByteList.get(i), i,filePartNames.get(i));
+                readSavBytes(romByteList.get(i), i, filePartNames.get(i));
             }
 
         } catch (Exception e) {
@@ -116,7 +117,7 @@ public class RomExtractor {
                     String hashHex = Utils.bytesToHex(hash);
                     gbcImage.setHashCode(hashHex);
                     ImageCodec imageCodec = new ImageCodec(128, 112, false);
-                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, false, false, false);
+                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         //I need to use copy because if not it's inmutable bitmap
                         Bitmap framed = Utils.hashFrames.get((gbcImage.getFrameId())).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);

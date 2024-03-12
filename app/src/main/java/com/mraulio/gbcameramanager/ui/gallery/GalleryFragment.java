@@ -1871,7 +1871,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40, keepFrame);//imageBytes.length/40 to get the height of the image
         String framePaletteId = gbcImage.getFramePaletteId();
         if (framePaletteId == null) framePaletteId = "bw";
-        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), Utils.hashPalettes.get(framePaletteId).getPaletteColorsInt(), imageBytes, invertPalette, gbcImage.isInvertFramePalette(), Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame());
+        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(),  imageBytes, invertPalette);
 
         return image;
     }

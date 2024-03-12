@@ -197,7 +197,6 @@ public class SaveManagerFragment extends Fragment {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-
             }
             return null;
         }

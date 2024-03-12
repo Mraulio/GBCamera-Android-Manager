@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (Float.valueOf(currentVersion) > Float.valueOf(previousVersion)) {
             //App has been updated, do something if necessary
-            deleteImageCache(getBaseContext());
+//            deleteImageCache(getBaseContext());
             // Update version name for future comparisons
             editor.putString("previous_version", currentVersion);
             editor.apply();

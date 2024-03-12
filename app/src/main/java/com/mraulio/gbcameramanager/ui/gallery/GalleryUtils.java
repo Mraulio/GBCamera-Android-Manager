@@ -417,7 +417,7 @@ public class GalleryUtils {
                 editor.putString("sort_by_date", CREATION_DATE.name());
                 editor.apply();
                 checkSorting();
-                updateGridView(currentPage);
+                updateGridView();
 
             }
         });
@@ -430,7 +430,7 @@ public class GalleryUtils {
                 editor.putString("sort_by_date", IMPORT_DATE.name());
                 editor.apply();
                 checkSorting();
-                updateGridView(currentPage);
+                updateGridView();
             }
         });
         sortTitle.setOnClickListener(new View.OnClickListener() {
@@ -442,7 +442,7 @@ public class GalleryUtils {
                 editor.putString("sort_by_date", TITLE.name());
                 editor.apply();
                 checkSorting();
-                updateGridView(currentPage);
+                updateGridView();
             }
         });
         sortAsc.setOnClickListener(new View.OnClickListener() {
@@ -452,7 +452,7 @@ public class GalleryUtils {
                 editor.putBoolean("sort_descending", false);
                 editor.apply();
                 checkSorting();
-                updateGridView(currentPage);
+                updateGridView();
 
             }
         });
@@ -463,7 +463,7 @@ public class GalleryUtils {
                 editor.putBoolean("sort_descending", true);
                 editor.apply();
                 checkSorting();
-                updateGridView(currentPage);
+                updateGridView();
 
             }
         });
@@ -566,7 +566,7 @@ public class GalleryUtils {
             saveTagsSet(selectedTags);
             editor.putInt("current_page", 0).apply();
             currentPage = 0;
-            updateGridView(currentPage);
+            updateGridView();
 
             dialog.dismiss();
         });

@@ -2,12 +2,14 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
+import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.reloadTags;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesListHolder;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 
 import com.mraulio.gbcameramanager.MainActivity;
@@ -24,9 +26,11 @@ import java.util.List;
 public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
     //        private int imageIndex;
     private List<Integer> listImagesIndexes;
+    private Activity activity;
 
-    public DeleteImageAsyncTask(List<Integer> listImagesIndexes) {
+    public DeleteImageAsyncTask(List<Integer> listImagesIndexes, Activity activity) {
         this.listImagesIndexes = listImagesIndexes;
+        this.activity = activity;
     }
 
     @Override
@@ -85,9 +89,13 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
         }
         GalleryFragment.tv_page.setText((GalleryFragment.currentPage + 1) + " / " + (GalleryFragment.lastPage + 1));
         MainActivity.fab.hide();
+
         retrieveTags(gbcImagesList);
         reloadTags();
+        showEditMenuButton = false;
+        activity.invalidateOptionsMenu();
+
         GalleryFragment.loadingDialog.dismiss();
-        GalleryFragment.updateGridView(GalleryFragment.currentPage);
+        GalleryFragment.updateGridView();
     }
 }

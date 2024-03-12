@@ -17,7 +17,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.media.Image;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -53,15 +52,13 @@ public class BigImageDialog {
 
     List<GbcImage> filteredGbcImages;
     Context context;
-    int currentPage;
     Activity activity;
     boolean hideAllMultipleImage;
     List<String> removedTags = new ArrayList<>();
 
-    public BigImageDialog(List<GbcImage> filteredGbcImages, Context context, int currentPage, Activity activity) {
+    public BigImageDialog(List<GbcImage> filteredGbcImages, Context context, Activity activity) {
         this.filteredGbcImages = filteredGbcImages;
         this.context = context;
-        this.currentPage = currentPage;
         this.activity = activity;
     }
 
@@ -85,7 +82,7 @@ public class BigImageDialog {
         Button btnOkWriteTag = dialog.findViewById(R.id.btnOkWriteTag);
         RadioButton rbEditTags = dialog.findViewById(R.id.rbEditTags);
         RadioButton rbMisc = dialog.findViewById(R.id.rbMisc);
-        Button btnUpdateImage = dialog.findViewById(R.id.btnSaveTags);
+        Button btnUpdateImage = dialog.findViewById(R.id.btnUpdateImage);
 
         //EditText Image Name
         EditText etImageName = dialog.findViewById(R.id.etImageName);
@@ -304,7 +301,7 @@ public class BigImageDialog {
                     gbcImageToUpdate.setTags(tagsToSave);
                 }
 
-                new SaveImageAsyncTask(gbcImageToUpdate).execute();
+                new UpdateImageAsyncTask(gbcImageToUpdate).execute();
                 retrieveTags(gbcImagesList);
                 originalTags[0] = new ArrayList<>(tempTags);
 
@@ -312,7 +309,7 @@ public class BigImageDialog {
                 etImageName.setBackgroundColor(context.getColor(R.color.white));
 
                 checkSorting();
-                updateGridView(currentPage);
+                updateGridView();
                 btnUpdateImage.setEnabled(false);
             }
         });
@@ -375,7 +372,7 @@ public class BigImageDialog {
         RadioButton rbEditTags = dialog.findViewById(R.id.rbEditTags);
         RadioButton rbMisc = dialog.findViewById(R.id.rbMisc);
         rbMisc.setVisibility(GONE);
-        Button btnUpdateImage = dialog.findViewById(R.id.btnSaveTags);
+        Button btnUpdateImage = dialog.findViewById(R.id.btnUpdateImage);
 
         //EditText Image Name
         EditText etImageName = dialog.findViewById(R.id.etImageName);
@@ -586,7 +583,7 @@ public class BigImageDialog {
                     }
 
                     if (saveImage) {
-                        new SaveImageAsyncTask(gbcImageToUpdate).execute();
+                        new UpdateImageAsyncTask(gbcImageToUpdate).execute();
                         retrieveTags(gbcImagesList);
                         originalTags[0] = new HashSet<>(tempTags);
                     }
@@ -606,7 +603,7 @@ public class BigImageDialog {
                     previousDialog.dismiss();
                 }
 
-                updateGridView(currentPage);
+                updateGridView();
                 dialog.dismiss();
             }
         });
@@ -615,8 +612,7 @@ public class BigImageDialog {
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                updateGridView(currentPage);
+                updateGridView();
                 dialog.dismiss();
             }
         });

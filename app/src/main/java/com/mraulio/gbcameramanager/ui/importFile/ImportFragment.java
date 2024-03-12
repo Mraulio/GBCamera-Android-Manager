@@ -60,10 +60,9 @@ import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.mraulio.gbcameramanager.db.ImageDao;
-import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
+import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
@@ -297,7 +296,8 @@ public class ImportFragment extends Fragment {
                                     }
                                 }
                                 if (newGbcImages.size() > 0) {
-                                    new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
+                                    SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageDatas, getContext(), tvFileName, numImagesAdded);
+                                    saveImageAsyncTask.execute();
                                     retrieveTags(gbcImagesList);
                                 } else {
                                     Utils.toast(getContext(), getString(R.string.no_new_images));
@@ -337,7 +337,9 @@ public class ImportFragment extends Fragment {
                                             }
                                         }
                                         if (newGbcImages.size() > 0) {
-                                            new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
+                                            ImagesImportDialog imagesImportDialog = new ImagesImportDialog(fileName, newGbcImages, newImageDatas, getContext(), getActivity(), tvFileName, numImagesAdded);
+                                            imagesImportDialog.createImagesImportDialog();
+
                                         } else {
                                             Utils.toast(getContext(), getString(R.string.no_new_images));
                                             tvFileName.setText(getString(R.string.no_new_images));
@@ -583,36 +585,6 @@ public class ImportFragment extends Fragment {
         adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null);
     }
 
-    private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
-        List<GbcImage> gbcImagesList;
-        List<ImageData> imageDataList;
-
-        public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<ImageData> imageDataList) {
-            this.gbcImagesList = gbcImagesList;
-            this.imageDataList = imageDataList;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            ImageDao imageDao = MainActivity.db.imageDao();
-            ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
-            //Need to insert first the gbcImage because of the Foreign Key
-            for (GbcImage gbcImage : gbcImagesList) {
-                imageDao.insert(gbcImage);
-            }
-            for (ImageData imageData : imageDataList) {
-                imageDataDao.insert(imageData);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            tvFileName.setText(numImagesAdded + getString(R.string.done_adding_images));
-            checkSorting();
-            Utils.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
-        }
-    }
 
     private class SavePaletteAsyncTask extends AsyncTask<Void, Void, Void> {
         List<GbcPalette> gbcPalettesList;

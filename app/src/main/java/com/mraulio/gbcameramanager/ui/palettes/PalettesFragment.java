@@ -37,7 +37,7 @@ import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.model.GbcImage;
-import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
+import com.mraulio.gbcameramanager.ui.gallery.UpdateImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
@@ -137,7 +137,7 @@ public class PalettesFragment extends Fragment {
                                             e.printStackTrace();
                                         }
                                     }
-                                    new SaveImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
+                                    new UpdateImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
                                 }
 
                             }

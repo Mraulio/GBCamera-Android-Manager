@@ -131,7 +131,7 @@ public class FramesFragment extends Fragment {
 
                 GbcFrame selectedFrame = currentlyShowingFrames[0].get(position);
 
-                if (selectedFrame.getFrameId().equals("gbcam01") || selectedFrame.getFrameId().equals("gbcam02") || selectedFrame.getFrameId().equals("gbcam03") || selectedFrame.getFrameId().equals("gbcam04")) {
+                if (selectedFrame.getFrameId().equals("gbcam01") || selectedFrame.getFrameId().equals("gbcam02") || selectedFrame.getFrameId().equals("gbcam03")) {
                     Utils.toast(getContext(), getString(R.string.cant_delete_base));
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -372,14 +372,14 @@ public class FramesFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             adapter.notifyDataSetChanged();
             for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
-                if (Utils.gbcImagesList.get(i).getFrameId().equals(gbcFrame.getFrameId())) {
-                    Utils.gbcImagesList.get(i).setFrameId("gbcam01");
+                if (Utils.gbcImagesList.get(i).getFrameId() != null && Utils.gbcImagesList.get(i).getFrameId().equals(gbcFrame.getFrameId()) ) {
+                    Utils.gbcImagesList.get(i).setFrameId(null);
                     //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
                     if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
                         Bitmap image = null;
                         try {
                             GbcImage gbcImage = Utils.gbcImagesList.get(i);
-                            image = frameChange(gbcImage, "gbcam01", gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
+                            image = frameChange(gbcImage, null, gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
                             Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
                             GalleryFragment.diskCache.put(gbcImage.getHashCode(), image);
                         } catch (IOException e) {
@@ -412,18 +412,17 @@ public class FramesFragment extends Fragment {
         Context context;
         int layoutResourceId;
         private boolean showTextView, checkDuplicate;
-        List<GbcFrame> data = new ArrayList<GbcFrame>();
+        List<GbcFrame> gbcFramesList = new ArrayList<GbcFrame>();
         int notSelectedColor = Color.parseColor("#C7D3D5");
         int selectedColor = Color.parseColor("#8C97B3");
         int lastSelectedPosition = -1; // No selected element initially
-
 
         public CustomGridViewAdapterFrames(Context context, int layoutResourceId,
                                            List<GbcFrame> data, boolean showTextView, boolean checkDuplicate) {
             super(context, layoutResourceId, data);
             this.layoutResourceId = layoutResourceId;
             this.context = context;
-            this.data = data;
+            this.gbcFramesList = data;
             this.showTextView = showTextView;
             this.checkDuplicate = checkDuplicate;
         }
@@ -454,10 +453,17 @@ public class FramesFragment extends Fragment {
             }
             if (!showTextView) {
                 holder.txtTitle.setVisibility(View.GONE);
+                System.out.println("GONEEEEE");
             }
-            Bitmap image = data.get(position).getFrameBitmap();
-            String name = data.get(position).getFrameName();
-            String id = data.get(position).getFrameId();
+            GbcFrame gbcFrame = gbcFramesList.get(position);
+            Bitmap image = null;
+            String name = null;
+            String id = null;
+            if (gbcFrame != null) {
+                image = gbcFrame.getFrameBitmap();
+                name = gbcFrame.getFrameName();
+                id = gbcFrame.getFrameId();
+            }
             if (checkDuplicate) {
                 for (GbcFrame objeto : Utils.framesList) {
                     if (objeto.getFrameId().equals(id)) {
@@ -465,8 +471,10 @@ public class FramesFragment extends Fragment {
                     }
                 }
             }
-            holder.txtTitle.setText(name);
-            holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
+                holder.txtTitle.setText(gbcFrame != null ? name : context.getResources().getString(R.string.as_imported_frame));
+            if (gbcFrame != null) {
+                holder.imageItem.setImageBitmap(image);
+            }
             return row;
         }
 

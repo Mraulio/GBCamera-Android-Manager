@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_margin="1dp"
-    android:padding="10dp"
-    app:cardElevation="4dp"
-    app:cardCornerRadius="4dp"
     android:backgroundTint="#C7D3D5"
-    android:layout_height="match_parent">
+    android:padding="10dp"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="4dp">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -19,19 +20,22 @@
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
-            android:padding="6dp"
             android:background="#C7D3D5"
-            android:src="@mipmap/ic_launcher"
-            android:scaleType="fitCenter"/>
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_as_imported_frame" />
+
         <TextView
+            android:id="@+id/tvFrameName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Frame name"
-            android:maxLines="1"
             android:background="#C7D3D5"
-            android:textColor="@color/black"
+            android:autoSizeMaxTextSize="20sp"
+            android:autoSizeMinTextSize="2sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
             android:scrollHorizontally="true"
-            android:id="@+id/tvFrameName"></TextView>
+            android:textColor="@color/black"></TextView>
 
     </LinearLayout>
 

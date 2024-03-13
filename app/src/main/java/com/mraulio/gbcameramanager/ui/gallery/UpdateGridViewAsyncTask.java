@@ -25,8 +25,6 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
 
         List<String> currentPageHashes = new ArrayList<>();
         ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
-        //foreach index
-        int index = 0;
         //Loop for each gbcImage in a sublist in all gbcImages objects for the current page
         for (GbcImage gbcImage : GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex)) {
             //Add the hashcode to the list of current hashes
@@ -49,10 +47,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
                 ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
-                GbcFrame gbcFrame = Utils.hashFrames.get(gbcImage.getFrameId());
-                if (gbcFrame == null){
-                    gbcFrame= Utils.hashFrames.get("gbcam01");
-                }
+
                 image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette());
                 //Add the bitmap to the cache
                 Utils.imageBitmapCache.put(imageHash, image);
@@ -68,7 +63,6 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
                     e.printStackTrace();
                 }
             }
-            index++;
         }
         GalleryFragment.gbcImagesForPage = GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex);
         //Create a list of bitmaps to use in the adapter, getting the bitmaps from the cache map for each image in the current page

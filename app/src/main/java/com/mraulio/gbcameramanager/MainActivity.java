@@ -1,9 +1,6 @@
 package com.mraulio.gbcameramanager;
 
-import static com.mraulio.gbcameramanager.utils.Utils.backupDatabase;
-import static com.mraulio.gbcameramanager.utils.Utils.deleteImageCache;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
-import static com.mraulio.gbcameramanager.utils.Utils.restoreDatabase;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -354,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
                     Utils.hashFrames.put(gbcFrame.getFrameId(), gbcFrame);
                 }
                 Utils.frameGroupsNames = hashFrames.get("gbcam01").getFrameGroupsNames();
+                System.out.println(Utils.frameGroupsNames.toString());
                 Utils.framesList.addAll(frames);
             } else {
                 //First time add it to the database

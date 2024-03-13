@@ -94,7 +94,7 @@ public class Utils {
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
     public static HashMap<String, Bitmap> imageBitmapCache = new HashMap<>();
-    public static HashMap<String, GbcFrame> hashFrames = new HashMap<>();
+    public static LinkedHashMap<String, GbcFrame> hashFrames = new LinkedHashMap<>();
     public static HashMap<String, GbcPalette> hashPalettes = new HashMap<>();
 
     public static LinkedHashSet<String> tagsHash = new LinkedHashSet<>();
@@ -195,11 +195,12 @@ public class Utils {
 
         TextView textView = new TextView(context);
         textView.setTextSize(20);
-        textView.setPadding(0,20,0,0);
+        textView.setPadding(0, 20, 0, 0);
         textView.setTextColor(context.getResources().getColor(R.color.imageview_bg));
 
-        textView.setText(text != null ? text : "No texto");
-
+        if (text != null) {
+            textView.setText(text);
+        }
         textView.setGravity(Gravity.CENTER);
         layout.addView(textView);
 

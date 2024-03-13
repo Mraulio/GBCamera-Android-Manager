@@ -120,7 +120,7 @@ public class RomExtractor {
                     Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
                     if (image.getHeight() == 112 && image.getWidth() == 128) {
                         //I need to use copy because if not it's inmutable bitmap
-                        Bitmap framed = Utils.hashFrames.get((gbcImage.getFrameId())).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                        Bitmap framed = Utils.hashFrames.get("gbcam01").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                         Canvas canvas = new Canvas(framed);
                         canvas.drawBitmap(image, 16, 16, null);
                         image = framed;

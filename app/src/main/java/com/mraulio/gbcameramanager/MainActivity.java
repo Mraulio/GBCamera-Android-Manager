@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
         String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
-
+        GalleryFragment.currentPage= 0;
         //To get the locale on the first startup and set the def value
         Resources resources = getResources();
         Configuration configuration = resources.getConfiguration();
@@ -351,7 +351,6 @@ public class MainActivity extends AppCompatActivity {
                     Utils.hashFrames.put(gbcFrame.getFrameId(), gbcFrame);
                 }
                 Utils.frameGroupsNames = hashFrames.get("gbcam01").getFrameGroupsNames();
-                System.out.println(Utils.frameGroupsNames.toString());
                 Utils.framesList.addAll(frames);
             } else {
                 //First time add it to the database

@@ -4,6 +4,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.TextView;
 
@@ -15,19 +16,21 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
     List<GbcImage> gbcImagesList;
-    List<ImageData> imageDataList;
+    List<Bitmap> bitmapList;
     Context context;
     TextView tvFileName;
     int numImagesAdded;
-    
-    public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<ImageData> imageDataList,Context context, TextView tvFileName, int numImagesAdded) {
+
+    public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<Bitmap> bitmapList, Context context, TextView tvFileName, int numImagesAdded) {
         this.gbcImagesList = gbcImagesList;
-        this.imageDataList = imageDataList;
+        this.bitmapList = bitmapList;
         this.context = context;
         this.tvFileName = tvFileName;
         this.numImagesAdded = numImagesAdded;
@@ -35,13 +38,29 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
+        List<GbcImage> newGbcImages = new ArrayList<>();
+        List<ImageData> newImageDatas = new ArrayList<>();
+        for (int i = 0; i < gbcImagesList.size(); i++) {
+            GbcImage gbcImage = gbcImagesList.get(i);
+            GbcImage.numImages++;
+            numImagesAdded++;
+            ImageData imageData = new ImageData();
+            imageData.setImageId(gbcImage.getHashCode());
+            imageData.setData(gbcImage.getImageBytes());
+            newImageDatas.add(imageData);
+            Utils.gbcImagesList.add(gbcImage);
+            Utils.gbcImagesListHolder.add(gbcImage);
+            newGbcImages.add(gbcImage);
+            Utils.imageBitmapCache.put(gbcImage.getHashCode(), bitmapList.get(i));
+        }
+
         ImageDao imageDao = MainActivity.db.imageDao();
         ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
         //Need to insert first the gbcImage because of the Foreign Key
         for (GbcImage gbcImage : gbcImagesList) {
             imageDao.insert(gbcImage);
         }
-        for (ImageData imageData : imageDataList) {
+        for (ImageData imageData : newImageDatas) {
             imageDataDao.insert(imageData);
         }
         return null;

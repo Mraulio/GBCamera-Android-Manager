@@ -106,7 +106,6 @@ public class StartCreation {
         Utils.hashFrames.put(myframe.getFrameId(), myframe);
         Utils.framesList.add(myframe);
 
-
     }
 
 }

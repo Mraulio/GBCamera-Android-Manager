@@ -267,7 +267,8 @@ public class ImportFragment extends Fragment {
                         btnAddImages.setEnabled(false);
                         numImagesAdded = 0;
                         List<GbcImage> newGbcImages = new ArrayList<>();
-                        List<ImageData> newImageDatas = new ArrayList<>();
+                        List<Bitmap> listNewBitmaps = new ArrayList<>();
+                        List<String> checkDuplicatedImport = new ArrayList<>();
                         switch (fileType) {
                             case TXT:
                             case JSON: {
@@ -276,27 +277,26 @@ public class ImportFragment extends Fragment {
                                     boolean alreadyAdded = false;
                                     //If the image already exists (by the hash) it doesn't add it. Same if it's already added
                                     for (GbcImage image : Utils.gbcImagesList) {
-                                        if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
+                                        if (image.getHashCode().equals(gbcImage.getHashCode())) {
+                                            alreadyAdded = true;
+                                            break;
+                                        }
+                                    }
+                                    //Now I need to check if the image is already added to the new Images (duplicated import)
+                                    for (String hashDup : checkDuplicatedImport) {
+                                        if (hashDup.equals(gbcImage.getHashCode())) {
                                             alreadyAdded = true;
                                             break;
                                         }
                                     }
                                     if (!alreadyAdded) {
-                                        GbcImage.numImages++;
-                                        numImagesAdded++;
-                                        ImageData imageData = new ImageData();
-                                        imageData.setImageId(gbcImage.getHashCode());
-                                        imageData.setData(gbcImage.getImageBytes());
-                                        newImageDatas.add(imageData);
-                                        Utils.gbcImagesList.add(gbcImage);
-                                        Utils.gbcImagesListHolder.add(gbcImage);
-
                                         newGbcImages.add(gbcImage);
-                                        Utils.imageBitmapCache.put(gbcImage.getHashCode(), importedImagesBitmaps.get(i));
+                                        listNewBitmaps.add(finalListBitmaps.get(i));
+                                        checkDuplicatedImport.add(gbcImage.getHashCode());
                                     }
                                 }
                                 if (newGbcImages.size() > 0) {
-                                    SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageDatas, getContext(), tvFileName, numImagesAdded);
+                                    SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, listNewBitmaps, getContext(), tvFileName, numImagesAdded);
                                     saveImageAsyncTask.execute();
                                     retrieveTags(gbcImagesList);
                                 } else {
@@ -309,35 +309,43 @@ public class ImportFragment extends Fragment {
                             case PHOTO_ROM:
                             case SAV: {
                                 if (!cbAddFrame.isChecked()) {
-                                    HashSet transparencyHS = transparencyHashSet(finalListBitmaps.get(0));
-                                    if (transparencyHS.size() > 0) {
+                                    boolean anyImageHasTransparency = false;
+                                    for (int i = 0; i < finalListBitmaps.size(); i++) {
+                                        HashSet transparencyHS = transparencyHashSet(finalListBitmaps.get(i));
+                                        if (transparencyHS.size() > 0) {
+                                            anyImageHasTransparency = true;
+                                        }
+                                    }
+                                    if (anyImageHasTransparency) {
                                         tvFileName.setText((getString(R.string.invalid_transparent_image)));
                                     } else {
+
                                         for (int i = 0; i < finalListImages.size(); i++) {
                                             GbcImage gbcImage = finalListImages.get(i);
                                             boolean alreadyAdded = false;
-                                            //If the palette already exists (by the hash) it doesn't add it. Same if it's already added
+                                            //If the image already exists (by the hash) it doesn't add it. Same if it's already added
                                             for (GbcImage image : Utils.gbcImagesList) {
                                                 if (image.getHashCode().toLowerCase(Locale.ROOT).equals(gbcImage.getHashCode())) {
                                                     alreadyAdded = true;
                                                     break;
                                                 }
                                             }
+                                            //Now I need to check if the image is already added to the new Images (duplicated import)
+                                            for (String hashDup : checkDuplicatedImport) {
+                                                if (hashDup.equals(gbcImage.getHashCode())) {
+                                                    alreadyAdded = true;
+                                                    break;
+                                                }
+                                            }
                                             if (!alreadyAdded) {
-                                                GbcImage.numImages++;
-                                                numImagesAdded++;
-                                                ImageData imageData = new ImageData();
-                                                imageData.setImageId(gbcImage.getHashCode());
-                                                imageData.setData(gbcImage.getImageBytes());
-                                                newImageDatas.add(imageData);
-                                                Utils.gbcImagesList.add(gbcImage);
-                                                Utils.gbcImagesListHolder.add(gbcImage);
                                                 newGbcImages.add(gbcImage);
-                                                Utils.imageBitmapCache.put(gbcImage.getHashCode(), finalListBitmaps.get(i));
+                                                listNewBitmaps.add(finalListBitmaps.get(i));
+                                                checkDuplicatedImport.add(gbcImage.getHashCode());
                                             }
                                         }
+
                                         if (newGbcImages.size() > 0) {
-                                            ImagesImportDialog imagesImportDialog = new ImagesImportDialog(newGbcImages, newImageDatas, selectedFile, getContext(), getActivity(), tvFileName, numImagesAdded);
+                                            ImagesImportDialog imagesImportDialog = new ImagesImportDialog(newGbcImages, listNewBitmaps, selectedFile, getContext(), getActivity(), tvFileName, numImagesAdded);
                                             imagesImportDialog.createImagesImportDialog();
 
                                         } else {

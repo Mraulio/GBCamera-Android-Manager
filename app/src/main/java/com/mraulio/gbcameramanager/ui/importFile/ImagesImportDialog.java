@@ -41,16 +41,16 @@ import java.util.Locale;
 
 public class ImagesImportDialog {
     List<GbcImage> newGbcImages;
-    List<ImageData> newImageDatas;
+    List<Bitmap> newImageBitmaps;
     Context context;
     Activity activity;
     TextView tvFileName;
     int numImagesAdded;
     DocumentFile file;
 
-    public ImagesImportDialog(List<GbcImage> newGbcImages, List<ImageData> newImageDatas, DocumentFile file, Context context, Activity activity, TextView tvFileName, int numImagesAdded) {
+    public ImagesImportDialog(List<GbcImage> newGbcImages, List<Bitmap> newImageBitmaps, DocumentFile file, Context context, Activity activity, TextView tvFileName, int numImagesAdded) {
         this.newGbcImages = newGbcImages;
-        this.newImageDatas = newImageDatas;
+        this.newImageBitmaps = newImageBitmaps;
         this.file = file;
         this.context = context;
         this.activity = activity;
@@ -79,7 +79,7 @@ public class ImagesImportDialog {
             ImageView imageViewMini = new ImageView(context);
             imageViewMini.setId(i);
             imageViewMini.setPadding(5, 5, 5, 5);
-            Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
+            Bitmap image = newImageBitmaps.get(i);
             imageViewMini.setImageBitmap(rotateBitmap(image, gbcImage));
 
             imageViewList.add(imageViewMini);
@@ -257,7 +257,7 @@ public class ImagesImportDialog {
                         gbcImageToAdd.setTags(tagsToSave);
                     }
                 }
-                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageDatas, context, tvFileName, numImagesAdded);
+                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded);
                 saveImageAsyncTask.execute();
 
                 dialog.dismiss();

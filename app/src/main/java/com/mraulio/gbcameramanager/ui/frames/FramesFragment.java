@@ -431,7 +431,6 @@ public class FramesFragment extends Fragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             View row = convertView;
             RecordHolder holder = null;
-
             if (row == null) {
                 LayoutInflater inflater = ((Activity) context).getLayoutInflater();
                 row = inflater.inflate(layoutResourceId, parent, false);
@@ -451,9 +450,8 @@ public class FramesFragment extends Fragment {
                 holder.txtTitle.setBackgroundColor(selectedColor);
                 holder.imageItem.setBackgroundColor(selectedColor);
             }
-            if (!showTextView) {
-                holder.txtTitle.setVisibility(View.GONE);
-                System.out.println("GONEEEEE");
+            if (showTextView) {
+                holder.txtTitle.setVisibility(View.VISIBLE);
             }
             GbcFrame gbcFrame = gbcFramesList.get(position);
             Bitmap image = null;

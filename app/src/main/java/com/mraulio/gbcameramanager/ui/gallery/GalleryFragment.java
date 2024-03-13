@@ -477,7 +477,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 currentlyShowingFrames[0] = currentGroupList;
                             }
 
-                            frameAdapter[0] = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false);
+                            frameAdapter[0] = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], false, false);
 
                             //Set the selected frame if it's in the selected group
                             GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
@@ -967,7 +967,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                         currentlyShowingFrames[0] = currentGroupList;
                                     }
 
-                                    frameAdapter[0] = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false);
+                                    frameAdapter[0] = new FramesFragment.CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], false, false);
 
                                     //Set the selected frame if it's in the selected group
                                     GbcImage gbcImage = filteredGbcImages.get(globalImageIndex[0]);

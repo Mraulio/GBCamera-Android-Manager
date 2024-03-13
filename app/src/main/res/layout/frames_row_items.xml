@@ -35,6 +35,7 @@
             android:autoSizeTextType="uniform"
             android:maxLines="1"
             android:scrollHorizontally="true"
+            android:visibility="gone"
             android:textColor="@color/black"></TextView>
 
     </LinearLayout>

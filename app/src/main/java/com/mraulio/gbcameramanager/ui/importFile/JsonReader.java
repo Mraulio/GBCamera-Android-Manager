@@ -1,11 +1,9 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
-import static com.mraulio.gbcameramanager.MainActivity.db;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.importFile.ImportFragment.importedFrameGroupIdNames;
-import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
-import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
@@ -33,11 +31,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 public class JsonReader {
+
+    static final String INTERNATIONAL_FRAMES = "International (Game Boy Camera) Frames";
+    static final String JAPANESE_FRAMES = "Japanese (Pocket Camera) Frames";
+    static final String HELLO_KITTY_FRAMES = "Hello Kitty Frames";
 
     public static List<?> jsonCheck(String jsonString) {
         try {
@@ -61,7 +66,6 @@ public class JsonReader {
                 if (paletteObject.has("shortName") && paletteObject.has("name") && paletteObject.has("palette") && paletteObject.has("origin")) {
                     JSONArray paletteArray = paletteObject.getJSONArray("palette");
 
-                    // Verificar que la matriz de paletas tenga cuatro elementos
                     if (paletteArray.length() == 4) {
                         System.out.println("JSON has the expected format.");
                     } else {
@@ -312,27 +316,8 @@ public class JsonReader {
         }
 
         return frameList;
-
     }
 
-    public static String decodeDataTransparency(String compressedString) {
-        byte[] compressedBytes = compressedString.getBytes(StandardCharsets.ISO_8859_1);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Inflater inflater = new Inflater();
-        inflater.setInput(compressedBytes);
-        byte[] buffer = new byte[1024];
-        try {
-            while (!inflater.finished()) {
-                int count = inflater.inflate(buffer);
-                outputStream.write(buffer, 0, count);
-            }
-        } catch (DataFormatException e) {
-            e.printStackTrace();
-        } finally {
-            inflater.end();
-        }
-        return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-    }
 
     public static List<GbcFrame> readerFramesWebApp(JSONObject jsonObject, JSONObject stateObject) throws
             JSONException {
@@ -342,6 +327,7 @@ public class JsonReader {
             return null;
         }
         List<GbcFrame> frameList = new ArrayList<>();
+        LinkedHashSet<String> newGroupIds = new LinkedHashSet<>();//To add the group id of each image, in case there is no group name for it
 
         for (int i = 0; i < framesArray.length(); i++) {
             JSONObject frameObj = null;
@@ -362,13 +348,33 @@ public class JsonReader {
                 } else {
                     return null;
                 }
+
+                //If an id is not valid I take the json is not valid
+                if (!checkValidId(id)) {
+                    return null;
+                }
+
+                String groupId = id.substring(0, id.length() - 2);
+                newGroupIds.add(groupId);
+
                 GbcFrame gbcFrame = new GbcFrame();
-                String frameHash = frameObj.getString("hash");
-                gbcFrame.setFrameHash(frameHash);
+
                 gbcFrame.setFrameName(name);
                 gbcFrame.setFrameId(id);
 
-                String data = jsonObject.getString("frame-" + frameHash);
+                boolean hasHash = false;
+                String frameHash = "";
+                if (frameObj.has("hash")) {
+                    frameHash = frameObj.getString("hash");
+                    hasHash = true;
+                }
+
+                String data = "";
+                if (hasHash) {
+                    data = jsonObject.getString("frame-" + frameHash);
+                } else {
+                    data = jsonObject.getString("frame-" + id);
+                }
                 String decompHash = recreateFrame(data);
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
@@ -383,6 +389,21 @@ public class JsonReader {
                 gbcFrame.setTransparentPixelPositions(transparencyHS);
                 frameList.add(gbcFrame);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
+
+                if (!hasHash) {
+                    //If json has not hash, generate it
+                    try {
+                        byte[] gbFrameBytes = Utils.encodeImage(image, "bw");
+                        gbcFrame.setFrameBytes(gbFrameBytes);
+                        String gbFrameHash = generateHashFromBytes(gbFrameBytes);
+                        gbcFrame.setFrameHash(gbFrameHash);
+                        frameHash = gbFrameHash;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (frameHash.isEmpty()) return null;
+
             } catch (JSONException e) {
                 e.printStackTrace();
             } catch (Exception e) {
@@ -398,11 +419,42 @@ public class JsonReader {
                 String frameGroupName = frameNameObj.getString("name");
                 importedFrameGroupIdNames.put(frameGroupId, frameGroupName);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+        //Now add the frames from the newGroupIds in case they are not in the frameGroupNames
+        for (String st : newGroupIds) {
+            if (!importedFrameGroupIdNames.containsKey(st)) {
+                String groupName = "";
+                if (st.equals("int")) {
+                    groupName = INTERNATIONAL_FRAMES;
+                } else if (st.equals("jp")) {
+                    groupName = JAPANESE_FRAMES;
+                } else if (st.equals("hk")) {
+                    groupName = HELLO_KITTY_FRAMES;
+                }
+                importedFrameGroupIdNames.put(st, groupName);
+            }
 
+        }
         return frameList;
+    }
+
+    private static boolean checkValidId(String frameId) {
+
+        //Pattern for lowercase chars with 2 numbers at the end
+        String idPattern = "^[a-z]+\\d{2}$";
+
+        Pattern pattern = Pattern.compile(idPattern);
+
+        Matcher matcher = pattern.matcher(frameId);
+
+        if (matcher.matches()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static HashSet<int[]> stringToHashSet(String data) {
@@ -487,6 +539,25 @@ public class JsonReader {
             result.append(finished.substring(i, i + 2));
         }
         return result.toString();
+    }
+
+    public static String decodeDataTransparency(String compressedString) {
+        byte[] compressedBytes = compressedString.getBytes(StandardCharsets.ISO_8859_1);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Inflater inflater = new Inflater();
+        inflater.setInput(compressedBytes);
+        byte[] buffer = new byte[1024];
+        try {
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, count);
+            }
+        } catch (DataFormatException e) {
+            e.printStackTrace();
+        } finally {
+            inflater.end();
+        }
+        return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
     }
 
 }

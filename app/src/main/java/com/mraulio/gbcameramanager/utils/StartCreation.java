@@ -50,7 +50,7 @@ public class StartCreation {
             throw new RuntimeException(e);
         }
         LinkedHashMap<String,String> frameGroupNamesHash = new LinkedHashMap<>();
-        frameGroupNamesHash.put("gbc","Default frames");
+        frameGroupNamesHash.put("gbcam","Default Frames");
         blackFrame.setFrameGroupsNames(frameGroupNamesHash);
         Utils.hashFrames.put(blackFrame.getFrameId(), blackFrame);
         frameGroupsNames = frameGroupNamesHash;

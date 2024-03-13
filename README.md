@@ -56,6 +56,7 @@ You may find me in my Instagram account [@gbcameroid](https://www.instagram.com/
   * [Gameboy 2BPP Graphics Format](https://www.huderlem.com/demos/gameboy2bpp.html) info.
   * Some info on the deleted images [here](https://www.insidegadgets.com/2017/07/11/learning-about-gameboy-camera-saves-and-converting-stored-images-to-bitmap/).
   * More info on deleted images and order in the sav [here](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves#part-1-injecting-custom-pictures-into-the-save).
+  * [Structure of the Game Boy Camera Save Data](https://funtography.online/wiki/Structure_of_the_Game_Boy_Camera_Save_Data)
 
 ## Some images from the app.
 <img src="https://github.com/Mraulio/GBCamera-Android-Manager/assets/12874082/6505c36b-e362-415f-808a-cd4336169fd6" width="300"/>

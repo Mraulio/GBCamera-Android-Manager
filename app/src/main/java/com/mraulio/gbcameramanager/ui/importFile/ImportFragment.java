@@ -1,6 +1,5 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
@@ -10,7 +9,6 @@ import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
-import static com.mraulio.gbcameramanager.utils.Utils.restartApplication;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
@@ -95,15 +93,15 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-
 
 public class ImportFragment extends Fragment {
 
     static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
     static List<GbcImage> importedImagesList = new ArrayList<>();
-    static HashMap<String, String> importedFrameGroupIdNames = new HashMap<>();
+    static LinkedHashMap<String, String> importedFrameGroupIdNames = new LinkedHashMap<>();
     int totalImages = 0;
     List<List<GbcImage>> listActiveImages = new ArrayList<>();
     List<List<GbcImage>> listDeletedImages = new ArrayList<>();

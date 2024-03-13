@@ -166,7 +166,7 @@ public class ImportFragment extends Fragment {
         btnAddImages = view.findViewById(R.id.btnAddImages);
         btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
-        loadingDialog = Utils.loadingDialog(getContext());
+        loadingDialog = Utils.loadingDialog(getContext(), null);
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.IMPORT;
 
         tvFileName = view.findViewById(R.id.tvFileName);

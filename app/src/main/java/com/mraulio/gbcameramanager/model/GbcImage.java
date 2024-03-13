@@ -80,7 +80,7 @@ public class GbcImage {
     public GbcImage() {
         this.paletteId = "bw";
         this.framePaletteId = "bw";
-        this.frameId = "gbcam01";//I set the nintendo frame as the default
+        this.frameId = null;//I set the nintendo frame as the default
         this.lockFrame = false;
         this.invertPalette = false;
         this.invertFramePalette = false;

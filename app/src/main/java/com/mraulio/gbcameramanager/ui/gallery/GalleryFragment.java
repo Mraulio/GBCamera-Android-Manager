@@ -152,7 +152,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         tv = view.findViewById(R.id.text_gallery);
         gridView = view.findViewById(R.id.gridView);
-        loadingDialog = Utils.loadingDialog(getContext());
+        loadingDialog = Utils.loadingDialog(getContext(), null);
         setHasOptionsMenu(true);
         diskCache = new DiskCache(getContext());
 
@@ -478,7 +478,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             //Set the selected frame if it's in the selected group
                             GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
                             for (int x = 0; x < currentlyShowingFrames[0].size(); x++) {
-                                if(currentlyShowingFrames[0].get(x).getFrameId().equals(gbcImage.getFrameId())){
+                                if (currentlyShowingFrames[0].get(x).getFrameId().equals(gbcImage.getFrameId())) {
                                     frameAdapter[0].setLastSelectedPosition(x);
                                 }
                             }
@@ -1004,7 +1004,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     public void run() {
                                         //Single tap action
                                         BigImageDialog bigImageDialog = new BigImageDialog(filteredGbcImages, getContext(), getActivity());
-                                        bigImageDialog.showBigImageDialogMultipleImages(selectedImages, imageView, selectionMode,dialog);
+                                        bigImageDialog.showBigImageDialogMultipleImages(selectedImages, imageView, selectionMode, dialog);
 
                                         clickCount = 0;
                                     }
@@ -1803,27 +1803,28 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     public static Bitmap frameChange(GbcImage gbcImage, String frameId, boolean invertImagePalette, boolean invertFramePalette, boolean keepFrame, Boolean save) throws IOException {
         Bitmap resultBitmap;
-        if ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224) {
-            boolean wasWildFrame = Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame();
+        GbcFrame gbcFrame = Utils.hashFrames.get(gbcImage.getFrameId());
+        if ((gbcImage.getImageBytes().length / 40) == 144 && gbcFrame != null || (gbcImage.getImageBytes().length / 40) == 224 && gbcFrame!= null) {
+//            boolean wasWildFrame = Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame();
             //To safecheck, maybe it's an image added with a wild frame size
-            if (!wasWildFrame && (gbcImage.getImageBytes().length / 40) == 224) {
-                wasWildFrame = true;
-            }
+//            if (!wasWildFrame && (gbcImage.getImageBytes().length / 40) == 224) {
+//                wasWildFrame = true;
+//            }
 //            if (wasWildFrame)
 //                yIndexActualImage= 40;
             int yIndexActualImage = 16;// y Index where the actual image starts
             int yIndexNewFrame = 16;
-            boolean isWildFrameNow = Utils.hashFrames.get(frameId).isWildFrame();
+            boolean isWildFrameNow = gbcFrame.isWildFrame();
             if (isWildFrameNow) yIndexNewFrame = 40;
 
-            Bitmap framed = Utils.hashFrames.get(frameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+            Bitmap framed = gbcFrame.getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             resultBitmap = Bitmap.createBitmap(framed.getWidth(), framed.getHeight(), Bitmap.Config.ARGB_8888);
 
             Canvas canvas = new Canvas(resultBitmap);
             String paletteId = gbcImage.getPaletteId();
             if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
                 paletteId = "bw";
-            Bitmap setToPalette = paletteChanger(paletteId, gbcImage.getImageBytes(), gbcImage, keepFrame, false, invertImagePalette);
+            Bitmap setToPalette = paletteChanger(paletteId, gbcImage.getImageBytes(), keepFrame,  invertImagePalette);
             Bitmap croppedBitmap = Bitmap.createBitmap(setToPalette, 16, yIndexActualImage, 128, 112); //Getting the internal 128x112 image
             canvas.drawBitmap(croppedBitmap, 16, yIndexNewFrame, null);
             gbcImage.setFrameId(frameId);
@@ -1836,8 +1837,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
                 framePaletteId = "bw";
 
-            GbcFrame gbcFrame = Utils.hashFrames.get(frameId);
             byte[] frameBytes = gbcFrame.getFrameBytes();
+            System.out.println(gbcFrame.getFrameId()+" frame ID //////////////////");
             if (frameBytes == null) {
                 try {
                     gbcFrame.setFrameBytes(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
@@ -1845,7 +1846,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     e.printStackTrace();
                 }
             }
-            framed = paletteChanger(framePaletteId, Utils.hashFrames.get(frameId).getFrameBytes(), gbcImage, true, false, invertFramePalette);
+            System.out.println("bytes: "+Utils.hashFrames.get(frameId).getFrameBytes());
+            System.out.println(frameBytes.length+" length");
+            framed = paletteChanger(framePaletteId, frameBytes, true,  invertFramePalette);
             framed = transparentBitmap(framed, Utils.hashFrames.get(gbcImage.getFrameId()));
 
             canvas.drawBitmap(framed, 0, 0, null);
@@ -1854,7 +1857,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             String imagePaletteId = gbcImage.getPaletteId();
             if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
                 imagePaletteId = "bw";
-            resultBitmap = paletteChanger(imagePaletteId, gbcImage.getImageBytes(), gbcImage, keepFrame, false, invertImagePalette);
+            resultBitmap = paletteChanger(imagePaletteId, gbcImage.getImageBytes(), keepFrame,  invertImagePalette);
         }
         //Because when exporting to json, hex or printing I use this method but don't want to keep the changes
         if (save != null && save) {
@@ -1862,16 +1865,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             new UpdateImageAsyncTask(gbcImage).execute();
         }
         return resultBitmap;
-
     }
 
     //Change palette
-    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, GbcImage gbcImage, boolean keepFrame, boolean save, boolean invertPalette) {
-
+    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, boolean keepFrame,boolean invertPalette) {
         ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40, keepFrame);//imageBytes.length/40 to get the height of the image
-        String framePaletteId = gbcImage.getFramePaletteId();
-        if (framePaletteId == null) framePaletteId = "bw";
-        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(),  imageBytes, invertPalette);
+        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
 
         return image;
     }

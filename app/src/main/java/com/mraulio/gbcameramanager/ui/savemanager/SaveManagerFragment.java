@@ -90,7 +90,7 @@ public class SaveManagerFragment extends Fragment {
         btnDelete = view.findViewById(R.id.btnDelete);
         btnAdd = view.findViewById(R.id.btnAdd);
         cbModDate =view.findViewById(R.id.cbModDate);
-        loadingDialog = Utils.loadingDialog(getContext());
+        loadingDialog = Utils.loadingDialog(getContext(), null);
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
 
 

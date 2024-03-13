@@ -20,14 +20,20 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -177,21 +183,34 @@ public class Utils {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
-    public static AlertDialog loadingDialog(Context context) {
+    public static AlertDialog loadingDialog(Context context, String text) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setGravity(Gravity.CENTER);
+
+        ProgressBar progressBar = new ProgressBar(context);
+        layout.addView(progressBar);
+
+        TextView textView = new TextView(context);
+        textView.setTextSize(20);
+        textView.setPadding(0,20,0,0);
+        textView.setTextColor(context.getResources().getColor(R.color.imageview_bg));
+
+        textView.setText(text != null ? text : "No texto");
+
+        textView.setGravity(Gravity.CENTER);
+        layout.addView(textView);
+
+        builder.setView(layout);
         builder.setCancelable(false);
 
-        ImageView imageView = new ImageView(context);
-        imageView.setImageResource(R.mipmap.ic_launcher);
-        builder.setView(imageView);
-
         AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-        imageView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.custom_progressbar));
-
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return dialog;
     }
+
 
     public static Bitmap rotateBitmap(Bitmap originalBitmap, GbcImage gbcImage) {
         Matrix matrix = new Matrix();

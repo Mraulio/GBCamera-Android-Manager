@@ -211,9 +211,10 @@
     <string name="dialog_confirm_restore_db">Restoring a database will reset all settings.\nMaking a database backup is recommended.\nApp will reset.\nAre you sure? </string>
     <string name="no_db_backup">Restoring a database will reset all settings.\nMaking a database backup is recommended.\nApp will reset.\nAre you sure? </string>
     <string name="as_imported_frame">As imported</string>
-    <string name="btn_export_current_framegroup">Export Current Group</string>
-    <string name="btn_edit_current_framegroup">Rename Current Group</string>
+    <string name="btn_export_current_framegroup">Export Group</string>
+    <string name="btn_edit_current_framegroup">Rename Group</string>
     <string name="notification_download_complete">Download complete</string>
+    <string name="et_rename_frame_group">New frame group name</string>
 
 
 </resources>

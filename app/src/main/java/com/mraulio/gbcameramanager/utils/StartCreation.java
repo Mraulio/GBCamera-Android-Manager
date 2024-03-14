@@ -17,7 +17,6 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 

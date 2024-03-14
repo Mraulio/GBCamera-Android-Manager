@@ -1397,7 +1397,6 @@ public class ImportFragment extends Fragment {
         return frameId;
     }
 
-
     private boolean checkExistingIdIndex(String frameId) {
         for (HashMap.Entry<String, GbcFrame> entry : hashFrames.entrySet()) {
             if (entry.getValue().getFrameId().equals(frameId)) {

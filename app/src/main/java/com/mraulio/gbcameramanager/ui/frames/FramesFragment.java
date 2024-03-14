@@ -19,13 +19,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -56,13 +56,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.zip.Deflater;
 
 public class FramesFragment extends Fragment {
-
+    List<String> frameGroupList;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -81,7 +82,7 @@ public class FramesFragment extends Fragment {
 
         Spinner spFrameGroups = view.findViewById(R.id.spFrameGroups);
 
-        List<String> frameGroupList = new ArrayList<>();
+        frameGroupList = new ArrayList<>();
         frameGroupList.add(getString(R.string.sp_all_frame_groups));
         List<String> frameGroupIds = new ArrayList<>();//To access with index
         for (LinkedHashMap.Entry<String, String> entry : frameGroupsNames.entrySet()) {
@@ -89,27 +90,34 @@ public class FramesFragment extends Fragment {
             frameGroupIds.add(entry.getKey());
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+        ArrayAdapter<String> adapterFrameGroupsSpinner = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, frameGroupList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spFrameGroups.setAdapter(adapter);
+        adapterFrameGroupsSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spFrameGroups.setAdapter(adapterFrameGroupsSpinner);
         final List<GbcFrame>[] currentGroupList = new ArrayList[]{new ArrayList<>()};
+        final String[] frameGroupName = new String[1];
+        final String[] frameGroupId = new String[1];
         spFrameGroups.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i == 0) {
                     //Show all frames
                     currentlyShowingFrames[0] = Utils.framesList;
+                    btnEditCurrentFrameGroup.setEnabled(false);
+                    btnExportCurrentGroup.setEnabled(false);
                 } else {
-                    String frameGroupId = frameGroupIds.get(i - 1);
+                    frameGroupId[0] = frameGroupIds.get(i - 1);
                     currentGroupList[0] = new ArrayList<>();
                     for (GbcFrame gbcFrame : Utils.framesList) {
                         String gbcFrameGroup = gbcFrame.getFrameId().substring(0, gbcFrame.getFrameId().length() - 2);//To remove the numbers at the end, always going to be 2 numbers
-                        if (gbcFrameGroup.equals(frameGroupId)) {
+                        if (gbcFrameGroup.equals(frameGroupId[0])) {
                             currentGroupList[0].add(gbcFrame);
                         }
                     }
+                    frameGroupName[0] = frameGroupsNames.get(frameGroupId[0]);
                     currentlyShowingFrames[0] = currentGroupList[0];
+                    btnEditCurrentFrameGroup.setEnabled(true);
+                    btnExportCurrentGroup.setEnabled(true);
                 }
                 customGridViewAdapterFrames[0] = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false);
                 gridView.setAdapter(customGridViewAdapterFrames[0]);
@@ -150,7 +158,7 @@ public class FramesFragment extends Fragment {
                     builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            new DeleteFrameAsyncTask(selectedFrame, spFrameGroups, frameGroupList, adapter, frameGroupIds, tvNumFrames, customGridViewAdapterFrames[0], gridView, currentlyShowingFrames[0]).execute();
+                            new DeleteFrameAsyncTask(selectedFrame, spFrameGroups, frameGroupList, adapterFrameGroupsSpinner, frameGroupIds, tvNumFrames, customGridViewAdapterFrames[0], gridView, currentlyShowingFrames[0]).execute();
                             //I change the frame index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
@@ -183,8 +191,8 @@ public class FramesFragment extends Fragment {
 
         btnExportCurrentGroup.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {                try {
-
+            public void onClick(View v) {
+                try {
                     framesJsonCreator(currentGroupList[0]);
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
@@ -196,6 +204,7 @@ public class FramesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //Show dialog to edit current group name
+                showRenameGroupDialog(getContext(), frameGroupId[0], frameGroupName[0], adapterFrameGroupsSpinner);
             }
         });
 
@@ -209,35 +218,42 @@ public class FramesFragment extends Fragment {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
         JSONArray framesArr = new JSONArray();
+        LinkedHashSet<String> groupIdsToExport = new LinkedHashSet<>();
         for (GbcFrame gbcFrame : frameListToExport) {
             JSONObject frameObj = new JSONObject();
-            frameObj.put("id", gbcFrame.getFrameId());
+            String frameId = gbcFrame.getFrameId();
+            frameObj.put("id", frameId);
             frameObj.put("name", gbcFrame.getFrameName());
             frameObj.put("hash", gbcFrame.getFrameHash());
             frameObj.put("isWildFrame", gbcFrame.isWildFrame());
             framesArr.put(frameObj);
+
+            String groupId = frameId.substring(0, frameId.length() - 2);
+            groupIdsToExport.add(groupId);
         }
         stateObj.put("frames", framesArr);
 
         JSONArray frameGroupNamesArr = new JSONArray();
+
         for (Map.Entry<String, String> entry : frameGroupsNames.entrySet()) {
-            JSONObject frameObj = new JSONObject();
             String key = entry.getKey();
-            String value = entry.getValue();
-            frameObj.put("id", key);
-            frameObj.put("name", value);
-            frameGroupNamesArr.put(frameObj);
+            if (groupIdsToExport.contains(key)) {
+                JSONObject frameObj = new JSONObject();
+                String value = entry.getValue();
+                frameObj.put("id", key);
+                frameObj.put("name", value);
+                frameGroupNamesArr.put(frameObj);
+            }
         }
 
         stateObj.put("frameGroupNames", frameGroupNamesArr);
 
         stateObj.put("lastUpdateUTC", System.currentTimeMillis() / 1000);
 
-
         json.put("state", stateObj);
 
-        for (int i = 0; i < Utils.framesList.size(); i++) {
-            GbcFrame gbcFrame = Utils.framesList.get(i);
+        for (int i = 0; i < frameListToExport.size(); i++) {
+            GbcFrame gbcFrame = frameListToExport.get(i);
 
             String txt = Utils.bytesToHex(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
             StringBuilder sb = new StringBuilder();
@@ -270,7 +286,7 @@ public class FramesFragment extends Fragment {
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(json.toString(2));
             Utils.toast(getContext(), getString(R.string.toast_frames_json));
-            showNotification(getContext(),file);
+            showNotification(getContext(), file);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -393,7 +409,7 @@ public class FramesFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             adapter.notifyDataSetChanged();
             for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
-                if (Utils.gbcImagesList.get(i).getFrameId() != null && Utils.gbcImagesList.get(i).getFrameId().equals(gbcFrame.getFrameId()) ) {
+                if (Utils.gbcImagesList.get(i).getFrameId() != null && Utils.gbcImagesList.get(i).getFrameId().equals(gbcFrame.getFrameId())) {
                     Utils.gbcImagesList.get(i).setFrameId(null);
                     //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
                     if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
@@ -490,7 +506,7 @@ public class FramesFragment extends Fragment {
                     }
                 }
             }
-                holder.txtTitle.setText(gbcFrame != null ? name : context.getResources().getString(R.string.as_imported_frame));
+            holder.txtTitle.setText(gbcFrame != null ? name : context.getResources().getString(R.string.as_imported_frame));
             if (gbcFrame != null) {
                 holder.imageItem.setImageBitmap(image);
             }
@@ -506,6 +522,39 @@ public class FramesFragment extends Fragment {
         public void setLastSelectedPosition(int position) {
             lastSelectedPosition = position;
         }
+    }
+
+    private void showRenameGroupDialog(Context context, String frameId, String frameGroupName, ArrayAdapter<String> adapterFrameGroupsSpinner) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(context.getResources().getString(R.string.et_rename_frame_group));
+
+        EditText editText = new EditText(context);
+        editText.setText(frameGroupName);
+        builder.setView(editText);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //Replace the name in the database
+                GbcFrame frameWithFrameGroupNames = hashFrames.get("gbcam01");
+                frameGroupsNames.put(frameId, editText.getText().toString());
+
+                new UpdateFrameAsyncTask(frameWithFrameGroupNames).execute();
+
+                frameGroupList.clear();
+                frameGroupList.add(getString(R.string.sp_all_frame_groups));
+                for (LinkedHashMap.Entry<String, String> entry : frameGroupsNames.entrySet()) {
+                    frameGroupList.add(entry.getValue() + " (" + entry.getKey() + ")");
+                }
+
+                adapterFrameGroupsSpinner.notifyDataSetChanged();
+            }
+        });
+
+        builder.setNegativeButton(getString(R.string.cancel), null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
 

@@ -62,7 +62,7 @@ public class ImagesImportDialog {
     public void createImagesImportDialog() {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.images_import_dialog);
-
+        dialog.setCancelable(false);//So it doesn't close when clicking outside or back button
         CheckBox cbUseModDate = dialog.findViewById(R.id.cbUseModDate);
         final String[] fileName = {file.getName()};
         long lastModifiedTime = file.lastModified();

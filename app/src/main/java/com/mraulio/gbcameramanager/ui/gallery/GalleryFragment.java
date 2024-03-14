@@ -24,6 +24,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.getSelectedTags;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
+import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
@@ -1429,7 +1430,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + getString(R.string.stitch), Toast.LENGTH_LONG);
                             toast.show();
                             mediaScanner(file, getContext());
-
+                            showNotification(getContext(), file);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -1585,6 +1586,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + "HDR!", Toast.LENGTH_LONG);
                             toast.show();
                             mediaScanner(file, getContext());
+                            showNotification(getContext(),file);
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -1690,7 +1692,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                                 out.write(bos.toByteArray());
                                 mediaScanner(gifFile, getContext());
-
+                                showNotification(getContext(), gifFile);
                                 Utils.toast(getContext(), getString(R.string.toast_saved) + "GIF!");
 
                             } catch (IOException e) {
@@ -1900,6 +1902,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 //            if (wasWildFrame)
 //                yIndexActualImage= 40;
             int yIndexActualImage = 16;// y Index where the actual image starts
+            if ((gbcImage.getImageBytes().length / 40) == 224) {
+                yIndexActualImage = 40;
+            }
             int yIndexNewFrame = 16;
             boolean isWildFrameNow = gbcFrame.isWildFrame();
             if (isWildFrameNow) yIndexNewFrame = 40;

@@ -382,11 +382,8 @@ public class JsonReader {
                 Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), bytes, false);//False for now, need to add the wild frame to the json
                 gbcFrame.setFrameBitmap(image);
                 gbcFrame.setFrameBytes(bytes);
-                HashSet<int[]> transparencyHS = transparencyHashSet(gbcFrame.getFrameBitmap());
-                if (transparencyHS.size() == 0) {
-                    transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
-                }
-                gbcFrame.setTransparentPixelPositions(transparencyHS);
+                Bitmap bitmap = transparentBitmap(image, gbcFrame);
+                gbcFrame.setFrameBitmap(bitmap);
                 frameList.add(gbcFrame);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
 

@@ -7,6 +7,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -71,6 +72,8 @@ public class FramesFragment extends Fragment {
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
         Button btnExportFramesJson = view.findViewById(R.id.btnExportFramesJson);
+        Button btnExportCurrentGroup = view.findViewById(R.id.btnExportCurrentGroup);
+        Button btnEditCurrentFrameGroup = view.findViewById(R.id.btnEditCurrentFrameGroup);
 
         final List<GbcFrame>[] currentlyShowingFrames = new List[]{Utils.framesList};
         final CustomGridViewAdapterFrames[] customGridViewAdapterFrames = {new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false)};
@@ -88,10 +91,9 @@ public class FramesFragment extends Fragment {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, frameGroupList);
-
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spFrameGroups.setAdapter(adapter);
-
+        final List<GbcFrame>[] currentGroupList = new ArrayList[]{new ArrayList<>()};
         spFrameGroups.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -100,14 +102,14 @@ public class FramesFragment extends Fragment {
                     currentlyShowingFrames[0] = Utils.framesList;
                 } else {
                     String frameGroupId = frameGroupIds.get(i - 1);
-                    List<GbcFrame> currentGroupList = new ArrayList<>();
+                    currentGroupList[0] = new ArrayList<>();
                     for (GbcFrame gbcFrame : Utils.framesList) {
                         String gbcFrameGroup = gbcFrame.getFrameId().substring(0, gbcFrame.getFrameId().length() - 2);//To remove the numbers at the end, always going to be 2 numbers
                         if (gbcFrameGroup.equals(frameGroupId)) {
-                            currentGroupList.add(gbcFrame);
+                            currentGroupList[0].add(gbcFrame);
                         }
                     }
-                    currentlyShowingFrames[0] = currentGroupList;
+                    currentlyShowingFrames[0] = currentGroupList[0];
                 }
                 customGridViewAdapterFrames[0] = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false);
                 gridView.setAdapter(customGridViewAdapterFrames[0]);
@@ -172,10 +174,28 @@ public class FramesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    framesJsonCreator();
+                    framesJsonCreator(framesList);
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        btnExportCurrentGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {                try {
+
+                    framesJsonCreator(currentGroupList[0]);
+                } catch (JSONException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        btnEditCurrentFrameGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Show dialog to edit current group name
             }
         });
 
@@ -185,11 +205,11 @@ public class FramesFragment extends Fragment {
         return view;
     }
 
-    private void framesJsonCreator() throws JSONException, IOException {
+    private void framesJsonCreator(List<GbcFrame> frameListToExport) throws JSONException, IOException {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
         JSONArray framesArr = new JSONArray();
-        for (GbcFrame gbcFrame : Utils.framesList) {
+        for (GbcFrame gbcFrame : frameListToExport) {
             JSONObject frameObj = new JSONObject();
             frameObj.put("id", gbcFrame.getFrameId());
             frameObj.put("name", gbcFrame.getFrameName());
@@ -250,6 +270,7 @@ public class FramesFragment extends Fragment {
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(json.toString(2));
             Utils.toast(getContext(), getString(R.string.toast_frames_json));
+            showNotification(getContext(),file);
         } catch (IOException e) {
             e.printStackTrace();
         }

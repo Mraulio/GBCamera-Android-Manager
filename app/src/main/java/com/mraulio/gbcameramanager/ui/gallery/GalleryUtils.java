@@ -15,6 +15,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesListHolder;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.saveTagsSet;
+import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
@@ -70,7 +71,7 @@ public class GalleryUtils {
     public static void saveImage(List<GbcImage> gbcImages, Context context) {
         LocalDateTime now = null;
         Date nowDate = new Date();
-
+        File file = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             now = LocalDateTime.now();
         }
@@ -95,7 +96,7 @@ public class GalleryUtils {
 
             fileName += extension;
             if (MainActivity.exportPng) {
-                File file = new File(Utils.IMAGES_FOLDER, fileName);
+                file = new File(Utils.IMAGES_FOLDER, fileName);
 
                 if (image.getHeight() == 144 && image.getWidth() == 160 && GalleryFragment.crop) {
                     image = Bitmap.createBitmap(image, 16, 16, 128, 112);
@@ -121,7 +122,7 @@ public class GalleryUtils {
                     e.printStackTrace();
                 }
             } else {
-                File file = new File(Utils.TXT_FOLDER, fileName);
+                file = new File(Utils.TXT_FOLDER, fileName);
 
                 //Saving txt without cropping it
                 try {
@@ -147,7 +148,7 @@ public class GalleryUtils {
                     e.printStackTrace();
                 }
             }
-            image.recycle();
+            showNotification(context, file);
         }
         if (MainActivity.exportPng) {
             toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved) + MainActivity.exportSize);

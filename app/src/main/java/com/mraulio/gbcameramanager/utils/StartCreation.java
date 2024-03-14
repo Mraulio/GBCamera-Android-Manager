@@ -91,7 +91,6 @@ public class StartCreation {
             myframe.setFrameBytes(myFrameBytes);
             String myFrameHash = generateHashFromBytes(myFrameBytes);
             myframe.setFrameHash(myFrameHash);
-
             myframe.setFrameBytes(Utils.encodeImage(bitmap, "bw"));
         } catch (IOException e) {
             e.printStackTrace();

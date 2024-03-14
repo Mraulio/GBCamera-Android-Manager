@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager;
 
+import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 
 import android.content.BroadcastReceiver;
@@ -264,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
                     1);
         }
         Utils.makeDirs();//If permissions granted, create the folders(Keep this for the updated versions with already permissions, to create the frame json folder)
-
+        createNotificationChannel(getBaseContext());
     }
 
     public void restartApplication() {

@@ -8,6 +8,8 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,6 +21,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -35,6 +39,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.FileProvider;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -70,7 +77,7 @@ public class Utils {
     static File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
     static File picturesDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
-
+    public static int notificationId = 0;
     public static final File MAIN_FOLDER = new File(downloadDirectory, "GBCamera Manager");
     public static final File SAVE_FOLDER = new File(MAIN_FOLDER, "Save dumps");
     public static final File IMAGES_FOLDER = new File(picturesDirectory, "GBCamera Manager");
@@ -81,6 +88,10 @@ public class Utils {
     public static final File ARDUINO_HEX_FOLDER = new File(MAIN_FOLDER, "Arduino Printer Hex");
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
     public static final File DB_BACKUP_FOLDER = new File(MAIN_FOLDER, "DB Backup");
+
+    public static final String CHANNEL_ID="gbcam_channel";
+    public static final String CHANNEL_NAME="GBCAM Channel";
+
 
     private static final String DB_NAME = "Database";
     private static final String DB_NAME_SHM = "Database-shm";
@@ -470,5 +481,33 @@ public class Utils {
         Runtime.getRuntime().exit(0);
     }
 
+    public static void showNotification(Context context, File downloadedFile) {
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri fileUri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", downloadedFile);
+        intent.setDataAndType(fileUri, context.getContentResolver().getType(fileUri));
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_download)
+                .setContentTitle(context.getResources().getString(R.string.notification_download_complete))
+                .setContentText(downloadedFile.getName())
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(notificationId++, builder.build());
+    }
+
+    public static void createNotificationChannel(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
 }
 

@@ -289,7 +289,7 @@ public class ImportFragment extends Fragment {
                                     }
                                     if (!alreadyAdded) {
                                         newGbcImages.add(gbcImage);
-                                        listNewBitmaps.add(finalListBitmaps.get(i));
+                                        listNewBitmaps.add(importedImagesBitmaps.get(i));
                                         checkDuplicatedImport.add(gbcImage.getHashCode());
                                     }
                                 }
@@ -1209,7 +1209,6 @@ public class ImportFragment extends Fragment {
         });
 
         final String[] newFrameGroupPlaceholder = {""};
-//        final boolean[] idChangedInSpinner = {false};
         etFrameGroupName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
@@ -1224,12 +1223,10 @@ public class ImportFragment extends Fragment {
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//                placeholderString = etImageName.getText().toString();
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                if (idChangedInSpinner[0]) return;
                 String placeHolder = autoCompNewId.getText().toString().trim();
                 if (!placeHolder.isEmpty()) {
                     if (!placeHolder.matches("^[a-z]{2,}$")) {
@@ -1238,7 +1235,6 @@ public class ImportFragment extends Fragment {
                     } else {
                         frameGroupId[0] = placeHolder;
                         autoCompNewId.setError(null);
-                        //                idChangedInSpinner[0] = false;
                         if (frameGroupsIdsList.contains(placeHolder)) {
                             String groupName = frameGroupsNames.get(autoCompNewId.getText().toString().trim());
                             etFrameGroupName.setText(groupName);
@@ -1292,13 +1288,11 @@ public class ImportFragment extends Fragment {
                     etFrameGroupName.setEnabled(true);
                     autoCompNewId.setEnabled(true);
                     etFrameGroupName.setText(newFrameGroupPlaceholder[0]);
-//                    autoCompNewId.setText("");
                 } else {
                     String groupName = spFrameGroupNamesList.get(position);
                     etFrameGroupName.setText(groupName);
                     etFrameGroupName.setEnabled(false);//An existing frame group
                     autoCompNewId.setText(frameGroupsIdsList.get(position - 1));
-//                    idChangedInSpinner[0] = true;
                     autoCompNewId.setSelection(autoCompNewId.getText().length());
 
                 }
@@ -1331,7 +1325,6 @@ public class ImportFragment extends Fragment {
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//                placeholderString = etImageName.getText().toString();
             }
 
             @Override

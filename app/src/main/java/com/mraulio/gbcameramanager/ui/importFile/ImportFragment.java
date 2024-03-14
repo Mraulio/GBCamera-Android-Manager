@@ -1092,8 +1092,8 @@ public class ImportFragment extends Fragment {
         GbcFrame gbcFrame = new GbcFrame();
         gbcFrame.setFrameBitmap(finalListBitmaps.get(0));
 
-        Button btnIncrement = view.findViewById(R.id.decrementButton);
-        Button btnDecrement = view.findViewById(R.id.incrementButton);
+        Button btnDecrement = view.findViewById(R.id.decrementButton);
+        Button btnIncrement = view.findViewById(R.id.incrementButton);
         EditText etFrameIndex = view.findViewById(R.id.numberEditText);
         AutoCompleteTextView autoCompNewId = view.findViewById(R.id.etFrameId);
 
@@ -1105,7 +1105,7 @@ public class ImportFragment extends Fragment {
 
         final int[] index = {1};
         final String[] frameId = {""};
-        btnIncrement.setOnClickListener(new View.OnClickListener() {
+        btnDecrement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (index[0] > MIN_INDEX) {
@@ -1115,6 +1115,8 @@ public class ImportFragment extends Fragment {
                     validId[0] = checkExistingIdIndex(frameId[0]);
                     if (!validId[0]) {
                         etFrameIndex.setError(getContext().getString(R.string.et_frame_id_error));
+                    } else {
+                        etFrameIndex.setError(null);
                     }
                 }
             }
@@ -1134,12 +1136,7 @@ public class ImportFragment extends Fragment {
             public void afterTextChanged(Editable s) {
                 String text = s.toString();
                 if (!text.isEmpty()) {
-                    if (!text.matches("^[1-9][0-9]?$|^(100)$")) {
-                        etFrameIndex.setError(getContext().getString(R.string.et_frame_index_error));
-                    } else {
-                        etFrameIndex.setError(null);
-                        index[0] = Integer.valueOf(text);
-                    }
+                    index[0] = Integer.valueOf(text);
                 }
                 frameId[0] = generateFrameId(autoCompNewId.getText().toString().trim(), index[0]);
                 validId[0] = checkExistingIdIndex(frameId[0]);
@@ -1149,7 +1146,7 @@ public class ImportFragment extends Fragment {
             }
         });
 
-        btnDecrement.setOnClickListener(new View.OnClickListener() {
+        btnIncrement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (index[0] < MAX_INDEX) {
@@ -1159,6 +1156,8 @@ public class ImportFragment extends Fragment {
                     validId[0] = checkExistingIdIndex(frameId[0]);
                     if (!validId[0]) {
                         etFrameIndex.setError(getContext().getString(R.string.et_frame_id_error));
+                    }else {
+                        etFrameIndex.setError(null);
                     }
                 }
             }

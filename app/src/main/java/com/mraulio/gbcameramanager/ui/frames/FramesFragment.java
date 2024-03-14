@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,10 +61,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 
 public class FramesFragment extends Fragment {
     List<String> frameGroupList;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -132,6 +136,8 @@ public class FramesFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 GbcFrame clickedFrame = currentlyShowingFrames[0].get(i);
+
+
             }
         });
 
@@ -218,7 +224,10 @@ public class FramesFragment extends Fragment {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
         JSONArray framesArr = new JSONArray();
+        Pattern pattern = Pattern.compile("^(\\D+)(\\d+)$");//Getting only the chars for the group id
+
         LinkedHashSet<String> groupIdsToExport = new LinkedHashSet<>();
+
         for (GbcFrame gbcFrame : frameListToExport) {
             JSONObject frameObj = new JSONObject();
             String frameId = gbcFrame.getFrameId();
@@ -228,8 +237,15 @@ public class FramesFragment extends Fragment {
             frameObj.put("isWildFrame", gbcFrame.isWildFrame());
             framesArr.put(frameObj);
 
-            String groupId = frameId.substring(0, frameId.length() - 2);
-            groupIdsToExport.add(groupId);
+            Matcher matcher = pattern.matcher(frameId);
+
+            String groupId;
+            if (matcher.matches()) {
+                groupId = matcher.group(1);
+                groupIdsToExport.add(groupId);
+            } else {
+                throw new JSONException("Exception");
+            }
         }
         stateObj.put("frames", framesArr);
 

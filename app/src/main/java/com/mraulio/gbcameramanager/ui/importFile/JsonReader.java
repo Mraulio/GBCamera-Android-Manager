@@ -353,9 +353,16 @@ public class JsonReader {
                 if (!checkValidId(id)) {
                     return null;
                 }
+                Pattern pattern = Pattern.compile("^(\\D+)(\\d+)$");//Getting only the chars for the group id
+                Matcher matcher = pattern.matcher(id);
 
-                String groupId = id.substring(0, id.length() - 2);
-                newGroupIds.add(groupId);
+                String groupId;
+                if (matcher.matches()) {
+                    groupId = matcher.group(1);
+                    newGroupIds.add(groupId);
+                } else {
+                    return null;
+                }
 
                 GbcFrame gbcFrame = new GbcFrame();
 

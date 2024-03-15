@@ -17,7 +17,6 @@ public class GbcPalette {
     private String paletteId;
 
     @ColumnInfo(name = "palette_name")
-
     private String paletteName;
 
     @ColumnInfo(name = "palette_colors")

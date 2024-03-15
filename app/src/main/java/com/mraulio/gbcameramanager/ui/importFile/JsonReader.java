@@ -204,7 +204,8 @@ public class JsonReader {
             JSONObject paletteObj;
             try {
                 paletteObj = palettesArr.getJSONObject(i);
-                String shortName = paletteObj.getString("shortName");
+                String paletteId = paletteObj.getString("shortName");
+                String paletteName = paletteObj.getString("name");
                 JSONArray paletteArr = paletteObj.getJSONArray("palette");
                 int[] paletteIntArray = new int[paletteArr.length()];
                 for (int j = 0; j < paletteArr.length(); j++) {
@@ -212,7 +213,8 @@ public class JsonReader {
                     paletteIntArray[j] = Color.parseColor(color);
                 }
                 GbcPalette gbcPalette = new GbcPalette();
-                gbcPalette.setPaletteId(shortName);
+                gbcPalette.setPaletteId(paletteId);
+                gbcPalette.setPaletteName(paletteName);
                 gbcPalette.setPaletteColors(paletteIntArray);
                 paletteList.add(gbcPalette);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.PALETTES;

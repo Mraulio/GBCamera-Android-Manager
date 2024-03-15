@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.palettes;
 
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 
 import android.app.AlertDialog;
@@ -86,6 +87,7 @@ public class PalettesFragment extends Fragment {
         gridViewPalettes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Ask to create a new palette using this as a base, or edit this palette name/colors
                 palette = Utils.gbcPalettesList.get(position).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
                 newPaletteName = Utils.gbcPalettesList.get(position).getPaletteId();
                 paletteDialog(palette, newPaletteName);
@@ -206,7 +208,6 @@ public class PalettesFragment extends Fragment {
         }
     }
 
-
     private void PaletteJsonCreator() throws JSONException {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
@@ -214,7 +215,7 @@ public class PalettesFragment extends Fragment {
         for (GbcPalette palette : Utils.gbcPalettesList) {
             JSONObject paletteObj = new JSONObject();
             paletteObj.put("shortName", palette.getPaletteId());
-            paletteObj.put("name", palette.getPaletteId());
+            paletteObj.put("name", palette.getPaletteName());
             JSONArray paletteArr = new JSONArray();
             for (int color : palette.getPaletteColorsInt()) {
                 String hexColor = "#" + Integer.toHexString(color).substring(2);
@@ -245,7 +246,7 @@ public class PalettesFragment extends Fragment {
         dialog.setContentView(R.layout.palette_creator);
         ImageView ivPalette = dialog.findViewById(R.id.ivPalette);
         Button btnSavePalette = dialog.findViewById(R.id.btnSavePalette);
-        EditText etPaletteName = dialog.findViewById(R.id.etPaletteName);
+        EditText etPaletteName = dialog.findViewById(R.id.etPaletteId);
         et1 = dialog.findViewById(R.id.et1);
         et2 = dialog.findViewById(R.id.et2);
         et3 = dialog.findViewById(R.id.et3);
@@ -261,7 +262,7 @@ public class PalettesFragment extends Fragment {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     placeholderString = etPaletteName.getText().toString();
-                    // El usuario ha confirmado la escritura.
+
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(etPaletteName.getWindowToken(), 0);
 
@@ -325,13 +326,11 @@ public class PalettesFragment extends Fragment {
         et1.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Este método se llama antes de que el texto cambie.
                 placeholderString = et1.getText().toString();
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Este método se llama cuando el texto cambia.
                 try {
                     iv1.setBackgroundColor(parseColor(et1.getText().toString()));
                     palette[0] = parseColor(et1.getText().toString());
@@ -650,7 +649,7 @@ public class PalettesFragment extends Fragment {
         Bitmap upscaledBitmap;
         byte[] imageBytes;
         if (Utils.gbcImagesList.size() == 0 || (Utils.gbcImagesList.get(0).getImageBytes().length / 40 != 144)) {//If there are no images, or they are not 144 height
-            imageBytes = Utils.encodeImage(Utils.framesList.get(1).getFrameBitmap(), "bw");
+            imageBytes = Utils.encodeImage(hashFrames.get("gbcam03").getFrameBitmap(), "bw");
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes, false);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Utils.framesList.get(0).getFrameBitmap().getWidth() * 6, Utils.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {

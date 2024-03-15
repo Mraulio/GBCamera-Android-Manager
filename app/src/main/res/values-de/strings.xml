@@ -157,7 +157,7 @@
     <string name="rotation_button">Zeige Button "Rotation".</string>
     <string name="frame_name">Frame-Namen festlegen</string>
     <string name="cant_add_frame">Dieses Bild kann nicht als Frame hinzugefügt werden</string>
-    <string name="no_empty_frame_name">Der Name darf nicht leer sein</string>
+    <string name="no_empty_frame_name">Der Id darf nicht leer sein</string>
     <string name="no_spaces_frame_name">Der Name darf keine Leerzeichen enthalten</string>
     <string name="frame_name_exists">Dieser Framename existiert bereits</string>
     <string name="no_valid_image_file">Keine gültige Bilddatei</string>

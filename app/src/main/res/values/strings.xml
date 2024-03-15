@@ -155,7 +155,7 @@
     <string name="rotation_button">Show Rotation button</string>
     <string name="frame_name">Set frame name</string>
     <string name="cant_add_frame">Can\'t add this image as a frame</string>
-    <string name="no_empty_frame_name">Name must not be empty</string>
+    <string name="no_empty_frame_name">Id must not be empty</string>
     <string name="no_spaces_frame_name">Name must not contain empty spaces</string>
     <string name="frame_name_exists">This frame name already exists</string>
     <string name="no_valid_image_file">Not a valid image file</string>
@@ -214,7 +214,12 @@
     <string name="btn_export_current_framegroup">Export Group</string>
     <string name="btn_edit_current_framegroup">Rename Group</string>
     <string name="notification_download_complete">Download complete</string>
-    <string name="et_rename_frame_group">New frame group name</string>
+    <string name="dialog_rename_frame_group_title">New frame group name</string>
+    <string name="dialog_edit_frame_title">Editing frame:\u0020</string>
+
+    <string name="cant_edit_base">Can\'t edit a base frame</string>
+    <string name="btn_edit_frame">Edit frame</string>
+    <string name="sp_new_frame_group">New Frame Group</string>
 
 
 </resources>

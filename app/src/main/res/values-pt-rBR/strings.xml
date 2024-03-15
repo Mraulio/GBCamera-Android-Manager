@@ -157,7 +157,7 @@
     <string name="rotation_button">Mostrar botão de rotação</string>
     <string name="frame_name">Definir nome da moldura</string>
     <string name="cant_add_frame">Não é possível adicionar esta imagem como moldura</string>
-    <string name="no_empty_frame_name">O nome não deve estar vazio</string>
+    <string name="no_empty_frame_name">O Id não deve estar vazio</string>
     <string name="no_spaces_frame_name">O nome não deve conter espaços vazios</string>
     <string name="frame_name_exists">Este nome de moldura já existe</string>
     <string name="no_valid_image_file">Não é um arquivo de imagem válido</string>

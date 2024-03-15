@@ -139,7 +139,7 @@
     <string name="rotation_button">Bouton Afficher la rotation</string>
     <string name="frame_name">Définir le nom du bordure</string>
     <string name="cant_add_frame">Impossible d\'ajouter cette image en tant que bordure</string>
-    <string name="no_empty_frame_name">Le nom ne doit pas être vide</string>
+    <string name="no_empty_frame_name">Le Id ne doit pas être vide</string>
     <string name="no_spaces_frame_name">Le nom ne doit pas contenir d\'espaces</string>
     <string name="frame_name_exists">Ce nom de bordure existe déjà</string>
     <string name="no_valid_image_file">Fichier image non valide</string>

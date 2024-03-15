@@ -62,6 +62,8 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -509,5 +511,35 @@ public class Utils {
             notificationManager.createNotificationChannel(channel);
         }
     }
+
+    public static void frameGroupSorting(){
+        List<GbcFrame> sortedFrameList = new ArrayList<>();
+
+        List<GbcFrame> sortedFrameGroup = new ArrayList<>();
+
+        // Sort each frame group by id and add it to the final list
+        for (String key: frameGroupsNames.keySet()) {
+            sortedFrameGroup.clear();
+            for (GbcFrame gbcFrame : Utils.framesList) {
+                String gbcFrameGroup = gbcFrame.getFrameId().replaceAll("^(\\D+).*", "$1");//To remove the numbers at the end
+                if (gbcFrameGroup.equals(key)) {
+                    sortedFrameGroup.add(gbcFrame);
+                }
+            }
+            //Now sort the group by id
+            Comparator<GbcFrame> comparator = new Comparator<GbcFrame>() {
+                @Override
+                public int compare(GbcFrame frame1, GbcFrame frame2) {
+                    int titleComparison = frame1.getFrameId().compareTo(frame2.getFrameId());
+
+                    return titleComparison;
+                }
+            };
+            Collections.sort(sortedFrameGroup, comparator);
+            sortedFrameList.addAll(sortedFrameGroup);
+        }
+        Utils.framesList = sortedFrameList;
+    }
+
 }
 

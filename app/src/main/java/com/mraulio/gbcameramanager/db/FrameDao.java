@@ -5,6 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -34,4 +35,17 @@ public interface FrameDao {
 
     @Query("DELETE FROM gbcframe")
     void deleteAll();
+
+    //If the frame id is modified I need to delete it and then insert again, because it's changing the Primary Key
+    //Done in a transaction
+    @Transaction
+    default void updateFrameWithPrimaryKeyMod(GbcFrame gbcFrame,String newId,String newName) {
+
+        delete(gbcFrame);
+
+        gbcFrame.setFrameId(newId);
+        gbcFrame.setFrameName(newName);
+
+        insert(gbcFrame);
+    }
 }

@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager;
 
 import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
+import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 
 import android.content.BroadcastReceiver;
@@ -353,6 +354,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 Utils.frameGroupsNames = hashFrames.get("gbcam01").getFrameGroupsNames();
                 Utils.framesList.addAll(frames);
+                //Now sort them by group and id
+                frameGroupSorting();
             } else {
                 //First time add it to the database
                 StartCreation.addFrames(getBaseContext());

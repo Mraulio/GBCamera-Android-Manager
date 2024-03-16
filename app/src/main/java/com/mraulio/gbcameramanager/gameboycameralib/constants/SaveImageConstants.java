@@ -16,8 +16,11 @@ public final class SaveImageConstants {
     public static final int IMAGE_LENGTH = 0xE00;
     public static final int MAX_SUPPORTED_IMAGES = 30;
     public static final int FACES_OFFSET = 0x11FC;
-    public static final int IMAGE_METADATA_OFFSET= 0x11FC;
-    public static final int IMAGE_METADATA_LENGTH = 0x11FC;
+
+
+    public static final int PHOTO_METADATA_START_OFFSET= 0xC0;
+
+
 
     private SaveImageConstants(){}
 }

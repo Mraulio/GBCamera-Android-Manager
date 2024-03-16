@@ -36,7 +36,6 @@ public interface Extractor {
     //Added by Mraulio
     List<byte[]> extractBytes(byte[] rawData,int saveBank);
 
-    List<byte[]> extractImageMetadata(byte[] rawData);
 
     List<byte[]> extractBytes(File file, int saveBank) throws IOException;
 

@@ -9,6 +9,8 @@ import android.os.Build;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
+import com.mraulio.gbcameramanager.utils.FileMetaParser;
+import com.mraulio.gbcameramanager.utils.PhotoMetaParser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,18 +56,17 @@ public class SaveImageExtractor implements Extractor {
 
     @Override
     public List<Bitmap> extract(byte[] rawData) {
-        List<Bitmap> images = new ArrayList<>(30);//31 to get the last seen, but needs tweak
+        List<Bitmap> images = new ArrayList<>(30);
         try {
             for (int i = IMAGE_START_LOCATION; i < rawData.length; i += NEXT_IMAGE_START_OFFSET) {
 
                 // The full size images
                 byte[] image = new byte[IMAGE_LENGTH];
                 System.arraycopy(rawData, i, image, 0, IMAGE_LENGTH);
-                if (i != 0 && isEmptyImage(image)) {//FOR THE DELETED IMAGES, CHECK THIS
+                if (i != 0 && isEmptyImage(image)) {
                     continue;
                 }
                 images.add(imageCodec.decode(image));
-
             }
 
         } catch (Exception e) {
@@ -74,20 +76,6 @@ public class SaveImageExtractor implements Extractor {
         return images;
     }
 
-    @Override
-    public List<byte[]> extractImageMetadata(byte[] rawData) {
-        List<byte[]> imageMetadatas = new ArrayList<>();
-        try {
-            for (int i = IMAGE_START_LOCATION; i < rawData.length; i += NEXT_IMAGE_START_OFFSET) {
-                byte[] imageMetadata = new byte[IMAGE_METADATA_LENGTH];
-                System.arraycopy(rawData, i + IMAGE_METADATA_OFFSET, imageMetadata, 0, IMAGE_METADATA_LENGTH);
-                imageMetadatas.add(imageMetadata);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return imageMetadatas;
-    }
 
     @Override
     public List<byte[]> extractBytes(File file, int saveBank) throws IOException {
@@ -184,6 +172,41 @@ public class SaveImageExtractor implements Extractor {
                         }
                     }
                     j++;
+
+//                    if (j < 4) {
+//                        /**
+//                         * Getting the Stock Rom Metadata
+//                         */
+//                        FileMetaParser fileMetaParser = new FileMetaParser();
+//                        HashMap<String, Object> metadataHash;
+//                        metadataHash = fileMetaParser.getFileMeta(rawData, i, false);
+//                        for (HashMap.Entry<String, Object> entry : metadataHash.entrySet()) {
+//                            String key = entry.getKey();
+//                            Object value = entry.getValue();
+//                            System.out.println("Clave: " + key + ", Valor: " + value);
+//                        }
+//                        System.out.println("\n*******************************************************\n");
+//                    }
+
+                    if (j < 4) {
+                        /**
+                         * Getting the Photo Rom Metadata
+                         */
+                        // The thumbs
+                        byte[] thumbImage = new byte[64];
+                        System.arraycopy(rawData, i + SMALL_IMAGE_START_OFFSET+192, thumbImage, 0, 64);
+                        PhotoMetaParser photoMetaParser = new PhotoMetaParser();
+                        HashMap<String, String> metadataHash;
+                        metadataHash = photoMetaParser.getFilePhotoMeta(thumbImage, i);
+//                        for (HashMap.Entry<String, String> entry : metadataHash.entrySet()) {
+//                            String key = entry.getKey();
+//                            Object value = entry.getValue();
+//                            System.out.println("Clave: " + key + ", Valor: " + value);
+//                        }
+//                        System.out.println("\n*******************************************************\n");
+                    }
+
+
                 }
             }
             //Append the last seen image after the active images

@@ -368,6 +368,7 @@ public class ImportFragment extends Fragment {
             }
         });
 
+        //To directly extract the file if opening the app from a file
         if (openedFromFile) {
             selectedFile = DocumentFile.fromSingleUri(getContext(), uri);
             readFileData();
@@ -1066,7 +1067,7 @@ public class ImportFragment extends Fragment {
         return true;
     }
 
-    public static void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
+    private void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
         List<String> dataList = HexToTileData.separateData(fileContent);
         String data = "";
         int index = 1;
@@ -1082,6 +1083,7 @@ public class ImportFragment extends Fragment {
             imageData.setImageId(hashHex);
             imageData.setData(bytes);
             importedImageDatas.add(imageData);
+            totalImages = index;
             String formattedIndex = String.format("%02d", index++);
             gbcImage.setName(fileName + " " + formattedIndex);
             int height = (data.length() + 1) / 120;//To get the real height of the image

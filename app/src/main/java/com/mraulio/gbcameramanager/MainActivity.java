@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager;
 import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -62,13 +63,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-
 public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     boolean anyImage = true;
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
+    Uri uri;
+    NavController navController;
 
     public enum CURRENT_FRAGMENT {
         GALLERY,
@@ -112,31 +114,11 @@ public class MainActivity extends AppCompatActivity {
     public static String selectedTags = "";
 
     public static boolean openedFromFile = false;
+    boolean openedFromUsb = false;
     public static UsbManager manager;
     public static int[] deletedCount = new int[7];
 
     public static AppDatabase db;
-    private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
-    private UsbDevice device;
-    private UsbManager usbManager;
-    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (ACTION_USB_PERMISSION.equals(action)) {
-                synchronized (this) {
-                    device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        if (device != null) {
-                            //call method to set up device communication
-                        }
-                    } else {
-                        Log.d("TAG", "permission denied for device " + device);
-                    }
-                }
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
 
         String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
-        GalleryFragment.currentPage = 0;
         //To get the locale on the first startup and set the def value
         Resources resources = getResources();
         Configuration configuration = resources.getConfiguration();
@@ -208,21 +189,13 @@ public class MainActivity extends AppCompatActivity {
 
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
-        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        registerReceiver(usbReceiver, filter);
+
 
         // Obtain Intent information
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
-        Uri uri = intent.getData();
-        if (Intent.ACTION_VIEW.equals(action) && type != null /** && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")**/) {
-            // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
-            Utils.toast(this, "Opened from file");
-            openedFromFile = true;
-        }
-
+        uri = intent.getData();
 
         if (!doneLoading) {
             new ReadDataAsyncTask().execute();
@@ -235,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         fab = binding.appBarMain.fab;
         fab.hide();
 
@@ -246,13 +220,15 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
 
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        if (openedFromFile) {
-            Bundle bundle = new Bundle();
-            bundle.putString("fileUri", uri.toString());
+        if (Intent.ACTION_VIEW.equals(action) && type != null) {
+            // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
+            openedFromFile = true;
 
-            navController.navigate(R.id.nav_import, bundle);
+        } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+            openedFromUsb = true;
         }
+        openingFromIntent(navController);
+
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
@@ -275,6 +251,17 @@ public class MainActivity extends AppCompatActivity {
         }
         Utils.makeDirs();//If permissions granted, create the folders(Keep this for the updated versions with already permissions, to create the frame json folder)
         createNotificationChannel(getBaseContext());
+    }
+
+    private void openingFromIntent(NavController navController) {
+
+        if (openedFromFile) {
+            Bundle bundle = new Bundle();
+            bundle.putString("fileUri", uri.toString());
+            navController.navigate(R.id.nav_import, bundle);
+        } else if (openedFromUsb) {
+            navController.navigate(R.id.nav_usbserial);
+        }
     }
 
     @Override
@@ -388,8 +375,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             //resume tasks needing this permission
-            Toast toast = Toast.makeText(this, getString(R.string.permissions_toast), Toast.LENGTH_LONG);
-            toast.show();
+            toast(this, getString(R.string.permissions_toast));
             Utils.makeDirs();//If permissions granted, create the folders
         }
     }

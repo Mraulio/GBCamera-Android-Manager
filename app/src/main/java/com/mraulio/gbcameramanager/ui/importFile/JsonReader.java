@@ -418,12 +418,14 @@ public class JsonReader {
         }
 
         try {
-            JSONArray framesGroupNamesArray = stateObject.getJSONArray("frameGroupNames");
-            for (int i = 0; i < framesGroupNamesArray.length(); i++) {
-                JSONObject frameNameObj = framesGroupNamesArray.getJSONObject(i);
-                String frameGroupId = frameNameObj.getString("id");
-                String frameGroupName = frameNameObj.getString("name");
-                importedFrameGroupIdNames.put(frameGroupId, frameGroupName);
+            if (stateObject.has("frameGroupNames")) {
+                JSONArray framesGroupNamesArray = stateObject.getJSONArray("frameGroupNames");
+                for (int i = 0; i < framesGroupNamesArray.length(); i++) {
+                    JSONObject frameNameObj = framesGroupNamesArray.getJSONObject(i);
+                    String frameGroupId = frameNameObj.getString("id");
+                    String frameGroupName = frameNameObj.getString("name");
+                    importedFrameGroupIdNames.put(frameGroupId, frameGroupName);
+                }
             }
 
         } catch (Exception e) {
@@ -442,7 +444,6 @@ public class JsonReader {
                 }
                 importedFrameGroupIdNames.put(st, groupName);
             }
-
         }
         return frameList;
     }

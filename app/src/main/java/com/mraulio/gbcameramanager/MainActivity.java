@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -54,7 +55,6 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         SAVE_MANAGER,
         SETTINGS
     }
+
     public static boolean showEditMenuButton = false;
     public static CURRENT_FRAGMENT currentFragment;
 
@@ -103,13 +104,14 @@ public class MainActivity extends AppCompatActivity {
         IMPORT_DATE,
         TITLE
     }
+
     public static SORT_MODE sortModeEnum = SORT_MODE.CREATION_DATE;
-    public static String sortMode ="";
+    public static String sortMode = "";
 
     public static boolean sortDescending = false;
     public static String selectedTags = "";
 
-    private boolean openedSav = false;
+    public static boolean openedFromFile = false;
     public static UsbManager manager;
     public static int[] deletedCount = new int[7];
 
@@ -139,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //Unhandled Exception Manager
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
 
@@ -163,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
         String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
-        GalleryFragment.currentPage= 0;
+        GalleryFragment.currentPage = 0;
         //To get the locale on the first startup and set the def value
         Resources resources = getResources();
         Configuration configuration = resources.getConfiguration();
@@ -214,13 +217,13 @@ public class MainActivity extends AppCompatActivity {
         String action = intent.getAction();
         String type = intent.getType();
         Uri uri = intent.getData();
-
-        if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
+        if (Intent.ACTION_VIEW.equals(action) && type != null /** && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")**/) {
             // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
-            // the type is "application/octet-stream" and the URI of the Intent ends in ".sav", make the desired action
             Utils.toast(this, "Opened from file");
-            openedSav = true;
+            openedFromFile = true;
         }
+
+
         if (!doneLoading) {
             new ReadDataAsyncTask().execute();
         }
@@ -232,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
-        if (openedSav) navigationView.setCheckedItem(R.id.nav_import);
         fab = binding.appBarMain.fab;
         fab.hide();
 
@@ -245,6 +247,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        if (openedFromFile) {
+            Bundle bundle = new Bundle();
+            bundle.putString("fileUri", uri.toString());
+
+            navController.navigate(R.id.nav_import, bundle);
+        }
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
@@ -269,20 +277,13 @@ public class MainActivity extends AppCompatActivity {
         createNotificationChannel(getBaseContext());
     }
 
-    public void restartApplication() {
-        Intent intent = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         switch (currentFragment) {
             case GALLERY:
                 menu.clear(); // Cleans the current menu
                 getMenuInflater().inflate(R.menu.gallery_menu, menu); // Inflates the menu
-                if (showEditMenuButton){
+                if (showEditMenuButton) {
                     menu.getItem(0).setVisible(true);
                 }
                 break;
@@ -319,8 +320,7 @@ public class MainActivity extends AppCompatActivity {
                     Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
                 Utils.gbcPalettesList.addAll(palettes);
-            }
-            else {
+            } else {
                 StringBuilder stringBuilder = new StringBuilder();
                 int resourcePalettes = R.raw.palettes;
                 try {
@@ -400,4 +400,27 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+
+    private void openFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_gallery, fragment)
+                .commit();
+    }
+
+
+//    @Override
+//    protected void onNewIntent(Intent intent) {
+//        super.onNewIntent(intent);
+//
+//        if (Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getType() != null) {
+//            // Crear una nueva intención para reiniciar la actividad
+//            Intent restartIntent = new Intent(this, MainActivity.class);
+//            restartIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+//
+//            // Reiniciar la actividad con la nueva intención
+//            startActivity(restartIntent);
+//            finish();  // Opcional: terminar la actividad actual si es necesario
+//        }
+//    }
 }

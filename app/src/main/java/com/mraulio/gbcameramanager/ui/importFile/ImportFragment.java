@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
+import static com.mraulio.gbcameramanager.MainActivity.openedFromFile;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
@@ -31,30 +32,20 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 
 import android.provider.OpenableColumns;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.model.ImageData;
@@ -78,7 +69,6 @@ import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,8 +79,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -130,6 +118,7 @@ public class ImportFragment extends Fragment {
     LinearLayout layoutCb;
     CustomGridViewAdapterPalette customAdapterPalette;
     GridView gridViewImport;
+    Uri uri;
 
     public enum ADD_WHAT {
         PALETTES,
@@ -149,6 +138,19 @@ public class ImportFragment extends Fragment {
 
     public static FILE_TYPE fileType;
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        loadingDialog = Utils.loadingDialog(getContext(), null);
+
+        if (getArguments() != null) {
+            String fileUri = getArguments().getString("fileUri");
+            uri = Uri.parse(fileUri);
+            fileName = getFileName(uri);
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -163,7 +165,6 @@ public class ImportFragment extends Fragment {
         btnAddImages = view.findViewById(R.id.btnAddImages);
         btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
-        loadingDialog = Utils.loadingDialog(getContext(), null);
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.IMPORT;
 
         tvFileName = view.findViewById(R.id.tvFileName);
@@ -356,7 +357,7 @@ public class ImportFragment extends Fragment {
                                         Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
                                     } else {
-                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(finalListBitmaps.get(0),getContext(), null, false);
+                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(finalListBitmaps.get(0), getContext(), null, false);
                                         frameImportDialogClass.frameImportDialog();
                                     }
                                 }
@@ -366,6 +367,15 @@ public class ImportFragment extends Fragment {
                 }
             }
         });
+
+        if (openedFromFile) {
+            selectedFile = DocumentFile.fromSingleUri(getContext(), uri);
+            readFileData();
+            loadingDialog.show();
+            new loadDataTask().execute();
+            openedFromFile = false;//So this doesn't execute again when entering the fragment later
+        }
+
         // Inflate the layout for this fragment
         return view;
     }
@@ -804,155 +814,164 @@ public class ImportFragment extends Fragment {
 
                                 }
                             } else if (data.getData() != null) {
-                                // Single file was selected
-                                Uri uri = data.getData();
+                                uri = data.getData();
                                 selectedFile = DocumentFile.fromSingleUri(getContext(), uri);
                                 fileName = getFileName(uri);
+                                readFileData();
+                            }
+                        }
+                    }
+                }
+            }
+    );
 
-                                //I check the extension of the file
-                                if (fileName.endsWith("sav")) {
-                                    ByteArrayOutputStream byteStream = null;
-                                    fileType = FILE_TYPE.SAV;
+    private void readFileData() {
+
+        //I check the extension of the file
+        if (fileName.toLowerCase().endsWith("sav")) {
+            ByteArrayOutputStream byteStream = null;
+            fileType = FILE_TYPE.SAV;
 
 
-                                    try {
-                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                        byteStream = new ByteArrayOutputStream();
-                                        byte[] buffer = new byte[1024];
-                                        int len;
-                                        while ((len = inputStream.read(buffer)) != -1) {
-                                            byteStream.write(buffer, 0, len);
-                                        }
-                                        byteStream.close();
-                                        inputStream.close();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
+            try {
+                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                byteStream = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = inputStream.read(buffer)) != -1) {
+                    byteStream.write(buffer, 0, len);
+                }
+                byteStream.close();
+                inputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-                                    fileBytes = byteStream.toByteArray();
-                                    tvFileName.setText(getString(R.string.file_name) + fileName);
-                                    btnExtractFile.setVisibility(View.VISIBLE);
-                                } else if (fileName.toLowerCase().endsWith("gbc")) {
-                                    ByteArrayOutputStream byteStream = null;
-                                    fileType = FILE_TYPE.PHOTO_ROM;
+            fileBytes = byteStream.toByteArray();
+            tvFileName.setText(getString(R.string.file_name) + fileName);
+            btnExtractFile.setVisibility(View.VISIBLE);
+        } else if (fileName.toLowerCase().endsWith("gbc")) {
+            ByteArrayOutputStream byteStream = null;
+            fileType = FILE_TYPE.PHOTO_ROM;
 
-                                    try {
-                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                        byteStream = new ByteArrayOutputStream();
-                                        byte[] buffer = new byte[1024];
-                                        int len;
-                                        while ((len = inputStream.read(buffer)) != -1) {
-                                            byteStream.write(buffer, 0, len);
-                                        }
-                                        byteStream.close();
-                                        inputStream.close();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
+            try {
+                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                byteStream = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = inputStream.read(buffer)) != -1) {
+                    byteStream.write(buffer, 0, len);
+                }
+                byteStream.close();
+                inputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-                                    fileBytes = byteStream.toByteArray();
-                                    tvFileName.setText(getString(R.string.file_name) + fileName);
-                                    btnExtractFile.setVisibility(View.VISIBLE);
+            fileBytes = byteStream.toByteArray();
+            tvFileName.setText(getString(R.string.file_name) + fileName);
+            btnExtractFile.setVisibility(View.VISIBLE);
 
-                                } else if (fileName.endsWith("txt")) {
-                                    fileType = FILE_TYPE.TXT;
-                                    try {
-                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                        StringBuilder stringBuilder = new StringBuilder();
-                                        try {
-                                            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        } else if (fileName.toLowerCase().endsWith("txt")) {
+            fileType = FILE_TYPE.TXT;
+            try {
+                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                StringBuilder stringBuilder = new StringBuilder();
+                try {
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-                                            String line = bufferedReader.readLine();
-                                            while (line != null) {
-                                                stringBuilder.append(line).append('\n');
-                                                line = bufferedReader.readLine();
-                                            }
-                                            bufferedReader.close();
-                                            inputStream.close();
+                    String line = bufferedReader.readLine();
+                    while (line != null) {
+                        stringBuilder.append(line).append('\n');
+                        line = bufferedReader.readLine();
+                    }
+                    bufferedReader.close();
+                    inputStream.close();
 
-                                        } catch (FileNotFoundException e) {
-                                            e.printStackTrace();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        fileContent = stringBuilder.toString();
-                                        fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
-                                        tvFileName.setText(getString(R.string.file_name) + fileName);
-                                        btnExtractFile.setVisibility(View.VISIBLE);
-                                    } catch (Exception e) {
-                                    }
-                                } else if (fileName.endsWith("json")) {
-                                    fileType = FILE_TYPE.JSON;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                fileContent = stringBuilder.toString();
+                fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
+                tvFileName.setText(getString(R.string.file_name) + fileName);
+                btnExtractFile.setVisibility(View.VISIBLE);
+            } catch (Exception e) {
+            }
+        } else if (fileName.toLowerCase().endsWith("json")) {
+            fileType = FILE_TYPE.JSON;
 
-                                    try {
-                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
-                                        StringBuilder stringBuilder = new StringBuilder();
-                                        try {
-                                            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                                            String line = bufferedReader.readLine();
-                                            while (line != null) {
-                                                stringBuilder.append(line).append('\n');
-                                                line = bufferedReader.readLine();
-                                            }
-                                            bufferedReader.close();
-                                            inputStream.close();
+            try {
+                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                StringBuilder stringBuilder = new StringBuilder();
+                try {
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    String line = bufferedReader.readLine();
+                    while (line != null) {
+                        stringBuilder.append(line).append('\n');
+                        line = bufferedReader.readLine();
+                    }
+                    bufferedReader.close();
+                    inputStream.close();
 
-                                        } catch (FileNotFoundException e) {
-                                            e.printStackTrace();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        fileContent = stringBuilder.toString();
-                                        fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
-                                        tvFileName.setText(getString(R.string.file_name) + fileName);
-                                        btnExtractFile.setVisibility(View.VISIBLE);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                fileContent = stringBuilder.toString();
+                fileBytes = fileContent.getBytes(StandardCharsets.UTF_8);
+                tvFileName.setText(getString(R.string.file_name) + fileName);
+                btnExtractFile.setVisibility(View.VISIBLE);
 
-                                    } catch (Exception e) {
-                                    }
-                                } else if (fileName.endsWith("png") || fileName.endsWith("jpg") || fileName.endsWith("jpeg") || fileName.endsWith("bmp")) {
-                                    fileType = FILE_TYPE.IMAGE;
-                                    finalListImages.clear();
-                                    finalListBitmaps.clear();
-                                    try {
-                                        InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (fileName.toLowerCase().endsWith("png") || fileName.toLowerCase().endsWith("jpg") || fileName.toLowerCase().endsWith("jpeg") || fileName.toLowerCase().endsWith("bmp")) {
+            fileType = FILE_TYPE.IMAGE;
+            finalListImages.clear();
+            finalListBitmaps.clear();
+            try {
+                InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
 
-                                        BitmapFactory.Options options = new BitmapFactory.Options();
-                                        options.inJustDecodeBounds = true;
-                                        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-                                        bitmap = resizeImage(bitmap);
-                                        boolean hasAllColors = checkPaletteColors(bitmap);
-                                        if (!hasAllColors) {
-                                            bitmap = convertToGrayScale(bitmap);
-                                            bitmap = ditherImage(bitmap);
-                                        }
-                                        GbcImage gbcImage = new GbcImage();
-                                        //Add a null frame id for imported images. Need to use a "NO FRAME OPTION, AS IMPORTED"
+                bitmap = resizeImage(bitmap);
+                boolean hasAllColors = checkPaletteColors(bitmap);
+                if (!hasAllColors) {
+                    bitmap = convertToGrayScale(bitmap);
+                    bitmap = ditherImage(bitmap);
+                }
+                GbcImage gbcImage = new GbcImage();
+                //Add a null frame id for imported images. Need to use a "NO FRAME OPTION, AS IMPORTED"
 //                                if (bitmap.getHeight()!=144){
 //                                    gbcImage.setFrameId(null);
 //                                }
-                                        byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
-                                        gbcImage.setImageBytes(imageBytes);
-                                        byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                                        String hashHex = Utils.bytesToHex(hash);
-                                        gbcImage.setHashCode(hashHex);
-                                        ImageData imageData = new ImageData();
-                                        imageData.setImageId(hashHex);
-                                        imageData.setData(imageBytes);
-                                        importedImageDatas.add(imageData);
-                                        gbcImage.setName(fileName);
-                                        finalListBitmaps.add(bitmap);
-                                        finalListImages.add(gbcImage);
-                                        tvFileName.setText(getString(R.string.file_name) + fileName);
-                                        btnExtractFile.setVisibility(View.GONE);
-                                        btnAddImages.setVisibility(View.VISIBLE);
-                                        btnAddImages.setEnabled(true);
+                byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
+                gbcImage.setImageBytes(imageBytes);
+                byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
+                String hashHex = Utils.bytesToHex(hash);
+                gbcImage.setHashCode(hashHex);
+                ImageData imageData = new ImageData();
+                imageData.setImageId(hashHex);
+                imageData.setData(imageBytes);
+                importedImageDatas.add(imageData);
+                gbcImage.setName(fileName);
+                finalListBitmaps.add(bitmap);
+                finalListImages.add(gbcImage);
+                tvFileName.setText(getString(R.string.file_name) + fileName);
+                btnExtractFile.setVisibility(View.GONE);
+                btnAddImages.setVisibility(View.VISIBLE);
+                btnAddImages.setEnabled(true);
 
-                                        adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
-                                        gridViewImport.setAdapter((ListAdapter) adapter);
-                                        ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-                                        cbAddFrame.setVisibility(View.VISIBLE);
-                                        gridViewImport.setAdapter((ListAdapter) adapter);
+                adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
+                gridViewImport.setAdapter((ListAdapter) adapter);
+                ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
+                cbAddFrame.setVisibility(View.VISIBLE);
+                gridViewImport.setAdapter((ListAdapter) adapter);
 
 //                                } else {
 //                                    tvFileName.setText(getString(R.string.file_name) + fileName);
@@ -963,25 +982,21 @@ public class ImportFragment extends Fragment {
 //                                    gridViewImport.setAdapter(null);
 //                                    bitmap.recycle();
 //                                }
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    } catch (NoSuchAlgorithmException e) {
-                                        e.printStackTrace();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-
-                                } else {
-                                    btnExtractFile.setVisibility(View.GONE);
-
-                                    tvFileName.setText(getString(R.string.no_valid_file));
-                                }
-                            }
-                        }
-                    }
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-    );
+
+        } else {
+            btnExtractFile.setVisibility(View.GONE);
+
+            tvFileName.setText(getString(R.string.no_valid_file));
+        }
+    }
+
 
     /**
      * Checks if the selected file are images

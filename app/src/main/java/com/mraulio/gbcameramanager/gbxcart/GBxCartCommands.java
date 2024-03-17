@@ -240,11 +240,11 @@ public class GBxCartCommands {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
                 folderName = "PhotoFullRom_" + dtf.format(now);
-                fileName += dtf.format(now) + ".full.gbc";
+                fileName += dtf.format(now) + "-full.gbc";
             }else{
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
                 folderName = "PhotoFullRom_" + sdf.format(nowDate);
-                fileName += sdf.format(nowDate) + ".full.gbc";
+                fileName += sdf.format(nowDate) + "-full.gbc";
             }
 
             UsbSerialFragment.photoFolder = new File(Utils.PHOTO_DUMPS_FOLDER, folderName);

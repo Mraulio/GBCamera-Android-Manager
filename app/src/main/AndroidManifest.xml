@@ -20,6 +20,7 @@
             android:name=".MainActivity"
             android:screenOrientation="portrait"
             android:exported="true"
+            android:launchMode="singleTask"
             android:label="@string/app_name"
             android:theme="@style/Theme.GBCameraManager.NoActionBar">
             <intent-filter>
@@ -33,13 +34,29 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.OPENABLE" />
 
                 <data
                     android:host="*"
                     android:mimeType="*/*"
-                    android:pathPattern=".*\\.sav"
+                    android:pathPattern=".*\\.sav" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.gbc" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.SAV" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.GBC" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.json" />
+                <data
                     android:scheme="content" />
             </intent-filter>
 

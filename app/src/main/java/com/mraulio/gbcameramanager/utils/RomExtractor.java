@@ -13,6 +13,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment;
 
 import java.io.ByteArrayOutputStream;
@@ -28,6 +29,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class RomExtractor {
@@ -67,10 +70,10 @@ public class RomExtractor {
             String extension = ".sav";
             if (i != 0) {//Because 0 is the actual rom
 
-                int startIndex = i * partSize; // Índice de inicio de la parte actual
-                int endIndex = (i == 8 - 1) ? fileBytes.length : (i + 1) * partSize; // Índice de fin de la parte actual
+                int startIndex = i * partSize;
+                int endIndex = (i == 8 - 1) ? fileBytes.length : (i + 1) * partSize;
 
-                byte[] filePartBytes = Arrays.copyOfRange(fileBytes, startIndex, endIndex); // Copiar la parte actual en un nuevo byte array
+                byte[] filePartBytes = Arrays.copyOfRange(fileBytes, startIndex, endIndex);
 
                 if (magicIsReal(filePartBytes)) {
                     romByteList.add(filePartBytes);
@@ -97,37 +100,15 @@ public class RomExtractor {
         extractedImagesBitmaps.clear();
         try {
             if (fileBytes.length == 131072) {
-                List<byte[]> listExtractedImageBytes;
+                LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(fileBytes, filePartName, saveBank);
 
-                listExtractedImageBytes = extractor.extractBytes(fileBytes, saveBank);
-                int nameIndex = 1;
-
-                for (byte[] imageBytes : listExtractedImageBytes) {
-                    GbcImage gbcImage = new GbcImage();
-                    String formattedIndex = String.format("%02d", nameIndex);
-                    if (nameIndex == listExtractedImageBytes.size() - MainActivity.deletedCount[saveBank]) {//Last seen image
-                        gbcImage.setName(filePartName + " [last seen]");
-                    } else if (nameIndex > listExtractedImageBytes.size() - MainActivity.deletedCount[saveBank]) {//Deleted images
-                        gbcImage.setName(filePartName + " [deleted]");
-                    } else {
-                        gbcImage.setName(filePartName + " " + formattedIndex);
-                    }
-                    nameIndex++;
-                    byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                    String hashHex = Utils.bytesToHex(hash);
-                    gbcImage.setHashCode(hashHex);
-                    ImageCodec imageCodec = new ImageCodec(128, 112, false);
-                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
-                    if (image.getHeight() == 112 && image.getWidth() == 128) {
-                        //I need to use copy because if not it's inmutable bitmap
-                        Bitmap framed = Utils.hashFrames.get("gbcam01").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-                        Canvas canvas = new Canvas(framed);
-                        canvas.drawBitmap(image, 16, 16, null);
-                        image = framed;
-                        imageBytes = Utils.encodeImage(image, "bw");
-                    }
-                    gbcImage.setImageBytes(imageBytes);
-                    extractedImagesBitmaps.add(image);
+                for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHash.entrySet()) {
+                    GbcImage gbcImage = entry.getKey();
+                    Bitmap imageBitmap = entry.getValue();
+                    ImageData imageData = new ImageData();
+                    imageData.setImageId(gbcImage.getHashCode());
+                    imageData.setData(gbcImage.getImageBytes());
+                    extractedImagesBitmaps.add(imageBitmap);
                     extractedImagesList.add(gbcImage);
                     totalImages++;
                 }
@@ -157,9 +138,7 @@ public class RomExtractor {
             } else {
 //                tv.append(gridView.getContext().getString(R.string.no_good_dump));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -3,11 +3,13 @@ package com.mraulio.gbcameramanager.utils;
 import static com.mraulio.gbcameramanager.utils.CharMap.CHAR_MAP_INT;
 import static com.mraulio.gbcameramanager.utils.CharMap.CHAR_MAP_JP;
 import static com.mraulio.gbcameramanager.utils.CharMap.charMapDateDigit;
+import static com.mraulio.gbcameramanager.utils.HomebrewRomsMetaParser.parseHomebrewRomMetadata;
 import static com.mraulio.gbcameramanager.utils.Utils.bytesToHex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,22 +18,20 @@ import java.util.Map;
  */
 public class FileMetaParser {
 
-    public HashMap<String, Object> getFileMeta(byte[] data, int baseAddress, boolean cartIsJP) {
-        int cartIndex = (baseAddress / 0x1000) - 2;
-        int albumIndex = cartIndex >= 0 ? data[0x11b2 + cartIndex] : 64;
+    public LinkedHashMap<String, String> getFileMeta(byte[] data, boolean cartIsJP) {
 
-        byte[] userId = Arrays.copyOfRange(data, baseAddress + 0x00F00, baseAddress + 0x00F03 + 1);
+        byte[] userId = Arrays.copyOfRange(data, 0x00000,  0x00003 + 1);
 
-        byte[] userName = Arrays.copyOfRange(data, baseAddress + 0x00F04, baseAddress + 0x00F0C + 1);
-        byte genderAndBloodType = data[baseAddress + 0x00F0D];
+        byte[] userName = Arrays.copyOfRange(data,  0x00004,  0x0000C + 1);
+        byte genderAndBloodType = data[ 0x0000D];
 
-        byte[] birthDate = Arrays.copyOfRange(data, baseAddress + 0x00F0E, baseAddress + 0x00F11 + 1);
+        byte[] birthDate = Arrays.copyOfRange(data,  0x0000E,  0x00011 + 1);
 
-        byte[] comment = Arrays.copyOfRange(data, baseAddress + 0x00F15, baseAddress + 0x00F2F + 1);
+        byte[] comment = Arrays.copyOfRange(data,  0x00015,  0x0002F + 1);
 
-        boolean isCopy = data[baseAddress + 0x00F33] != 0;
+        boolean isCopy = data[ 0x00033] != 0;
 
-        byte frameNumber = data[baseAddress + 0x00F54];
+        byte frameNumber = data[ 0x00054];
 
         String parsedUserId = parseUserId(userId,cartIsJP);
         String parsedBirthDate = parseBirthDate(birthDate, cartIsJP);
@@ -40,15 +40,16 @@ public class FileMetaParser {
         String parsedBloodType = parseBloodType(genderAndBloodType);
         String parsedComment = convertToReadable(comment, cartIsJP);
 
-        HashMap<String, Object> meta = new HashMap<>();
+
+        LinkedHashMap<String, String> meta = new LinkedHashMap<>();
         meta.put("userId", parsedUserId);
         meta.put("birthDate", parsedBirthDate);
         meta.put("userName", parsedUserName);
         meta.put("gender", parsedGender);
         meta.put("bloodType", parsedBloodType);
         meta.put("comment", parsedComment);
-        meta.put("isCopy", isCopy);
-        meta.put("frameIndex", frameNumber);
+        meta.put("isCopy", String.valueOf(isCopy));
+        meta.put("frameIndex", String.valueOf(frameNumber));
         return meta;
     }
 
@@ -119,15 +120,15 @@ public class FileMetaParser {
                 result.append(" ");
             }
         }
-        return result.toString();
+        return result.toString().trim();
     }
 
     private String parseGender(byte b) {
         if ((b & 0x01) != 0) {
-            return "m";
+            return "♂";
         }
         if ((b & 0x02) != 0) {
-            return "f";
+            return "♀";
         }
         return "-";
     }

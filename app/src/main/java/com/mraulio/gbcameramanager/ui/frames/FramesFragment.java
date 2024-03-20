@@ -9,7 +9,6 @@ import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparent
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;

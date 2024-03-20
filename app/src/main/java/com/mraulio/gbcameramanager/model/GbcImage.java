@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Entity
@@ -32,7 +33,7 @@ public class GbcImage {
     private boolean invertPalette;
 
     @ColumnInfo(name = "image_metadata")
-    private byte[] imageMetadata;
+    private LinkedHashMap imageMetadata;
 
     @ColumnInfo(name = "invert_frame_palette", defaultValue = "false")
     private boolean invertFramePalette;
@@ -69,11 +70,11 @@ public class GbcImage {
 
     private byte[] imageBytes;
 
-    public byte[] getImageMetadata() {
+    public LinkedHashMap getImageMetadata() {
         return imageMetadata;
     }
 
-    public void setImageMetadata(byte[] imageMetadata) {
+    public void setImageMetadata(LinkedHashMap imageMetadata) {
         this.imageMetadata = imageMetadata;
     }
 

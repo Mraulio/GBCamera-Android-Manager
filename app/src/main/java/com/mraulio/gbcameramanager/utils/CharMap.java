@@ -122,7 +122,7 @@ public class CharMap {
         put(0xC4, "/");
         put(0xC5, ":");
         put(0xC6, "~");
-        put(0xC7, String.valueOf('"'));
+        put(0xC7, "\"");
         put(0xC8, "@");
     }};
 

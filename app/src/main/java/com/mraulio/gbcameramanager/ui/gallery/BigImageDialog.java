@@ -7,6 +7,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.compareTags;
+import static com.mraulio.gbcameramanager.ui.gallery.MetadataValues.metadataTexts;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
@@ -44,6 +45,7 @@ import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -162,9 +164,28 @@ public class BigImageDialog {
             }
         });
 
-        TextView tvCreationDate = dialog.findViewById(R.id.tvCreationDate);
+        TextView tvCreationDate = dialog.findViewById(R.id.tvMetadata);
+        StringBuilder stringBuilder = new StringBuilder();
 
-        tvCreationDate.setText(filteredGbcImages.get(globalImageIndex).getCreationDate().toString());
+        //Create the metadata text
+        LinkedHashMap lhm = filteredGbcImages.get(globalImageIndex).getImageMetadata();
+        stringBuilder.append(filteredGbcImages.get(globalImageIndex).getCreationDate().toString() + "\n");
+
+        if (lhm != null) { //Last seen images don't have metadata
+            for (Object key : lhm.keySet()) {
+                if (key.equals("frameIndex")) continue;
+                String metadata = metadataTexts.get(key);
+                String value = (String) lhm.get(key);
+                if (metadata == null) {
+                    metadata = (String) key;
+                }
+                stringBuilder.append(metadata).append(": ").append(value).append("\n");
+                if (key.equals("isCopy")) stringBuilder.append("\n");
+            }
+        }
+
+        tvCreationDate.setText(stringBuilder.toString());
+
         LinearLayout editTagsLayout = dialog.findViewById(R.id.editTagsLayout);
         LinearLayout miscLayout = dialog.findViewById(R.id.miscLayout);
 
@@ -453,24 +474,6 @@ public class BigImageDialog {
         editTagsLayout.setVisibility(VISIBLE);
 
         rbEditTags.setChecked(true);
-
-        final boolean[] rbEditWasSelected = {false};
-//        rbEditTags.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//
-//                if (!rbEditWasSelected[0]) {
-//                    rbEditWasSelected[0] = true;
-//                    editTagsLayout.setVisibility(VISIBLE);
-//                } else {
-//                    editTagsLayout.setVisibility(GONE);
-//                    rbEditTags.setChecked(false);
-//                    rbEditWasSelected[0] = false;
-//
-//                }
-//            }
-//        });
 
         LinearLayout tagsLayout = dialog.findViewById(R.id.tagsCheckBoxes);
 

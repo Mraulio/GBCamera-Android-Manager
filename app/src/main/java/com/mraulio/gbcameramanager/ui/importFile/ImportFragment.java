@@ -79,6 +79,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -88,6 +89,7 @@ public class ImportFragment extends Fragment {
 
     static List<Bitmap> importedImagesBitmaps = new ArrayList<>();
     static List<GbcImage> importedImagesList = new ArrayList<>();
+    static LinkedHashMap<GbcImage, Bitmap> importedImagesHash = new LinkedHashMap<>();
     public static LinkedHashMap<String, String> importedFrameGroupIdNames = new LinkedHashMap<>();
     int totalImages = 0;
     List<List<GbcImage>> listActiveImages = new ArrayList<>();
@@ -100,12 +102,14 @@ public class ImportFragment extends Fragment {
     List<GbcImage> lastSeenImage = new ArrayList<>();
     List<Bitmap> lastSeenBitmap = new ArrayList<>();
     DocumentFile selectedFile;
-    public static List<ImageData> importedImageDatas = new ArrayList<>();
+//    public static List<ImageData> importedImageDatas = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
+
     byte[] fileBytes;
     private AlertDialog loadingDialog;
     private Adapter adapter;
     boolean isGoodSave = true;
+    public static List<LinkedHashMap<String, Object>> metadataHashes = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0;
 
     static TextView tvFileName;
     static String fileName;
@@ -786,7 +790,7 @@ public class ImportFragment extends Fragment {
                                             ImageData imageData = new ImageData();
                                             imageData.setImageId(hashHex);
                                             imageData.setData(imageBytes);
-                                            importedImageDatas.add(imageData);
+//                                            importedImageDatas.add(imageData);
                                             gbcImage.setName(fileName);
                                             finalListBitmaps.add(bitmap);
                                             finalListImages.add(gbcImage);
@@ -959,7 +963,7 @@ public class ImportFragment extends Fragment {
                 ImageData imageData = new ImageData();
                 imageData.setImageId(hashHex);
                 imageData.setData(imageBytes);
-                importedImageDatas.add(imageData);
+//                importedImageDatas.add(imageData);
                 gbcImage.setName(fileName);
                 finalListBitmaps.add(bitmap);
                 finalListImages.add(gbcImage);
@@ -974,15 +978,6 @@ public class ImportFragment extends Fragment {
                 cbAddFrame.setVisibility(View.VISIBLE);
                 gridViewImport.setAdapter((ListAdapter) adapter);
 
-//                                } else {
-//                                    tvFileName.setText(getString(R.string.file_name) + fileName);
-//                                    tvFileName.setText(getString(R.string.no_valid_image_file));
-//                                    btnExtractFile.setVisibility(View.GONE);
-//                                    btnAddImages.setVisibility(View.GONE);
-//                                    layoutCb.setVisibility(View.GONE);
-//                                    gridViewImport.setAdapter(null);
-//                                    bitmap.recycle();
-//                                }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (NoSuchAlgorithmException e) {
@@ -1020,52 +1015,28 @@ public class ImportFragment extends Fragment {
 
     public boolean extractSavImages() {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
-        try {
-            //Extract the images
-            listImportedImageBytes = extractor.extractBytes(fileBytes, 0);
-            //Check for Magic or FF bytes
-            if (!magicIsReal(fileBytes)) {
-                return false;
-            }
-            int nameIndex = 1;
-            for (byte[] imageBytes : listImportedImageBytes) {
-                GbcImage gbcImage = new GbcImage();
-                String formattedIndex = String.format("%02d", nameIndex);
-                if (nameIndex == listImportedImageBytes.size() - MainActivity.deletedCount[0]) {//Last seen image
-                    gbcImage.setName(fileName + " [last seen]");
-                } else if (nameIndex > listImportedImageBytes.size() - MainActivity.deletedCount[0]) {//Deleted images
-                    gbcImage.setName(fileName + " [deleted]");
-                } else {
-                    gbcImage.setName(fileName + " " + formattedIndex);
-                }
-                nameIndex++;
-                byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                String hashHex = Utils.bytesToHex(hash);
-                gbcImage.setHashCode(hashHex);
-                ImageCodec imageCodec = new ImageCodec(128, 112, gbcImage.isLockFrame());
-                Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
-                if (image.getHeight() == 112 && image.getWidth() == 128) {
-                    //I need to use copy because if not it's inmutable bitmap
-                    Bitmap framed = Utils.hashFrames.get("gbcam01").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-                    Canvas canvas = new Canvas(framed);
-                    canvas.drawBitmap(image, 16, 16, null);
-                    image = framed;
-                    imageBytes = Utils.encodeImage(image, gbcImage.getPaletteId());
-                }
-                ImageData imageData = new ImageData();
-                imageData.setImageId(gbcImage.getHashCode());
-                imageData.setData(imageBytes);
-                importedImageDatas.add(imageData);
-                gbcImage.setImageBytes(imageBytes);
-                importedImagesBitmaps.add(image);
-                importedImagesList.add(gbcImage);
-                totalImages = importedImagesList.size();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        //Check for Magic or FF bytes
+        if (!magicIsReal(fileBytes)) {
+            return false;
         }
+        //Extract the images
+        importedImagesHash = extractor.extractGbcImages(fileBytes, fileName, 0);
+
+        for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHash.entrySet()) {
+            GbcImage gbcImage = entry.getKey();
+            Bitmap imageBitmap = entry.getValue();
+            ImageData imageData = new ImageData();
+            imageData.setImageId(gbcImage.getHashCode());
+            imageData.setData(gbcImage.getImageBytes());
+            importedImagesBitmaps.add(imageBitmap);
+            importedImagesList.add(gbcImage);
+        }
+        totalImages = importedImagesList.size();
+
         return true;
     }
+
 
     private void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
         List<String> dataList = HexToTileData.separateData(fileContent);
@@ -1082,7 +1053,7 @@ public class ImportFragment extends Fragment {
             ImageData imageData = new ImageData();
             imageData.setImageId(hashHex);
             imageData.setData(bytes);
-            importedImageDatas.add(imageData);
+//            importedImageDatas.add(imageData);
             totalImages = index;
             String formattedIndex = String.format("%02d", index++);
             gbcImage.setName(fileName + " " + formattedIndex);

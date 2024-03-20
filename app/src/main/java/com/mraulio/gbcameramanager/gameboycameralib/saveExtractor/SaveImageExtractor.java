@@ -3,14 +3,17 @@ package com.mraulio.gbcameramanager.gameboycameralib.saveExtractor;
 import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.*;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.os.Build;
 
 
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.FileMetaParser;
-import com.mraulio.gbcameramanager.utils.PhotoMetaParser;
+import com.mraulio.gbcameramanager.utils.HomebrewRomsMetaParser;
+import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,10 +21,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -76,6 +82,11 @@ public class SaveImageExtractor implements Extractor {
         return images;
     }
 
+    @Override
+    public List<byte[]> extractBytes(byte[] rawData, int saveBank) {
+        return null;
+    }
+
 
     @Override
     public List<byte[]> extractBytes(File file, int saveBank) throws IOException {
@@ -90,9 +101,51 @@ public class SaveImageExtractor implements Extractor {
         }
     }
 
+    private GbcImage getGbcImage(byte[] imageBytes, String gbcImageName, HashMap<GbcImage, Bitmap> hashImageBitmap) {
+        GbcImage gbcImage = new GbcImage();
+        try {
+            gbcImage.setName(gbcImageName);
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
+            String hashHex = Utils.bytesToHex(hash);
+            gbcImage.setHashCode(hashHex);
+            Bitmap imageBitmap = gbcImageBitmap(gbcImage, imageBytes);
+            hashImageBitmap.put(gbcImage, imageBitmap);
+        } catch (
+                Exception e) {
+            e.printStackTrace();
+        }
+        return gbcImage;
+    }
+
+    private Bitmap gbcImageBitmap(GbcImage gbcImage, byte[] imageBytes) {
+        try {
+            ImageCodec imageCodec = new ImageCodec(128, 112, gbcImage.isLockFrame());
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
+            if (image.getHeight() == 112 && image.getWidth() == 128) {
+                //I need to use copy because if not it's inmutable bitmap
+                Bitmap framed = Utils.hashFrames.get("gbcam01").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                Canvas canvas = new Canvas(framed);
+                canvas.drawBitmap(image, 16, 16, null);
+                image = framed;
+                imageBytes = Utils.encodeImage(image, gbcImage.getPaletteId());
+            }
+            gbcImage.setImageBytes(imageBytes);
+            return image;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     //Added by Mraulio
     @Override
-    public List<byte[]> extractBytes(byte[] rawData, int saveBank) {
+    public LinkedHashMap<GbcImage, Bitmap> extractGbcImages(byte[] rawData, String fileName, int saveBank) {
+        LinkedHashMap<GbcImage, Bitmap> allImagesGB = new LinkedHashMap<>(31);
+        LinkedHashMap<GbcImage, Bitmap> deletedImagesGB = new LinkedHashMap<>();
+        LinkedHashMap<GbcImage, Bitmap> lastSeenImageGB = new LinkedHashMap<>();
+
+        HashMap<GbcImage, Bitmap> hashImageBitmap = new HashMap<>();
+
         final int PHOTOS_LOCATION = 0x11B2;
         final int PHOTOS_READ_COUNT = 0x1E;
         MainActivity.deletedCount[saveBank] = 0;
@@ -103,6 +156,7 @@ public class SaveImageExtractor implements Extractor {
         //For the development rom, in which the vector doesn't exist and has repeated bytes.
         photosPositions = checkDuplicates(photosPositions);
         List<byte[]> deletedImages = new ArrayList<>();
+        List<LinkedHashMap<String, Object>> deletedMetadataHases = new ArrayList<>();
         int activePhotos = 0;
         StringBuilder sb = new StringBuilder();
         for (byte x : photosPositions) {
@@ -130,12 +184,11 @@ public class SaveImageExtractor implements Extractor {
                 index++;
             }
         }
-        ArrayList<byte[]> allImages = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0
+        ArrayList<GbcImage> allImages = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0
+
         for (int i = 0; i < activePhotos; i++) {
             allImages.add(null);//Fill it with null so I can later use the "put" method
         }
-        byte[] lastSeenImage = new byte[0];
-
         //Sort the noFFarray
         Arrays.sort(noFFarray);
         sb.setLength(0);
@@ -152,73 +205,90 @@ public class SaveImageExtractor implements Extractor {
                 byte[] image = new byte[IMAGE_LENGTH];
                 System.arraycopy(rawData, i, image, 0, IMAGE_LENGTH);
 
+                byte[] thumbImage = new byte[SMALL_IMAGE_LENGTH];
+                System.arraycopy(rawData, i + SMALL_IMAGE_START_OFFSET, thumbImage, 0, SMALL_IMAGE_LENGTH);
+
+                byte[] imageMetadataBytes = new byte[IMAGE_METADATA_LENGTH];
+                System.arraycopy(rawData, i + IMAGE_METADATA_OFFSET, imageMetadataBytes, 0, IMAGE_METADATA_LENGTH);
+
                 //The last seen image
                 if (i == 0) {
                     i = NEXT_IMAGE_START_OFFSET;//0 means it's the last seen, then we need to continue on 0x2000(2 * NEXT_IMAGE_START_OFFSET)
-                    lastSeenImage = image;
+                    String lastSeenGbcImageName = fileName + " [last seen]";
+                    GbcImage lastSeenGbcImage = getGbcImage(image, lastSeenGbcImageName, hashImageBitmap);
+                    Bitmap lastSeenBitmap = gbcImageBitmap(lastSeenGbcImage, image);
+                    lastSeenImageGB.put(lastSeenGbcImage, lastSeenBitmap);
+
                 } else {
                     //If it's a deleted photo
                     if (photosPositions[j] == (byte) 0xFF) {
                         if (!isEmptyImage(image)) {//In case the image is not FF, because of the isEmptyImage method
                             deletedImages.add(image);//Can't order it, all are -1 (0xFF)
+                            String deletedGbcImageName = fileName + " [deleted]";
+                            GbcImage deletedGbcImage = getGbcImage(image, deletedGbcImageName, hashImageBitmap);
+                            Bitmap deletedBitmap = gbcImageBitmap(deletedGbcImage, image);
+                            deletedGbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage));
+                            deletedImagesGB.put(deletedGbcImage,deletedBitmap);
                             MainActivity.deletedCount[saveBank]++;
                         }
                     } else {//If not a deleted photo
                         //I get the index in the sorted array where the "real" index from the vector is stored
                         for (int b = 0; b < noFFarray.length; b++) {
                             if (noFFarray[b] == photosPositions[j]) {
-                                allImages.set(b, image);
+                                String formattedIndex = String.format("%02d", (b + 1));
+                                String gbcImageName = fileName + " " + formattedIndex;
+                                GbcImage gbcImage = getGbcImage(image, gbcImageName, hashImageBitmap);
+                                gbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage));
+
+                                allImages.set(b, gbcImage);
                             }
                         }
                     }
                     j++;
-
-//                    if (j < 4) {
-//                        /**
-//                         * Getting the Stock Rom Metadata
-//                         */
-//                        FileMetaParser fileMetaParser = new FileMetaParser();
-//                        HashMap<String, Object> metadataHash;
-//                        metadataHash = fileMetaParser.getFileMeta(rawData, i, false);
-//                        for (HashMap.Entry<String, Object> entry : metadataHash.entrySet()) {
-//                            String key = entry.getKey();
-//                            Object value = entry.getValue();
-//                            System.out.println("Clave: " + key + ", Valor: " + value);
-//                        }
-//                        System.out.println("\n*******************************************************\n");
-//                    }
-
-                    if (j < 4) {
-                        /**
-                         * Getting the Photo Rom Metadata
-                         */
-                        // The thumbs
-                        byte[] thumbImage = new byte[64];
-                        System.arraycopy(rawData, i + SMALL_IMAGE_START_OFFSET+192, thumbImage, 0, 64);
-                        PhotoMetaParser photoMetaParser = new PhotoMetaParser();
-                        HashMap<String, String> metadataHash;
-                        metadataHash = photoMetaParser.getFilePhotoMeta(thumbImage, i);
-//                        for (HashMap.Entry<String, String> entry : metadataHash.entrySet()) {
-//                            String key = entry.getKey();
-//                            Object value = entry.getValue();
-//                            System.out.println("Clave: " + key + ", Valor: " + value);
-//                        }
-//                        System.out.println("\n*******************************************************\n");
-                    }
-
-
                 }
             }
-            //Append the last seen image after the active images
-            allImages.add(lastSeenImage);
-            //Append the deleted images at the end
-            allImages.addAll(deletedImages);
 
+            //To add them in order
+            for (GbcImage gbcImage : allImages) {
+                allImagesGB.put(gbcImage, hashImageBitmap.get(gbcImage));
+            }
+
+            //Append the last seen image after the active images
+            allImagesGB.putAll(lastSeenImageGB);
+            //Append the deleted images at the end
+            allImagesGB.putAll(deletedImagesGB);
+
+            //To update the images creation date, now that they are in order, so they show properly when sorting by creation date
+            long timeMs = System.currentTimeMillis();
+            long plusMs = 0;
+            for (GbcImage gbcImage : allImagesGB.keySet()) {
+                gbcImage.setCreationDate(new Date(timeMs + plusMs++));
+            }
         } catch (Exception e) {
             // Just print the error and continue to return what images we have
             e.printStackTrace();
         }
-        return allImages;
+        return allImagesGB;
+    }
+
+    private LinkedHashMap<String, String> getMetadata(byte[] imageMetadata, byte[] thumbImage) {
+        FileMetaParser fileMetaParser = new FileMetaParser();
+        LinkedHashMap<String, String> metadataOriginal;
+        metadataOriginal = fileMetaParser.getFileMeta(imageMetadata, false);
+
+        LinkedHashMap<String, String> metadataHomebrew;
+        HomebrewRomsMetaParser homebrewRomsMetaParser = new HomebrewRomsMetaParser();
+        metadataHomebrew = homebrewRomsMetaParser.parseHomebrewRomMetadata(thumbImage);
+
+        LinkedHashMap<String, String> allMetadatas = new LinkedHashMap<>();
+        for (LinkedHashMap.Entry<String, String> entry : metadataOriginal.entrySet()) {
+            allMetadatas.put(entry.getKey(), entry.getValue());
+        }
+        for (LinkedHashMap.Entry<String, String> entry : metadataHomebrew.entrySet()) {
+            allMetadatas.put(entry.getKey(), entry.getValue());
+        }
+
+        return allMetadatas;
     }
 
     private byte[] checkDuplicates(byte[] array) {

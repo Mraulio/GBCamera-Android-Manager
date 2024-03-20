@@ -3,8 +3,12 @@ package com.mraulio.gbcameramanager.gameboycameralib.saveExtractor;
 
 import android.graphics.Bitmap;
 
+import com.mraulio.gbcameramanager.model.GbcImage;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 /**
  * Modified from https://github.com/KodeMunkie/gameboycameralib
@@ -38,6 +42,9 @@ public interface Extractor {
 
 
     List<byte[]> extractBytes(File file, int saveBank) throws IOException;
+
+    //Added by Mraulio
+    LinkedHashMap<GbcImage, Bitmap> extractGbcImages(byte[] rawData,String fileName, int saveBank);
 
     /**
      * Extract images from a local file system file and return as PNG byte data

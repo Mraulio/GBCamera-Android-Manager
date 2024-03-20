@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.savemanager;
 
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
@@ -39,6 +40,7 @@ import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -46,6 +48,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -89,7 +93,7 @@ public class SaveManagerFragment extends Fragment {
         gridviewSaves = view.findViewById(R.id.gridViewSaves);
         btnDelete = view.findViewById(R.id.btnDelete);
         btnAdd = view.findViewById(R.id.btnAdd);
-        cbModDate =view.findViewById(R.id.cbModDate);
+        cbModDate = view.findViewById(R.id.cbModDate);
         loadingDialog = Utils.loadingDialog(getContext(), null);
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
 
@@ -106,7 +110,7 @@ public class SaveManagerFragment extends Fragment {
                 lastModDate = new Date(selectedFile.lastModified());
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss", Locale.getDefault());
                 String dateString = dateFormat.format(lastModDate);
-                cbModDate.setText(getString(R.string.cb_use_mod_date)+": "+dateString);
+                cbModDate.setText(getString(R.string.cb_use_mod_date) + ": " + dateString);
                 new loadDataTask().execute();
             }
         });
@@ -179,8 +183,8 @@ public class SaveManagerFragment extends Fragment {
             try {
                 int dateIndex = 0;
                 for (GbcImage gbcImage : gbcImagesList) {
-                    if (cbModDate.isChecked()){
-                        long lastModifiedTime = selectedFile.lastModified()+dateIndex++;
+                    if (cbModDate.isChecked()) {
+                        long lastModifiedTime = selectedFile.lastModified() + dateIndex++;
                         lastModDate = new Date(lastModifiedTime);
                         gbcImage.setCreationDate(lastModDate);
                     }
@@ -264,60 +268,54 @@ public class SaveManagerFragment extends Fragment {
         //I get the last file from the directory, which I just dumped
         try {
             if (selectedFile.length() / 1024 == 128) {
-                List<byte[]> listExtractedImageBytes = new ArrayList<>();
 
-                listExtractedImageBytes = extractor.extractBytes(selectedFile, saveBank);
-                int nameIndex = 1;
-                String fileName = selectedFile.getName();
-                for (byte[] imageBytes : listExtractedImageBytes) {
-                    GbcImage gbcImage = new GbcImage();
-
-                    String formattedIndex = String.format("%02d", nameIndex);
-                    if (nameIndex == listExtractedImageBytes.size() - MainActivity.deletedCount[saveBank]) {//Last seen image
-                        gbcImage.setName(fileName + " [last seen]");
-                    } else if (nameIndex > listExtractedImageBytes.size() - MainActivity.deletedCount[saveBank]) {//Deleted images
-                        gbcImage.setName(fileName + " [deleted]");
-                    } else {
-                        gbcImage.setName(fileName + " " + formattedIndex);
-                    }
-                    nameIndex++;
-                    byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                    String hashHex = Utils.bytesToHex(hash);
-                    gbcImage.setHashCode(hashHex);
-                    ImageCodec imageCodec = new ImageCodec(128, 112, false);
-                    Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
-                    if (image.getHeight() == 112 && image.getWidth() == 128) {
-                        //I need to use copy because if not it's inmutable bitmap
-                        Bitmap framed = Utils.hashFrames.get((gbcImage.getFrameId())).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-                        Canvas canvas = new Canvas(framed);
-                        canvas.drawBitmap(image, 16, 16, null);
-                        image = framed;
-                        imageBytes = Utils.encodeImage(image, "bw");
-                    }
-                    gbcImage.setImageBytes(imageBytes);
-                    extractedImagesBitmaps.add(image);
-                    extractedImagesList.add(gbcImage);
+                byte[] extractedImageBytes = new byte[0];
+                try (FileInputStream fis = new FileInputStream(selectedFile)) {
+                    extractedImageBytes = new byte[(int) selectedFile.length()];
+                    fis.read(extractedImageBytes);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                listActiveImages = new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1));
-                listActiveBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1));
-                lastSeenImage = extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1);
-                lastSeenBitmap = extractedImagesBitmaps.get(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1);
-                listDeletedImages = new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - MainActivity.deletedCount[saveBank], extractedImagesList.size()));
 
-                listDeletedBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank], extractedImagesBitmaps.size()));
-                listDeletedBitmapsRedStroke = new ArrayList<>();
-                Paint paint = new Paint();
-                paint.setColor(Color.RED);
-                paint.setStrokeWidth(2);
-                int startX = 160;
-                int startY = 0;
-                int endX = 0;
-                int endY = 144;
-                for (Bitmap bitmap : listDeletedBitmaps) {
-                    Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
-                    Canvas canvas = new Canvas(copiedBitmap);
-                    canvas.drawLine(startX, startY, endX, endY, paint);
-                    listDeletedBitmapsRedStroke.add(copiedBitmap);
+                //Check for Magic or FF bytes
+                if (!magicIsReal(extractedImageBytes)) {
+                    //
+                } else {
+                    String fileName = selectedFile.getName();
+
+                    LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(extractedImageBytes, fileName, 0);
+
+                    for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHash.entrySet()) {
+                        GbcImage gbcImage = entry.getKey();
+                        Bitmap imageBitmap = entry.getValue();
+                        ImageData imageData = new ImageData();
+                        imageData.setImageId(gbcImage.getHashCode());
+                        imageData.setData(gbcImage.getImageBytes());
+                        extractedImagesBitmaps.add(imageBitmap);
+                        extractedImagesList.add(gbcImage);
+                    }
+
+                    listActiveImages = new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1));
+                    listActiveBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1));
+                    lastSeenImage = extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1);
+                    lastSeenBitmap = extractedImagesBitmaps.get(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1);
+                    listDeletedImages = new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - MainActivity.deletedCount[saveBank], extractedImagesList.size()));
+
+                    listDeletedBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank], extractedImagesBitmaps.size()));
+                    listDeletedBitmapsRedStroke = new ArrayList<>();
+                    Paint paint = new Paint();
+                    paint.setColor(Color.RED);
+                    paint.setStrokeWidth(2);
+                    int startX = 160;
+                    int startY = 0;
+                    int endX = 0;
+                    int endY = 144;
+                    for (Bitmap bitmap : listDeletedBitmaps) {
+                        Bitmap copiedBitmap = bitmap.copy(bitmap.getConfig(), true);//Need to get a copy of the original bitmap, or else I'll paint on it
+                        Canvas canvas = new Canvas(copiedBitmap);
+                        canvas.drawLine(startX, startY, endX, endY, paint);
+                        listDeletedBitmapsRedStroke.add(copiedBitmap);
+                    }
                 }
             } else {
                 listActiveImages.clear();
@@ -329,9 +327,7 @@ public class SaveManagerFragment extends Fragment {
                 listDeletedBitmaps.clear();
                 listDeletedBitmapsRedStroke.clear();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

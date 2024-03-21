@@ -21,15 +21,13 @@ public class MetadataValues {
         put("ditheringLight", "Dith. light");
         put("ditherset", "Dither set");
         put("isCopy", "Is copy");
-        put("bloodType", "Dither set");
+        put("bloodType", "Blood type");
         put("gender", "Gender");
         put("comment", "Comment");
         put("userName", "User name");
         put("userId", "User ID");
         put("birthDate", "Birthday");
         put("cpuFast", "Double speed");
-        put("userId", "User ID");
-        put("userId", "User ID");
 
     }};
 }

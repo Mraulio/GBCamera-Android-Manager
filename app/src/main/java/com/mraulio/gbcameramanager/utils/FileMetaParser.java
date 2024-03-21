@@ -43,8 +43,8 @@ public class FileMetaParser {
 
         LinkedHashMap<String, String> meta = new LinkedHashMap<>();
         meta.put("userId", parsedUserId);
-        meta.put("birthDate", parsedBirthDate);
         meta.put("userName", parsedUserName);
+        meta.put("birthDate", parsedBirthDate);
         meta.put("gender", parsedGender);
         meta.put("bloodType", parsedBloodType);
         meta.put("comment", parsedComment);

@@ -10,8 +10,11 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
+import static com.mraulio.gbcameramanager.ui.gallery.MetadataValues.metadataTexts;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesListHolder;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.hashPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.saveTagsSet;
@@ -42,6 +45,7 @@ import android.widget.TextView;
 
 import androidx.core.content.FileProvider;
 
+import com.ddyos.unicode.exifinterface.UnicodeExifInterface;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
@@ -58,10 +62,12 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -117,6 +123,38 @@ public class GalleryUtils {
                     Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                     scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
                     out.flush();
+
+                    // Agrega metadatos al archivo PNG
+                    UnicodeExifInterface exifInterface = new UnicodeExifInterface(file.getAbsolutePath());
+                    //Create the metadata text
+                    StringBuilder stringBuilder = new StringBuilder();
+                    LinkedHashMap lhm = gbcImage.getImageMetadata();
+                    stringBuilder.append("Origin: GBCamera Android Manager\n");
+                    stringBuilder.append("Palette: " + hashPalettes.get(gbcImage.getPaletteId()).getPaletteName() + " (" + gbcImage.getPaletteId() + ")\n");
+                    if (gbcImage.getFrameId() != null)
+                        stringBuilder.append("Frame: " + hashFrames.get(gbcImage.getFrameId()).getFrameName() + " (" + gbcImage.getFrameId() + ")\n");
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+                    stringBuilder.append("Creation date: " + sdf.format(gbcImage.getCreationDate()) + "\n");
+
+                    if (lhm != null) { //Last seen images don't have metadata
+                        for (Object key : lhm.keySet()) {
+                            if (key.equals("frameIndex")) continue;
+                            String metadata = metadataTexts.get(key);
+                            String value = (String) lhm.get(key);
+                            if (metadata == null) {
+                                metadata = (String) key;
+                            }
+                            stringBuilder.append(metadata).append(": ").append(value).append("\n");
+                            if (key.equals("isCopy")) stringBuilder.append("\n");
+                        }
+                    }
+
+                    String metadataComment = stringBuilder.toString();
+
+                    exifInterface.setAttribute(UnicodeExifInterface.TAG_USER_COMMENT, metadataComment);
+                    exifInterface.saveAttributes();
+
                     mediaScanner(file, context);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -479,7 +517,7 @@ public class GalleryUtils {
             case IMPORT_DATE:
                 gbcImagesList.clear();
                 gbcImagesList.addAll(gbcImagesListHolder);
-                if (sortDescending){
+                if (sortDescending) {
                     Collections.reverse(gbcImagesList);
                 }
                 break;

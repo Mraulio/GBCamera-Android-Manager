@@ -43,6 +43,7 @@ import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -166,10 +167,10 @@ public class BigImageDialog {
 
         TextView tvCreationDate = dialog.findViewById(R.id.tvMetadata);
         StringBuilder stringBuilder = new StringBuilder();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
 
-        //Create the metadata text
         LinkedHashMap lhm = filteredGbcImages.get(globalImageIndex).getImageMetadata();
-        stringBuilder.append(filteredGbcImages.get(globalImageIndex).getCreationDate().toString() + "\n");
+        stringBuilder.append(sdf.format(filteredGbcImages.get(globalImageIndex).getCreationDate()).toString() + "\n");
 
         if (lhm != null) { //Last seen images don't have metadata
             for (Object key : lhm.keySet()) {

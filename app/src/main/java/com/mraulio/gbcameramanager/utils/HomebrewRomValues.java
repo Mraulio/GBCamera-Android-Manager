@@ -86,8 +86,8 @@ public class HomebrewRomValues {
     }};
 
     public static final HashMap<Integer, String> VALUES_INVERT_OUTPUT = new HashMap<Integer, String>() {{
-        put(0b00001000, "on");
-        put(0b00000000, "off");
+        put(0b00001000, "Inverted");
+        put(0b00000000, "Normal");
     }};
 
     public static final HashMap<Integer, String> VALUES_VOLTAGE_REF = new HashMap<Integer, String>() {{

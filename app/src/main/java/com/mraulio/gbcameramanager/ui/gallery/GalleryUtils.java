@@ -62,7 +62,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -124,7 +123,6 @@ public class GalleryUtils {
                     scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
                     out.flush();
 
-                    // Agrega metadatos al archivo PNG
                     UnicodeExifInterface exifInterface = new UnicodeExifInterface(file.getAbsolutePath());
                     //Create the metadata text
                     StringBuilder stringBuilder = new StringBuilder();

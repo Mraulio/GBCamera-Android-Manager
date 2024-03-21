@@ -837,7 +837,6 @@ public class ImportFragment extends Fragment {
             ByteArrayOutputStream byteStream = null;
             fileType = FILE_TYPE.SAV;
 
-
             try {
                 InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
                 byteStream = new ByteArrayOutputStream();

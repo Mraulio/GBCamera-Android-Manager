@@ -216,12 +216,14 @@ public class GBxCartCommands {
         private TextView tv;
         private UsbSerialPort port;
         List<File> fullRomFileList;
+        List<byte[]> fullRomFileBytes;
 
-        public ReadPHOTORomAsyncTask(UsbSerialPort port, Context context, TextView tv, List<File> fullRomFileList) {
+        public ReadPHOTORomAsyncTask(UsbSerialPort port, Context context, TextView tv, List<File> fullRomFileList, List<byte[]> fullRomFileBytes) {
             this.port = port;
             this.context = context;
             this.tv = tv;
             this.fullRomFileList = fullRomFileList;
+            this.fullRomFileBytes = fullRomFileBytes;
         }
 
 
@@ -241,7 +243,7 @@ public class GBxCartCommands {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
                 folderName = "PhotoFullRom_" + dtf.format(now);
                 fileName += dtf.format(now) + "-full.gbc";
-            }else{
+            } else {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
                 folderName = "PhotoFullRom_" + sdf.format(nowDate);
                 fileName += sdf.format(nowDate) + "-full.gbc";
@@ -332,6 +334,7 @@ public class GBxCartCommands {
 
                             if (magicIsReal(fileBytes)) {
                                 fullRomFileList.add(outputFile);
+                                fullRomFileBytes.add(fileBytes);
                             } else {
                                 outputFile.delete();
                             }
@@ -480,7 +483,7 @@ public class GBxCartCommands {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     fileBytes = Files.readAllBytes(latestFile.toPath());
-                }else{
+                } else {
                     FileInputStream fis = new FileInputStream(latestFile);
                     fileBytes = new byte[(int) latestFile.length()];
                     fis.read(fileBytes);
@@ -496,7 +499,7 @@ public class GBxCartCommands {
 
             tv.append(context.getString(R.string.last_sav_name) + latestFile.getName() + ".\n" +
                     context.getString(R.string.size) + latestFile.length() / 1024 + "KB");
-            readSav(latestFile, 0);
+            readSav(latestFile, fileBytes, 0);
             btnAddImages.setVisibility(View.VISIBLE);
             btnDelSav.setVisibility(View.VISIBLE);
             layoutCb.setVisibility(View.VISIBLE);

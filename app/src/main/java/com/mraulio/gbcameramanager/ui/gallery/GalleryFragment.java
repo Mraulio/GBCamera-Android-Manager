@@ -1586,7 +1586,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + "HDR!", Toast.LENGTH_LONG);
                             toast.show();
                             mediaScanner(file, getContext());
-                            showNotification(getContext(),file);
+                            showNotification(getContext(), file);
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -1626,7 +1626,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 //Using this library https://github.com/nbadal/android-gif-encoder
 
                 if (!selectedImages.isEmpty()) {
-                    Collections.sort(selectedImages);
+                    List<Integer> sortedList = new ArrayList<>(selectedImages);
+                    final List<Integer>[] listInUse = new List[]{selectedImages};
+                    Collections.sort(sortedList);
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle("GIF!");
@@ -1636,9 +1638,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                     builder.setView(dialogView);
                     TextView tv_animation = dialogView.findViewById(R.id.tv_animation);
-                    Button reload_anim = dialogView.findViewById(R.id.btn_animation);
+                    Button reload_anim = dialogView.findViewById(R.id.btnReload);
                     CheckBox cb_loop = dialogView.findViewById(R.id.cb_loop);
-
+                    CheckBox cbSort = dialogView.findViewById(R.id.cbSort);
                     final int[] loop = {0};
                     cb_loop.setOnClickListener(v -> {
                         if (cb_loop.isChecked()) {
@@ -1647,6 +1649,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             loop[0] = -1;//-1 to not repeat
                         }
                     });
+
                     ImageView imageView = dialogView.findViewById(R.id.animation_image);
                     imageView.setAdjustViewBounds(true);
                     imageView.setPadding(30, 10, 30, 10);
@@ -1726,7 +1729,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 encoder.start(bos);
                                 List<Bitmap> bitmapList = new ArrayList<Bitmap>();
 
-                                for (int i : selectedImages) {
+                                if (cbSort.isChecked())
+                                    listInUse[0] = sortedList;
+                                else {
+                                    listInUse[0] = selectedImages;
+                                }
+                                for (int i : listInUse[0]) {
                                     Bitmap bitmap = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
                                     bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
                                     bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false));

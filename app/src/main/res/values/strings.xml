@@ -221,6 +221,7 @@
     <string name="btn_edit_frame">Edit frame</string>
     <string name="sp_new_frame_group">New Frame Group</string>
     <string name="et_palette_id">Set Palette Id</string>
+    <string name="btn_realod_anim">Reload</string>
 
 
 </resources>

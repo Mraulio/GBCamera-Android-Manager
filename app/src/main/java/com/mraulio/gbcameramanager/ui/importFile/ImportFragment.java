@@ -345,7 +345,6 @@ public class ImportFragment extends Fragment {
                                                 checkDuplicatedImport.add(gbcImage.getHashCode());
                                             }
                                         }
-
                                         if (newGbcImages.size() > 0) {
                                             ImagesImportDialog imagesImportDialog = new ImagesImportDialog(newGbcImages, listNewBitmaps, selectedFile, getContext(), getActivity(), tvFileName, numImagesAdded);
                                             imagesImportDialog.createImagesImportDialog();
@@ -375,7 +374,7 @@ public class ImportFragment extends Fragment {
         //To directly extract the file if opening the app from a file
         if (openedFromFile) {
             selectedFile = DocumentFile.fromSingleUri(getContext(), uri);
-            readFileData();
+            readFileData(uri);
             loadingDialog.show();
             new loadDataTask().execute();
             openedFromFile = false;//So this doesn't execute again when entering the fragment later
@@ -759,11 +758,10 @@ public class ImportFragment extends Fragment {
                                     tvFileName.setText("Selected files: " + count);
                                     for (int i = 0; i < count; i++) {
                                         Uri uri = uris.get(i);
-//                                        Uri uri = data.getClipData().getItemAt(i).getUri();
 
                                         fileName = getFileName(uri);
                                         fileType = FILE_TYPE.IMAGE;
-
+                                        selectedFile = null;//Passing it as null to not get the name and modified date
                                         try {
                                             InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
 
@@ -787,9 +785,9 @@ public class ImportFragment extends Fragment {
                                             byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                                             String hashHex = Utils.bytesToHex(hash);
                                             gbcImage.setHashCode(hashHex);
-                                            ImageData imageData = new ImageData();
-                                            imageData.setImageId(hashHex);
-                                            imageData.setData(imageBytes);
+//                                            ImageData imageData = new ImageData();
+//                                            imageData.setImageId(hashHex);
+//                                            imageData.setData(imageBytes);
 //                                            importedImageDatas.add(imageData);
                                             gbcImage.setName(fileName);
                                             finalListBitmaps.add(bitmap);
@@ -822,7 +820,7 @@ public class ImportFragment extends Fragment {
                                 uri = data.getData();
                                 selectedFile = DocumentFile.fromSingleUri(getContext(), uri);
                                 fileName = getFileName(uri);
-                                readFileData();
+                                readFileData(uri);
                             }
                         }
                     }
@@ -830,7 +828,7 @@ public class ImportFragment extends Fragment {
             }
     );
 
-    private void readFileData() {
+    private void readFileData(Uri uri) {
 
         //I check the extension of the file
         if (fileName.toLowerCase().endsWith("sav")) {
@@ -932,7 +930,8 @@ public class ImportFragment extends Fragment {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (fileName.toLowerCase().endsWith("png") || fileName.toLowerCase().endsWith("jpg") || fileName.toLowerCase().endsWith("jpeg") || fileName.toLowerCase().endsWith("bmp")) {
+        } else if (isImageFile(fileName)) {
+            System.out.println("Reading data");
             fileType = FILE_TYPE.IMAGE;
             finalListImages.clear();
             finalListBitmaps.clear();
@@ -959,9 +958,10 @@ public class ImportFragment extends Fragment {
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                 String hashHex = Utils.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);
-                ImageData imageData = new ImageData();
-                imageData.setImageId(hashHex);
-                imageData.setData(imageBytes);
+                System.out.println(hashHex);
+//                ImageData imageData = new ImageData();
+//                imageData.setImageId(hashHex);
+//                imageData.setData(imageBytes);
 //                importedImageDatas.add(imageData);
                 gbcImage.setName(fileName);
                 finalListBitmaps.add(bitmap);
@@ -973,7 +973,7 @@ public class ImportFragment extends Fragment {
 
                 adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
                 gridViewImport.setAdapter((ListAdapter) adapter);
-                ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
+                addEnum = ImportFragment.ADD_WHAT.IMAGES;
                 cbAddFrame.setVisibility(View.VISIBLE);
                 gridViewImport.setAdapter((ListAdapter) adapter);
 
@@ -991,7 +991,6 @@ public class ImportFragment extends Fragment {
             tvFileName.setText(getString(R.string.no_valid_file));
         }
     }
-
 
     /**
      * Checks if the selected file are images
@@ -1035,7 +1034,6 @@ public class ImportFragment extends Fragment {
 
         return true;
     }
-
 
     private void extractHexImages(String fileContent) throws NoSuchAlgorithmException {
         List<String> dataList = HexToTileData.separateData(fileContent);

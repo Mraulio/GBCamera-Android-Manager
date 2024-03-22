@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
+import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
@@ -27,6 +28,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.documentfile.provider.DocumentFile;
+
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
@@ -63,12 +65,21 @@ public class ImagesImportDialog {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.images_import_dialog);
         dialog.setCancelable(false);//So it doesn't close when clicking outside or back button
+        EditText etImageName = dialog.findViewById(R.id.etImageNameImport);
         CheckBox cbUseModDate = dialog.findViewById(R.id.cbUseModDate);
-        final String[] fileName = {file.getName()};
-        long lastModifiedTime = file.lastModified();
+        final String[] fileName = {""};
+        long lastModifiedTime = 0;
+        if (file != null) {
+            fileName[0] = file.getName();
+            etImageName.setText(fileName[0]);
+            lastModifiedTime = file.lastModified();
+        }else{
+            cbUseModDate.setVisibility(GONE);
+            etImageName.setText("----");
+        }
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss", Locale.getDefault());
         String dateString = dateFormat.format(lastModifiedTime);
-        cbUseModDate.setText(context.getString(R.string.cb_use_mod_date)+": "+dateString);
+        cbUseModDate.setText(context.getString(R.string.cb_use_mod_date) + ": " + dateString);
         List<ImageView> imageViewList = new ArrayList<>();
 
         LinearLayout layoutSelected = dialog.findViewById(R.id.lyMultipleImagesImport);
@@ -97,10 +108,8 @@ public class ImagesImportDialog {
         Button btnOkWriteTag = dialog.findViewById(R.id.btnOkWriteTagImport);
         Button btnAddImages = dialog.findViewById(R.id.btnAddImagesImport);
 
-        //EditText Image Name
-        EditText etImageName = dialog.findViewById(R.id.etImageNameImport);
 
-        etImageName.setText(fileName[0]);
+
 
         final boolean[] editingName = {false};
         boolean[] editingTags = {false};
@@ -128,7 +137,7 @@ public class ImagesImportDialog {
         });
 
 
-        //        //Autocomplete text view Text Write tag
+        //Autocomplete text view Text Write tag
         AutoCompleteTextView autoCAddTag = dialog.findViewById(R.id.etWriteTagImport);
         List<String> availableTotalTags = new ArrayList<>(tagsHash);
         List<String> availableTotalTagsSpinner = new ArrayList<>();
@@ -246,7 +255,7 @@ public class ImagesImportDialog {
                     if (editingName[0]) {
                         if (maxIndex > 1) {
                             String formattedIndex = String.format(formatString, nameIndex);
-                            gbcImageToAdd.setName(fileName[0] + "_" + formattedIndex);
+                            gbcImageToAdd.setName(fileName[0] + " " + formattedIndex);
                         } else {
                             gbcImageToAdd.setName(fileName[0]);
                         }

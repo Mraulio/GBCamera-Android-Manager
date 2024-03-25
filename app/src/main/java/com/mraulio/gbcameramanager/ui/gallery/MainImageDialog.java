@@ -57,12 +57,13 @@ import com.mraulio.gbcameramanager.ui.usbserial.PrintOverArduino;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class MainImageDialog {
+public class MainImageDialog implements SerialInputOutputManager.Listener {
 
     private boolean crop;
     private boolean keepFrame;
@@ -168,7 +169,7 @@ public class MainImageDialog {
                     } else {//Touching left part of the screen outside dialog
                         if (position == 0 && currentPage != 0) {
                             prevPage();
-                            newPosition = MainActivity.imagesPage-1;
+                            newPosition = MainActivity.imagesPage - 1;
                             //We are at the end of the current page.
                         } else {
                             newPosition = position - 1;
@@ -643,7 +644,29 @@ public class MainImageDialog {
             Toast.makeText(context, "Error in connect." + e.toString(), Toast.LENGTH_SHORT).show();
         }
 
-        usbIoManager = new SerialInputOutputManager(port, (SerialInputOutputManager.Listener) this);
+        usbIoManager = new SerialInputOutputManager(port, this );
+    }
+
+    @Override
+    public void onNewData(byte[] data) {
+        BigInteger bigInt = new BigInteger(1, data);
+        String hexString = bigInt.toString(16);
+        // Make sure the string is of pair length
+        if (hexString.length() % 2 != 0) {
+            hexString = "0" + hexString;
+        }
+        // Format the string in 2 chars blocks
+        hexString = String.format("%0" + (hexString.length() + hexString.length() % 2) + "X", new BigInteger(hexString, 16));
+        hexString = hexString.replaceAll("..", "$0 ");//To separate with spaces every hex byte
+        String finalHexString = hexString;
+       activity.runOnUiThread(() -> {
+            tvResponseBytes.append(finalHexString);
+        });
+    }
+
+    @Override
+    public void onRunError(Exception e) {
+
     }
 }
 

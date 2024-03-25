@@ -535,6 +535,7 @@ public class FramesFragment extends Fragment {
                     }
                 }
             }
+
             holder.txtTitle.setText(gbcFrame != null ? name : context.getResources().getString(R.string.as_imported_frame));
             if (gbcFrame != null) {
                 holder.imageItem.setImageBitmap(image);

@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager;
 
 import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
+import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 

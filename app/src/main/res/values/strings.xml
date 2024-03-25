@@ -3,7 +3,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">GBCamera Manager</string>
-    <string name="nav_header_subtitle">https://github.com/Mraulio</string>
+    <string name="nav_header_subtitle">Github</string>
+    <string name="nav_header_wiki">Wiki</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -167,6 +168,9 @@
     <string name="print_paper_btn">Print</string>
     <string name="custom_paper_color">Custom Paper color:</string>
 
+
+    <!--NEW STRINGS-->
+
     <string name="stitch">Stitch</string>
     <string name="stitch_bottom">Stitch Bottom</string>
     <string name="stitch_right">Stitch Right</string>
@@ -222,6 +226,8 @@
     <string name="sp_new_frame_group">New Frame Group</string>
     <string name="et_palette_id">Set Palette Id</string>
     <string name="btn_realod_anim">Reload</string>
+    <string name="toast_first_image">This is the first image</string>
+    <string name="toast_last_image">This is the last image</string>
 
 
 </resources>

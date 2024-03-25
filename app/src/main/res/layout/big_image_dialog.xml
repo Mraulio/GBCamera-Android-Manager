@@ -23,19 +23,11 @@
             android:singleLine="true"
             android:textSize="20dp"></EditText>
 
-        <LinearLayout
-            android:id="@+id/lySingleImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
+            <com.mraulio.gbcameramanager.utils.TouchImageView
                 android:id="@+id/imageView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:scaleType="fitStart" />
-        </LinearLayout>
+                android:layout_height="wrap_content" />
+
 
         <HorizontalScrollView
             android:id="@+id/hSVMultipleImages"
@@ -168,12 +160,12 @@
             android:visibility="gone">
 
             <TextView
-                android:layout_marginHorizontal="20dp"
                 android:id="@+id/tvMetadata"
-                android:textIsSelectable="true"
-                android:textSize="18sp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:textIsSelectable="true"
+                android:textSize="18sp">
 
             </TextView>
         </LinearLayout>

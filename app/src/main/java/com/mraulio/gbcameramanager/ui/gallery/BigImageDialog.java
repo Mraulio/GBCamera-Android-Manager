@@ -41,6 +41,7 @@ import android.widget.TextView;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.utils.TouchImageView;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.text.SimpleDateFormat;
@@ -79,8 +80,8 @@ public class BigImageDialog {
         lp.copyFrom(dialog.getWindow().getAttributes());
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-
-        ImageView imageView = dialog.findViewById(R.id.imageView);
+        TouchImageView imageView = dialog.findViewById(R.id.imageView);
+        imageView.setMaxZoom(5);
         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false));
         Button btnOkWriteTag = dialog.findViewById(R.id.btnOkWriteTag);
         RadioButton rbEditTags = dialog.findViewById(R.id.rbEditTags);
@@ -157,13 +158,13 @@ public class BigImageDialog {
         });
 
 
-        imageView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                v.getParent().requestDisallowInterceptTouchEvent(true);
-                return false;
-            }
-        });
+//        imageView.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                v.getParent().requestDisallowInterceptTouchEvent(true);
+//                return false;
+//            }
+//        });
 
         TextView tvCreationDate = dialog.findViewById(R.id.tvMetadata);
         StringBuilder stringBuilder = new StringBuilder();
@@ -216,6 +217,7 @@ public class BigImageDialog {
         rbMisc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 if (!rbMiscWasSelected[0]) {
                     rbMiscWasSelected[0] = true;
                     rbEditWasSelected[0] = false;

@@ -4,7 +4,8 @@
     <string name="navigation_drawer_open">Navigation öffnen</string>
     <string name="navigation_drawer_close">Navigation schließen</string>
     <string name="nav_header_title">GBCamera Manager</string>
-    <string name="nav_header_subtitle">https://github.com/Mraulio</string>
+    <string name="nav_header_subtitle">Github</string>
+    <string name="nav_header_wiki">Wiki</string>
     <string name="nav_header_desc">Navigation</string>
     <string name="action_settings">Einstellungen</string>
 

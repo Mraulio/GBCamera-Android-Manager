@@ -22,6 +22,8 @@ import android.os.Bundle;
 import android.os.LocaleList;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -208,6 +210,37 @@ public class MainActivity extends AppCompatActivity {
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+
+        View headerView = navigationView.getHeaderView(0);
+        TextView tvGit = headerView.findViewById(R.id.tvGit);
+        TextView tvWiki = headerView.findViewById(R.id.tvWiki);
+
+        tvGit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String wikiUrl = "https://github.com/Mraulio/GBCamera-Android-Manager";
+
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(wikiUrl));
+
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+        });
+
+        tvWiki.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String gitUrl = "https://github.com/Mraulio/GBCamera-Android-Manager/wiki";
+
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(gitUrl));
+
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+        });
+
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         fab = binding.appBarMain.fab;
         fab.hide();

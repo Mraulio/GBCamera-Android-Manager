@@ -38,6 +38,7 @@ import com.mraulio.gbcameramanager.utils.Utils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -262,7 +263,7 @@ public class ImagesImportDialog {
                         nameIndex++;
                     }
                     if (editingTags[0]) {
-                        List<String> tagsToSave = new ArrayList<>(tempTags);//So it doesn't follow the temptags if I select another
+                        HashSet<String> tagsToSave = new HashSet<>(tempTags);//So it doesn't follow the temptags if I select another
                         gbcImageToAdd.setTags(tagsToSave);
                     }
                 }

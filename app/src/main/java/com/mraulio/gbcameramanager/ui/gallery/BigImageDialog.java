@@ -57,7 +57,7 @@ public class BigImageDialog {
     Context context;
     Activity activity;
     boolean hideAllMultipleImage;
-    List<String> removedTags = new ArrayList<>();
+    HashSet<String> removedTags = new HashSet<>();
 
     public BigImageDialog(List<GbcImage> filteredGbcImages, Context context, Activity activity) {
         this.filteredGbcImages = filteredGbcImages;
@@ -320,7 +320,7 @@ public class BigImageDialog {
                     } else {
                         previousImageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
                     }
-                    List<String> tagsToSave = new ArrayList<>(tempTags);//So it doesn't follow the temptags if I select another
+                    HashSet<String> tagsToSave = new HashSet<>(tempTags);//So it doesn't follow the temptags if I select another
                     gbcImageToUpdate.setTags(tagsToSave);
                 }
 
@@ -378,11 +378,11 @@ public class BigImageDialog {
         final HashSet<String>[] originalTags = new HashSet[]{new HashSet<>()};
         for (Integer imageIndex : selectedImages) {
             GbcImage gbcImage = filteredGbcImages.get(imageIndex);
-            List<String> tags = gbcImage.getTags();
+            HashSet<String> tags = gbcImage.getTags();
             originalTags[0].addAll(tags);
         }
 
-        List<String> tempTags = new ArrayList<>();
+        HashSet<String> tempTags = new HashSet<>();
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(dialog.getWindow().getAttributes());
@@ -582,7 +582,14 @@ public class BigImageDialog {
                         } else {
                             previousImageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
                         }
-                        List<String> tagsToSave = new ArrayList<>(tempTags);//So it doesn't follow the temptags if I select another
+                        HashSet<String> tagsToSave = new HashSet<>();//So it doesn't follow the temptags if I select another
+                        tagsToSave.addAll(gbcImageToUpdate.getTags());//Add all previous tags from the image
+                        tagsToSave.addAll(tempTags);//Add all the new tags
+                        for (String st : removedTags) {
+                            if (tagsToSave.contains(st)){
+                                tagsToSave.remove(st);//Remove the deselected tags
+                            }
+                        }
                         gbcImageToUpdate.setTags(tagsToSave);
                     }
 
@@ -674,7 +681,7 @@ public class BigImageDialog {
      *
      * @param tag
      */
-    private void createTagCheckBoxMultipleImages(String tag, LinearLayout tagsLayout, List<String> tempTags, boolean[] editingTags, Button btnUpdateImages, boolean autoCheck) {
+    private void createTagCheckBoxMultipleImages(String tag, LinearLayout tagsLayout, HashSet<String> tempTags, boolean[] editingTags, Button btnUpdateImages, boolean autoCheck) {
         CheckBox tagCb = new CheckBox(context);
         if (autoCheck) {
             tagCb.setButtonDrawable(android.R.drawable.checkbox_on_background);
@@ -709,22 +716,14 @@ public class BigImageDialog {
                     tagCb.setButtonDrawable(android.R.drawable.checkbox_off_background);
                 }
                 editingTags[0] = true;
-//                editingTags[0] = compareTags(originalTags, tempTags);
-//                if (editingTags[0]) {
-//                    tagsLayout.setBackgroundColor(context.getColor(R.color.update_image_color));
-//                } else {
-//                    tagsLayout.setBackgroundColor(context.getColor(R.color.white));
-//                }
-//                if (editingTags[0] || editingName) {
-//                    btnUpdateImages.setEnabled(true);
-//                } else
+
                 btnUpdateImages.setEnabled(true);
             }
         });
         tagsLayout.addView(tagCb);
     }
 
-    private boolean checkIfTagsHide(List<String> filteredTags, List<String> removedTags) {
+    private boolean checkIfTagsHide(List<String> filteredTags, HashSet<String> removedTags) {
         boolean hideBool = false;
         for (String tag : filteredTags) {
             if (removedTags.contains(tag))

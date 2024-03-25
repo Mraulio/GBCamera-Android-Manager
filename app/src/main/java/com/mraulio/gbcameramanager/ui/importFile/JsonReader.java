@@ -121,7 +121,7 @@ public class JsonReader {
                     gbcImage.setName(imageJson.getString("title"));
                     JSONArray tagsArray = imageJson.getJSONArray("tags");
                     if (tagsArray.length() > 0) {
-                        List<String> tagsStrings = new ArrayList<>();
+                        HashSet<String> tagsStrings = new HashSet<>();
                         for (int j = 0; j < tagsArray.length(); j++) {
                             String str = tagsArray.getString(j);
                             tagsStrings.add(str);

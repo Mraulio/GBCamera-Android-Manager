@@ -5,10 +5,9 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 @Entity
 public class GbcImage {
@@ -45,7 +44,7 @@ public class GbcImage {
     private Date creationDate;
 
     @ColumnInfo(name = "tags_list")
-    private List<String> tags = new ArrayList<>();
+    private HashSet<String> tags = new HashSet<>();
 
     public String getFramePaletteId() {
         return framePaletteId;
@@ -130,11 +129,11 @@ public class GbcImage {
         this.lockFrame = lockFrame;
     }
 
-    public List<String> getTags() {
+    public HashSet<String> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(HashSet<String> tags) {
         this.tags = tags;
     }
 

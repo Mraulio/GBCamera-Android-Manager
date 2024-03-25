@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -77,5 +78,21 @@ public class TypeConverters {
             return null;
         }
         return new Gson().toJson(map);
+    }
+
+    @TypeConverter
+    public static HashSet<String> tagsFromString(String value) {
+        if (value == null) {
+            return null;
+        }
+        return new Gson().fromJson(value, HashSet.class);
+    }
+
+    @TypeConverter
+    public static String fromHashSet(HashSet<String> set) {
+        if (set == null) {
+            return null;
+        }
+        return new Gson().toJson(set);
     }
 }

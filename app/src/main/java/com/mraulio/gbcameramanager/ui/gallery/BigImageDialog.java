@@ -21,7 +21,6 @@ import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -375,7 +374,6 @@ public class BigImageDialog {
             layoutSelected.addView(imageViewMini);
 
         }
-
 
         final HashSet<String>[] originalTags = new HashSet[]{new HashSet<>()};
         for (Integer imageIndex : selectedImages) {

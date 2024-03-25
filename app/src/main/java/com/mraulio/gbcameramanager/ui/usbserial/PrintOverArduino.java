@@ -208,7 +208,7 @@ public class PrintOverArduino {
                     }
                     //Wait 14s between each print. Can play with this number
                     try {
-                        Thread.sleep(14000);
+                        Thread.sleep(16000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

@@ -43,6 +43,11 @@
         android:title="@string/json_backup_item"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_clone"
+        android:orderInCategory="100"
+        android:title="@string/action_duplicate"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_delete"
         android:orderInCategory="100"
         android:title="@string/delete"

@@ -298,7 +298,7 @@ public class ImportFragment extends Fragment {
                                     }
                                 }
                                 if (newGbcImages.size() > 0) {
-                                    SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, listNewBitmaps, getContext(), tvFileName, numImagesAdded);
+                                    SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, listNewBitmaps, getContext(), tvFileName, numImagesAdded, null);
                                     saveImageAsyncTask.execute();
                                     retrieveTags(gbcImagesList);
                                 } else {

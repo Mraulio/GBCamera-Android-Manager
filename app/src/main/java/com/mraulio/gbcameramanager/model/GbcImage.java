@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 @Entity
-public class GbcImage {
+public class GbcImage implements Cloneable{
 
     @PrimaryKey
     @NonNull
@@ -86,6 +86,15 @@ public class GbcImage {
         this.invertFramePalette = false;
         this.creationDate = new Date(System.currentTimeMillis());
         this.rotation = 0;
+    }
+
+    @Override
+    public GbcImage clone() {
+        try {
+            return (GbcImage) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
     public int getRotation() {

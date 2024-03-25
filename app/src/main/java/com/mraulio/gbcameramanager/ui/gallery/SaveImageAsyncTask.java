@@ -18,8 +18,6 @@ import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
 
 public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
     List<GbcImage> gbcImagesList;
@@ -27,13 +25,15 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
     Context context;
     TextView tvFileName;
     int numImagesAdded;
+    CustomGridViewAdapterImage customGridViewAdapterImage;
 
-    public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<Bitmap> bitmapList, Context context, TextView tvFileName, int numImagesAdded) {
+    public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<Bitmap> bitmapList, Context context, TextView tvFileName, int numImagesAdded, CustomGridViewAdapterImage customGridViewAdapterImage) {
         this.gbcImagesList = gbcImagesList;
         this.bitmapList = bitmapList;
         this.context = context;
         this.tvFileName = tvFileName;
         this.numImagesAdded = numImagesAdded;
+        this.customGridViewAdapterImage = customGridViewAdapterImage;
     }
 
     @Override
@@ -68,10 +68,13 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        tvFileName.setText(numImagesAdded + context.getString(R.string.done_adding_images));
+        if (tvFileName != null) {
+            tvFileName.setText(numImagesAdded + context.getString(R.string.done_adding_images));
+        }
         retrieveTags(gbcImagesList);
         checkSorting();
+        GalleryFragment gf = new GalleryFragment();
+        gf.updateFromMain();
         Utils.toast(context, context.getString(R.string.images_added) + numImagesAdded);
     }
 }
-

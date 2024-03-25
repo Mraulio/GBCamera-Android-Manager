@@ -14,6 +14,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.stitchImages;
 
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.getSelectedTags;
+import static com.mraulio.gbcameramanager.utils.Utils.imageBitmapCache;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
@@ -61,6 +62,7 @@ import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcImage;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -75,6 +77,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -397,7 +400,7 @@ public class GalleryFragment extends Fragment {
                     List<Integer> indexesToLoad = new ArrayList<>();
                     for (int i : selectedImages) {
                         String hashCode = filteredGbcImages.get(i).getHashCode();
-                        if (Utils.imageBitmapCache.get(hashCode) == null) {
+                        if (imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
                         }
                         stitchGbcImage.add(filteredGbcImages.get(i));
@@ -439,7 +442,7 @@ public class GalleryFragment extends Fragment {
                             gridViewStitch.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, stitchGbcImage, stitchBitmapList, false, false, false, null));
 
                             for (int i : selectedImages) {
-                                Bitmap image = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                                Bitmap image = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
 //                                image = rotateBitmap(image, (filteredGbcImages.get(i)));//Not rotating them now
                                 stitchBitmapList.add(image);
                             }
@@ -461,6 +464,40 @@ public class GalleryFragment extends Fragment {
                     Utils.toast(getContext(), getString(R.string.no_selected));
                 return true;
 
+            case R.id.action_clone:
+                if (selectionMode[0]) {
+                    List<GbcImage> gbcImagesToClone = new ArrayList<>();
+                    Collections.sort(selectedImages);
+                    for (int i : selectedImages) {
+                        gbcImagesToClone.add(filteredGbcImages.get(i));
+                    }
+                    List<GbcImage> clonedImages = new ArrayList<>();
+                    List<Bitmap> clonedBitmaps = new ArrayList<>();
+                    for (GbcImage gbcImage : gbcImagesToClone) {
+                        GbcImage clonedImage = gbcImage.clone();
+                        long timeMs = System.currentTimeMillis();
+                        String timeString = String.valueOf(timeMs);
+                        String lastFiveDigits = timeString.substring(Math.max(0, timeString.length() - 5));
+                        String phrase = "clone" + lastFiveDigits;
+                        String name = new String(gbcImage.getName());
+                        name += "-clone";
+                        StringBuilder modifiedString = new StringBuilder(gbcImage.getHashCode());
+                        clonedImage.setName(name);
+                        modifiedString.replace(54, 64, phrase);
+                        String clonedHash = modifiedString.toString();
+                        clonedImage.setHashCode(clonedHash);
+                        HashSet tags = new HashSet(clonedImage.getTags());
+                        tags.add("Cloned");
+                        clonedImage.setTags(tags);
+                        clonedImages.add(clonedImage);
+                        Bitmap originalBitmap = imageBitmapCache.get(gbcImage.getHashCode());
+                        Bitmap clonedBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
+                        clonedBitmaps.add(clonedBitmap);
+                    }
+                    new SaveImageAsyncTask(clonedImages, clonedBitmaps, getContext(), null, 0, customGridViewAdapterImage).execute();
+                }
+                return true;
+
             case R.id.action_delete:
                 if (!selectedImages.isEmpty()) {
                     Collections.sort(selectedImages);
@@ -475,7 +512,7 @@ public class GalleryFragment extends Fragment {
                     List<Integer> indexesToLoad = new ArrayList<>();
                     for (int i : selectedImages) {
                         String hashCode = filteredGbcImages.get(i).getHashCode();
-                        if (Utils.imageBitmapCache.get(hashCode) == null) {
+                        if (imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
                         }
                         deleteGbcImage.add(filteredGbcImages.get(i));
@@ -499,7 +536,7 @@ public class GalleryFragment extends Fragment {
                         @Override
                         public void onTaskComplete(Result result) {
                             for (int i : selectedImages) {
-                                deleteBitmapList.add(Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
+                                deleteBitmapList.add(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
                             }
                             deleteImageGridView.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, deleteGbcImage, deleteBitmapList, false, false, false, null));
                             builder.setView(deleteImageGridView);
@@ -539,7 +576,7 @@ public class GalleryFragment extends Fragment {
                     List<Integer> indexesToLoad = new ArrayList<>();
                     for (int i : selectedImages) {
                         String hashCode = filteredGbcImages.get(i).getHashCode();
-                        if (Utils.imageBitmapCache.get(hashCode) == null) {
+                        if (imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
                         }
                     }
@@ -595,7 +632,7 @@ public class GalleryFragment extends Fragment {
                             List<Bitmap> listBitmaps = new ArrayList<>();
 
                             for (int i : selectedImages) {
-                                Bitmap image = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                                Bitmap image = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
                                 image = rotateBitmap(image, (filteredGbcImages.get(i)));
                                 listBitmaps.add(image);
 
@@ -707,7 +744,7 @@ public class GalleryFragment extends Fragment {
                     List<Integer> indexesToLoad = new ArrayList<>();
                     for (int i : selectedImages) {
                         String hashCode = filteredGbcImages.get(i).getHashCode();
-                        if (Utils.imageBitmapCache.get(hashCode) == null) {
+                        if (imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
                         }
                     }
@@ -729,7 +766,7 @@ public class GalleryFragment extends Fragment {
                                     listInUse[0] = selectedImages;
                                 }
                                 for (int i : listInUse[0]) {
-                                    Bitmap bitmap = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                                    Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
                                     bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
                                     bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false));
                                 }
@@ -760,7 +797,7 @@ public class GalleryFragment extends Fragment {
                         List<Bitmap> bitmapList = new ArrayList<Bitmap>();
 
                         for (int i : selectedImages) {
-                            Bitmap bitmap = Utils.imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                            Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
                             bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
                             bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false));
                         }
@@ -794,7 +831,7 @@ public class GalleryFragment extends Fragment {
                     List<Integer> indexesToLoad = new ArrayList<>();
                     for (int i : selectedImages) {
                         String hashCode = filteredGbcImages.get(i).getHashCode();
-                        if (Utils.imageBitmapCache.get(hashCode) == null) {
+                        if (imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
                         }
                     }
@@ -1024,7 +1061,6 @@ public class GalleryFragment extends Fragment {
     }
 
 
-
     public void updateFromMain() {
         if (Utils.gbcImagesList.size() > 0) {
             retrieveTags(gbcImagesList);
@@ -1086,7 +1122,7 @@ public class GalleryFragment extends Fragment {
                 boolean doAsync = false;
                 //The bitmaps come from the BitmapCache map, using the gbcimage hashcode
                 for (GbcImage gbcImage : filteredGbcImages.subList(startIndex, endIndex)) {
-                    if (!Utils.imageBitmapCache.containsKey(gbcImage.getHashCode())) {
+                    if (!imageBitmapCache.containsKey(gbcImage.getHashCode())) {
                         doAsync = true;
                     }
                 }
@@ -1096,7 +1132,7 @@ public class GalleryFragment extends Fragment {
                 } else {
                     List<Bitmap> bitmapList = new ArrayList<>();
                     for (GbcImage gbcImage : filteredGbcImages.subList(startIndex, endIndex)) {
-                        bitmapList.add(Utils.imageBitmapCache.get(gbcImage.getHashCode()));
+                        bitmapList.add(imageBitmapCache.get(gbcImage.getHashCode()));
                     }
                     customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, filteredGbcImages.subList(startIndex, endIndex), bitmapList, false, false, true, selectedImages);
                     gridView.setAdapter(customGridViewAdapterImage);

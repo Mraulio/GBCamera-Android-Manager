@@ -267,7 +267,7 @@ public class ImagesImportDialog {
                         gbcImageToAdd.setTags(tagsToSave);
                     }
                 }
-                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded);
+                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded,null);
                 saveImageAsyncTask.execute();
 
                 dialog.dismiss();

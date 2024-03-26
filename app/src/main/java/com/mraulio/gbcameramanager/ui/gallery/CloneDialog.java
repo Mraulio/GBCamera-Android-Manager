@@ -85,8 +85,7 @@ public class CloneDialog {
                     modifiedString.append("clonedBadLength" + timeString);
                 }
                 String clonedHash = modifiedString.toString();
-                System.out.println(clonedHash);
-                System.out.println("---");
+
                 clonedImage.setHashCode(clonedHash);
 
                 HashSet tags = new HashSet(clonedImage.getTags());

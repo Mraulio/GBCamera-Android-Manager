@@ -215,7 +215,7 @@ public class GalleryFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 if (!selectionMode[0]) {
-                    MainImageDialog mainImageDialog = new MainImageDialog(selectionMode[0], gridView, crop, keepFrame, currentPage, lastPage, position,
+                    MainImageDialog mainImageDialog = new MainImageDialog(selectionMode[0], gridView, keepFrame, currentPage, lastPage, position,
                             itemsPerPage, filteredGbcImages, lastSeenGalleryImage, getContext(), displayMetrics, showPalettes, getActivity(),
                             port, usbIoManager, tvResponseBytes, connection, tv, manager, null, null);
                     mainImageDialog.showImageDialog();
@@ -336,7 +336,7 @@ public class GalleryFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.action_multi_edit:
                 if (selectionMode[0] && selectedImages.size() > 1) {
-                    MainImageDialog mainImageDialog = new MainImageDialog(selectionMode[0], gridView, crop, keepFrame, currentPage, lastPage, 0,
+                    MainImageDialog mainImageDialog = new MainImageDialog(selectionMode[0], gridView, keepFrame, currentPage, lastPage, 0,
                             itemsPerPage, filteredGbcImages, lastSeenGalleryImage, getContext(), displayMetrics, showPalettes, getActivity(),
                             port, usbIoManager, tvResponseBytes, connection, tv, manager, selectedImages, customGridViewAdapterImage);
                     mainImageDialog.showImageDialog();

@@ -72,7 +72,6 @@ import javax.xml.transform.Result;
 
 public class MainImageDialog implements SerialInputOutputManager.Listener {
 
-    private boolean crop;
     private boolean keepFrame;
     private int currentPage;
     private int lastPage;
@@ -97,13 +96,12 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     private int imageViewMiniIndex = 0;
     final int[] globalImageIndex = new int[1];
     static int newPosition;
-    public MainImageDialog(boolean multiEdition, GridView gridView, boolean crop, boolean keepFrame, int currentPage, int lastPage, int position, int itemsPerPage,
+    public MainImageDialog(boolean multiEdition, GridView gridView, boolean keepFrame, int currentPage, int lastPage, int position, int itemsPerPage,
                            List<GbcImage> filteredGbcImages, int lastSeenGalleryImage, Context context, DisplayMetrics displayMetrics,
                            boolean showPalettes, Activity activity, UsbSerialPort port, SerialInputOutputManager usbIoManager,
                            TextView tvResponseBytes, UsbDeviceConnection connection, TextView tv, UsbManager manager, List<Integer> selectedImages, CustomGridViewAdapterImage customGridViewAdapterImage) {
         this.multiEdition = multiEdition;
         this.gridView = gridView;
-        this.crop = crop;
         this.keepFrame = keepFrame;
         this.currentPage = currentPage;
         this.lastPage = lastPage;
@@ -127,7 +125,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
     public void showImageDialog() {
         if (!multiEdition) {
-            crop = false;
             keepFrame = false;
             //Obtain selected image
             int globalImageIndex;
@@ -299,15 +296,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }
-            });
-            cbCrop.setOnClickListener(v ->
-
-            {
-                if (!crop) {
-                    crop = true;
-                } else {
-                    crop = false;
                 }
             });
 
@@ -628,7 +616,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 //                            Bitmap sharedBitmap = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                     List sharedList = new ArrayList();
                     sharedList.add(sharedImage);
-                    shareImage(sharedList, context);
+                    shareImage(sharedList, context, cbCrop.isChecked());
                 }
             });
             saveButton.setOnClickListener(new View.OnClickListener() {
@@ -636,7 +624,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 public void onClick(View v) {
                     List saveList = new ArrayList();
                     saveList.add(filteredGbcImages.get(globalImageIndex));
-                    saveImage(saveList, context);
+                    saveImage(saveList, context,cbCrop.isChecked());
                 }
             });
 
@@ -672,7 +660,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 public void onTaskComplete(Result result) {
                     globalImageIndex[0] = selectedImages.get(0);
 
-                    crop = false;
                     keepFrame = false;
 
                     final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode())};
@@ -864,13 +851,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                         keepFrame = true;
                         cbFrameKeep.setChecked(true);
                     }
-                    cbCrop.setOnClickListener(v -> {
-                        if (!crop) {
-                            crop = true;
-                        } else {
-                            crop = false;
-                        }
-                    });
 
                     if (!keepFrame && filteredGbcImages.get(globalImageIndex[0]).isInvertPalette()) {
                         cbInvert.setChecked(true);
@@ -1150,13 +1130,13 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                 GbcImage gbcImage = filteredGbcImages.get(i);
                                 sharedList.add(gbcImage);
                             }
-                            shareImage(sharedList, context);
+                            shareImage(sharedList, context, cbCrop.isChecked());
                         }
                     });
                     saveButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            saveImage(selectedGbcImages, context);
+                            saveImage(selectedGbcImages, context, cbCrop.isChecked());
                         }
                     });
 

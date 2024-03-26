@@ -82,7 +82,8 @@ import java.util.TreeSet;
 import java.util.zip.Deflater;
 
 public class GalleryUtils {
-    public static void saveImage(List<GbcImage> gbcImages, Context context) {
+    public static void saveImage(List<GbcImage> gbcImages, Context context, boolean crop) {
+        System.out.println(""+crop);
         LocalDateTime now = null;
         Date nowDate = new Date();
         File file = null;
@@ -112,11 +113,11 @@ public class GalleryUtils {
             if (MainActivity.exportPng) {
                 file = new File(Utils.IMAGES_FOLDER, fileName);
 
-                if (image.getHeight() == 144 && image.getWidth() == 160 && GalleryFragment.crop) {
+                if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
                     image = Bitmap.createBitmap(image, 16, 16, 128, 112);
                 }
                 //For the wild frames
-                else if (image.getHeight() == 224 && GalleryFragment.crop) {
+                else if (image.getHeight() == 224 && crop) {
                     image = Bitmap.createBitmap(image, 16, 40, 128, 112);
                 }
                 //Rotate the image
@@ -247,7 +248,7 @@ public class GalleryUtils {
         return sb.toString();
     }
 
-    static void shareImage(List<GbcImage> gbcImages, Context context) {
+    static void shareImage(List<GbcImage> gbcImages, Context context, boolean crop) {
         ArrayList<Uri> imageUris = new ArrayList<>();
         FileOutputStream fileOutputStream = null;
 
@@ -256,11 +257,11 @@ public class GalleryUtils {
                 GbcImage gbcImage = gbcImages.get(i);
                 Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
 
-                if (image.getHeight() == 144 && image.getWidth() == 160 && GalleryFragment.crop) {
+                if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
                     image = Bitmap.createBitmap(image, 16, 16, 128, 112);
                 }
                 //For the wild frames
-                else if (image.getHeight() == 224 && GalleryFragment.crop) {
+                else if (image.getHeight() == 224 && crop) {
                     image = Bitmap.createBitmap(image, 16, 40, 128, 112);
                 }
                 //Rotate the image

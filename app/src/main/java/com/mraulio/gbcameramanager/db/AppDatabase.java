@@ -1,6 +1,5 @@
 package com.mraulio.gbcameramanager.db;
 
-import androidx.room.AutoMigration;
 import androidx.room.Database;
 import androidx.room.RoomDatabase;
 

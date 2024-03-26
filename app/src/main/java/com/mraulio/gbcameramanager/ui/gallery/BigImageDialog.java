@@ -723,7 +723,7 @@ public class BigImageDialog {
         tagsLayout.addView(tagCb);
     }
 
-    private boolean checkIfTagsHide(List<String> filteredTags, HashSet<String> removedTags) {
+    private boolean checkIfTagsHide(HashSet<String> filteredTags, HashSet<String> removedTags) {
         boolean hideBool = false;
         for (String tag : filteredTags) {
             if (removedTags.contains(tag))

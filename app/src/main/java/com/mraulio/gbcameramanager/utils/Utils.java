@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.utils;
 
+import static com.mraulio.gbcameramanager.MainActivity.hiddenTags;
 import static com.mraulio.gbcameramanager.MainActivity.selectedTags;
 import static com.mraulio.gbcameramanager.MainActivity.sharedPreferences;
 import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
@@ -84,8 +85,8 @@ public class Utils {
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
     public static final File DB_BACKUP_FOLDER = new File(MAIN_FOLDER, "DB Backup");
 
-    public static final String CHANNEL_ID="gbcam_channel";
-    public static final String CHANNEL_NAME="GBCAM Channel";
+    public static final String CHANNEL_ID = "gbcam_channel";
+    public static final String CHANNEL_NAME = "GBCAM Channel";
 
 
     private static final String DB_NAME = "Database";
@@ -160,28 +161,49 @@ public class Utils {
         return tagsHash;
     }
 
-    public static void saveTagsSet(List<String> tagsList) {
+    public static void saveTagsSet(HashSet<String> tagsList, boolean saveAsHiddenTag) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(tagsList);
-        editor.putString("selected_tags", json);
+        if (!saveAsHiddenTag) {
+            editor.putString("selected_tags", json);
+        } else {
+            editor.putString("hidden_tags", json);
+        }
         editor.apply();
     }
 
-    public static ArrayList<String> getSelectedTags() {
+    public static HashSet<String> getSelectedTags() {
         try {
-            ArrayList<String> arrayList;
+            HashSet<String> tagList;
 
             if (!selectedTags.isEmpty()) {
-                arrayList = new Gson().fromJson(selectedTags, new TypeToken<ArrayList<String>>() {
+                tagList = new Gson().fromJson(selectedTags, new TypeToken<HashSet<String>>() {
                 }.getType());
             } else {
-                arrayList = new ArrayList<>();
+                tagList = new HashSet<>();
             }
-            return arrayList;
+            return tagList;
         } catch (Exception e) {
             e.printStackTrace();
-            return new ArrayList<>();
+            return new HashSet<>();
+        }
+    }
+
+    public static HashSet<String> getHiddenTags() {
+        try {
+            HashSet<String> hiddenTagList;
+
+            if (!hiddenTags.isEmpty()) {
+                hiddenTagList = new Gson().fromJson(hiddenTags, new TypeToken<HashSet<String>>() {
+                }.getType());
+            } else {
+                hiddenTagList = new HashSet<>();
+            }
+            return hiddenTagList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new HashSet<>();
         }
     }
 
@@ -505,13 +527,13 @@ public class Utils {
         }
     }
 
-    public static void frameGroupSorting(){
+    public static void frameGroupSorting() {
         List<GbcFrame> sortedFrameList = new ArrayList<>();
 
         List<GbcFrame> sortedFrameGroup = new ArrayList<>();
 
         // Sort each frame group by id and add it to the final list
-        for (String key: frameGroupsNames.keySet()) {
+        for (String key : frameGroupsNames.keySet()) {
             sortedFrameGroup.clear();
             for (GbcFrame gbcFrame : Utils.framesList) {
                 String gbcFrameGroup = gbcFrame.getFrameId().replaceAll("^(\\D+).*", "$1");//To remove the numbers at the end

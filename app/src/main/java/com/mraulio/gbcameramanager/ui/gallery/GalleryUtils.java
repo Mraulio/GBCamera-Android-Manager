@@ -32,6 +32,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StrikethroughSpan;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -541,10 +545,11 @@ public class GalleryUtils {
 
         LinearLayout buttonLayout = dialog.findViewById(R.id.buttonLayout);
 
-        List<String> selectedTags = new ArrayList<>(filterTags);
+        HashSet<String> selectedTags = new HashSet<>(filterTags);
+        HashSet<String> hiddenTags = new HashSet<>();
 
         Iterator<String> tagIterator = hashTags.iterator();
-        updateSelectedTagsText(selectedTagsTextView, selectedTags);
+        updateSelectedTagsText(selectedTagsTextView, selectedTags, hiddenTags);
         List<CheckBox> checkBoxList = new ArrayList<>();
         //Dynamically add checkboxes
         while (tagIterator.hasNext()) {
@@ -568,14 +573,26 @@ public class GalleryUtils {
                         selectedTag = "__filter:favourite__";//Reverse the tag
                     }
                     if (selectedTags.contains(selectedTag)) {
-
                         selectedTags.remove(selectedTag);
-                        updateSelectedTagsText(selectedTagsTextView, selectedTags);
-                        checkBox.setBackgroundColor(context.getResources().getColor(R.color.white));
+                        hiddenTags.add(selectedTag);
+
+                        updateSelectedTagsText(selectedTagsTextView, selectedTags, hiddenTags);
+                        checkBox.setButtonDrawable(android.R.drawable.checkbox_off_background);
+                        checkBox.setBackgroundColor(context.getResources().getColor(R.color.duplicated));
 
                     } else {
-                        selectedTags.add(selectedTag);
-                        updateSelectedTagsText(selectedTagsTextView, selectedTags);
+                        if (hiddenTags.contains(selectedTag)) {
+                            hiddenTags.remove(selectedTag);
+                            checkBox.setButtonDrawable(android.R.drawable.checkbox_off_background);
+
+                            checkBox.setBackgroundColor(context.getResources().getColor(R.color.white));
+
+                        } else {
+                            selectedTags.add(selectedTag);
+                            checkBox.setButtonDrawable(android.R.drawable.checkbox_on_background);
+                            checkBox.setBackgroundColor(context.getResources().getColor(R.color.paper_color_green));
+                        }
+                        updateSelectedTagsText(selectedTagsTextView, selectedTags, hiddenTags);
                         checkBox.setBackgroundColor(context.getResources().getColor(R.color.paper_color_blue));
                     }
                 }
@@ -587,12 +604,12 @@ public class GalleryUtils {
         Button btnClear = dialog.findViewById(R.id.btnClear);
         btnClear.setOnClickListener(v -> {
             selectedTags.clear();
+            hiddenTags.clear();
             for (CheckBox cb : checkBoxList) {
                 cb.setChecked(false);
                 cb.setBackgroundColor(context.getResources().getColor(R.color.white));
-
             }
-            updateSelectedTagsText(selectedTagsTextView, selectedTags);
+            updateSelectedTagsText(selectedTagsTextView, selectedTags, hiddenTags);
 
         });
 
@@ -600,7 +617,8 @@ public class GalleryUtils {
         btnAccept.setOnClickListener(v -> {
 
             filterTags = selectedTags;
-            saveTagsSet(selectedTags);
+            saveTagsSet(selectedTags, false);
+            saveTagsSet(hiddenTags, true);
             editor.putInt("current_page", 0).apply();
             currentPage = 0;
             updateGridView();
@@ -627,7 +645,7 @@ public class GalleryUtils {
                 filterTags.remove(tag);
             }
         }
-        saveTagsSet(filterTags);
+        saveTagsSet(filterTags, false);
     }
 
     /**
@@ -636,7 +654,7 @@ public class GalleryUtils {
      * @param selectedTagsLayout
      * @param selectedTags
      */
-    public static void updateSelectedTagsText(TextView selectedTagsLayout, List<String> selectedTags) {
+    public static void updateSelectedTagsText(TextView selectedTagsLayout, HashSet<String> selectedTags, HashSet<String> notShowingTags) {
         StringBuilder builder = new StringBuilder();
         for (String tag : selectedTags) {
             if (tag.equals("__filter:favourite__")) {
@@ -644,11 +662,23 @@ public class GalleryUtils {
             }
             builder.append(tag).append(", ");
         }
+
+        StringBuilder notShowingTagsSB = new StringBuilder();
+        for (String tag : notShowingTags) {
+            if (tag.equals("__filter:favourite__")) {
+                tag = "Favourite \u2764\ufe0f";
+            }
+            notShowingTagsSB.append(tag).append(", ");
+        }
+        String notShowingString = notShowingTagsSB.toString();
+        SpannableString string = new SpannableString(notShowingString);
+        string.setSpan(new StrikethroughSpan(), 0, notShowingString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         String selectedTagsText = builder.toString();
+        selectedTagsText += string;
         if (!selectedTagsText.isEmpty()) {
             selectedTagsText = selectedTagsText.substring(0, selectedTagsText.length() - 2);
         }
-        selectedTagsLayout.setText(selectedTagsText);
+        selectedTagsLayout.setText(string);
     }
 
     @SuppressLint("NewApi")

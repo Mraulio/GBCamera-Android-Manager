@@ -12,7 +12,9 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.showFilterDial
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.stitchImages;
 
+import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.newPosition;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
+import static com.mraulio.gbcameramanager.utils.Utils.getHiddenTags;
 import static com.mraulio.gbcameramanager.utils.Utils.getSelectedTags;
 import static com.mraulio.gbcameramanager.utils.Utils.imageBitmapCache;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
@@ -93,9 +95,10 @@ public class GalleryFragment extends Fragment {
     public static GridView gridView;
     static AlertDialog loadingDialog;
     static SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
-    static List<String> filterTags = new ArrayList<>();
+    static HashSet<String> filterTags = new HashSet<>();
+    static HashSet<String> hiddenTags = new HashSet<>();
     static List<GbcImage> filteredGbcImages = new ArrayList<>();
-
+    static boolean updatingFromChangeImage = false;
     static List<Integer> selectedImages = new ArrayList<>();
     static StringBuilder sbTitle = new StringBuilder();
     static int itemsPerPage = MainActivity.imagesPage;
@@ -483,9 +486,15 @@ public class GalleryFragment extends Fragment {
                         name += "-clone";
                         StringBuilder modifiedString = new StringBuilder(gbcImage.getHashCode());
                         clonedImage.setName(name);
-                        modifiedString.replace(54, 64, phrase);
+                        try {
+                            modifiedString.replace(modifiedString.length() - 10, modifiedString.length(), phrase);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            modifiedString.append("clonedBadLength" + System.currentTimeMillis());
+                        }
                         String clonedHash = modifiedString.toString();
                         clonedImage.setHashCode(clonedHash);
+
                         HashSet tags = new HashSet(clonedImage.getTags());
                         tags.add("Cloned");
                         clonedImage.setTags(tags);
@@ -1060,12 +1069,12 @@ public class GalleryFragment extends Fragment {
         return dialog;
     }
 
-
     public void updateFromMain() {
         if (Utils.gbcImagesList.size() > 0) {
             retrieveTags(gbcImagesList);
             checkSorting();
             filterTags = getSelectedTags();
+            hiddenTags = getHiddenTags();
             updateGridView();
             updateTitleText();
 
@@ -1081,7 +1090,7 @@ public class GalleryFragment extends Fragment {
         //Bitmap list to store current page bitmaps
         filteredGbcImages = new ArrayList<>();
 
-        if (filterTags.isEmpty()) {
+        if (filterTags.isEmpty() && hiddenTags.isEmpty()) {
             filteredGbcImages = Utils.gbcImagesList;
         } else {
             filteredGbcImages.clear();
@@ -1089,6 +1098,12 @@ public class GalleryFragment extends Fragment {
                 boolean containsAllTags = true;
                 for (String tag : filterTags) {
                     if (!gbcImageToFilter.getTags().contains(tag)) {
+                        containsAllTags = false;
+                        break; //Doesn't keep checking the rest of the tags
+                    }
+                }
+                for (String tag : hiddenTags) {
+                    if (gbcImageToFilter.getTags().contains(tag)) {
                         containsAllTags = false;
                         break; //Doesn't keep checking the rest of the tags
                     }
@@ -1135,6 +1150,10 @@ public class GalleryFragment extends Fragment {
                         bitmapList.add(imageBitmapCache.get(gbcImage.getHashCode()));
                     }
                     customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, filteredGbcImages.subList(startIndex, endIndex), bitmapList, false, false, true, selectedImages);
+                    if (updatingFromChangeImage) {
+                        gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+                        updatingFromChangeImage = false;
+                    }
                     gridView.setAdapter(customGridViewAdapterImage);
                 }
                 tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));

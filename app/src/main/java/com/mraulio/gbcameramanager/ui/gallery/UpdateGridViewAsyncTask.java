@@ -1,5 +1,9 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.gridView;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updatingFromChangeImage;
+import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.newPosition;
+
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
@@ -7,7 +11,6 @@ import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
-import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -41,7 +44,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
                 imageBytes = imageDataDao.getDataByImageId(imageHash);
                 //Set the image bytes to the object
                 gbcImage.setImageBytes(imageBytes);
-                if (gbcImage.getFramePaletteId()==null){
+                if (gbcImage.getFramePaletteId() == null) {
                     gbcImage.setFramePaletteId("bw");
                 }
                 //Create the image bitmap
@@ -56,7 +59,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
                     if ((image.getHeight() == 144 || image.getHeight() == 160) && gbcImage.getFrameId() != null)
-                        image = GalleryFragment.frameChange(gbcImage, gbcImage.getFrameId(),gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(),gbcImage.isLockFrame(),true);
+                        image = GalleryFragment.frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
                     Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                     GalleryFragment.diskCache.put(imageHash, image);
                 } catch (Exception e) {
@@ -70,7 +73,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
         for (GbcImage gbcImage : GalleryFragment.gbcImagesForPage) {
             bitmapList.add(Utils.imageBitmapCache.get(gbcImage.getHashCode()));
         }
-        GalleryFragment.customGridViewAdapterImage = new CustomGridViewAdapterImage(GalleryFragment.gridView.getContext(), R.layout.row_items, GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex), bitmapList, false, false, true, GalleryFragment.selectedImages);
+        GalleryFragment.customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex), bitmapList, false, false, true, GalleryFragment.selectedImages);
         return null;
     }
 
@@ -84,7 +87,12 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         //Notifies the adapter
-        GalleryFragment.gridView.setAdapter(GalleryFragment.customGridViewAdapterImage);
+        gridView.setAdapter(GalleryFragment.customGridViewAdapterImage);
+        if (updatingFromChangeImage) {
+            gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+            updatingFromChangeImage = false;
+        }
         GalleryFragment.loadingDialog.dismiss();
+
     }
 }

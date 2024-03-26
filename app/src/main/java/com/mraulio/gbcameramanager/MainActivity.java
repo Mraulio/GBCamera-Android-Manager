@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static boolean sortDescending = false;
     public static String selectedTags = "";
-
+    public static String hiddenTags = "";
     public static boolean openedFromFile = false;
     boolean openedFromUsb = false;
     public static UsbManager manager;
@@ -143,11 +143,13 @@ public class MainActivity extends AppCompatActivity {
         customColorPaper = sharedPreferences.getInt("custom_paper_color", Color.WHITE);
         exportSquare = sharedPreferences.getBoolean("export_square", false);
         sortMode = sharedPreferences.getString("sort_by_date", SORT_MODE.CREATION_DATE.name());
+
         if (sortMode != null) {
             sortModeEnum = SORT_MODE.valueOf(sortMode);
         }
         sortDescending = sharedPreferences.getBoolean("sort_descending", false);
         selectedTags = sharedPreferences.getString("selected_tags", "");
+        hiddenTags = sharedPreferences.getString("hidden_tags", "");
 
         String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);

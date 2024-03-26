@@ -9,6 +9,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.nextPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.prevPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updatingFromChangeImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.reloadTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.saveImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.shareImage;
@@ -67,6 +68,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import javax.xml.transform.Result;
 
@@ -96,7 +98,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     CustomGridViewAdapterImage customGridViewAdapterImage;
     private int imageViewMiniIndex = 0;
     final int[] globalImageIndex = new int[1];
-
+    static int newPosition;
     public MainImageDialog(boolean multiEdition, GridView gridView, boolean crop, boolean keepFrame, int currentPage, int lastPage, int position, int itemsPerPage,
                            List<GbcImage> filteredGbcImages, int lastSeenGalleryImage, Context context, DisplayMetrics displayMetrics,
                            boolean showPalettes, Activity activity, UsbSerialPort port, SerialInputOutputManager usbIoManager,
@@ -181,11 +183,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                     if (eventHandled) {
                                         return true; //If event already handled, so it doesn't add up
                                     }
-                                    if (x > leftHalf) {
-                                        changeImage(false, dialog, globalImageIndex);
-                                    } else {
-                                        changeImage(true, dialog, globalImageIndex);
-                                    }
+                                    changeImage(!(x > leftHalf), dialog, globalImageIndex);
                                 } else {
                                     dialog.dismiss();
                                 }
@@ -201,14 +199,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 btn_paperize.setVisibility(VISIBLE);
             }
 
-            selectedImage[0] =
-
-                    rotateBitmap(selectedImage[0], filteredGbcImages.get(globalImageIndex));
-            imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0], selectedImage[0].
-
-                    getWidth() * 6, selectedImage[0].
-
-                    getHeight() * 6, false));
+            selectedImage[0] = rotateBitmap(selectedImage[0], filteredGbcImages.get(globalImageIndex));
+            imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0],
+                    selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
             int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
             imageView.setMaxHeight(maxHeight);
 
@@ -1194,42 +1187,45 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
     private void changeImage(boolean prevImage, Dialog dialog, int globalImageIndex) {
         //Touching 2/3 superior part of the exterior of the dialog
-
-        int newPosition;
-
+        boolean updateHere = false; //Because updatingFromChangeImage changes in an asynctask and it's status not to be trusted
         if (!prevImage) {//Touching right part of the screen outside dialog
             if (position == itemsPerPage - 1 && currentPage != lastPage) {
                 //We are at the end of the current page.
                 //Do a nextPage and select first item if possible
-                nextPage();
+                updatingFromChangeImage = true;
+                updateHere = true;
                 newPosition = 0;
-
+                nextPage();
             } else {
                 newPosition = position + 1;
             }
             if (globalImageIndex < filteredGbcImages.size() - 1) {
-                gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+                if (!updateHere) {
+                    gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+                }
                 dialog.dismiss();
             } else {
                 toast(context, context.getString(R.string.toast_last_image));
             }
         } else {//Touching left part of the screen outside dialog
             if (position == 0 && currentPage != 0) {
-                prevPage();
+                updatingFromChangeImage = true;
+                updateHere = true;
                 newPosition = MainActivity.imagesPage - 1;
+                prevPage();
                 //We are at the end of the current page.
             } else {
                 newPosition = position - 1;
             }
             if (globalImageIndex > 0) {
-                gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+                if (!updateHere) {
+                    gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+                }
                 dialog.dismiss();
             } else {
                 toast(context, context.getString(R.string.toast_first_image));
             }
         }
-
-//        return true; // Consumes the event
     }
 
     private void connect() {

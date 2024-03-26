@@ -95,8 +95,8 @@ public class GalleryFragment extends Fragment {
     public static GridView gridView;
     static AlertDialog loadingDialog;
     static SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
-    static HashSet<String> filterTags = new HashSet<>();
-    static HashSet<String> hiddenTags = new HashSet<>();
+    static HashSet<String> selectedFilterTags = new HashSet<>();
+    static HashSet<String> hiddenFilterTags = new HashSet<>();
     static List<GbcImage> filteredGbcImages = new ArrayList<>();
     static boolean updatingFromChangeImage = false;
     static List<Integer> selectedImages = new ArrayList<>();
@@ -319,7 +319,7 @@ public class GalleryFragment extends Fragment {
     }
 
     private static void updateTitleText() {
-        if (!filterTags.isEmpty()) {
+        if (!selectedFilterTags.isEmpty() || !hiddenFilterTags.isEmpty()) {
             sbTitle.append(tv.getContext().getString(R.string.filtered_images) + filteredGbcImages.size());
         } else {
             sbTitle.append(tv.getContext().getString(R.string.total_images) + filteredGbcImages.size());
@@ -1073,8 +1073,8 @@ public class GalleryFragment extends Fragment {
         if (Utils.gbcImagesList.size() > 0) {
             retrieveTags(gbcImagesList);
             checkSorting();
-            filterTags = getSelectedTags();
-            hiddenTags = getHiddenTags();
+            selectedFilterTags = getSelectedTags();
+            hiddenFilterTags = getHiddenTags();
             updateGridView();
             updateTitleText();
 
@@ -1090,19 +1090,19 @@ public class GalleryFragment extends Fragment {
         //Bitmap list to store current page bitmaps
         filteredGbcImages = new ArrayList<>();
 
-        if (filterTags.isEmpty() && hiddenTags.isEmpty()) {
+        if (selectedFilterTags.isEmpty() && hiddenFilterTags.isEmpty()) {
             filteredGbcImages = Utils.gbcImagesList;
         } else {
             filteredGbcImages.clear();
             for (GbcImage gbcImageToFilter : Utils.gbcImagesList) {
                 boolean containsAllTags = true;
-                for (String tag : filterTags) {
+                for (String tag : selectedFilterTags) {
                     if (!gbcImageToFilter.getTags().contains(tag)) {
                         containsAllTags = false;
                         break; //Doesn't keep checking the rest of the tags
                     }
                 }
-                for (String tag : hiddenTags) {
+                for (String tag : hiddenFilterTags) {
                     if (gbcImageToFilter.getTags().contains(tag)) {
                         containsAllTags = false;
                         break; //Doesn't keep checking the rest of the tags

@@ -4,7 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.nextPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.prevPage;
@@ -31,7 +31,6 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.util.DisplayMetrics;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,7 +67,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 import javax.xml.transform.Result;
 
@@ -369,7 +367,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                     iter.remove();
                                 }
                                 filteredGbcImages.get(globalImageIndex).setTags(tags);
-                                if (!filterTags.isEmpty())//Because right now I'm only filtering favourites
+                                if (!selectedFilterTags.isEmpty())//Because right now I'm only filtering favourites
                                     dialog.dismiss();
                                 imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
                             }
@@ -965,10 +963,10 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                     //To save the image with the favorite tag to the database
                                     new UpdateImageAsyncTask(filteredGbcImages.get(i)).execute();
                                 }
-                                if (!filterTags.isEmpty()) {
+                                if (!selectedFilterTags.isEmpty()) {
                                     dialog.dismiss();
                                 }
-                                if (multiEdition && !filterTags.isEmpty()) {
+                                if (multiEdition && !selectedFilterTags.isEmpty()) {
                                     for (int i = indexesToRemove.size(); i > 0; i--) {
                                         filteredGbcImages.remove(indexesToRemove.get(i - 1));
                                     }

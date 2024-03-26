@@ -3,7 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.compareTags;
@@ -605,7 +605,7 @@ public class BigImageDialog {
 
                 //If one of the tags removed from the image is in the tags filtered, clear selected images, hide fab, hide dialog...
 
-                if (checkIfTagsHide(filterTags, removedTags)) {
+                if (checkIfTagsHide(selectedFilterTags, removedTags)) {
                     selectedImages.clear();
                     showEditMenuButton = false;
                     MainActivity.fab.hide();

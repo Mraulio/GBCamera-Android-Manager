@@ -49,7 +49,6 @@ public class JsonReader {
             JSONObject jsonObject = new JSONObject(jsonString);
 
             if (!jsonObject.has("state")) {
-                System.out.println("Not a valid json: 'state'.");
                 return null;
             }
             JSONObject stateObject = jsonObject.getJSONObject("state");
@@ -57,7 +56,6 @@ public class JsonReader {
             if (stateObject.has("palettes")) {
                 JSONArray palettesArray = stateObject.getJSONArray("palettes");
                 if (palettesArray.length() == 0) {
-                    System.out.println("No palettes.");
                     return null;
                 }
                 JSONObject paletteObject = palettesArray.getJSONObject(0);
@@ -66,15 +64,13 @@ public class JsonReader {
                 if (paletteObject.has("shortName") && paletteObject.has("name") && paletteObject.has("palette") && paletteObject.has("origin")) {
                     JSONArray paletteArray = paletteObject.getJSONArray("palette");
 
-                    if (paletteArray.length() == 4) {
-                        System.out.println("JSON has the expected format.");
-                    } else {
-                        System.out.println("Not a 4 element palette.");
+                    if (paletteArray.length() != 4) {
                         return null;
                     }
                     return readerPalettes(palettesArray);
                 } else {
-                    System.out.println("The json doesn't have expected keys.");
+
+                   return null;
                 }
 
             } else if (stateObject.has("frames")) {

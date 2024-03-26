@@ -13,7 +13,6 @@ void setup() {
   digitalWrite(clk, HIGH);
   digitalWrite(TX, LOW);
   Serial.begin(9600);//9600 WORKS. 19200, 38400,57600 DON'T
-  Serial.println("Waiting for data");
 }
 
 void loop() {
@@ -35,7 +34,5 @@ char printing(char byte_sent) { // this function prints bytes to the serial
     delayMicroseconds(30);//double speed mode
   }
   delayMicroseconds(0);//optionnal delay between bytes, may me less than 1490 µs
-//  Serial.println(byte_sent, HEX);
-//  Serial.println(byte_read, HEX);
 return byte_read;
 }

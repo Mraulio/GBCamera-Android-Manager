@@ -296,7 +296,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 }
                 if (newGbcImages.size() > 0) {
                     Uri uri = Uri.fromFile(latestFile);
-                    System.out.println(uri.getPath());
                     DocumentFile documentFile =  DocumentFile.fromFile(latestFile);
                     toast(getContext(),documentFile.getName());
                     ImagesImportDialog imagesImportDialog = new ImagesImportDialog(newGbcImages, listNewBitmaps, documentFile, getContext(), getActivity(), tv, numImagesAdded);

@@ -95,7 +95,6 @@ public class ImageCodec implements Codec {
                 try {
                     baos.write(tileCodec.encode(Bitmap.createBitmap(buf, x, y, TileCodec.TILE_WIDTH, TileCodec.TILE_HEIGHT)));
                 } catch (Exception e) {
-                    System.out.println("Exception: "+e.toString());
                     e.printStackTrace();
                 }
             }

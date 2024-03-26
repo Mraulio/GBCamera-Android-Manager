@@ -8,26 +8,33 @@
         android:id="@+id/tagsTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
         android:gravity="center"
-        android:textSize="25sp"
+        android:padding="8dp"
         android:text="@string/tags_dialog_title"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold"/>
+        android:textSize="25sp"
+        android:textStyle="bold" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center">
+
         <LinearLayout
-            android:layout_marginHorizontal="20dp"
-            android:id="@+id/buttonLayout"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/buttonLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginHorizontal="20dp"
+                android:orientation="vertical"></LinearLayout>
         </LinearLayout>
+
 
     </ScrollView>
 
@@ -35,10 +42,27 @@
         android:id="@+id/selectedTagsTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/listview_back"
+        android:layout_margin="3dp"
+        android:autoSizeMaxTextSize="30sp"
+        android:autoSizeMinTextSize="2sp"
+        android:autoSizeTextType="uniform"
+        android:background="@drawable/border_layout"
+        android:backgroundTint="#9FDDA2"
         android:padding="8dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/hiddenTagsTv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:autoSizeMaxTextSize="30sp"
+        android:autoSizeMinTextSize="2sp"
+        android:autoSizeTextType="uniform"
+        android:background="@drawable/border_layout"
+        android:backgroundTint="#DAA3A3"
+        android:padding="8dp"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -50,10 +74,10 @@
             android:id="@+id/btnClear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/tags_dialog_clear"
-            android:backgroundTint="@color/listview_selected"
             android:layout_marginEnd="10dp"
-            />
+            android:backgroundTint="@color/listview_selected"
+            android:text="@string/tags_dialog_clear" />
+
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
@@ -65,10 +89,9 @@
             android:id="@+id/btnAccept"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="OK"
-            android:backgroundTint="@color/save_color"
             android:layout_marginStart="10dp"
-            />
+            android:backgroundTint="@color/save_color"
+            android:text="OK" />
 
     </LinearLayout>
 </LinearLayout>

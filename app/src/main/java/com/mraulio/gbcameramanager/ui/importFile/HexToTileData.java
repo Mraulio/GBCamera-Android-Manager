@@ -44,8 +44,7 @@ public class HexToTileData {
                                 }
                             } catch (Exception e) {
                                 // DIFFERENT EMPTY DATA PACKAGE??
-                                System.out.println("Exception");
-//                                e.printStackTrace();
+                                e.printStackTrace();
                             }
                         }
                     } else if (line.startsWith("88 33 02")) {

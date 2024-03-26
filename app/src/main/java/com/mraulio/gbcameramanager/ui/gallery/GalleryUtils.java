@@ -7,7 +7,8 @@ import static com.mraulio.gbcameramanager.MainActivity.sortMode;
 import static com.mraulio.gbcameramanager.MainActivity.sortModeEnum;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filterTags;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.hiddenFilterTags;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.ui.gallery.MetadataValues.metadataTexts;
@@ -30,6 +31,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.text.SpannableString;
@@ -46,6 +49,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.ddyos.unicode.exifinterface.UnicodeExifInterface;
@@ -74,6 +78,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.TreeSet;
 import java.util.zip.Deflater;
 
 public class GalleryUtils {
@@ -530,11 +535,21 @@ public class GalleryUtils {
         }
     }
 
+    @SuppressLint("ResourceAsColor")
     public static void showFilterDialog(Context context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View dialogView = inflater.inflate(R.layout.tags_dialog, null);
 
         TextView selectedTagsTextView = dialogView.findViewById(R.id.selectedTagsTextView);
+        TextView hiddenTagsTv = dialogView.findViewById(R.id.hiddenTagsTv);
+
+        Drawable drawableNotSelected = ContextCompat.getDrawable(context, R.drawable.ic_not_selected);
+
+        Drawable drawableHidden = ContextCompat.getDrawable(context, R.drawable.ic_hidden_tag);
+        drawableHidden.setColorFilter(context.getColor(R.color.listview_selected), PorterDuff.Mode.SRC_ATOP);
+
+        Drawable drawableSelected = ContextCompat.getDrawable(context, R.drawable.ic_selected);
+        drawableSelected.setColorFilter(context.getColor(R.color.save_color), PorterDuff.Mode.SRC_ATOP);
 
         Dialog dialog = new Dialog(context);
         dialog.setContentView(dialogView);
@@ -545,24 +560,32 @@ public class GalleryUtils {
 
         LinearLayout buttonLayout = dialog.findViewById(R.id.buttonLayout);
 
-        HashSet<String> selectedTags = new HashSet<>(filterTags);
-        HashSet<String> hiddenTags = new HashSet<>();
+        HashSet<String> selectedTags = new HashSet<>(selectedFilterTags);
+        HashSet<String> hiddenTags = new HashSet<>(hiddenFilterTags);
 
-        Iterator<String> tagIterator = hashTags.iterator();
-        updateSelectedTagsText(selectedTagsTextView, selectedTags, hiddenTags);
+        LinkedHashSet newTagsSetWithTopFavorite = new LinkedHashSet();
+        newTagsSetWithTopFavorite.add("__filter:favourite__"); //adding it in case it doesn't exist, so it appears at the top with the comparator
+        newTagsSetWithTopFavorite.addAll(hashTags);
+        Iterator<String> tagIterator = newTagsSetWithTopFavorite.iterator();
+
+        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags);
         List<CheckBox> checkBoxList = new ArrayList<>();
         //Dynamically add checkboxes
         while (tagIterator.hasNext()) {
 
             String item = tagIterator.next();
             CheckBox checkBox = new CheckBox(context);
+            checkBox.setButtonDrawable(drawableNotSelected);
             if (selectedTags.contains(item)) {
-                checkBox.setBackgroundColor(context.getResources().getColor(R.color.paper_color_blue));
-                checkBox.setChecked(true);
+                checkBox.setButtonDrawable(drawableSelected);
+            } else if (hiddenTags.contains(item)) {
+                checkBox.setButtonDrawable(drawableHidden);
             }
+
             if (item.equals("__filter:favourite__")) {
                 item = "Favourite \u2764\ufe0f";//The heart emoticon
             }
+            checkBox.setCompoundDrawablePadding(10);
             checkBox.setText(item);
             checkBox.setTextSize(20);
             checkBox.setOnClickListener(new View.OnClickListener() {
@@ -576,24 +599,19 @@ public class GalleryUtils {
                         selectedTags.remove(selectedTag);
                         hiddenTags.add(selectedTag);
 
-                        updateSelectedTagsText(selectedTagsTextView, selectedTags, hiddenTags);
-                        checkBox.setButtonDrawable(android.R.drawable.checkbox_off_background);
-                        checkBox.setBackgroundColor(context.getResources().getColor(R.color.duplicated));
+                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags);
+                        checkBox.setButtonDrawable(drawableHidden);
 
                     } else {
                         if (hiddenTags.contains(selectedTag)) {
                             hiddenTags.remove(selectedTag);
-                            checkBox.setButtonDrawable(android.R.drawable.checkbox_off_background);
-
-                            checkBox.setBackgroundColor(context.getResources().getColor(R.color.white));
+                            checkBox.setButtonDrawable(drawableNotSelected);
 
                         } else {
                             selectedTags.add(selectedTag);
-                            checkBox.setButtonDrawable(android.R.drawable.checkbox_on_background);
-                            checkBox.setBackgroundColor(context.getResources().getColor(R.color.paper_color_green));
+                            checkBox.setButtonDrawable(drawableSelected);
                         }
-                        updateSelectedTagsText(selectedTagsTextView, selectedTags, hiddenTags);
-                        checkBox.setBackgroundColor(context.getResources().getColor(R.color.paper_color_blue));
+                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags);
                     }
                 }
             });
@@ -606,17 +624,17 @@ public class GalleryUtils {
             selectedTags.clear();
             hiddenTags.clear();
             for (CheckBox cb : checkBoxList) {
-                cb.setChecked(false);
-                cb.setBackgroundColor(context.getResources().getColor(R.color.white));
+                cb.setButtonDrawable(drawableNotSelected);
             }
-            updateSelectedTagsText(selectedTagsTextView, selectedTags, hiddenTags);
+            updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags);
 
         });
 
         Button btnAccept = dialog.findViewById(R.id.btnAccept);
         btnAccept.setOnClickListener(v -> {
 
-            filterTags = selectedTags;
+            selectedFilterTags = selectedTags;
+            hiddenFilterTags = hiddenTags;
             saveTagsSet(selectedTags, false);
             saveTagsSet(hiddenTags, true);
             editor.putInt("current_page", 0).apply();
@@ -640,27 +658,47 @@ public class GalleryUtils {
     public static void reloadTags() {
         retrieveTags(gbcImagesList);
         //If the list of tags contains a tag that doesn't exist anymore, delete it from the list
-        for (String tag : filterTags) {
+        List<String> selectedTagsToDeleteHolder = new ArrayList<>();
+        List<String> hiddenTagsToDeleteHolder = new ArrayList<>();
+        for (String tag : selectedFilterTags) {
             if (!tagsHash.contains(tag)) {
-                filterTags.remove(tag);
+                selectedTagsToDeleteHolder.add(tag);
             }
         }
-        saveTagsSet(filterTags, false);
+        for (String tag : hiddenFilterTags) {
+            if (!tagsHash.contains(tag)) {
+                hiddenTagsToDeleteHolder.add(tag);
+            }
+        }
+
+        //To not have concurrency
+        for (String st : selectedTagsToDeleteHolder) {
+            if (selectedFilterTags.contains(st)) {
+                selectedFilterTags.remove(st);
+            }
+        }
+        for (String st : hiddenTagsToDeleteHolder) {
+            if (hiddenFilterTags.contains(st)) {
+                hiddenFilterTags.remove(st);
+            }
+        }
+        saveTagsSet(selectedFilterTags, false);
+        saveTagsSet(hiddenFilterTags, true);
     }
 
     /**
      * Updates the textview with the selected tags
      *
-     * @param selectedTagsLayout
+     * @param selectedTagsTv
      * @param selectedTags
      */
-    public static void updateSelectedTagsText(TextView selectedTagsLayout, HashSet<String> selectedTags, HashSet<String> notShowingTags) {
-        StringBuilder builder = new StringBuilder();
+    public static void updateSelectedTagsText(TextView selectedTagsTv, TextView hiddenTagsTV, HashSet<String> selectedTags, HashSet<String> notShowingTags) {
+        StringBuilder selectedTagsBuilder = new StringBuilder();
         for (String tag : selectedTags) {
             if (tag.equals("__filter:favourite__")) {
                 tag = "Favourite \u2764\ufe0f";
             }
-            builder.append(tag).append(", ");
+            selectedTagsBuilder.append(tag).append(", ");
         }
 
         StringBuilder notShowingTagsSB = new StringBuilder();
@@ -671,14 +709,18 @@ public class GalleryUtils {
             notShowingTagsSB.append(tag).append(", ");
         }
         String notShowingString = notShowingTagsSB.toString();
+        if (!notShowingString.isEmpty()) {
+            notShowingString = notShowingString.substring(0, notShowingString.length() - 2);
+        }
         SpannableString string = new SpannableString(notShowingString);
         string.setSpan(new StrikethroughSpan(), 0, notShowingString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        String selectedTagsText = builder.toString();
-        selectedTagsText += string;
+        String selectedTagsText = selectedTagsBuilder.toString();
         if (!selectedTagsText.isEmpty()) {
             selectedTagsText = selectedTagsText.substring(0, selectedTagsText.length() - 2);
         }
-        selectedTagsLayout.setText(string);
+
+        selectedTagsTv.setText(selectedTagsText);
+        hiddenTagsTV.setText(string);
     }
 
     @SuppressLint("NewApi")
@@ -725,5 +767,8 @@ public class GalleryUtils {
         }
         return editingTags;
     }
+
+
+
 
 }

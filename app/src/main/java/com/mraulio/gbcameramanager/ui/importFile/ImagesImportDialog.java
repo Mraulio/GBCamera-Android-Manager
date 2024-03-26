@@ -74,12 +74,15 @@ public class ImagesImportDialog {
             fileName[0] = file.getName();
             etImageName.setText(fileName[0]);
             lastModifiedTime = file.lastModified();
-        }else{
+        } else {
             cbUseModDate.setVisibility(GONE);
             etImageName.setText("----");
         }
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss", Locale.getDefault());
         String dateString = dateFormat.format(lastModifiedTime);
+        if (lastModifiedTime != 0) {
+            cbUseModDate.setChecked(true);
+        }
         cbUseModDate.setText(context.getString(R.string.cb_use_mod_date) + ": " + dateString);
         List<ImageView> imageViewList = new ArrayList<>();
 
@@ -108,8 +111,6 @@ public class ImagesImportDialog {
 
         Button btnOkWriteTag = dialog.findViewById(R.id.btnOkWriteTagImport);
         Button btnAddImages = dialog.findViewById(R.id.btnAddImagesImport);
-
-
 
 
         final boolean[] editingName = {false};
@@ -267,7 +268,7 @@ public class ImagesImportDialog {
                         gbcImageToAdd.setTags(tagsToSave);
                     }
                 }
-                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded,null);
+                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded, null);
                 saveImageAsyncTask.execute();
 
                 dialog.dismiss();

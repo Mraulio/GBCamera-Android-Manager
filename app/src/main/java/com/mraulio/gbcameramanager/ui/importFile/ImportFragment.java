@@ -931,7 +931,6 @@ public class ImportFragment extends Fragment {
                 e.printStackTrace();
             }
         } else if (isImageFile(fileName)) {
-            System.out.println("Reading data");
             fileType = FILE_TYPE.IMAGE;
             finalListImages.clear();
             finalListBitmaps.clear();
@@ -958,11 +957,6 @@ public class ImportFragment extends Fragment {
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                 String hashHex = Utils.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);
-                System.out.println(hashHex);
-//                ImageData imageData = new ImageData();
-//                imageData.setImageId(hashHex);
-//                imageData.setData(imageBytes);
-//                importedImageDatas.add(imageData);
                 gbcImage.setName(fileName);
                 finalListBitmaps.add(bitmap);
                 finalListImages.add(gbcImage);

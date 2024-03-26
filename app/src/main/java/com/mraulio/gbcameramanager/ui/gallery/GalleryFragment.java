@@ -469,41 +469,8 @@ public class GalleryFragment extends Fragment {
 
             case R.id.action_clone:
                 if (selectionMode[0]) {
-                    List<GbcImage> gbcImagesToClone = new ArrayList<>();
-                    Collections.sort(selectedImages);
-                    for (int i : selectedImages) {
-                        gbcImagesToClone.add(filteredGbcImages.get(i));
-                    }
-                    List<GbcImage> clonedImages = new ArrayList<>();
-                    List<Bitmap> clonedBitmaps = new ArrayList<>();
-                    for (GbcImage gbcImage : gbcImagesToClone) {
-                        GbcImage clonedImage = gbcImage.clone();
-                        long timeMs = System.currentTimeMillis();
-                        String timeString = String.valueOf(timeMs);
-                        String lastFiveDigits = timeString.substring(Math.max(0, timeString.length() - 5));
-                        String phrase = "clone" + lastFiveDigits;
-                        String name = new String(gbcImage.getName());
-                        name += "-clone";
-                        StringBuilder modifiedString = new StringBuilder(gbcImage.getHashCode());
-                        clonedImage.setName(name);
-                        try {
-                            modifiedString.replace(modifiedString.length() - 10, modifiedString.length(), phrase);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            modifiedString.append("clonedBadLength" + System.currentTimeMillis());
-                        }
-                        String clonedHash = modifiedString.toString();
-                        clonedImage.setHashCode(clonedHash);
-
-                        HashSet tags = new HashSet(clonedImage.getTags());
-                        tags.add("Cloned");
-                        clonedImage.setTags(tags);
-                        clonedImages.add(clonedImage);
-                        Bitmap originalBitmap = imageBitmapCache.get(gbcImage.getHashCode());
-                        Bitmap clonedBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
-                        clonedBitmaps.add(clonedBitmap);
-                    }
-                    new SaveImageAsyncTask(clonedImages, clonedBitmaps, getContext(), null, 0, customGridViewAdapterImage).execute();
+                    CloneDialog cloneDialog = new CloneDialog(getContext(),selectedImages,customGridViewAdapterImage,filteredGbcImages);
+                    cloneDialog.createCloneDialog();
                 }
                 return true;
 

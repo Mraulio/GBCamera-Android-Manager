@@ -54,7 +54,6 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
             imageData.setData(gbcImage.getImageBytes());
             newImageDatas.add(imageData);
             Utils.gbcImagesList.add(gbcImage);
-            Utils.gbcImagesListHolder.add(gbcImage);
             newGbcImages.add(gbcImage);
             Utils.imageBitmapCache.put(gbcImage.getHashCode(), bitmapList.get(i));
             GalleryFragment.diskCache.put(gbcImage.getHashCode(), bitmapList.get(i));

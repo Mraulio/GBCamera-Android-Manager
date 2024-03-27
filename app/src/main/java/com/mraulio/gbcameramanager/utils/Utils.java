@@ -96,7 +96,6 @@ public class Utils {
     public static LinkedHashMap<String, String> frameGroupsNames = new LinkedHashMap<>();
 
     public static final int[] ROTATION_VALUES = {0, 90, 180, 270};
-    public static List<GbcImage> gbcImagesListHolder = new ArrayList<>();
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
@@ -211,46 +210,6 @@ public class Utils {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
-    public static AlertDialog loadingDialog(Context context, String text) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        LinearLayout layout = new LinearLayout(context);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setGravity(Gravity.CENTER);
-
-        ProgressBar progressBar = new ProgressBar(context);
-        layout.addView(progressBar);
-
-        TextView textView = new TextView(context);
-        textView.setTextSize(20);
-        textView.setPadding(0, 20, 0, 0);
-        textView.setTextColor(context.getResources().getColor(R.color.imageview_bg));
-
-        if (text != null) {
-            textView.setText(text);
-        }
-        textView.setGravity(Gravity.CENTER);
-        layout.addView(textView);
-
-        builder.setView(layout);
-        builder.setCancelable(false);
-
-        AlertDialog dialog = builder.create();
-
-        // Asignar un ID manualmente al TextView
-        textView.setId(123456); // Por ejemplo, asignar un número entero único
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        return dialog;
-    }
-
-    public static void setLoadingDialogText(AlertDialog dialog, String newText) {
-        if (dialog != null && dialog.isShowing()) {
-            TextView textView = dialog.findViewById(0);
-            if (textView != null) {
-                textView.setText(newText);
-            }
-        }
-    }
     public static Bitmap rotateBitmap(Bitmap originalBitmap, GbcImage gbcImage) {
         Matrix matrix = new Matrix();
         matrix.postRotate(ROTATION_VALUES[gbcImage.getRotation()]);

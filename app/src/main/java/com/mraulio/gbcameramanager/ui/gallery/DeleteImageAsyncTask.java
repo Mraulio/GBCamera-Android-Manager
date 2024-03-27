@@ -3,10 +3,8 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.reloadTags;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
-import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesListHolder;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 
 import android.app.Activity;
@@ -58,21 +56,16 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
         //IMPROVE THIS
         Collections.sort(listImagesIndexes);
         for (int index = listImagesIndexes.size(); index > 0; index--) {
-            int image = listImagesIndexes.get(index - 1);
-            String imageHash = GalleryFragment.filteredGbcImages.get(image).getHashCode();
-            GalleryFragment.filteredGbcImages.remove(image);
+            int imageIndex = listImagesIndexes.get(index - 1);
+            String imageHash = GalleryFragment.filteredGbcImages.get(imageIndex).getHashCode();
+            GalleryFragment.filteredGbcImages.remove(imageIndex);
             for (int i = 0; i < gbcImagesList.size(); i++) {
                 GbcImage gbcImage = gbcImagesList.get(i);
                 if (gbcImage.getHashCode().equals(imageHash)) {
                     gbcImagesList.remove(i);
                 }
             }
-            for (int i = 0; i < gbcImagesListHolder.size(); i++) {
-                GbcImage gbcImage = gbcImagesListHolder.get(i);
-                if (gbcImage.getHashCode().equals(imageHash)) {
-                    gbcImagesListHolder.remove(i);
-                }
-            }
+
         }
         return null;
     }

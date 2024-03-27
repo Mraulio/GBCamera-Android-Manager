@@ -3,7 +3,6 @@ package com.mraulio.gbcameramanager.ui.savemanager;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
-import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -30,20 +29,18 @@ import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
-import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,8 +57,8 @@ public class SaveManagerFragment extends Fragment {
     private String saveName;
     private Button btnDelete, btnAdd;
     private CheckBox cbModDate;
-    private AlertDialog loadingDialog;
     private File selectedFile;
+    LoadingDialog loadingDialog;
     private CustomGridViewAdapterImage gridAdapter;
     private ArrayAdapter<String> listViewAdapter;
     private int numImagesAdded = 0;
@@ -94,7 +91,7 @@ public class SaveManagerFragment extends Fragment {
         btnDelete = view.findViewById(R.id.btnDelete);
         btnAdd = view.findViewById(R.id.btnAdd);
         cbModDate = view.findViewById(R.id.cbModDate);
-        loadingDialog = Utils.loadingDialog(getContext(), null);
+        loadingDialog = new LoadingDialog(getContext(),"Extracting");
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
 
 
@@ -104,7 +101,7 @@ public class SaveManagerFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 currentPosition = position;
-                loadingDialog.show();
+                loadingDialog.showDialog();
                 saveName = (String) parent.getItemAtPosition(position);
                 selectedFile = new File(Utils.SAVE_FOLDER, saveName);
                 lastModDate = new Date(selectedFile.lastModified());
@@ -145,7 +142,6 @@ public class SaveManagerFragment extends Fragment {
                         imageData.setData(gbcImage.getImageBytes());
                         newImageDatas.add(imageData);
                         Utils.gbcImagesList.add(gbcImage);
-                        Utils.gbcImagesListHolder.add(gbcImage);
 
                         newGbcImages.add(gbcImage);
                         Utils.imageBitmapCache.put(gbcImage.getHashCode(), extractedImagesBitmaps.get(i));
@@ -248,7 +244,7 @@ public class SaveManagerFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            loadingDialog.dismiss();
+            loadingDialog.dismissDialog();
             if (lastSeenImage != null) {
                 showImages(gridviewSaves, gridAdapter);
                 btnAdd.setEnabled(true);

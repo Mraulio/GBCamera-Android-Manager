@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.SORT_MODE.*;
+import static com.mraulio.gbcameramanager.MainActivity.db;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.MainActivity.sortDescending;
 import static com.mraulio.gbcameramanager.MainActivity.sortMode;
@@ -13,7 +14,6 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.ui.gallery.MetadataValues.metadataTexts;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
-import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesListHolder;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.hashPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
@@ -55,7 +55,11 @@ import androidx.core.content.FileProvider;
 import com.ddyos.unicode.exifinterface.UnicodeExifInterface;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.db.FrameDao;
+import com.mraulio.gbcameramanager.db.ImageDao;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.BufferedWriter;
@@ -522,11 +526,16 @@ public class GalleryUtils {
                 sortByDate(gbcImagesList, sortDescending);
                 break;
             case IMPORT_DATE:
-                gbcImagesList.clear();
-                gbcImagesList.addAll(gbcImagesListHolder);
-                if (sortDescending) {
-                    Collections.reverse(gbcImagesList);
-                }
+                Thread thread = new Thread(() -> {
+                    ImageDao imageDao = db.imageDao();
+
+                    gbcImagesList = imageDao.getAll();
+                    if (sortDescending) {
+                        Collections.reverse(gbcImagesList);
+                    }
+                });
+                thread.start();
+
                 break;
             case TITLE:
                 sortByTitle(gbcImagesList, sortDescending);

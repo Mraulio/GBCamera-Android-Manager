@@ -443,6 +443,7 @@ public class GalleryFragment extends Fragment {
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
+                            loadDialog.dismissDialog();
                             gridViewStitch.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, stitchGbcImage, stitchBitmapList, false, false, false, null));
 
                             for (int i : selectedImages) {
@@ -511,6 +512,7 @@ public class GalleryFragment extends Fragment {
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
+                            loadDialog.dismissDialog();
                             for (int i : selectedImages) {
                                 deleteBitmapList.add(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
                             }
@@ -605,6 +607,7 @@ public class GalleryFragment extends Fragment {
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
+                            loadDialog.dismissDialog();
                             List<Bitmap> listBitmaps = new ArrayList<>();
 
                             for (int i : selectedImages) {
@@ -729,6 +732,7 @@ public class GalleryFragment extends Fragment {
                         LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                             @Override
                             public void onTaskComplete(Result result) {
+                                loadDialog.dismissDialog();
                                 bos.reset();
                                 AnimatedGifEncoder encoder = new AnimatedGifEncoder();
                                 encoder.setRepeat(loop[0]);
@@ -766,6 +770,7 @@ public class GalleryFragment extends Fragment {
                     });
                     loadDialog.showDialog();
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad,loadDialog, result -> {
+                        loadDialog.dismissDialog();
                         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
                         encoder.setRepeat(loop[0]);
                         encoder.setFrameRate(fps[0]);
@@ -813,7 +818,7 @@ public class GalleryFragment extends Fragment {
                     }
                     loadDialog.showDialog();
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,result -> {
-
+                        loadDialog.dismissDialog();
                         try {
                             JSONObject stateObject = new JSONObject();
                             JSONArray imagesArray = new JSONArray();

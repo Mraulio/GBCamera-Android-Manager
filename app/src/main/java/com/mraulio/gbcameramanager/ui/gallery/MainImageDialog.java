@@ -660,6 +660,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
                 @Override
                 public void onTaskComplete(Result result) {
+                    loadingDialog.dismissDialog();
                     globalImageIndex[0] = selectedImages.get(0);
 
                     keepFrame = false;

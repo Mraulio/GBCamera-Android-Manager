@@ -2,32 +2,24 @@ package com.mraulio.gbcameramanager;
 
 import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
-import static com.mraulio.gbcameramanager.utils.Utils.framesList;
-import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.LocaleList;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -393,7 +385,6 @@ public class MainActivity extends AppCompatActivity {
             if (imagesFromDao.size() > 0) {
                 //I need to add them to the gbcImagesList(GbcImage)
                 Utils.gbcImagesList.addAll(imagesFromDao);
-                Utils.gbcImagesListHolder = new ArrayList<>(Utils.gbcImagesList);
                 GbcImage.numImages += Utils.gbcImagesList.size();
             } else anyImage = false;
             return null;

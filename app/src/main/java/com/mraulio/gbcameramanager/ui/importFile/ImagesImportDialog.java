@@ -6,6 +6,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -33,6 +34,7 @@ import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.text.SimpleDateFormat;
@@ -268,7 +270,10 @@ public class ImagesImportDialog {
                         gbcImageToAdd.setTags(tagsToSave);
                     }
                 }
-                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded, null);
+                LoadingDialog saveDialog = new LoadingDialog(context, "Saving images");
+                AlertDialog saveAlertDialog = saveDialog.showDialog();
+                saveAlertDialog.show();
+                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded, null,saveAlertDialog);
                 saveImageAsyncTask.execute();
 
                 dialog.dismiss();

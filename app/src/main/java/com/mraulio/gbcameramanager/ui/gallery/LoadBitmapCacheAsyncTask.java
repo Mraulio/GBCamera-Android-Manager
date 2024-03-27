@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
@@ -17,10 +18,12 @@ import javax.xml.transform.Result;
 public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
     private List<Integer> indexesToLoad;
     private AsyncTaskCompleteListener<Result> listener;
+    private AlertDialog loadDialog;
 
-    public LoadBitmapCacheAsyncTask(List<Integer> indexesToLoad, AsyncTaskCompleteListener<Result> listener) {
+    public LoadBitmapCacheAsyncTask(List<Integer> indexesToLoad, AlertDialog loadDialog,AsyncTaskCompleteListener<Result> listener ) {
         this.indexesToLoad = indexesToLoad;
         this.listener = listener;
+        this.loadDialog = loadDialog;
     }
 
     //I could add a isCancelled flag
@@ -75,6 +78,8 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
         if (listener != null) {
             listener.onTaskComplete(result); //Notify the finalization from the interface
         }
-        GalleryFragment.loadingDialog.dismiss();
+        if (loadDialog != null && loadDialog.isShowing()) {
+            loadDialog.dismiss();
+        }
     }
 }

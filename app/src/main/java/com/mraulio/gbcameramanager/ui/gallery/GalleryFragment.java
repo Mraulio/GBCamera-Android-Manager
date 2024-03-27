@@ -60,6 +60,7 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.utils.AnimatedGifEncoder;
 import com.mraulio.gbcameramanager.utils.DiskCache;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -94,6 +95,7 @@ public class GalleryFragment extends Fragment {
     static UsbSerialPort port = null;
     public static GridView gridView;
     static AlertDialog loadingDialog;
+    static LoadingDialog loadDialog;
     static SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
     static HashSet<String> selectedFilterTags = new HashSet<>();
     static HashSet<String> hiddenFilterTags = new HashSet<>();
@@ -136,7 +138,8 @@ public class GalleryFragment extends Fragment {
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         tv = view.findViewById(R.id.text_gallery);
         gridView = view.findViewById(R.id.gridView);
-        loadingDialog = Utils.loadingDialog(getContext(), null);
+        loadDialog = new LoadingDialog(getContext(), null);
+        loadingDialog = loadDialog.showDialog();
         setHasOptionsMenu(true);
         diskCache = new DiskCache(getContext());
 
@@ -439,7 +442,7 @@ public class GalleryFragment extends Fragment {
                     });
 
                     loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, new AsyncTaskCompleteListener<Result>() {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
                             gridViewStitch.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, stitchGbcImage, stitchBitmapList, false, false, false, null));
@@ -469,7 +472,7 @@ public class GalleryFragment extends Fragment {
 
             case R.id.action_clone:
                 if (selectionMode[0]) {
-                    CloneDialog cloneDialog = new CloneDialog(getContext(),selectedImages,customGridViewAdapterImage,filteredGbcImages);
+                    CloneDialog cloneDialog = new CloneDialog(getContext(), selectedImages, customGridViewAdapterImage, filteredGbcImages);
                     cloneDialog.createCloneDialog();
                 }
                 return true;
@@ -508,7 +511,7 @@ public class GalleryFragment extends Fragment {
                         }
                     });
                     loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, new AsyncTaskCompleteListener<Result>() {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
                             for (int i : selectedImages) {
@@ -602,7 +605,7 @@ public class GalleryFragment extends Fragment {
                     builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     });
                     loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, new AsyncTaskCompleteListener<Result>() {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
                             List<Bitmap> listBitmaps = new ArrayList<>();
@@ -726,7 +729,7 @@ public class GalleryFragment extends Fragment {
                     }
                     reload_anim.setOnClickListener(v -> {
                         loadingDialog.show();
-                        LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, new AsyncTaskCompleteListener<Result>() {
+                        LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
                             @Override
                             public void onTaskComplete(Result result) {
                                 bos.reset();
@@ -765,7 +768,7 @@ public class GalleryFragment extends Fragment {
                         asyncTask.execute();
                     });
                     loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, result -> {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad,loadingDialog, result -> {
                         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
                         encoder.setRepeat(loop[0]);
                         encoder.setFrameRate(fps[0]);
@@ -812,7 +815,7 @@ public class GalleryFragment extends Fragment {
                         }
                     }
                     loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, result -> {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,result -> {
 
                         try {
                             JSONObject stateObject = new JSONObject();

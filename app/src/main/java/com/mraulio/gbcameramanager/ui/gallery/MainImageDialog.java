@@ -57,6 +57,7 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.ui.usbserial.PrintOverArduino;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.IOException;
@@ -654,8 +655,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             }
             imageViewMiniIndex = 0;
             final Dialog dialog = new Dialog(context);
-
-            LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, new AsyncTaskCompleteListener<Result>() {
+            LoadingDialog loadingDialog = new LoadingDialog(context, "Loading cache");
+            AlertDialog alertLoadingDialog = loadingDialog.showDialog();
+            LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, alertLoadingDialog,new AsyncTaskCompleteListener<Result>() {
                 @Override
                 public void onTaskComplete(Result result) {
                     globalImageIndex[0] = selectedImages.get(0);

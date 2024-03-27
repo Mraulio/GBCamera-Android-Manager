@@ -54,6 +54,7 @@ import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.RomExtractor;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
@@ -298,7 +299,10 @@ public class ImportFragment extends Fragment {
                                     }
                                 }
                                 if (newGbcImages.size() > 0) {
-                                    SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, listNewBitmaps, getContext(), tvFileName, numImagesAdded, null);
+                                    LoadingDialog saveDialog = new LoadingDialog(getContext(), "Saving images");
+                                    AlertDialog saveAlertDialog = saveDialog.showDialog();
+                                    saveAlertDialog.show();
+                                    SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, listNewBitmaps, getContext(), tvFileName, numImagesAdded, null, saveAlertDialog);
                                     saveImageAsyncTask.execute();
                                     retrieveTags(gbcImagesList);
                                 } else {

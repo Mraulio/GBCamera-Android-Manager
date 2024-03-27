@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static com.mraulio.gbcameramanager.MainActivity.customColorPaper;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.crop;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
@@ -315,6 +316,7 @@ public class PaperUtils {
                 btnSavePaper.setEnabled(true);
                 paperizedBitmaps.clear();
                 if (!loadingDialog.isShowing()) {
+                    loadDialog.setLoadingDialogText("Paperizing...");
                     loadingDialog.show();
                 }
                 new PaperizeAsyncTask(indexToPaperize, paperColor[0], paperizedBitmaps, ivPaperized, cbOnlyImagePaper.isChecked(), context).execute();

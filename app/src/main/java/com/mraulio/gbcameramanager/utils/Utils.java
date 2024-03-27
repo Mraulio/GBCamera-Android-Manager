@@ -236,11 +236,21 @@ public class Utils {
         builder.setCancelable(false);
 
         AlertDialog dialog = builder.create();
+
+        // Asignar un ID manualmente al TextView
+        textView.setId(123456); // Por ejemplo, asignar un número entero único
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return dialog;
     }
 
-
+    public static void setLoadingDialogText(AlertDialog dialog, String newText) {
+        if (dialog != null && dialog.isShowing()) {
+            TextView textView = dialog.findViewById(0);
+            if (textView != null) {
+                textView.setText(newText);
+            }
+        }
+    }
     public static Bitmap rotateBitmap(Bitmap originalBitmap, GbcImage gbcImage) {
         Matrix matrix = new Matrix();
         matrix.postRotate(ROTATION_VALUES[gbcImage.getRotation()]);

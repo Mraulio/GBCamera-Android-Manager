@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -26,14 +27,17 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
     TextView tvFileName;
     int numImagesAdded;
     CustomGridViewAdapterImage customGridViewAdapterImage;
+    AlertDialog loadingDialogSave;
 
-    public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<Bitmap> bitmapList, Context context, TextView tvFileName, int numImagesAdded, CustomGridViewAdapterImage customGridViewAdapterImage) {
+    public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<Bitmap> bitmapList, Context context, TextView tvFileName,
+                              int numImagesAdded, CustomGridViewAdapterImage customGridViewAdapterImage,AlertDialog loadingDialogSave) {
         this.gbcImagesList = gbcImagesList;
         this.bitmapList = bitmapList;
         this.context = context;
         this.tvFileName = tvFileName;
         this.numImagesAdded = numImagesAdded;
         this.customGridViewAdapterImage = customGridViewAdapterImage;
+        this.loadingDialogSave = loadingDialogSave;
     }
 
     @Override
@@ -56,13 +60,12 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
 
         ImageDao imageDao = MainActivity.db.imageDao();
         ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
+
         //Need to insert first the gbcImage because of the Foreign Key
-        for (GbcImage gbcImage : gbcImagesList) {
-            imageDao.insert(gbcImage);
-        }
-        for (ImageData imageData : newImageDatas) {
-            imageDataDao.insert(imageData);
-        }
+        imageDao.insertManyImages(newGbcImages);
+
+        imageDataDao.insertManyDatas(newImageDatas);
+
         return null;
     }
 
@@ -70,6 +73,9 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         if (tvFileName != null) {
             tvFileName.setText(numImagesAdded + context.getString(R.string.done_adding_images));
+        }
+        if (loadingDialogSave != null && loadingDialogSave.isShowing()) {
+            loadingDialogSave.dismiss();
         }
         retrieveTags(gbcImagesList);
         checkSorting();

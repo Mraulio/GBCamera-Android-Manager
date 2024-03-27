@@ -4,7 +4,6 @@ import static com.mraulio.gbcameramanager.MainActivity.customColorPaper;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.crop;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadDialog;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.rotateBitmapImport;
@@ -315,11 +314,9 @@ public class PaperUtils {
             public void onClick(View v) {
                 btnSavePaper.setEnabled(true);
                 paperizedBitmaps.clear();
-                if (!loadingDialog.isShowing()) {
-                    loadDialog.setLoadingDialogText("Paperizing...");
-                    loadingDialog.show();
-                }
-                new PaperizeAsyncTask(indexToPaperize, paperColor[0], paperizedBitmaps, ivPaperized, cbOnlyImagePaper.isChecked(), context).execute();
+                loadDialog.showDialog();
+                loadDialog.setLoadingDialogText("Paperizing...");
+                new PaperizeAsyncTask(indexToPaperize, paperColor[0], paperizedBitmaps, ivPaperized, cbOnlyImagePaper.isChecked(), context, loadDialog).execute();
             }
         });
         btnSavePaper.setOnClickListener(new View.OnClickListener() {

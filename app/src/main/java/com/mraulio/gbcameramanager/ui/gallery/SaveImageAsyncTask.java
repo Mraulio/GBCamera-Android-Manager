@@ -15,37 +15,38 @@ import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
-    List<GbcImage> gbcImagesList;
+    List<GbcImage> gbcImagesListToSave;
     List<Bitmap> bitmapList;
     Context context;
     TextView tvFileName;
     int numImagesAdded;
     CustomGridViewAdapterImage customGridViewAdapterImage;
-    AlertDialog loadingDialogSave;
+    LoadingDialog loadDialogSave;
 
     public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<Bitmap> bitmapList, Context context, TextView tvFileName,
-                              int numImagesAdded, CustomGridViewAdapterImage customGridViewAdapterImage,AlertDialog loadingDialogSave) {
-        this.gbcImagesList = gbcImagesList;
+                              int numImagesAdded, CustomGridViewAdapterImage customGridViewAdapterImage, LoadingDialog loadDialogSave) {
+        this.gbcImagesListToSave = gbcImagesList;
         this.bitmapList = bitmapList;
         this.context = context;
         this.tvFileName = tvFileName;
         this.numImagesAdded = numImagesAdded;
         this.customGridViewAdapterImage = customGridViewAdapterImage;
-        this.loadingDialogSave = loadingDialogSave;
+        this.loadDialogSave = loadDialogSave;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
         List<GbcImage> newGbcImages = new ArrayList<>();
         List<ImageData> newImageDatas = new ArrayList<>();
-        for (int i = 0; i < gbcImagesList.size(); i++) {
-            GbcImage gbcImage = gbcImagesList.get(i);
+        for (int i = 0; i < gbcImagesListToSave.size(); i++) {
+            GbcImage gbcImage = gbcImagesListToSave.get(i);
             GbcImage.numImages++;
             numImagesAdded++;
             ImageData imageData = new ImageData();
@@ -56,6 +57,7 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
             Utils.gbcImagesListHolder.add(gbcImage);
             newGbcImages.add(gbcImage);
             Utils.imageBitmapCache.put(gbcImage.getHashCode(), bitmapList.get(i));
+            GalleryFragment.diskCache.put(gbcImage.getHashCode(), bitmapList.get(i));
         }
 
         ImageDao imageDao = MainActivity.db.imageDao();
@@ -74,10 +76,8 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
         if (tvFileName != null) {
             tvFileName.setText(numImagesAdded + context.getString(R.string.done_adding_images));
         }
-        if (loadingDialogSave != null && loadingDialogSave.isShowing()) {
-            loadingDialogSave.dismiss();
-        }
-        retrieveTags(gbcImagesList);
+        loadDialogSave.dismissDialog();
+        retrieveTags(gbcImagesListToSave);
         checkSorting();
         GalleryFragment gf = new GalleryFragment();
         gf.updateFromMain();

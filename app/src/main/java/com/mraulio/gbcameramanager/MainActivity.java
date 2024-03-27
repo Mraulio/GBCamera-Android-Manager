@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager;
 import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
+import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
@@ -14,6 +15,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -401,6 +403,11 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
+//            for (GbcImage gbcImage: gbcImagesList){
+//                Bitmap image = GalleryFragment.diskCache.get(gbcImage.getHashCode());
+//                Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
+//            }
+
             gf.updateFromMain();
         }
     }

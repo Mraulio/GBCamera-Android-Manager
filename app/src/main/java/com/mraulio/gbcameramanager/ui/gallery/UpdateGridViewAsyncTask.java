@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.gridView;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updatingFromChangeImage;
 import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.newPosition;
 
@@ -39,7 +40,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
 
 //                Get the image bytes from the database for the current gbcImage
             if (image == null) {
-                if (!GalleryFragment.loadingDialog.isShowing())
+                if (!loadDialog.isShowing())
                     publishProgress();
                 imageBytes = imageDataDao.getDataByImageId(imageHash);
                 //Set the image bytes to the object
@@ -80,8 +81,8 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onProgressUpdate(Void... values) {
         super.onProgressUpdate(values);
-        if (!GalleryFragment.loadingDialog.isShowing())
-            GalleryFragment.loadingDialog.show();
+        if (!loadDialog.isShowing())
+            loadDialog.showDialog();
     }
 
     @Override
@@ -92,7 +93,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
             gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
             updatingFromChangeImage = false;
         }
-        GalleryFragment.loadingDialog.dismiss();
+        loadDialog.dismissDialog();
 
     }
 }

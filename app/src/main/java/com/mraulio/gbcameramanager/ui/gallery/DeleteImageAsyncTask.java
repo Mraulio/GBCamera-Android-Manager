@@ -18,6 +18,7 @@ import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.Collections;
@@ -27,10 +28,12 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
     //        private int imageIndex;
     private List<Integer> listImagesIndexes;
     private Activity activity;
+    LoadingDialog loadDialog;
 
-    public DeleteImageAsyncTask(List<Integer> listImagesIndexes, Activity activity) {
+    public DeleteImageAsyncTask(List<Integer> listImagesIndexes, Activity activity, LoadingDialog loadDialog) {
         this.listImagesIndexes = listImagesIndexes;
         this.activity = activity;
+        this.loadDialog = loadDialog;
     }
 
     @Override
@@ -42,7 +45,11 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
             ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
             ImageData imageData = imageDataDao.getImageDataByid(hashCode);
             imageDao.delete(gbcImage);
-            imageDataDao.delete(imageData);
+            try {
+                imageDataDao.delete(imageData);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             Utils.imageBitmapCache.remove(hashCode);
             GalleryFragment.diskCache.remove(hashCode);
             GbcImage.numImages--;
@@ -95,7 +102,7 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
         showEditMenuButton = false;
         activity.invalidateOptionsMenu();
 
-        GalleryFragment.loadingDialog.dismiss();
+        loadDialog.dismissDialog();
         GalleryFragment.updateGridView();
     }
 }

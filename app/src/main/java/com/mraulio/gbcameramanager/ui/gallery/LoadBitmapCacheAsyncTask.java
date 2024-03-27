@@ -1,6 +1,5 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
-import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
@@ -9,6 +8,7 @@ import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.List;
@@ -18,9 +18,9 @@ import javax.xml.transform.Result;
 public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
     private List<Integer> indexesToLoad;
     private AsyncTaskCompleteListener<Result> listener;
-    private AlertDialog loadDialog;
+    private LoadingDialog loadDialog;
 
-    public LoadBitmapCacheAsyncTask(List<Integer> indexesToLoad, AlertDialog loadDialog,AsyncTaskCompleteListener<Result> listener ) {
+    public LoadBitmapCacheAsyncTask(List<Integer> indexesToLoad, LoadingDialog loadDialog, AsyncTaskCompleteListener<Result> listener) {
         this.indexesToLoad = indexesToLoad;
         this.listener = listener;
         this.loadDialog = loadDialog;
@@ -78,8 +78,7 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
         if (listener != null) {
             listener.onTaskComplete(result); //Notify the finalization from the interface
         }
-        if (loadDialog != null && loadDialog.isShowing()) {
-            loadDialog.dismiss();
-        }
+
+
     }
 }

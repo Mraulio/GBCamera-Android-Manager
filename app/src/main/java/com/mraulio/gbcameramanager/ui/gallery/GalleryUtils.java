@@ -83,7 +83,6 @@ import java.util.zip.Deflater;
 
 public class GalleryUtils {
     public static void saveImage(List<GbcImage> gbcImages, Context context, boolean crop) {
-        System.out.println(""+crop);
         LocalDateTime now = null;
         Date nowDate = new Date();
         File file = null;

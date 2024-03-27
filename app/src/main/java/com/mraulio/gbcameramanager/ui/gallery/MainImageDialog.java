@@ -656,8 +656,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             imageViewMiniIndex = 0;
             final Dialog dialog = new Dialog(context);
             LoadingDialog loadingDialog = new LoadingDialog(context, "Loading cache");
-            AlertDialog alertLoadingDialog = loadingDialog.showDialog();
-            LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, alertLoadingDialog,new AsyncTaskCompleteListener<Result>() {
+            loadingDialog.showDialog();
+            LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
                 @Override
                 public void onTaskComplete(Result result) {
                     globalImageIndex[0] = selectedImages.get(0);

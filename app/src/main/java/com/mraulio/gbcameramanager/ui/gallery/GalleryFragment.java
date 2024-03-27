@@ -94,7 +94,6 @@ public class GalleryFragment extends Fragment {
     static UsbDeviceConnection connection;
     static UsbSerialPort port = null;
     public static GridView gridView;
-    static AlertDialog loadingDialog;
     static LoadingDialog loadDialog;
     static SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
     static HashSet<String> selectedFilterTags = new HashSet<>();
@@ -139,7 +138,6 @@ public class GalleryFragment extends Fragment {
         tv = view.findViewById(R.id.text_gallery);
         gridView = view.findViewById(R.id.gridView);
         loadDialog = new LoadingDialog(getContext(), null);
-        loadingDialog = loadDialog.showDialog();
         setHasOptionsMenu(true);
         diskCache = new DiskCache(getContext());
 
@@ -441,8 +439,8 @@ public class GalleryFragment extends Fragment {
                     builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     });
 
-                    loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
+                    loadDialog.showDialog();
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
                             gridViewStitch.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, stitchGbcImage, stitchBitmapList, false, false, false, null));
@@ -472,7 +470,7 @@ public class GalleryFragment extends Fragment {
 
             case R.id.action_clone:
                 if (selectionMode[0]) {
-                    CloneDialog cloneDialog = new CloneDialog(getContext(), selectedImages, customGridViewAdapterImage, filteredGbcImages);
+                    CloneDialog cloneDialog = new CloneDialog(getContext(), selectedImages, customGridViewAdapterImage, filteredGbcImages,getActivity());
                     cloneDialog.createCloneDialog();
                 }
                 return true;
@@ -500,18 +498,17 @@ public class GalleryFragment extends Fragment {
                     builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            loadingDialog.show();
-                            new DeleteImageAsyncTask(selectedImages, getActivity()).execute();
+                            loadDialog.showDialog();
+                            new DeleteImageAsyncTask(selectedImages, getActivity(),loadDialog).execute();
                         }
                     });
                     builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            //No action
-                        }
+                            loadDialog.dismissDialog();                        }
                     });
-                    loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
+                    loadDialog.showDialog();
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
                             for (int i : selectedImages) {
@@ -604,8 +601,8 @@ public class GalleryFragment extends Fragment {
                     });
                     builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     });
-                    loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
+                    loadDialog.showDialog();
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
                             List<Bitmap> listBitmaps = new ArrayList<>();
@@ -728,8 +725,8 @@ public class GalleryFragment extends Fragment {
                         }
                     }
                     reload_anim.setOnClickListener(v -> {
-                        loadingDialog.show();
-                        LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
+                        loadDialog.showDialog();
+                        LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                             @Override
                             public void onTaskComplete(Result result) {
                                 bos.reset();
@@ -767,8 +764,8 @@ public class GalleryFragment extends Fragment {
                         });
                         asyncTask.execute();
                     });
-                    loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad,loadingDialog, result -> {
+                    loadDialog.showDialog();
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad,loadDialog, result -> {
                         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
                         encoder.setRepeat(loop[0]);
                         encoder.setFrameRate(fps[0]);
@@ -814,8 +811,8 @@ public class GalleryFragment extends Fragment {
                             indexesToLoad.add(i);
                         }
                     }
-                    loadingDialog.show();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,result -> {
+                    loadDialog.showDialog();
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,result -> {
 
                         try {
                             JSONObject stateObject = new JSONObject();
@@ -883,30 +880,6 @@ public class GalleryFragment extends Fragment {
         }
         return false;
     }
-
-//    private void connect() {
-//        manager = (UsbManager) getActivity().getSystemService(Context.USB_SERVICE);
-//        List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
-//        if (availableDrivers.isEmpty()) {
-//            return;
-//        }
-//        // Open a connection to the first available driver.
-//        UsbSerialDriver driver = availableDrivers.get(0);
-//        connection = manager.openDevice(driver.getDevice());
-//
-//        port = driver.getPorts().get(0); // Most devices have just one port (port 0)
-//        try {
-//            if (port.isOpen()) port.close();
-//            port.open(connection);
-//            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-//
-//        } catch (Exception e) {
-//            tv.append(e.toString());
-//            Toast.makeText(getContext(), "Error in connect." + e.toString(), Toast.LENGTH_SHORT).show();
-//        }
-//
-//        usbIoManager = new SerialInputOutputManager(port, this);
-//    }
 
     public static Bitmap frameChange(GbcImage gbcImage, String frameId,
                                      boolean invertImagePalette, boolean invertFramePalette, boolean keepFrame, Boolean save) throws

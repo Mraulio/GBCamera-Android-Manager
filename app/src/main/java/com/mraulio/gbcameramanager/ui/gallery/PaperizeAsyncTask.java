@@ -3,7 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filteredGbcImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
+
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperize;
 
 import android.animation.AnimatorSet;
@@ -15,6 +15,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,14 +27,16 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
     private ImageView ivPaperized;
     private List<Bitmap> paperizedBitmaps;
     private boolean onlyImage;
+    private LoadingDialog loadDialog;
 
-    public PaperizeAsyncTask(List<Integer> gbcImagesList, int paperColor, List<Bitmap> paperizedBitmaps, ImageView ivPaperized, boolean onlyImage, Context context) {
+    public PaperizeAsyncTask(List<Integer> gbcImagesList, int paperColor, List<Bitmap> paperizedBitmaps, ImageView ivPaperized, boolean onlyImage, Context context, LoadingDialog loadDialog) {
         this.gbcImagesList = gbcImagesList;
         this.paperColor = paperColor;
         this.paperizedBitmaps = paperizedBitmaps;
         this.ivPaperized = ivPaperized;
         this.onlyImage = onlyImage;
         this.context = context;
+        this.loadDialog = loadDialog;
     }
 
     @Override
@@ -88,7 +91,7 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
         animatorSet.playSequentially(stopAnimation1, stopAnimation2, stopAnimation3, stopAnimation4,stopAnimation5,stopAnimation6, slideAnimator);
 
         animatorSet.start();
-        loadingDialog.dismiss();
+        loadDialog.dismissDialog();
     }
 
     private AnimatorSet createStopAnimation(ImageView imageView, float position, long duration) {

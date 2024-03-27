@@ -15,7 +15,6 @@ import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -103,15 +102,13 @@ public class ImportFragment extends Fragment {
     List<GbcImage> lastSeenImage = new ArrayList<>();
     List<Bitmap> lastSeenBitmap = new ArrayList<>();
     DocumentFile selectedFile;
-//    public static List<ImageData> importedImageDatas = new ArrayList<>();
     public static List<byte[]> listImportedImageBytes = new ArrayList<>();
 
     byte[] fileBytes;
-    private AlertDialog loadingDialog;
     private Adapter adapter;
     boolean isGoodSave = true;
     public static List<LinkedHashMap<String, Object>> metadataHashes = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0;
-
+    LoadingDialog loadingDialog;
     static TextView tvFileName;
     static String fileName;
 
@@ -147,7 +144,7 @@ public class ImportFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loadingDialog = Utils.loadingDialog(getContext(), null);
+        loadingDialog = new LoadingDialog(getContext(),"Extracting file");
 
         if (getArguments() != null) {
             String fileUri = getArguments().getString("fileUri");
@@ -184,7 +181,7 @@ public class ImportFragment extends Fragment {
         btnExtractFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadingDialog.show();
+                loadingDialog.showDialog();
                 new loadDataTask().execute();
             }
         });
@@ -300,9 +297,8 @@ public class ImportFragment extends Fragment {
                                 }
                                 if (newGbcImages.size() > 0) {
                                     LoadingDialog saveDialog = new LoadingDialog(getContext(), "Saving images");
-                                    AlertDialog saveAlertDialog = saveDialog.showDialog();
-                                    saveAlertDialog.show();
-                                    SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, listNewBitmaps, getContext(), tvFileName, numImagesAdded, null, saveAlertDialog);
+                                    saveDialog.showDialog();
+                                    SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, listNewBitmaps, getContext(), tvFileName, numImagesAdded, null, saveDialog);
                                     saveImageAsyncTask.execute();
                                     retrieveTags(gbcImagesList);
                                 } else {
@@ -379,7 +375,7 @@ public class ImportFragment extends Fragment {
         if (openedFromFile) {
             selectedFile = DocumentFile.fromSingleUri(getContext(), uri);
             readFileData(uri);
-            loadingDialog.show();
+            loadingDialog.showDialog();
             new loadDataTask().execute();
             openedFromFile = false;//So this doesn't execute again when entering the fragment later
         }
@@ -494,7 +490,7 @@ public class ImportFragment extends Fragment {
                 case SAV:
                     if (!isGoodSave) {
                         tvFileName.setText(getString(R.string.no_valid_file));
-                        loadingDialog.dismiss();
+                        loadingDialog.dismissDialog();
                         adapter = null;
                         gridViewImport.setAdapter((ListAdapter) adapter);
                         btnAddImages.setVisibility(View.GONE);
@@ -547,7 +543,7 @@ public class ImportFragment extends Fragment {
             }
 
             gridViewImport.setAdapter((ListAdapter) adapter);
-            loadingDialog.dismiss();
+            loadingDialog.dismissDialog();
 
         }
     }

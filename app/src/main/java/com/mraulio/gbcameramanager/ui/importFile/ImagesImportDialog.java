@@ -271,9 +271,8 @@ public class ImagesImportDialog {
                     }
                 }
                 LoadingDialog saveDialog = new LoadingDialog(context, "Saving images");
-                AlertDialog saveAlertDialog = saveDialog.showDialog();
-                saveAlertDialog.show();
-                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded, null,saveAlertDialog);
+                saveDialog.showDialog();
+                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded, null,saveDialog);
                 saveImageAsyncTask.execute();
 
                 dialog.dismiss();

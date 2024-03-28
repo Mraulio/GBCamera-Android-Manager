@@ -533,6 +533,7 @@ public class GalleryUtils {
                     if (sortDescending) {
                         Collections.reverse(gbcImagesList);
                     }
+                    updateGridView();
                 });
                 thread.start();
 

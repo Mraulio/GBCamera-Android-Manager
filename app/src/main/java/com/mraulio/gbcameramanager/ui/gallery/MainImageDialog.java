@@ -314,9 +314,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
                     Bitmap bitmap = Utils.imageBitmapCache.get(gbcImage.getHashCode());
                     int rotation = gbcImage.getRotation();
-                    if (rotation != 3) {
-                        rotation++;
-                    } else rotation = 0;
+                    if (rotation != 0) {
+                        rotation--;
+                    } else rotation = 3;
                     gbcImage.setRotation(rotation);
                     bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
                     imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
@@ -833,7 +833,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                         @Override
                         public void onClick(View v) {
                             int rotation = filteredGbcImages.get(globalImageIndex[0]).getRotation();
-                            rotation = (rotation != 3) ? rotation + 1 : 0;
+                            rotation = (rotation != 0) ? rotation - 1 : 3;
                             for (int i : selectedImages) {
                                 GbcImage gbcImage = filteredGbcImages.get(i);
                                 gbcImage.setRotation(rotation);

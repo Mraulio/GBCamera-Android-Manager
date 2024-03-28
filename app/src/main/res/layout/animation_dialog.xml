@@ -37,32 +37,53 @@
         app:layout_constraintStart_toEndOf="@id/animation_seekbar"
         app:layout_constraintTop_toTopOf="@id/animation_seekbar" />
 
-    <CheckBox
-        android:id="@+id/cb_loop"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_marginVertical="10dp"
+        android:id="@+id/switchesLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:checked="true"
-        android:text="Loop"
-        app:layout_constraintBottom_toBottomOf="@id/btnReload"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btnReload" />
+        app:layout_constraintTop_toBottomOf="@id/animation_seekbar">
+
+        <Switch
+            android:id="@+id/swLoop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:checked="true"
+            android:paddingHorizontal="5dp"
+            android:text="Loop" />
+
+        <Switch
+            android:id="@+id/swSort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:checked="false"
+            android:paddingHorizontal="5dp"
+            android:text="@string/menu_sort" />
+
+        <Switch
+            android:id="@+id/swCrop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:paddingHorizontal="5dp"
+            android:text="@string/cb_crop" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnReload"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="@string/btn_realod_anim"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/animation_seekbar" />
+        app:layout_constraintTop_toBottomOf="@id/switchesLayout" />
 
-    <CheckBox
-        android:id="@+id/cbSort"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="false"
-        android:text="@string/menu_sort"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btnReload" />
 </androidx.constraintlayout.widget.ConstraintLayout>

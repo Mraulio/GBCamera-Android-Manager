@@ -42,12 +42,12 @@ public class DeleteImageAsyncTask extends AsyncTask<Void, Void, Void> {
             ImageDao imageDao = MainActivity.db.imageDao();
             ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
             ImageData imageData = imageDataDao.getImageDataByid(hashCode);
-            imageDao.delete(gbcImage);
             try {
                 imageDataDao.delete(imageData);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            imageDao.delete(gbcImage);
             Utils.imageBitmapCache.remove(hashCode);
             GalleryFragment.diskCache.remove(hashCode);
             GbcImage.numImages--;

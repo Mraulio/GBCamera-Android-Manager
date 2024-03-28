@@ -48,6 +48,7 @@ import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -443,7 +444,6 @@ public class GalleryFragment extends Fragment {
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
-                            loadDialog.dismissDialog();
                             gridViewStitch.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, stitchGbcImage, stitchBitmapList, false, false, false, null));
 
                             for (int i : selectedImages) {
@@ -462,6 +462,7 @@ public class GalleryFragment extends Fragment {
                             } catch (IllegalArgumentException e) {
                                 Utils.toast(getContext(), getString(R.string.hdr_exception));
                             }
+                            loadDialog.dismissDialog();
                         }
                     });
                     asyncTask.execute();
@@ -607,7 +608,6 @@ public class GalleryFragment extends Fragment {
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
-                            loadDialog.dismissDialog();
                             List<Bitmap> listBitmaps = new ArrayList<>();
 
                             for (int i : selectedImages) {
@@ -626,6 +626,7 @@ public class GalleryFragment extends Fragment {
                             } catch (IllegalArgumentException e) {
                                 Utils.toast(getContext(), getString(R.string.hdr_exception));
                             }
+                            loadDialog.dismissDialog();
                         }
                     });
                     asyncTask.execute();
@@ -649,16 +650,10 @@ public class GalleryFragment extends Fragment {
                     builder.setView(dialogView);
                     TextView tv_animation = dialogView.findViewById(R.id.tv_animation);
                     Button reload_anim = dialogView.findViewById(R.id.btnReload);
-                    CheckBox cb_loop = dialogView.findViewById(R.id.cb_loop);
-                    CheckBox cbSort = dialogView.findViewById(R.id.cbSort);
-                    final int[] loop = {0};
-                    cb_loop.setOnClickListener(v -> {
-                        if (cb_loop.isChecked()) {
-                            loop[0] = 0;//0 to infinite loop
-                        } else {
-                            loop[0] = -1;//-1 to not repeat
-                        }
-                    });
+                    Switch swLoop = dialogView.findViewById(R.id.swLoop);
+                    Switch swSort = dialogView.findViewById(R.id.swSort);
+                    Switch swCrop = dialogView.findViewById(R.id.swCrop);
+
 
                     ImageView imageView = dialogView.findViewById(R.id.animation_image);
                     imageView.setAdjustViewBounds(true);
@@ -732,23 +727,28 @@ public class GalleryFragment extends Fragment {
                         LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
                             @Override
                             public void onTaskComplete(Result result) {
-                                loadDialog.dismissDialog();
                                 bos.reset();
                                 AnimatedGifEncoder encoder = new AnimatedGifEncoder();
-                                encoder.setRepeat(loop[0]);
+                                encoder.setRepeat(swLoop.isChecked() ? 0 : -1);
                                 encoder.setFrameRate(fps[0]);
                                 encoder.start(bos);
-                                List<Bitmap> bitmapList = new ArrayList<Bitmap>();
+                                List<Bitmap> bitmapList = new ArrayList<>();
 
-                                if (cbSort.isChecked())
-                                    listInUse[0] = sortedList;
-                                else {
-                                    listInUse[0] = selectedImages;
-                                }
+                                listInUse[0] = swSort.isChecked() ? sortedList : selectedImages;
+
                                 for (int i : listInUse[0]) {
-                                    Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                                    Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(),true);
+                                    if (swCrop.isChecked()){
+                                        if (bitmap.getHeight() == 144 && bitmap.getWidth() == 160) {
+                                            bitmap = Bitmap.createBitmap(bitmap, 16, 16, 128, 112);
+                                        }
+                                        //For the wild frames
+                                        else if (bitmap.getHeight() == 224 && crop) {
+                                            bitmap = Bitmap.createBitmap(bitmap, 16, 40, 128, 112);
+                                        }
+                                    }
                                     bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
-                                    bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false));
+                                    bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * exportSize, bitmap.getHeight() * exportSize, false));
                                 }
 
                                 for (Bitmap bitmap : bitmapList) {
@@ -764,23 +764,24 @@ public class GalleryFragment extends Fragment {
                                     e.printStackTrace();
                                 }
                                 imageView.setImageDrawable(gifDrawable);
+                                loadDialog.dismissDialog();
                             }
                         });
                         asyncTask.execute();
                     });
+
                     loadDialog.showDialog();
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad,loadDialog, result -> {
-                        loadDialog.dismissDialog();
                         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
-                        encoder.setRepeat(loop[0]);
+                        encoder.setRepeat(swLoop.isChecked() ? 0 : -1);
                         encoder.setFrameRate(fps[0]);
                         encoder.start(bos);
-                        List<Bitmap> bitmapList = new ArrayList<Bitmap>();
+                        List<Bitmap> bitmapList = new ArrayList<>();
 
                         for (int i : selectedImages) {
-                            Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
+                            Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(),true);
                             bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
-                            bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false));
+                            bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * exportSize, bitmap.getHeight() * exportSize, false));
                         }
 
                         for (Bitmap bitmap : bitmapList) {
@@ -798,6 +799,7 @@ public class GalleryFragment extends Fragment {
                         imageView.setImageDrawable(gifDrawable);
 
                         AlertDialog dialog = builder.create();
+                        loadDialog.dismissDialog();
                         dialog.show();
                     });
                     asyncTask.execute();
@@ -818,7 +820,6 @@ public class GalleryFragment extends Fragment {
                     }
                     loadDialog.showDialog();
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,result -> {
-                        loadDialog.dismissDialog();
                         try {
                             JSONObject stateObject = new JSONObject();
                             JSONArray imagesArray = new JSONArray();
@@ -874,6 +875,7 @@ public class GalleryFragment extends Fragment {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        loadDialog.dismissDialog();
 
                     });
                     asyncTask.execute();

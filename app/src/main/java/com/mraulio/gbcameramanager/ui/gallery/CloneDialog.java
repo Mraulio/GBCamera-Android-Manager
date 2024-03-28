@@ -50,7 +50,7 @@ public class CloneDialog {
 
         final NumberPicker numberPicker = new NumberPicker(context);
         numberPicker.setMinValue(1);
-        numberPicker.setMaxValue(100);
+        numberPicker.setMaxValue(10);
         builder.setView(numberPicker);
 
         builder.setPositiveButton(context.getString(R.string.action_clone), new DialogInterface.OnClickListener() {

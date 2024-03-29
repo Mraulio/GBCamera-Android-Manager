@@ -81,7 +81,7 @@ public class BigImageDialog {
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         TouchImageView imageView = dialog.findViewById(R.id.imageView);
         imageView.setMaxZoom(5);
-        imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 5, bitmap.getHeight() * 5, false));
+        imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false));
         Button btnOkWriteTag = dialog.findViewById(R.id.btnOkWriteTag);
         RadioButton rbEditTags = dialog.findViewById(R.id.rbEditTags);
         RadioButton rbMisc = dialog.findViewById(R.id.rbMisc);

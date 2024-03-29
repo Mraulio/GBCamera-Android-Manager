@@ -1,12 +1,14 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.exportSize;
+import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.createCollage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.showFilterDialog;
@@ -394,6 +396,7 @@ public class GalleryFragment extends Fragment {
                     Button btnCancel = stitchView.findViewById(R.id.cancel_button);
                     Switch swCropStitch = stitchView.findViewById(R.id.swCropStitch);
                     Switch swHorizontalOrientation = stitchView.findViewById(R.id.sw_orientation);
+                    Switch swHalfFrame = stitchView.findViewById(R.id.sw_half_frame);
                     TextView tvNPCols = stitchView.findViewById(R.id.tvNPCols);
                     HorizontalNumberPicker nPColsRows = stitchView.findViewById(R.id.numberPickerCols);
                     nPColsRows.setMax(30);
@@ -415,7 +418,7 @@ public class GalleryFragment extends Fragment {
                     btnReloadStitch.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            stitchedImage[0] = createCollage(stitchBitmapList, nPColsRows.getValue(), swCropStitch.isChecked(), swHorizontalOrientation.isChecked());
+                            stitchedImage[0] = createCollage(stitchBitmapList, nPColsRows.getValue(), swCropStitch.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked());
                             Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * finalScaledStitch, stitchedImage[0].getHeight() * finalScaledStitch, false);
                             imageView.setImageBitmap(bitmap);
                         }
@@ -449,6 +452,10 @@ public class GalleryFragment extends Fragment {
                             }
                             try (FileOutputStream out = new FileOutputStream(file)) {
                                 Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * exportSize, stitchedImage[0].getHeight() * exportSize, false);
+                                //Make square if checked in settings
+                                if (exportSquare) {
+                                    bitmap = makeSquareImage(bitmap);
+                                }
                                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                                 Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + getString(R.string.stitch), Toast.LENGTH_LONG);
                                 toast.show();
@@ -476,7 +483,7 @@ public class GalleryFragment extends Fragment {
                                 stitchBitmapList.add(image);
                             }
                             try {
-                                stitchedImage[0] = createCollage(stitchBitmapList, nPColsRows.getValue(), swCropStitch.isChecked(), swHorizontalOrientation.isChecked());
+                                stitchedImage[0] = createCollage(stitchBitmapList, nPColsRows.getValue(), swCropStitch.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked());
                                 Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * finalScaledStitch, stitchedImage[0].getHeight() * finalScaledStitch, false);
                                 imageView.setImageBitmap(bitmap);
                                 dialog.setContentView(stitchView);

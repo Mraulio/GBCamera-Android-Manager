@@ -229,6 +229,6 @@
     <string name="toast_first_image">This is the first image</string>
     <string name="toast_last_image">This is the last image</string>
     <string name="action_clone">Clone</string>
-
+    <string name="sw_half_frame">Half frame</string>
 
 </resources>

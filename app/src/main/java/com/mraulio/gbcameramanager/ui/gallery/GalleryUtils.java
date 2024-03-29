@@ -8,6 +8,7 @@ import static com.mraulio.gbcameramanager.MainActivity.sortMode;
 import static com.mraulio.gbcameramanager.MainActivity.sortModeEnum;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.galleryActivity;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.hiddenFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
@@ -60,6 +61,7 @@ import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.BufferedWriter;
@@ -368,40 +370,6 @@ public class GalleryUtils {
         return combinedBitmap;
     }
 
-    public static Bitmap stitchImages(List<Bitmap> bitmaps, boolean stitchBottom) {
-        // Make sure all images have the same dimensions
-        int width = bitmaps.get(0).getWidth();
-        int height = bitmaps.get(0).getHeight();
-
-        for (Bitmap bitmap : bitmaps) {
-            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
-                throw new IllegalArgumentException("All images must have same dimensions.");
-            }
-        }
-        int cropX = 16;
-        int cropY = (height == 224) ? 40 : 16;
-        int newWidth = stitchBottom ? (width - (cropX * 2)) : (width - (cropX * 2)) * bitmaps.size();
-        int newHeight = stitchBottom ? (height - (cropY * 2)) * bitmaps.size() : (height - (cropY * 2));
-
-        Bitmap stitchedImage = Bitmap.createBitmap(newWidth, newHeight, bitmaps.get(0).getConfig());
-        Canvas canvas = new Canvas(stitchedImage);
-        int destX = 0;
-        int destY = 0;
-
-        for (Bitmap bitmap : bitmaps) {
-            Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, cropX, cropY, 128, 112);
-
-            if (stitchBottom) {
-                canvas.drawBitmap(croppedBitmap, 0, destY, null);
-                destY += 112;
-            } else {
-                canvas.drawBitmap(croppedBitmap, destX, 0, null);
-                destX += 128;
-            }
-        }
-
-        return stitchedImage;
-    }
 
     public static String encodeData(String value) {
         byte[] inputBytes = value.getBytes(StandardCharsets.UTF_8);
@@ -466,7 +434,7 @@ public class GalleryUtils {
                 sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
                 editor.putString("sort_by_date", CREATION_DATE.name());
                 editor.apply();
-                checkSorting();
+                checkSorting(context);
                 updateGridView();
 
             }
@@ -479,8 +447,8 @@ public class GalleryUtils {
                 sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
                 editor.putString("sort_by_date", IMPORT_DATE.name());
                 editor.apply();
-                checkSorting();
-                updateGridView();
+                checkSorting(context);
+
             }
         });
         sortTitle.setOnClickListener(new View.OnClickListener() {
@@ -491,7 +459,7 @@ public class GalleryUtils {
                 sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
                 editor.putString("sort_by_date", TITLE.name());
                 editor.apply();
-                checkSorting();
+                checkSorting(context);
                 updateGridView();
             }
         });
@@ -501,7 +469,7 @@ public class GalleryUtils {
                 sortDescending = false;
                 editor.putBoolean("sort_descending", false);
                 editor.apply();
-                checkSorting();
+                checkSorting(context);
                 updateGridView();
 
             }
@@ -512,7 +480,7 @@ public class GalleryUtils {
                 sortDescending = true;
                 editor.putBoolean("sort_descending", true);
                 editor.apply();
-                checkSorting();
+                checkSorting(context);
                 updateGridView();
 
             }
@@ -520,20 +488,28 @@ public class GalleryUtils {
         dialog.show();
     }
 
-    public static void checkSorting() {
+    public static void checkSorting(Context context) {
         switch (sortModeEnum) {
             case CREATION_DATE:
                 sortByDate(gbcImagesList, sortDescending);
                 break;
             case IMPORT_DATE:
+                LoadingDialog loadingDialog = new LoadingDialog(context, "");
+                loadingDialog.showDialog();
                 Thread thread = new Thread(() -> {
+
                     ImageDao imageDao = db.imageDao();
 
                     gbcImagesList = imageDao.getAll();
                     if (sortDescending) {
                         Collections.reverse(gbcImagesList);
                     }
-                    updateGridView();
+                    galleryActivity.runOnUiThread(() -> {
+                        updateGridView();
+                        loadingDialog.dismissDialog();
+
+                    });
+
                 });
                 thread.start();
 
@@ -777,8 +753,6 @@ public class GalleryUtils {
         }
         return editingTags;
     }
-
-
 
 
 }

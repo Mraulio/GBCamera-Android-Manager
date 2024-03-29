@@ -23,10 +23,10 @@
             android:singleLine="true"
             android:textSize="20dp"></EditText>
 
-            <com.mraulio.gbcameramanager.utils.TouchImageView
-                android:id="@+id/imageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+        <com.mraulio.gbcameramanager.utils.TouchImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
 
         <HorizontalScrollView

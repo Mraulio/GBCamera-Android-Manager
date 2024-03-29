@@ -300,7 +300,7 @@ public class ImportFragment extends Fragment {
                                     saveDialog.showDialog();
                                     SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, listNewBitmaps, getContext(), tvFileName, numImagesAdded, null, saveDialog);
                                     saveImageAsyncTask.execute();
-                                    retrieveTags(gbcImagesList);
+
                                 } else {
                                     Utils.toast(getContext(), getString(R.string.no_new_images));
                                     tvFileName.setText(getString(R.string.no_new_images));

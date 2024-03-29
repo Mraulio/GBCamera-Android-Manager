@@ -399,7 +399,7 @@ public class MainActivity extends AppCompatActivity {
 //                Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
 //            }
 
-            gf.updateFromMain();
+            gf.updateFromMain(MainActivity.this);
         }
     }
 

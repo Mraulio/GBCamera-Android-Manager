@@ -77,9 +77,9 @@ public class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
         }
         loadDialogSave.dismissDialog();
         retrieveTags(gbcImagesListToSave);
-        checkSorting();
+        checkSorting(context);
         GalleryFragment gf = new GalleryFragment();
-        gf.updateFromMain();
+        gf.updateFromMain(context);
         Utils.toast(context, context.getString(R.string.images_added) + numImagesAdded);
     }
 }

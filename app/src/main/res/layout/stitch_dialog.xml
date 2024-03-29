@@ -6,61 +6,141 @@
     android:orientation="vertical"
     android:padding="10dp">
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:weightSum="2">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="3dp"
+            android:background="@color/background_light"
+            android:orientation="vertical">
 
-            <HorizontalScrollView
+            <com.mraulio.gbcameramanager.utils.TouchImageView
+                android:id="@+id/iv_stitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_gravity="center">
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+                <!--            <RadioGroup-->
+                <!--                android:id="@+id/rbGroupStitch"-->
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:layout_margin="10dp"-->
+                <!--                android:gravity="center"-->
+                <!--                android:orientation="horizontal">-->
 
-                <ImageView
-                    android:id="@+id/iv_stitch"
+                <!--                <RadioButton-->
+                <!--                    android:id="@+id/rbBottom"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_marginHorizontal="10dp"-->
+                <!--                    android:text="@string/stitch_bottom" />-->
+
+                <!--                <RadioButton-->
+                <!--                    android:id="@+id/rbRight"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_marginHorizontal="10dp"-->
+                <!--                    android:text="@string/stitch_right" />-->
+
+                <!--            </RadioGroup>-->
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Switch
+                        android:id="@+id/sw_orientation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Horizontal"></Switch>
+
+                    <Switch
+                        android:id="@+id/swCropStitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginLeft="20dp"
+                        android:text="@string/cb_crop"></Switch>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/customNumberLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvNPCols"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:text="Cols"
+                        android:textSize="20sp" />
+
+                    <com.mraulio.gbcameramanager.utils.HorizontalNumberPicker
+                        android:id="@+id/numberPickerCols"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnReloadStitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/btn_realod_anim"></Button>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitCenter" />
-            </HorizontalScrollView>
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
 
-            <GridView
-                android:id="@+id/gridViewStitch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:horizontalSpacing="5dp"
-                android:numColumns="4"
-                android:stretchMode="columnWidth"
-                android:verticalSpacing="5dp"></GridView>
+                    <Button
+                        android:id="@+id/cancel_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:text="@string/cancel"></Button>
 
-            <RadioGroup
-                android:id="@+id/rbGroupStitch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:orientation="horizontal">
+                    <Button
+                        android:id="@+id/save_btn_stitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:backgroundTint="@color/save_color"
+                        android:text="@string/btn_save"></Button>
 
-                <RadioButton
-                    android:id="@+id/rbBottom"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="10dp"
-                    android:text="@string/stitch_bottom" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
 
-                <RadioButton
-                    android:id="@+id/rbRight"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="10dp"
-                    android:text="@string/stitch_right" />
-
-            </RadioGroup>
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 </LinearLayout>

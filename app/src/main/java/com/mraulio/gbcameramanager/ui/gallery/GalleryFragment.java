@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static com.mraulio.gbcameramanager.MainActivity.exportSize;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
+import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.createCollage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
@@ -10,7 +11,6 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.showFilterDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortImages;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.stitchImages;
 
 import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.newPosition;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
@@ -24,7 +24,9 @@ import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -40,6 +42,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -61,7 +65,9 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.utils.AnimatedGifEncoder;
 import com.mraulio.gbcameramanager.utils.DiskCache;
+import com.mraulio.gbcameramanager.utils.HorizontalNumberPicker;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
+import com.mraulio.gbcameramanager.utils.TouchImageView;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -106,7 +112,7 @@ public class GalleryFragment extends Fragment {
     static int itemsPerPage = MainActivity.imagesPage;
     static int startIndex = 0;
     static int endIndex = 0;
-
+    static Activity galleryActivity;
     public static int currentPage;
     static int lastPage = 0;
     public static TextView tvResponseBytes;
@@ -130,7 +136,7 @@ public class GalleryFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
+        galleryActivity = getActivity();
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.GALLERY;
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;
@@ -315,7 +321,7 @@ public class GalleryFragment extends Fragment {
             }
         });
 
-        if (MainActivity.doneLoading) updateFromMain();
+        if (MainActivity.doneLoading) updateFromMain(getContext());
 
         return view;
     }
@@ -365,102 +371,125 @@ public class GalleryFragment extends Fragment {
             case R.id.action_stitch:
                 if (!selectedImages.isEmpty()) {
                     //If there are too many images selected, the resulting image to show will be too big (because of the *6 in the ImageView)
+                    int scaledStitch = 4;
+                    int maxZoom = 10;
                     if (selectedImages.size() > 40) {
+                        scaledStitch = 1;
+                        maxZoom = 30;
+                    }
+                    if (selectedImages.size() > 200) {
                         toast(getContext(), getString(R.string.stitch_too_many_images));
                         return true;
                     }
+
                     final Bitmap[] stitchedImage = new Bitmap[1];
-                    final boolean[] stitchBottom = {true};
                     LayoutInflater inflater = LayoutInflater.from(getContext());
                     List<Bitmap> stitchBitmapList = new ArrayList<>();
-                    List<GbcImage> stitchGbcImage = new ArrayList<>();
                     View stitchView = inflater.inflate(R.layout.stitch_dialog, null);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    ImageView imageView = stitchView.findViewById(R.id.iv_stitch);
-                    GridView gridViewStitch = stitchView.findViewById(R.id.gridViewStitch);
-                    RadioButton rbStitchBottom = stitchView.findViewById(R.id.rbBottom);
-                    RadioButton rbStitchRight = stitchView.findViewById(R.id.rbRight);
+                    TouchImageView imageView = stitchView.findViewById(R.id.iv_stitch);
+                    imageView.setMaxZoom(maxZoom);
 
-                    rbStitchBottom.setChecked(true);
-                    rbStitchBottom.setOnClickListener(new View.OnClickListener() {
+                    Button btnReloadStitch = stitchView.findViewById(R.id.btnReloadStitch);
+                    Button btnSaveStitch = stitchView.findViewById(R.id.save_btn_stitch);
+                    Button btnCancel = stitchView.findViewById(R.id.cancel_button);
+                    Switch swCropStitch = stitchView.findViewById(R.id.swCropStitch);
+                    Switch swHorizontalOrientation = stitchView.findViewById(R.id.sw_orientation);
+                    TextView tvNPCols = stitchView.findViewById(R.id.tvNPCols);
+                    HorizontalNumberPicker nPColsRows = stitchView.findViewById(R.id.numberPickerCols);
+                    nPColsRows.setMax(30);
+                    nPColsRows.setMin(1);
+
+                    Dialog dialog = new Dialog(getContext());
+                    swHorizontalOrientation.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(View v) {
-                            stitchBottom[0] = true;
-                            stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
-                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 5, stitchedImage[0].getHeight() * 5, false);
+                        public void onClick(View view) {
+                            if (swHorizontalOrientation.isChecked()) {
+                                tvNPCols.setText("Rows");
+                            } else {
+                                tvNPCols.setText("Cols");
+                            }
+                        }
+                    });
+                    int finalScaledStitch = scaledStitch;
+
+                    btnReloadStitch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            stitchedImage[0] = createCollage(stitchBitmapList, nPColsRows.getValue(), swCropStitch.isChecked(), swHorizontalOrientation.isChecked());
+                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * finalScaledStitch, stitchedImage[0].getHeight() * finalScaledStitch, false);
                             imageView.setImageBitmap(bitmap);
                         }
                     });
-                    rbStitchRight.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            stitchBottom[0] = false;
-                            stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
-                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 5, stitchedImage[0].getHeight() * 5, false);
-                            imageView.setImageBitmap(bitmap);
-                        }
-                    });
 
-                    builder.setView(stitchView);
                     List<Integer> indexesToLoad = new ArrayList<>();
                     for (int i : selectedImages) {
                         String hashCode = filteredGbcImages.get(i).getHashCode();
                         if (imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
                         }
-                        stitchGbcImage.add(filteredGbcImages.get(i));
 
                     }
-                    builder.setPositiveButton(getString(R.string.btn_save), (dialog, which) -> {
-                        LocalDateTime now = null;
-                        Date nowDate = new Date();
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            now = LocalDateTime.now();
-                        }
-                        File file = null;
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
-                            file = new File(Utils.IMAGES_FOLDER, "Stitch_" + dtf.format(now) + ".png");
-                        } else {
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
-                            file = new File(Utils.IMAGES_FOLDER, "Stitch_" + sdf.format(nowDate) + ".png");
-                        }
-                        try (FileOutputStream out = new FileOutputStream(file)) {
-                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * exportSize, stitchedImage[0].getHeight() * exportSize, false);
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + getString(R.string.stitch), Toast.LENGTH_LONG);
-                            toast.show();
-                            mediaScanner(file, getContext());
-                            showNotification(getContext(), file);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                    btnSaveStitch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            LocalDateTime now = null;
+                            Date nowDate = new Date();
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                now = LocalDateTime.now();
+                            }
+                            File file = null;
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+
+                                file = new File(Utils.IMAGES_FOLDER, "Stitch_" + dtf.format(now) + ".png");
+                            } else {
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                                file = new File(Utils.IMAGES_FOLDER, "Stitch_" + sdf.format(nowDate) + ".png");
+                            }
+                            try (FileOutputStream out = new FileOutputStream(file)) {
+                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * exportSize, stitchedImage[0].getHeight() * exportSize, false);
+                                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + getString(R.string.stitch), Toast.LENGTH_LONG);
+                                toast.show();
+                                mediaScanner(file, getContext());
+                                showNotification(getContext(), file);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
-                    builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+                    btnCancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.dismiss();
+                        }
                     });
 
                     loadDialog.showDialog();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
-                            gridViewStitch.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, stitchGbcImage, stitchBitmapList, false, false, false, null));
 
                             for (int i : selectedImages) {
-                                Bitmap image = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode());
-//                                image = rotateBitmap(image, (filteredGbcImages.get(i)));//Not rotating them now
+                                Bitmap image = rotateBitmap(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()), filteredGbcImages.get(i));
                                 stitchBitmapList.add(image);
                             }
                             try {
-                                stitchedImage[0] = stitchImages(stitchBitmapList, stitchBottom[0]);
-                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * 5, stitchedImage[0].getHeight() * 5, false);
+                                stitchedImage[0] = createCollage(stitchBitmapList, nPColsRows.getValue(), swCropStitch.isChecked(), swHorizontalOrientation.isChecked());
+                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * finalScaledStitch, stitchedImage[0].getHeight() * finalScaledStitch, false);
                                 imageView.setImageBitmap(bitmap);
-                                builder.setView(stitchView);
-
-                                AlertDialog dialog = builder.create();
+                                dialog.setContentView(stitchView);
+                                int screenHeight = displayMetrics.heightPixels;
+                                int desiredHeight = (int) (screenHeight * 0.8);
+                                Window window = dialog.getWindow();
+                                window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, desiredHeight);
                                 dialog.show();
                             } catch (IllegalArgumentException e) {
                                 Utils.toast(getContext(), getString(R.string.hdr_exception));
+                                e.printStackTrace();
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
                             loadDialog.dismissDialog();
                         }
@@ -472,7 +501,7 @@ public class GalleryFragment extends Fragment {
 
             case R.id.action_clone:
                 if (selectionMode[0]) {
-                    CloneDialog cloneDialog = new CloneDialog(getContext(), selectedImages, customGridViewAdapterImage, filteredGbcImages,getActivity());
+                    CloneDialog cloneDialog = new CloneDialog(getContext(), selectedImages, customGridViewAdapterImage, filteredGbcImages, getActivity());
                     cloneDialog.createCloneDialog();
                 }
                 return true;
@@ -501,16 +530,17 @@ public class GalleryFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             loadDialog.showDialog();
-                            new DeleteImageAsyncTask(selectedImages, getActivity(),loadDialog).execute();
+                            new DeleteImageAsyncTask(selectedImages, getActivity(), loadDialog).execute();
                         }
                     });
                     builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            loadDialog.dismissDialog();                        }
+                            loadDialog.dismissDialog();
+                        }
                     });
                     loadDialog.showDialog();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
                             loadDialog.dismissDialog();
@@ -605,7 +635,7 @@ public class GalleryFragment extends Fragment {
                     builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     });
                     loadDialog.showDialog();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, new AsyncTaskCompleteListener<Result>() {
                         @Override
                         public void onTaskComplete(Result result) {
                             List<Bitmap> listBitmaps = new ArrayList<>();
@@ -724,7 +754,7 @@ public class GalleryFragment extends Fragment {
                     }
                     reload_anim.setOnClickListener(v -> {
                         loadDialog.showDialog();
-                        LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,new AsyncTaskCompleteListener<Result>() {
+                        LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, new AsyncTaskCompleteListener<Result>() {
                             @Override
                             public void onTaskComplete(Result result) {
                                 bos.reset();
@@ -737,8 +767,8 @@ public class GalleryFragment extends Fragment {
                                 listInUse[0] = swSort.isChecked() ? sortedList : selectedImages;
 
                                 for (int i : listInUse[0]) {
-                                    Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(),true);
-                                    if (swCrop.isChecked()){
+                                    Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(), true);
+                                    if (swCrop.isChecked()) {
                                         if (bitmap.getHeight() == 144 && bitmap.getWidth() == 160) {
                                             bitmap = Bitmap.createBitmap(bitmap, 16, 16, 128, 112);
                                         }
@@ -771,7 +801,7 @@ public class GalleryFragment extends Fragment {
                     });
 
                     loadDialog.showDialog();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad,loadDialog, result -> {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, result -> {
                         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
                         encoder.setRepeat(swLoop.isChecked() ? 0 : -1);
                         encoder.setFrameRate(fps[0]);
@@ -779,7 +809,7 @@ public class GalleryFragment extends Fragment {
                         List<Bitmap> bitmapList = new ArrayList<>();
 
                         for (int i : selectedImages) {
-                            Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(),true);
+                            Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(), true);
                             bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
                             bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * exportSize, bitmap.getHeight() * exportSize, false));
                         }
@@ -819,7 +849,7 @@ public class GalleryFragment extends Fragment {
                         }
                     }
                     loadDialog.showDialog();
-                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog,result -> {
+                    LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, result -> {
                         try {
                             JSONObject stateObject = new JSONObject();
                             JSONArray imagesArray = new JSONArray();
@@ -1019,10 +1049,10 @@ public class GalleryFragment extends Fragment {
         return dialog;
     }
 
-    public void updateFromMain() {
+    public void updateFromMain(Context context) {
         if (Utils.gbcImagesList.size() > 0) {
             retrieveTags(gbcImagesList);
-            checkSorting();
+            checkSorting(context);
             selectedFilterTags = getSelectedTags();
             hiddenFilterTags = getHiddenTags();
             updateGridView();

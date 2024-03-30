@@ -171,10 +171,9 @@
 
     <!--NEW STRINGS-->
 
-    <string name="stitch">Stitch</string>
-    <string name="stitch_bottom">Stitch Bottom</string>
-    <string name="stitch_right">Stitch Right</string>
-    <string name="stitch_too_many_images">Too many images selected. Stitch would probably fail, resulting image too big.</string>
+    <string name="collage">Collage</string>
+
+    <string name="collage_too_many_images">Too many images selected. Collage would probably fail, resulting image too big.</string>
     <string name="square_download">Export square image</string>
 
     <string name="toast_frames_json">Frames Json saved.</string>
@@ -228,7 +227,8 @@
     <string name="btn_realod_anim">Reload</string>
     <string name="toast_first_image">This is the first image</string>
     <string name="toast_last_image">This is the last image</string>
-    <string name="action_clone">Clone</string>
+    <string name="action_duplicate">Duplicate</string>
     <string name="sw_half_frame">Half frame</string>
+    <string name="tv_extra_padding">Extra padding:\u0020</string>
 
 </resources>

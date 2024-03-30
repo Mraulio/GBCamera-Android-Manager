@@ -17,13 +17,13 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:gravity="center"
-            android:padding="3dp"
             android:background="@color/background_light"
-            android:orientation="vertical">
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="3dp">
 
             <com.mraulio.gbcameramanager.utils.TouchImageView
-                android:id="@+id/iv_stitch"
+                android:id="@+id/iv_collage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -31,15 +31,15 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
             android:layout_marginTop="5dp"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
                 android:layout_gravity="center"
+                android:gravity="center"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -54,19 +54,57 @@
                         android:text="Horizontal"></Switch>
 
                     <Switch
-                        android:id="@+id/swCropStitch"
+                        android:id="@+id/swCropCollage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="20dp"
                         android:layout_marginLeft="20dp"
+                        android:layout_marginBottom="20dp"
                         android:text="@string/cb_crop"></Switch>
+
                     <Switch
                         android:id="@+id/sw_half_frame"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="20dp"
                         android:layout_marginLeft="20dp"
+                        android:layout_marginBottom="20dp"
                         android:text="@string/sw_half_frame"></Switch>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal"
+                    android:weightSum="6">
+
+                    <TextView
+                        android:id="@+id/tv_extra_padding"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="5dp"
+                        android:layout_weight="2"
+                        android:text="@string/tv_extra_padding">
+
+                    </TextView>
+
+                    <SeekBar
+                        android:id="@+id/sb_extra_padding"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="5dp"
+                        android:layout_weight="3"
+                        android:max="5"
+                        android:min="0"
+                        android:progress="0"></SeekBar>
+
+                    <ImageView
+                        android:id="@+id/iv_padding_color"
+                        android:layout_width="0dp"
+                        android:layout_height="25dp"
+                        android:layout_marginHorizontal="5dp"
+                        android:layout_weight="1"
+                        ></ImageView>
 
                 </LinearLayout>
 
@@ -74,6 +112,7 @@
                     android:id="@+id/customNumberLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
                     android:gravity="center"
                     android:orientation="horizontal">
 
@@ -93,7 +132,7 @@
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/btnReloadStitch"
+                    android:id="@+id/btnReloadCollage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -114,7 +153,7 @@
                         android:text="@string/cancel"></Button>
 
                     <Button
-                        android:id="@+id/save_btn_stitch"
+                        android:id="@+id/save_btn_collage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="20dp"

@@ -4,6 +4,7 @@ import static com.mraulio.gbcameramanager.MainActivity.exportSize;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
+import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.applyBorderToIV;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.createCollage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
@@ -35,6 +36,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
+import android.graphics.Color;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 
@@ -45,14 +47,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
-import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -61,6 +61,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.OnColorSelectedListener;
+import com.flask.colorpicker.builder.ColorPickerClickListener;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -77,6 +81,7 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -370,39 +375,97 @@ public class GalleryFragment extends Fragment {
                 }
                 return true;
 
-            case R.id.action_stitch:
+            case R.id.action_collage:
                 if (!selectedImages.isEmpty()) {
                     //If there are too many images selected, the resulting image to show will be too big (because of the *6 in the ImageView)
-                    int scaledStitch = 4;
+                    int scaledCollage = 4;
                     int maxZoom = 10;
                     if (selectedImages.size() > 40) {
-                        scaledStitch = 1;
+                        scaledCollage = 1;
                         maxZoom = 30;
                     }
                     if (selectedImages.size() > 200) {
-                        toast(getContext(), getString(R.string.stitch_too_many_images));
+                        toast(getContext(), getString(R.string.collage_too_many_images));
                         return true;
                     }
 
-                    final Bitmap[] stitchedImage = new Bitmap[1];
+                    final Bitmap[] collagedImage = new Bitmap[1];
                     LayoutInflater inflater = LayoutInflater.from(getContext());
-                    List<Bitmap> stitchBitmapList = new ArrayList<>();
-                    View stitchView = inflater.inflate(R.layout.stitch_dialog, null);
-                    TouchImageView imageView = stitchView.findViewById(R.id.iv_stitch);
+                    List<Bitmap> collageBitmapList = new ArrayList<>();
+                    View collageView = inflater.inflate(R.layout.collage_dialog, null);
+                    TouchImageView imageView = collageView.findViewById(R.id.iv_collage);
                     imageView.setMaxZoom(maxZoom);
 
-                    Button btnReloadStitch = stitchView.findViewById(R.id.btnReloadStitch);
-                    Button btnSaveStitch = stitchView.findViewById(R.id.save_btn_stitch);
-                    Button btnCancel = stitchView.findViewById(R.id.cancel_button);
-                    Switch swCropStitch = stitchView.findViewById(R.id.swCropStitch);
-                    Switch swHorizontalOrientation = stitchView.findViewById(R.id.sw_orientation);
-                    Switch swHalfFrame = stitchView.findViewById(R.id.sw_half_frame);
-                    TextView tvNPCols = stitchView.findViewById(R.id.tvNPCols);
-                    HorizontalNumberPicker nPColsRows = stitchView.findViewById(R.id.numberPickerCols);
+                    Button btnReloadCollage = collageView.findViewById(R.id.btnReloadCollage);
+                    Button btnSaveCollage = collageView.findViewById(R.id.save_btn_collage);
+                    Button btnCancel = collageView.findViewById(R.id.cancel_button);
+                    Switch swCropCollage = collageView.findViewById(R.id.swCropCollage);
+                    Switch swHorizontalOrientation = collageView.findViewById(R.id.sw_orientation);
+                    Switch swHalfFrame = collageView.findViewById(R.id.sw_half_frame);
+                    TextView tvExtraPadding = collageView.findViewById(R.id.tv_extra_padding);
+                    SeekBar swExtraPadding = collageView.findViewById(R.id.sb_extra_padding);
+                    ImageView ivPaddingColor = collageView.findViewById(R.id.iv_padding_color);
+                    TextView tvNPCols = collageView.findViewById(R.id.tvNPCols);
+                    HorizontalNumberPicker nPColsRows = collageView.findViewById(R.id.numberPickerCols);
                     nPColsRows.setMax(30);
                     nPColsRows.setMin(1);
 
+                    final int[] lastPicked = {Color.parseColor("#FFFFFF")};
+
+
+                    ivPaddingColor.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ColorPickerDialogBuilder
+                                    .with(getContext())
+                                    .setTitle(getString(R.string.choose_color))
+                                    .initialColor(lastPicked[0])
+                                    .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
+                                    .density(12)
+                                    .showAlphaSlider(false)
+                                    .setOnColorSelectedListener(new OnColorSelectedListener() {
+                                        @Override
+                                        public void onColorSelected(int selectedColor) {
+                                            Utils.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
+                                        }
+                                    })
+                                    .setPositiveButton("OK", new ColorPickerClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
+                                            applyBorderToIV(ivPaddingColor, selectedColor);
+                                            lastPicked[0] = selectedColor;
+
+                                        }
+                                    })
+                                    .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                        }
+                                    })
+                                    .build()
+                                    .show();
+                        }
+                    });
                     Dialog dialog = new Dialog(getContext());
+
+                    final int[] extraPaddingMultiplier = {0};
+                    tvExtraPadding.setText(getString(R.string.tv_extra_padding) + extraPaddingMultiplier[0]);
+                    swExtraPadding.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            extraPaddingMultiplier[0] = progress;
+                            tvExtraPadding.setText(getString(R.string.tv_extra_padding) + extraPaddingMultiplier[0]);
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                        }
+                    });
+
                     swHorizontalOrientation.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -413,13 +476,13 @@ public class GalleryFragment extends Fragment {
                             }
                         }
                     });
-                    int finalScaledStitch = scaledStitch;
+                    int finalScaledCollage = scaledCollage;
 
-                    btnReloadStitch.setOnClickListener(new View.OnClickListener() {
+                    btnReloadCollage.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            stitchedImage[0] = createCollage(stitchBitmapList, nPColsRows.getValue(), swCropStitch.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked());
-                            Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * finalScaledStitch, stitchedImage[0].getHeight() * finalScaledStitch, false);
+                            collagedImage[0] = createCollage(collageBitmapList, nPColsRows.getValue(), swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
+                            Bitmap bitmap = Bitmap.createScaledBitmap(collagedImage[0], collagedImage[0].getWidth() * finalScaledCollage, collagedImage[0].getHeight() * finalScaledCollage, false);
                             imageView.setImageBitmap(bitmap);
                         }
                     });
@@ -433,7 +496,7 @@ public class GalleryFragment extends Fragment {
 
                     }
 
-                    btnSaveStitch.setOnClickListener(new View.OnClickListener() {
+                    btnSaveCollage.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             LocalDateTime now = null;
@@ -445,19 +508,19 @@ public class GalleryFragment extends Fragment {
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
-                                file = new File(Utils.IMAGES_FOLDER, "Stitch_" + dtf.format(now) + ".png");
+                                file = new File(Utils.IMAGES_FOLDER, "Collage_" + dtf.format(now) + ".png");
                             } else {
                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
-                                file = new File(Utils.IMAGES_FOLDER, "Stitch_" + sdf.format(nowDate) + ".png");
+                                file = new File(Utils.IMAGES_FOLDER, "Collage_" + sdf.format(nowDate) + ".png");
                             }
                             try (FileOutputStream out = new FileOutputStream(file)) {
-                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * exportSize, stitchedImage[0].getHeight() * exportSize, false);
+                                Bitmap bitmap = Bitmap.createScaledBitmap(collagedImage[0], collagedImage[0].getWidth() * exportSize, collagedImage[0].getHeight() * exportSize, false);
                                 //Make square if checked in settings
                                 if (exportSquare) {
                                     bitmap = makeSquareImage(bitmap);
                                 }
                                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + getString(R.string.stitch), Toast.LENGTH_LONG);
+                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + getString(R.string.collage), Toast.LENGTH_LONG);
                                 toast.show();
                                 mediaScanner(file, getContext());
                                 showNotification(getContext(), file);
@@ -480,17 +543,18 @@ public class GalleryFragment extends Fragment {
 
                             for (int i : selectedImages) {
                                 Bitmap image = rotateBitmap(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()), filteredGbcImages.get(i));
-                                stitchBitmapList.add(image);
+                                collageBitmapList.add(image);
                             }
                             try {
-                                stitchedImage[0] = createCollage(stitchBitmapList, nPColsRows.getValue(), swCropStitch.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked());
-                                Bitmap bitmap = Bitmap.createScaledBitmap(stitchedImage[0], stitchedImage[0].getWidth() * finalScaledStitch, stitchedImage[0].getHeight() * finalScaledStitch, false);
+                                collagedImage[0] = createCollage(collageBitmapList, nPColsRows.getValue(), swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
+                                Bitmap bitmap = Bitmap.createScaledBitmap(collagedImage[0], collagedImage[0].getWidth() * finalScaledCollage, collagedImage[0].getHeight() * finalScaledCollage, false);
                                 imageView.setImageBitmap(bitmap);
-                                dialog.setContentView(stitchView);
+                                dialog.setContentView(collageView);
                                 int screenHeight = displayMetrics.heightPixels;
                                 int desiredHeight = (int) (screenHeight * 0.8);
                                 Window window = dialog.getWindow();
                                 window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, desiredHeight);
+                                applyBorderToIV(ivPaddingColor, collagedImage[0].getPixel(0, 0));
                                 dialog.show();
                             } catch (IllegalArgumentException e) {
                                 Utils.toast(getContext(), getString(R.string.hdr_exception));
@@ -498,6 +562,7 @@ public class GalleryFragment extends Fragment {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
+
                             loadDialog.dismissDialog();
                         }
                     });
@@ -506,10 +571,10 @@ public class GalleryFragment extends Fragment {
                     Utils.toast(getContext(), getString(R.string.no_selected));
                 return true;
 
-            case R.id.action_clone:
+            case R.id.action_duplicate:
                 if (selectionMode[0]) {
-                    CloneDialog cloneDialog = new CloneDialog(getContext(), selectedImages, customGridViewAdapterImage, filteredGbcImages, getActivity());
-                    cloneDialog.createCloneDialog();
+                    DuplicateDialog duplicateDialog = new DuplicateDialog(getContext(), selectedImages, customGridViewAdapterImage, filteredGbcImages, getActivity());
+                    duplicateDialog.createDuplicateDialog();
                 }
                 return true;
 
@@ -690,7 +755,6 @@ public class GalleryFragment extends Fragment {
                     Switch swLoop = dialogView.findViewById(R.id.swLoop);
                     Switch swSort = dialogView.findViewById(R.id.swSort);
                     Switch swCrop = dialogView.findViewById(R.id.swCrop);
-
 
                     ImageView imageView = dialogView.findViewById(R.id.animation_image);
                     imageView.setAdjustViewBounds(true);

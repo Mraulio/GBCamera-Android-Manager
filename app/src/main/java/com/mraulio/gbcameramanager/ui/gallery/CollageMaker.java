@@ -2,15 +2,18 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CollageMaker {
 
-    public static Bitmap createCollage(List<Bitmap> bitmaps, int value, boolean crop, boolean horizontalOrientation, boolean halfFrame) {
+    public static Bitmap createCollage(List<Bitmap> bitmaps, int value, boolean crop, boolean horizontalOrientation, boolean halfFrame, int extraPaddingMultiplier, int paddingColor) {
 
         int width = bitmaps.get(0).getWidth();
         int height = bitmaps.get(0).getHeight();
@@ -71,17 +74,17 @@ public class CollageMaker {
                 if (bitmapIndex < totalImages) {
                     Bitmap bitmap = bitmaps.get(bitmapIndex);
 
-                    // Calcular el desplazamiento horizontal
+                    // Calculate horizontal offset
                     int horizontalOffset = 0;
                     if (halfFrame && !crop && col != 0) {
-                        horizontalOffset = -8 * (col-1); // Si no es la primera columna, ajustar el desplazamiento horizontal
+                        horizontalOffset = -8 * (col - 1);
                         bitmap = Bitmap.createBitmap(bitmap, 8, 0, 152, 144);//Crop 50% of the left frame
                     }
 
-                    // Calcular el desplazamiento vertical
+                    // Calculate vertical offset
                     int verticalOffset = 0;
                     if (halfFrame && !crop && row != 0) {
-                        verticalOffset = -8 * (row-1); // Si no es la primera fila, ajustar el desplazamiento vertical
+                        verticalOffset = -8 * (row - 1);
                         bitmap = Bitmap.createBitmap(bitmap, 0, 8, bitmap.getWidth(), 136);//Crop 50% of the top frame
                     }
                     Matrix matrix = new Matrix();
@@ -94,6 +97,42 @@ public class CollageMaker {
             }
         }
 
+        if (extraPaddingMultiplier > 0) {
+            collageBitmap = addPadding(collageBitmap, extraPaddingMultiplier, paddingColor);
+        }
+
         return collageBitmap;
+    }
+
+    public static Bitmap addPadding(Bitmap originalBitmap, int paddingMult, int paddingColor) {
+
+        int paddingSize = paddingMult * 8;
+
+        int width = originalBitmap.getWidth();
+        int height = originalBitmap.getHeight();
+
+        Bitmap paddedBitmap = Bitmap.createBitmap(width + paddingSize * 2, height + paddingSize * 2, originalBitmap.getConfig());
+
+        Canvas canvas = new Canvas(paddedBitmap);
+
+        canvas.drawColor(paddingColor);
+
+        canvas.drawBitmap(originalBitmap, paddingSize, paddingSize, null);
+
+        return paddedBitmap;
+
+    }
+
+    public static void applyBorderToIV(ImageView imageView, int colorBackground) {
+
+        GradientDrawable borderDrawable = new GradientDrawable();
+
+        borderDrawable.setColor(colorBackground);
+
+        borderDrawable.setCornerRadius(10);
+
+        borderDrawable.setStroke(2, Color.parseColor("#000000"));
+
+        imageView.setBackground(borderDrawable);
     }
 }

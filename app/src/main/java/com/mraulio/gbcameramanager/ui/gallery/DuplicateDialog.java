@@ -11,53 +11,46 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.NumberPicker;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
-import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.model.GbcImage;
-import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
-import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import javax.xml.transform.Result;
-
-public class CloneDialog {
+public class DuplicateDialog {
     Context context;
     List<Integer> selectedImages;
     CustomGridViewAdapterImage customGridViewAdapterImage;
     List<GbcImage> filteredGbcImages;
-    List<GbcImage> gbcImagesToClone = new ArrayList<>();
+    List<GbcImage> gbcImagesToDuplicate = new ArrayList<>();
     List<Integer> indexesToLoad = new ArrayList<>();
 
-    public CloneDialog(Context context, List<Integer> selectedImages, CustomGridViewAdapterImage customGridViewAdapterImage, List<GbcImage> filteredGbcImages, Activity activity) {
+    public DuplicateDialog(Context context, List<Integer> selectedImages, CustomGridViewAdapterImage customGridViewAdapterImage, List<GbcImage> filteredGbcImages, Activity activity) {
         this.context = context;
         this.selectedImages = selectedImages;
         this.customGridViewAdapterImage = customGridViewAdapterImage;
         this.filteredGbcImages = filteredGbcImages;
     }
 
-    public void createCloneDialog() {
+    public void createDuplicateDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getString(R.string.action_clone));
+        builder.setTitle(context.getString(R.string.action_duplicate));
 
         final NumberPicker numberPicker = new NumberPicker(context);
         numberPicker.setMinValue(1);
         numberPicker.setMaxValue(10);
         builder.setView(numberPicker);
 
-        builder.setPositiveButton(context.getString(R.string.action_clone), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(context.getString(R.string.action_duplicate), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 int selectedNumber = numberPicker.getValue();
-                saveClonedImages(selectedNumber);
+                saveDuplicatedImages(selectedNumber);
+                saveDuplicatedImages(selectedNumber);
             }
         });
 
@@ -72,12 +65,12 @@ public class CloneDialog {
         dialog.show();
     }
 
-    private void saveClonedImages(int numberOfClones) {
+    private void saveDuplicatedImages(int numberOfDuplicates) {
 
 
         Collections.sort(selectedImages);
         for (int i : selectedImages) {
-            gbcImagesToClone.add(filteredGbcImages.get(i));
+            gbcImagesToDuplicate.add(filteredGbcImages.get(i));
 
             String hashCode = filteredGbcImages.get(i).getHashCode();
             if (imageBitmapCache.get(hashCode) == null) {
@@ -88,87 +81,87 @@ public class CloneDialog {
         loadDialogCache.showDialog();
         //Need to get the bitmaps if they are not created
         LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialogCache, result -> {
-            CreateClonesAsyncTask createClonesAsyncTask = new CreateClonesAsyncTask(loadDialogCache, numberOfClones);
-            createClonesAsyncTask.execute();
+            CreateDuplicatesAsyncTask createDuplicatesAsyncTask = new CreateDuplicatesAsyncTask(loadDialogCache, numberOfDuplicates);
+            createDuplicatesAsyncTask.execute();
         });
         asyncTask.execute();
 
     }
 
-    private class CreateClonesAsyncTask extends AsyncTask<Void, Void, Void> {
+    private class CreateDuplicatesAsyncTask extends AsyncTask<Void, Void, Void> {
         LoadingDialog loadDialogCache;
-        int numberOfClones;
+        int numberOfDuplicats;
 
-        List<Bitmap> clonedBitmaps = new ArrayList<>();
-        List<GbcImage> clonedImages = new ArrayList<>();
+        List<Bitmap> duplicatedBitmaps = new ArrayList<>();
+        List<GbcImage> duplicatedImages = new ArrayList<>();
 
-        public CreateClonesAsyncTask(LoadingDialog loadDialogCache, int numberOfClones) {
+        public CreateDuplicatesAsyncTask(LoadingDialog loadDialogCache, int numberOfDuplicates) {
             this.loadDialogCache = loadDialogCache;
-            this.numberOfClones = numberOfClones;
+            this.numberOfDuplicats = numberOfDuplicates;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             long timeMs = System.currentTimeMillis();
             boolean alreadyIncluded;
-            int totalClones = gbcImagesToClone.size()*numberOfClones;
-            int currentClonedImages = 0;
-            for (int j = 0; j < gbcImagesToClone.size(); j++) {
-                GbcImage gbcImage = gbcImagesToClone.get(j);
+            int totalDuplicates = gbcImagesToDuplicate.size() * numberOfDuplicats;
+            int currentDuplicatedImages = 0;
+            for (int j = 0; j < gbcImagesToDuplicate.size(); j++) {
+                GbcImage gbcImage = gbcImagesToDuplicate.get(j);
                 timeMs += j;
-                for (int i = 0; i < numberOfClones; i++) {
-                    GbcImage clonedImage = gbcImage.clone();
-                    loadDialogCache.setLoadingDialogText("Creating clones: " + currentClonedImages++ + "/" + totalClones);
+                for (int i = 0; i < numberOfDuplicats; i++) {
+                    GbcImage duplicatedImage = gbcImage.clone();
+                    loadDialogCache.setLoadingDialogText("Creating duplicates: " + currentDuplicatedImages++ + "/" + totalDuplicates);
 
-                    long timeMsThisClone = timeMs + i + numberOfClones;
-                    String timeString = String.valueOf(timeMsThisClone);
+                    long timeMsThisDuplicate = timeMs + i + numberOfDuplicats;
+                    String timeString = String.valueOf(timeMsThisDuplicate);
                     String lastFiveDigits = timeString.substring(Math.max(0, timeString.length() - 5));
-                    String phrase = "clone" + lastFiveDigits;
+                    String phrase = "duped" + lastFiveDigits;
                     String name = new String(gbcImage.getName());
-                    name += "-clone";
+                    name += "-duplicate";
                     StringBuilder modifiedString = new StringBuilder(gbcImage.getHashCode());
-                    clonedImage.setName(name);
+                    duplicatedImage.setName(name);
                     try {
                         modifiedString.replace(modifiedString.length() - 10, modifiedString.length(), phrase);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        modifiedString.append("clonedBadLength" + timeString);
+                        modifiedString.append("dupeddbadlength" + timeString);
                     }
-                    String clonedHash = modifiedString.toString();
+                    String duplicatedHash = modifiedString.toString();
 
                     int aux = 1;
 
-                    do {//Mostly needed for clones of clones
+                    do {//Mostly needed for duplicates of duplicates
                         alreadyIncluded = false;
                         for (GbcImage image : gbcImagesList) {
-                            if (image.getHashCode().equals(clonedHash)) {
+                            if (image.getHashCode().equals(duplicatedHash)) {
                                 alreadyIncluded = true;
                                 break;
                             }
                         }
-                        for (GbcImage image : clonedImages) {
-                            if (image.getHashCode().equals(clonedHash)) {
+                        for (GbcImage image : duplicatedImages) {
+                            if (image.getHashCode().equals(duplicatedHash)) {
                                 alreadyIncluded = true;
                                 break;
                             }
                         }
                         if (alreadyIncluded) {//Change the hash
-                            String lastNumbersString = clonedHash.substring(clonedHash.length() - 5);
+                            String lastNumbersString = duplicatedHash.substring(duplicatedHash.length() - 5);
                             int lastNumbers = Integer.parseInt(lastNumbersString, 10);//Base 10 to keep left 0
                             int sum = lastNumbers + aux++;
-                            clonedHash = clonedHash.replace(lastNumbersString, String.format("%05d", sum));
+                            duplicatedHash = duplicatedHash.replace(lastNumbersString, String.format("%05d", sum));
                         }
                     } while (alreadyIncluded);
 
-                    clonedImage.setHashCode(clonedHash);
+                    duplicatedImage.setHashCode(duplicatedHash);
 
-                    HashSet tags = new HashSet(clonedImage.getTags());
-                    tags.add("Cloned");
-                    clonedImage.setTags(tags);
-                    clonedImages.add(clonedImage);
+                    HashSet tags = new HashSet(duplicatedImage.getTags());
+                    tags.add("Duplicated");
+                    duplicatedImage.setTags(tags);
+                    duplicatedImages.add(duplicatedImage);
                     Bitmap originalBitmap = imageBitmapCache.get(gbcImage.getHashCode());
-                    Bitmap clonedBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
-                    clonedBitmaps.add(clonedBitmap);
+                    Bitmap duplicatedBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
+                    duplicatedBitmaps.add(duplicatedBitmap);
 
                 }
 
@@ -183,7 +176,7 @@ public class CloneDialog {
             LoadingDialog loadDialogSave = new LoadingDialog(context, "Saving data");
             loadDialogSave.showDialog();
 
-            new SaveImageAsyncTask(clonedImages, clonedBitmaps, context, null, 0, customGridViewAdapterImage, loadDialogSave).execute();
+            new SaveImageAsyncTask(duplicatedImages, duplicatedBitmaps, context, null, 0, customGridViewAdapterImage, loadDialogSave).execute();
         }
     }
 }

@@ -432,9 +432,30 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         @Override
                         public void onClick(View view) {
                             final int PRINT_WIDTH = 160; //  Prints need to be 160px in width
-                            Bitmap printBitmap = collagedImage[0].copy(collagedImage[0].getConfig(), true);
-
+                            List<Bitmap> collageBwBitmaps = new ArrayList<>();
                             if (colsRowsValue[0] == 1) { //Only do this if it's 1 row / column
+
+                                // Need to change all images to B&W and redo the collage first for the encoding to work
+                                for (int i : selectedImages) {
+                                    GbcImage gbcImage = filteredGbcImages.get(i);
+                                    //Need to change the palette to bw so the encodeImage method works
+                                    Bitmap image = null;
+                                    try {
+                                        image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+
+                                    image = rotateBitmap(image, gbcImage);
+
+                                    collageBwBitmaps.add(image);
+
+                                }
+                                if (lastPicked[0] != Color.parseColor("#000000")) {//If border is not black, make it always white.
+                                    lastPicked[0] = Color.parseColor("#FFFFFF");
+                                }
+
+                                Bitmap printBitmap = createCollage(collageBwBitmaps, colsRowsValue[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
 
                                 if (swHorizontalOrientation.isChecked()) {
                                     Matrix matrix = new Matrix();

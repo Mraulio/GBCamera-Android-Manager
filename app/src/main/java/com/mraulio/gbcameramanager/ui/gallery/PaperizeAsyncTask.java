@@ -1,31 +1,22 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
-
-import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.addPadding;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filteredGbcImages;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
-
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperize;
-import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
-import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 
-import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
 
-import java.io.IOException;
 import java.util.List;
 
-public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
-    private List<Integer> gbcImagesList;
+ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
+    private List<Bitmap> bitmapList;
     private Context context;
     private int paperColor;
     private ImageView ivPaperized;
@@ -33,8 +24,8 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
     private boolean onlyImage;
     private LoadingDialog loadDialog;
 
-    public PaperizeAsyncTask(List<Integer> gbcImagesList, int paperColor, List<Bitmap> paperizedBitmaps, ImageView ivPaperized, boolean onlyImage, Context context, LoadingDialog loadDialog) {
-        this.gbcImagesList = gbcImagesList;
+    public PaperizeAsyncTask(List<Bitmap> bitmapList, int paperColor, List<Bitmap> paperizedBitmaps, ImageView ivPaperized, boolean onlyImage, Context context, LoadingDialog loadDialog) {
+        this.bitmapList = bitmapList;
         this.paperColor = paperColor;
         this.paperizedBitmaps = paperizedBitmaps;
         this.ivPaperized = ivPaperized;
@@ -46,26 +37,8 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... voids) {
 
-        for (int i : gbcImagesList) {
-            GbcImage gbcImage = filteredGbcImages.get(i);
-            Bitmap bw_image = null;
-            try {
-                bw_image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
-
-                //Not rotate wild frames
-                if (!hashFrames.get(gbcImage.getFrameId()).isWildFrame() ||
-                        (bw_image.getHeight() > 144 && gbcImage.getRotation() == 2)) {//If image is higher than a normal one, only rotate if it's 180º
-                    bw_image = rotateBitmap(bw_image, gbcImage);
-                }
-
-                //If image is rotated sideways, add 8px on each side to print it in that orientation
-                if (bw_image.getWidth() == 144 && bw_image.getHeight() == 160) {
-                    bw_image = addPadding(bw_image, 1, Color.parseColor("#FFFFFF"));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Bitmap paperized = paperize(bw_image, paperColor, onlyImage, context);
+        for (Bitmap bitmap : bitmapList) {
+            Bitmap paperized = paperize(bitmap, paperColor, onlyImage, context);
             paperizedBitmaps.add(paperized);
         }
 
@@ -74,7 +47,8 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        ivPaperized.setImageBitmap(paperizedBitmaps.get(0));
+        try {
+            ivPaperized.setImageBitmap(paperizedBitmaps.get(0));
 
         final long imageViewHeight = ivPaperized.getHeight();
         // Starting position outside the screen
@@ -106,6 +80,9 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
         animatorSet.playSequentially(stopAnimation1, stopAnimation2, stopAnimation3, stopAnimation4,stopAnimation5,stopAnimation6, slideAnimator);
 
         animatorSet.start();
+        } catch (Exception e){
+            toast(context,"Image too big to draw on screen. You can try downloading it");
+        }
         loadDialog.dismissDialog();
     }
 

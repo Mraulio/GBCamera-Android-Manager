@@ -2,11 +2,16 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.customColorPaper;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
+import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.addPadding;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.crop;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filteredGbcImages;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.rotateBitmapImport;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -30,6 +35,7 @@ import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.File;
@@ -212,7 +218,7 @@ public class PaperUtils {
         return modifiedImage;
     }
 
-    public static void paperDialog(List<Integer> indexToPaperize, Context context) {
+    public static void paperDialog(List<Bitmap> bitmapsToPaperize, Context context) {
 
         //Do a dialog class extending DialogFragment with onDismiss for recycles
         final Dialog dialog = new Dialog(context);
@@ -316,7 +322,8 @@ public class PaperUtils {
                 paperizedBitmaps.clear();
                 loadDialog.showDialog();
                 loadDialog.setLoadingDialogText("Paperizing...");
-                new PaperizeAsyncTask(indexToPaperize, paperColor[0], paperizedBitmaps, ivPaperized, cbOnlyImagePaper.isChecked(), context, loadDialog).execute();
+
+                new PaperizeAsyncTask(bitmapsToPaperize, paperColor[0], paperizedBitmaps, ivPaperized, cbOnlyImagePaper.isChecked(), context, loadDialog).execute();
             }
         });
         btnSavePaper.setOnClickListener(new View.OnClickListener() {

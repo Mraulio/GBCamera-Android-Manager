@@ -136,8 +136,20 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:gravity="center"
-
                     android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_paperize_collage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:autoSizeMaxTextSize="30sp"
+                        android:autoSizeMinTextSize="3sp"
+                        android:autoSizeTextType="uniform"
+                        android:maxLines="1"
+                        android:text="@string/paperize_button"
+                        android:textSize="10dp"
+                        android:visibility="gone" />
 
                     <Button
                         android:id="@+id/print_button_collage"
@@ -147,6 +159,8 @@
                         android:layout_marginHorizontal="3dp"
                         android:drawableTint="@color/white"
                         android:gravity="center_horizontal"
+                        android:visibility="gone"
+
                         app:icon="@drawable/ic_print"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp" />
@@ -155,7 +169,7 @@
                         android:id="@+id/btnReloadCollage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="30dp"
+                        android:layout_marginHorizontal="10dp"
                         android:text="@string/btn_realod_anim"></Button>
                 </LinearLayout>
 

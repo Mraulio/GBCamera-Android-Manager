@@ -194,7 +194,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 }
             });
             ImageView imageView = dialog.findViewById(R.id.image_view);
-            Button btnPaperize = dialog.findViewById(R.id.btnPaperize);
+            Button btnPaperize = dialog.findViewById(R.id.btn_paperize_collage);
             if (MainActivity.showPaperizeButton) {
                 btnPaperize.setVisibility(VISIBLE);
             }
@@ -308,8 +308,30 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 @Override
                 public void onClick(View v) {
                     List<Integer> indexToPaperize = new ArrayList<>();
+                    List<Bitmap> bitmapsToPaperize = new ArrayList<>();
                     indexToPaperize.add(globalImageIndex);
-                    paperDialog(indexToPaperize, context);
+                    for (int i = 0; i < indexToPaperize.size(); i++) {
+                        GbcImage gbcImage = filteredGbcImages.get(i);
+                        Bitmap bw_image = null;
+                        try {
+                            bw_image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+
+                            //Not rotate wild frames
+                            if (!hashFrames.get(gbcImage.getFrameId()).isWildFrame() ||
+                                    (bw_image.getHeight() > 144 && gbcImage.getRotation() == 2)) {//If image is higher than a normal one, only rotate if it's 180º
+                                bw_image = rotateBitmap(bw_image, gbcImage);
+                            }
+
+                            //If image is rotated sideways, add 8px on each side to print it in that orientation
+                            if (bw_image.getWidth() == 144 && bw_image.getHeight() == 160) {
+                                bw_image = addPadding(bw_image, 1, Color.parseColor("#FFFFFF"));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        bitmapsToPaperize.add(bw_image);
+                    }
+                    paperDialog(bitmapsToPaperize, context);
                 }
             });
             rotateButton.setOnClickListener(new View.OnClickListener() {
@@ -839,7 +861,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     });
 
                     showPalettes = true;
-                    Button btn_paperize = dialog.findViewById(R.id.btnPaperize);
+                    Button btn_paperize = dialog.findViewById(R.id.btn_paperize_collage);
                     if (MainActivity.showPaperizeButton) {
                         btn_paperize.setVisibility(VISIBLE);
                     }

@@ -20,6 +20,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.showFilterDial
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortImages;
 
 import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.newPosition;
+import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.getHiddenTags;
 import static com.mraulio.gbcameramanager.utils.Utils.getSelectedTags;
@@ -411,7 +412,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     Button btnCancel = collageView.findViewById(R.id.cancel_button);
 
                     Button btnPrint = collageView.findViewById(R.id.print_button_collage);
+                    Button btnPaperizeCollage = collageView.findViewById(R.id.btn_paperize_collage);
+
                     btnPrint.setVisibility(MainActivity.printingEnabled ? VISIBLE : GONE);
+                    btnPaperizeCollage.setVisibility(MainActivity.showPaperizeButton ? VISIBLE : GONE);
+
 
                     Switch swCropCollage = collageView.findViewById(R.id.swCropCollage);
                     Switch swHorizontalOrientation = collageView.findViewById(R.id.sw_orientation);
@@ -428,127 +433,79 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     final int[] lastPicked = {Color.parseColor("#FFFFFF")};
                     final int[] extraPaddingMultiplier = {0};
 
-                    btnPrint.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            final int PRINT_WIDTH = 160; //  Prints need to be 160px in width
-                            List<Bitmap> collageBwBitmaps = new ArrayList<>();
-                            if (colsRowsValue[0] == 1) { //Only do this if it's 1 row / column
+                    btnPrint.setOnClickListener(view -> {
+                        Bitmap printBitmap = getPrintBitmap(colsRowsValue[0], lastPicked[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0]);
+                        if (printBitmap != null) {
+                            try {
+                                connect();
+                                usbIoManager.start();
+                                port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 
-                                // Need to change all images to B&W and redo the collage first for the encoding to work
-                                for (int i : selectedImages) {
-                                    GbcImage gbcImage = filteredGbcImages.get(i);
-                                    //Need to change the palette to bw so the encodeImage method works
-                                    Bitmap image = null;
-                                    try {
-                                        image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                View dialogView = getActivity().getLayoutInflater().inflate(R.layout.print_dialog, null);
+                                tvResponseBytes = dialogView.findViewById(R.id.tvResponseBytes);
+                                builder.setView(dialogView);
 
-                                    image = rotateBitmap(image, gbcImage);
+                                builder.setNegativeButton(getString(R.string.dialog_close_button), (dialog, which) -> {
+                                });
 
-                                    collageBwBitmaps.add(image);
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
 
-                                }
-                                if (lastPicked[0] != Color.parseColor("#000000")) {//If border is not black, make it always white.
-                                    lastPicked[0] = Color.parseColor("#FFFFFF");
-                                }
+                                //PRINT IMAGE
+                                PrintOverArduino printOverArduino = new PrintOverArduino();
 
-                                Bitmap printBitmap = createCollage(collageBwBitmaps, colsRowsValue[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
-
-                                if (swHorizontalOrientation.isChecked()) {
-                                    Matrix matrix = new Matrix();
-                                    matrix.postRotate(90);
-                                    printBitmap = Bitmap.createBitmap(printBitmap, 0, 0, printBitmap.getWidth(), printBitmap.getHeight(), matrix, false);
-                                }
-
-                                int paddingMult = ((PRINT_WIDTH - printBitmap.getWidth()) / 8) / 2;
-                                if (paddingMult != 0) {
-                                    //Add padding on each side to center it
-                                    printBitmap = addPadding(printBitmap, paddingMult, Color.parseColor("#FFFFFF"));
-                                }
+                                printOverArduino.banner = false;
                                 try {
-                                    connect();
-                                    usbIoManager.start();
-                                    port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                    View dialogView = getActivity().getLayoutInflater().inflate(R.layout.print_dialog, null);
-                                    tvResponseBytes = dialogView.findViewById(R.id.tvResponseBytes);
-                                    builder.setView(dialogView);
-
-                                    builder.setNegativeButton(getString(R.string.dialog_close_button), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                        }
-                                    });
-
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
-
-                                    //PRINT IMAGE
-                                    PrintOverArduino printOverArduino = new PrintOverArduino();
-
-                                    printOverArduino.banner = false;
-                                    try {
-                                        List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
-                                        if (availableDrivers.isEmpty()) {
-                                            return;
-                                        }
-                                        UsbSerialDriver driver = availableDrivers.get(0);
-                                        List<byte[]> imageByteList = new ArrayList();
-
-                                        imageByteList.add(Utils.encodeImage(printBitmap, "bw"));
-                                        printOverArduino.sendThreadDelay(connection, driver.getDevice(), tvResponseBytes, imageByteList);
-                                    } catch (Exception e) {
-                                        tv.append(e.toString());
-                                        Toast toast = Toast.makeText(getContext(), getContext().getString(R.string.error_print_image) + e.toString(), Toast.LENGTH_LONG);
-                                        toast.show();
+                                    List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+                                    if (availableDrivers.isEmpty()) {
+                                        return;
                                     }
+                                    UsbSerialDriver driver = availableDrivers.get(0);
+                                    List<byte[]> imageByteList = new ArrayList();
+
+                                    imageByteList.add(Utils.encodeImage(printBitmap, "bw"));
+                                    printOverArduino.sendThreadDelay(connection, driver.getDevice(), tvResponseBytes, imageByteList);
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    tv.append(e.toString());
+                                    Toast toast = Toast.makeText(getContext(), getContext().getString(R.string.error_print_image) + e.toString(), Toast.LENGTH_LONG);
+                                    toast.show();
                                 }
-                            } else {
-                                toast(getContext(), getString(R.string.collage_print_col_rows_error));
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
                         }
                     });
 
-
-                    ivPaddingColor.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ColorPickerDialogBuilder
-                                    .with(getContext())
-                                    .setTitle(getString(R.string.choose_color))
-                                    .initialColor(lastPicked[0])
-                                    .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
-                                    .density(12)
-                                    .showAlphaSlider(false)
-                                    .setOnColorSelectedListener(new OnColorSelectedListener() {
-                                        @Override
-                                        public void onColorSelected(int selectedColor) {
-                                            Utils.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase());
-                                        }
-                                    })
-                                    .setPositiveButton("OK", new ColorPickerClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
-                                            applyBorderToIV(ivPaddingColor, selectedColor);
-                                            lastPicked[0] = selectedColor;
-
-                                        }
-                                    })
-                                    .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                        }
-                                    })
-                                    .build()
-                                    .show();
+                    btnPaperizeCollage.setOnClickListener(view -> {
+                        Bitmap printBitmap = getPrintBitmap(colsRowsValue[0], lastPicked[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0]);
+                        if (printBitmap != null) {
+                            List<Bitmap> printHolder = new ArrayList<>();
+                            printHolder.add(printBitmap);
+                            paperDialog(printHolder, getContext());
                         }
                     });
+
+                    ivPaddingColor.setOnClickListener(v -> ColorPickerDialogBuilder
+                            .with(getContext())
+                            .setTitle(getString(R.string.choose_color))
+                            .initialColor(lastPicked[0])
+                            .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
+                            .density(12)
+                            .showAlphaSlider(false)
+                            .setOnColorSelectedListener(selectedColor -> Utils.toast(getContext(), getString(R.string.selected_color) + Integer.toHexString(selectedColor).substring(2).toUpperCase()))
+                            .setPositiveButton("OK", new ColorPickerClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
+                                    applyBorderToIV(ivPaddingColor, selectedColor);
+                                    lastPicked[0] = selectedColor;
+
+                                }
+                            })
+                            .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+                            })
+                            .build()
+                            .show());
                     Dialog dialog = new Dialog(getContext());
 
                     tvExtraPadding.setText(getString(R.string.tv_extra_padding) + extraPaddingMultiplier[0]);
@@ -583,7 +540,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         @Override
                         public void onClick(View view) {
                             colsRowsValue[0] = nPColsRows.getValue();
-
                             collagedImage[0] = createCollage(collageBitmapList, colsRowsValue[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
                             Bitmap bitmap = Bitmap.createScaledBitmap(collagedImage[0], collagedImage[0].getWidth() * finalScaledCollage, collagedImage[0].getHeight() * finalScaledCollage, false);
                             imageView.setImageBitmap(bitmap);
@@ -596,7 +552,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         if (imageBitmapCache.get(hashCode) == null) {
                             indexesToLoad.add(i);
                         }
-
                     }
 
                     btnSaveCollage.setOnClickListener(new View.OnClickListener() {
@@ -1387,4 +1342,50 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public void onRunError(Exception e) {
 
     }
+
+    private Bitmap getPrintBitmap(int colsRowsValue, int lastPicked, boolean swCropCollageChecked, boolean swHorizontalOrientationChecked, boolean swHalfFrameChecked, int extraPaddingMultiplier) {
+        final int PRINT_WIDTH = 160; //  Prints need to be 160px in width
+        List<Bitmap> collageBwBitmaps = new ArrayList<>();
+        if (colsRowsValue == 1) { //Only do this if it's 1 row / column
+
+            // Need to change all images to B&W and redo the collage first for the encoding to work
+            for (int i : selectedImages) {
+                GbcImage gbcImage = filteredGbcImages.get(i);
+                //Need to change the palette to bw so the encodeImage method works
+                Bitmap image;
+                try {
+                    image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                image = rotateBitmap(image, gbcImage);
+
+                collageBwBitmaps.add(image);
+
+            }
+            if (lastPicked != Color.parseColor("#000000")) {//If border is not black, make it always white.
+                lastPicked = Color.parseColor("#FFFFFF");
+            }
+
+            Bitmap printBitmap = createCollage(collageBwBitmaps, colsRowsValue, swCropCollageChecked, swHorizontalOrientationChecked, swHalfFrameChecked, extraPaddingMultiplier, lastPicked);
+
+            if (swHorizontalOrientationChecked) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90);
+                printBitmap = Bitmap.createBitmap(printBitmap, 0, 0, printBitmap.getWidth(), printBitmap.getHeight(), matrix, false);
+            }
+
+            int paddingMult = ((PRINT_WIDTH - printBitmap.getWidth()) / 8) / 2;
+            if (paddingMult != 0) {
+                //Add padding on each side to center it
+                printBitmap = addPadding(printBitmap, paddingMult, Color.parseColor("#FFFFFF"));
+            }
+            return printBitmap;
+        } else {
+            toast(getContext(), getString(R.string.collage_print_col_rows_error));
+            return null;
+        }
+    }
+
 }

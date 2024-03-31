@@ -103,7 +103,7 @@
         android:weightSum="4">
 
         <Button
-            android:id="@+id/btnPaperize"
+            android:id="@+id/btn_paperize_collage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

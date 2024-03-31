@@ -44,14 +44,10 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginHorizontal="3dp"
             android:layout_weight="1"
-            android:autoSizeMaxTextSize="30sp"
-            android:autoSizeMinTextSize="5sp"
-            android:autoSizeTextType="uniform"
             android:drawableTint="@color/white"
             android:gravity="center_horizontal"
-            android:textSize="10dp"
-            android:visibility="gone"
             app:icon="@drawable/ic_print"
+            android:visibility="gone"
             app:iconGravity="textStart"
             app:iconPadding="0dp" />
 

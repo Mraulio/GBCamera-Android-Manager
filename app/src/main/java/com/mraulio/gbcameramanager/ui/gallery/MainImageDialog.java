@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
+import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.addPadding;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.nextPage;
@@ -17,6 +18,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
@@ -27,6 +29,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
@@ -97,6 +100,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     private int imageViewMiniIndex = 0;
     final int[] globalImageIndex = new int[1];
     static int newPosition;
+
     public MainImageDialog(boolean multiEdition, GridView gridView, boolean keepFrame, int currentPage, int lastPage, int position, int itemsPerPage,
                            List<GbcImage> filteredGbcImages, int lastSeenGalleryImage, Context context, DisplayMetrics displayMetrics,
                            boolean showPalettes, Activity activity, UsbSerialPort port, SerialInputOutputManager usbIoManager,
@@ -190,9 +194,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 }
             });
             ImageView imageView = dialog.findViewById(R.id.image_view);
-            Button btn_paperize = dialog.findViewById(R.id.btnPaperize);
+            Button btnPaperize = dialog.findViewById(R.id.btnPaperize);
             if (MainActivity.showPaperizeButton) {
-                btn_paperize.setVisibility(VISIBLE);
+                btnPaperize.setVisibility(VISIBLE);
             }
 
             selectedImage[0] = rotateBitmap(selectedImage[0], filteredGbcImages.get(globalImageIndex));
@@ -300,7 +304,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 }
             });
 
-            btn_paperize.setOnClickListener(new View.OnClickListener() {
+            btnPaperize.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     List<Integer> indexToPaperize = new ArrayList<>();
@@ -584,6 +588,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
                         AlertDialog dialog = builder.create();
                         dialog.show();
+
                         //PRINT IMAGE
                         PrintOverArduino printOverArduino = new PrintOverArduino();
 
@@ -597,6 +602,17 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                             GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
                             List<byte[]> imageByteList = new ArrayList();
                             Bitmap image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+
+                            //Not rotate wild frames
+                            if (!hashFrames.get(gbcImage.getFrameId()).isWildFrame() ||
+                                    (image.getHeight() > 144 && gbcImage.getRotation() == 2)) {//If image is higher than a normal one, only rotate if it's 180º
+                                image = rotateBitmap(image, gbcImage);
+                            }
+
+                            //If image is rotated sideways, add 8px on each side to print it in that orientation
+                            if (image.getWidth() == 144 && image.getHeight() == 160) {
+                                image = addPadding(image, 1, Color.parseColor("#FFFFFF"));
+                            }
                             imageByteList.add(Utils.encodeImage(image, "bw"));
                             printOverArduino.sendThreadDelay(connection, driver.getDevice(), tvResponseBytes, imageByteList);
                         } catch (Exception e) {
@@ -625,7 +641,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 public void onClick(View v) {
                     List saveList = new ArrayList();
                     saveList.add(filteredGbcImages.get(globalImageIndex));
-                    saveImage(saveList, context,cbCrop.isChecked());
+                    saveImage(saveList, context, cbCrop.isChecked());
                 }
             });
 
@@ -657,7 +673,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             final Dialog dialog = new Dialog(context);
             LoadingDialog loadingDialog = new LoadingDialog(context, "Loading cache");
             loadingDialog.showDialog();
-            LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog,new AsyncTaskCompleteListener<Result>() {
+            LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog, new AsyncTaskCompleteListener<Result>() {
                 @Override
                 public void onTaskComplete(Result result) {
                     loadingDialog.dismissDialog();

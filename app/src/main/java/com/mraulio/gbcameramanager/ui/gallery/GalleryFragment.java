@@ -1,9 +1,13 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.MainActivity.exportSize;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
+import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
+import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.addPadding;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.applyBorderToIV;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.createCollage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
@@ -19,6 +23,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.newPosition
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.getHiddenTags;
 import static com.mraulio.gbcameramanager.utils.Utils.getSelectedTags;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.imageBitmapCache;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
@@ -37,6 +42,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 
@@ -65,10 +71,13 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
+import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.ui.usbserial.PrintOverArduino;
 import com.mraulio.gbcameramanager.utils.AnimatedGifEncoder;
 import com.mraulio.gbcameramanager.utils.DiskCache;
 import com.mraulio.gbcameramanager.utils.HorizontalNumberPicker;
@@ -88,6 +97,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -102,7 +112,7 @@ import javax.xml.transform.Result;
 
 import pl.droidsonroids.gif.GifDrawable;
 
-public class GalleryFragment extends Fragment {
+public class GalleryFragment extends Fragment implements SerialInputOutputManager.Listener {
     static UsbManager manager = MainActivity.manager;
     SerialInputOutputManager usbIoManager;
     static UsbDeviceConnection connection;
@@ -399,6 +409,10 @@ public class GalleryFragment extends Fragment {
                     Button btnReloadCollage = collageView.findViewById(R.id.btnReloadCollage);
                     Button btnSaveCollage = collageView.findViewById(R.id.save_btn_collage);
                     Button btnCancel = collageView.findViewById(R.id.cancel_button);
+
+                    Button btnPrint = collageView.findViewById(R.id.print_button_collage);
+                    btnPrint.setVisibility(MainActivity.printingEnabled ? VISIBLE : GONE);
+
                     Switch swCropCollage = collageView.findViewById(R.id.swCropCollage);
                     Switch swHorizontalOrientation = collageView.findViewById(R.id.sw_orientation);
                     Switch swHalfFrame = collageView.findViewById(R.id.sw_half_frame);
@@ -410,7 +424,75 @@ public class GalleryFragment extends Fragment {
                     nPColsRows.setMax(30);
                     nPColsRows.setMin(1);
 
+                    final int[] colsRowsValue = {1};
                     final int[] lastPicked = {Color.parseColor("#FFFFFF")};
+                    final int[] extraPaddingMultiplier = {0};
+
+                    btnPrint.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            final int PRINT_WIDTH = 160; //  Prints need to be 160px in width
+                            Bitmap printBitmap = collagedImage[0].copy(collagedImage[0].getConfig(), true);
+
+                            if (colsRowsValue[0] == 1) { //Only do this if it's 1 row / column
+
+                                if (swHorizontalOrientation.isChecked()) {
+                                    Matrix matrix = new Matrix();
+                                    matrix.postRotate(90);
+                                    printBitmap = Bitmap.createBitmap(printBitmap, 0, 0, printBitmap.getWidth(), printBitmap.getHeight(), matrix, false);
+                                }
+
+                                int paddingMult = ((PRINT_WIDTH - printBitmap.getWidth()) / 8) / 2;
+                                if (paddingMult != 0) {
+                                    //Add padding on each side to center it
+                                    printBitmap = addPadding(printBitmap, paddingMult, Color.parseColor("#FFFFFF"));
+                                }
+                                try {
+                                    connect();
+                                    usbIoManager.start();
+                                    port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                    View dialogView = getActivity().getLayoutInflater().inflate(R.layout.print_dialog, null);
+                                    tvResponseBytes = dialogView.findViewById(R.id.tvResponseBytes);
+                                    builder.setView(dialogView);
+
+                                    builder.setNegativeButton(getString(R.string.dialog_close_button), new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                        }
+                                    });
+
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
+
+                                    //PRINT IMAGE
+                                    PrintOverArduino printOverArduino = new PrintOverArduino();
+
+                                    printOverArduino.banner = false;
+                                    try {
+                                        List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+                                        if (availableDrivers.isEmpty()) {
+                                            return;
+                                        }
+                                        UsbSerialDriver driver = availableDrivers.get(0);
+                                        List<byte[]> imageByteList = new ArrayList();
+
+                                        imageByteList.add(Utils.encodeImage(printBitmap, "bw"));
+                                        printOverArduino.sendThreadDelay(connection, driver.getDevice(), tvResponseBytes, imageByteList);
+                                    } catch (Exception e) {
+                                        tv.append(e.toString());
+                                        Toast toast = Toast.makeText(getContext(), getContext().getString(R.string.error_print_image) + e.toString(), Toast.LENGTH_LONG);
+                                        toast.show();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                toast(getContext(), getString(R.string.collage_print_col_rows_error));
+                            }
+                        }
+                    });
 
 
                     ivPaddingColor.setOnClickListener(new View.OnClickListener() {
@@ -448,7 +530,6 @@ public class GalleryFragment extends Fragment {
                     });
                     Dialog dialog = new Dialog(getContext());
 
-                    final int[] extraPaddingMultiplier = {0};
                     tvExtraPadding.setText(getString(R.string.tv_extra_padding) + extraPaddingMultiplier[0]);
                     swExtraPadding.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                         @Override
@@ -477,11 +558,12 @@ public class GalleryFragment extends Fragment {
                         }
                     });
                     int finalScaledCollage = scaledCollage;
-
                     btnReloadCollage.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            collagedImage[0] = createCollage(collageBitmapList, nPColsRows.getValue(), swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
+                            colsRowsValue[0] = nPColsRows.getValue();
+
+                            collagedImage[0] = createCollage(collageBitmapList, colsRowsValue[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
                             Bitmap bitmap = Bitmap.createScaledBitmap(collagedImage[0], collagedImage[0].getWidth() * finalScaledCollage, collagedImage[0].getHeight() * finalScaledCollage, false);
                             imageView.setImageBitmap(bitmap);
                         }
@@ -546,7 +628,7 @@ public class GalleryFragment extends Fragment {
                                 collageBitmapList.add(image);
                             }
                             try {
-                                collagedImage[0] = createCollage(collageBitmapList, nPColsRows.getValue(), swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
+                                collagedImage[0] = createCollage(collageBitmapList, colsRowsValue[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
                                 Bitmap bitmap = Bitmap.createScaledBitmap(collagedImage[0], collagedImage[0].getWidth() * finalScaledCollage, collagedImage[0].getHeight() * finalScaledCollage, false);
                                 imageView.setImageBitmap(bitmap);
                                 dialog.setContentView(collageView);
@@ -554,7 +636,8 @@ public class GalleryFragment extends Fragment {
                                 int desiredHeight = (int) (screenHeight * 0.8);
                                 Window window = dialog.getWindow();
                                 window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, desiredHeight);
-                                applyBorderToIV(ivPaddingColor, collagedImage[0].getPixel(0, 0));
+                                lastPicked[0] = collagedImage[0].getPixel(0, 0);
+                                applyBorderToIV(ivPaddingColor, lastPicked[0]);
                                 dialog.show();
                             } catch (IllegalArgumentException e) {
                                 Utils.toast(getContext(), getString(R.string.hdr_exception));
@@ -1228,6 +1311,30 @@ public class GalleryFragment extends Fragment {
         }
     }
 
+    private void connect() {
+        manager = (UsbManager) getActivity().getSystemService(Context.USB_SERVICE);
+        List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+        if (availableDrivers.isEmpty()) {
+            return;
+        }
+        // Open a connection to the first available driver.
+        UsbSerialDriver driver = availableDrivers.get(0);
+        connection = manager.openDevice(driver.getDevice());
+
+        port = driver.getPorts().get(0); // Most devices have just one port (port 0)
+        try {
+            if (port.isOpen()) port.close();
+            port.open(connection);
+            port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+
+        } catch (Exception e) {
+            tv.append(e.toString());
+            Toast.makeText(getContext(), "Error in connect." + e.toString(), Toast.LENGTH_SHORT).show();
+        }
+
+        usbIoManager = new SerialInputOutputManager(port, this);
+    }
+
     private void hideSelectionOptions() {
         showEditMenuButton = false;
         selectedImages.clear();
@@ -1236,5 +1343,27 @@ public class GalleryFragment extends Fragment {
         MainActivity.fab.hide();
         updateTitleText();
         getActivity().invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onNewData(byte[] data) {
+        BigInteger bigInt = new BigInteger(1, data);
+        String hexString = bigInt.toString(16);
+        // Make sure the string is of pair length
+        if (hexString.length() % 2 != 0) {
+            hexString = "0" + hexString;
+        }
+        // Format the string in 2 chars blocks
+        hexString = String.format("%0" + (hexString.length() + hexString.length() % 2) + "X", new BigInteger(hexString, 16));
+        hexString = hexString.replaceAll("..", "$0 ");//To separate with spaces every hex byte
+        String finalHexString = hexString;
+        getActivity().runOnUiThread(() -> {
+            tvResponseBytes.append(finalHexString);
+        });
+    }
+
+    @Override
+    public void onRunError(Exception e) {
+
     }
 }

@@ -64,7 +64,7 @@ public class CollageMaker {
 
         Bitmap collageBitmap = Bitmap.createBitmap(collageWidth, collageHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(collageBitmap);
-        canvas.drawColor(0xFFFFFFFF);
+        canvas.drawColor(paddingColor);
 
         Paint paint = new Paint();
 

@@ -230,5 +230,6 @@
     <string name="action_duplicate">Duplicate</string>
     <string name="sw_half_frame">Half frame</string>
     <string name="tv_extra_padding">Extra padding:\u0020</string>
+    <string name="collage_print_col_rows_error">Only 1 row/column allowed.</string>
 
 </resources>

@@ -70,7 +70,7 @@ public class JsonReader {
                     return readerPalettes(palettesArray);
                 } else {
 
-                   return null;
+                    return null;
                 }
 
             } else if (stateObject.has("frames")) {
@@ -371,6 +371,7 @@ public class JsonReader {
                 String frameHash = "";
                 if (frameObj.has("hash")) {
                     frameHash = frameObj.getString("hash");
+                    gbcFrame.setFrameHash(frameHash);
                     hasHash = true;
                 }
 
@@ -391,7 +392,6 @@ public class JsonReader {
                 gbcFrame.setFrameBitmap(bitmap);
                 frameList.add(gbcFrame);
                 ImportFragment.addEnum = ImportFragment.ADD_WHAT.FRAMES;
-
                 if (!hasHash) {
                     //If json has not hash, generate it
                     try {
@@ -404,6 +404,7 @@ public class JsonReader {
                         e.printStackTrace();
                     }
                 }
+
                 if (frameHash.isEmpty()) return null;
 
             } catch (JSONException e) {

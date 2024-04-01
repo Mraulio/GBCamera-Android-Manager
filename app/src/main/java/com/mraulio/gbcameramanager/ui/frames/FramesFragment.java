@@ -6,6 +6,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
+import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 
@@ -53,6 +54,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,7 +72,7 @@ import java.util.zip.Deflater;
 public class FramesFragment extends Fragment {
     static List<String> frameGroupList;
     public static Spinner spFrameGroups;
-    public static final CustomGridViewAdapterFrames[] customGridViewAdapterFrames= new CustomGridViewAdapterFrames[1];
+    public static final CustomGridViewAdapterFrames[] customGridViewAdapterFrames = new CustomGridViewAdapterFrames[1];
     public static ArrayAdapter<String> adapterFrameGroupsSpinner;
     public static List<String> frameGroupIds = new ArrayList<>();
 
@@ -200,8 +202,8 @@ public class FramesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    framesJsonCreator(framesList);
-                } catch (JSONException | IOException e) {
+                    framesJsonCreator(framesList, "gbcam_all_frames");
+                } catch (JSONException | IOException | NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
             }
@@ -211,8 +213,10 @@ public class FramesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    framesJsonCreator(currentGroupList[0]);
+                    framesJsonCreator(currentGroupList[0], "gbcam_framegroup_" + frameGroupId[0]);
                 } catch (JSONException | IOException e) {
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
             }
@@ -233,7 +237,7 @@ public class FramesFragment extends Fragment {
     }
 
 
-    private void framesJsonCreator(List<GbcFrame> frameListToExport) throws JSONException, IOException {
+    private void framesJsonCreator(List<GbcFrame> frameListToExport, String fileName) throws JSONException, IOException, NoSuchAlgorithmException {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
         JSONArray framesArr = new JSONArray();
@@ -246,7 +250,13 @@ public class FramesFragment extends Fragment {
             String frameId = gbcFrame.getFrameId();
             frameObj.put("id", frameId);
             frameObj.put("name", gbcFrame.getFrameName());
-            frameObj.put("hash", gbcFrame.getFrameHash());
+
+            String hash = gbcFrame.getFrameHash();
+            if (hash == null) {
+                hash = generateHashFromBytes(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
+                gbcFrame.setFrameHash(hash);
+            }
+            frameObj.put("hash", hash);
             frameObj.put("isWildFrame", gbcFrame.isWildFrame());
             framesArr.put(frameObj);
 
@@ -309,7 +319,7 @@ public class FramesFragment extends Fragment {
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
-        String fileName = "frames_" + dateFormat.format(new Date()) + ".json";
+        fileName = fileName + "_" + dateFormat.format(new Date()) + ".json";
         File file = new File(Utils.FRAMES_FOLDER, fileName);
 
         try (FileWriter fileWriter = new FileWriter(file)) {
@@ -582,7 +592,7 @@ public class FramesFragment extends Fragment {
         dialog.show();
     }
 
-    public static void reloadFrameGroupsSpinner(Context context){
+    public static void reloadFrameGroupsSpinner(Context context) {
         //Update the name in the spinner
         frameGroupList.clear();
         frameGroupIds.clear();

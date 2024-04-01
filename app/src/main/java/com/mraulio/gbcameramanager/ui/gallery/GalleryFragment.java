@@ -437,6 +437,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         Bitmap printBitmap = getPrintBitmap(colsRowsValue[0], lastPicked[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0]);
                         if (printBitmap != null) {
                             try {
+//                                imageView.setImageBitmap(Bitmap.createScaledBitmap(printBitmap, printBitmap.getWidth() * 5, printBitmap.getHeight() * 5, false));
                                 connect();
                                 usbIoManager.start();
                                 port.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);

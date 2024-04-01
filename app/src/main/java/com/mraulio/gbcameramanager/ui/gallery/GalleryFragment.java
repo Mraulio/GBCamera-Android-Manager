@@ -1346,46 +1346,72 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     private Bitmap getPrintBitmap(int colsRowsValue, int lastPicked, boolean swCropCollageChecked, boolean swHorizontalOrientationChecked, boolean swHalfFrameChecked, int extraPaddingMultiplier) {
         final int PRINT_WIDTH = 160; //  Prints need to be 160px in width
         List<Bitmap> collageBwBitmaps = new ArrayList<>();
-        if (colsRowsValue == 1) { //Only do this if it's 1 row / column
 
-            // Need to change all images to B&W and redo the collage first for the encoding to work
-            for (int i : selectedImages) {
-                GbcImage gbcImage = filteredGbcImages.get(i);
-                //Need to change the palette to bw so the encodeImage method works
-                Bitmap image;
-                try {
-                    image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-                image = rotateBitmap(image, gbcImage);
-
-                collageBwBitmaps.add(image);
-
-            }
-            if (lastPicked != Color.parseColor("#000000")) {//If border is not black, make it always white.
-                lastPicked = Color.parseColor("#FFFFFF");
+        // Need to change all images to B&W and redo the collage first for the encoding to work
+        for (int i : selectedImages) {
+            GbcImage gbcImage = filteredGbcImages.get(i);
+            //Need to change the palette to bw so the encodeImage method works
+            Bitmap image;
+            try {
+                image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
-            Bitmap printBitmap = createCollage(collageBwBitmaps, colsRowsValue, swCropCollageChecked, swHorizontalOrientationChecked, swHalfFrameChecked, extraPaddingMultiplier, lastPicked);
+            image = rotateBitmap(image, gbcImage);
 
-            if (swHorizontalOrientationChecked) {
-                Matrix matrix = new Matrix();
-                matrix.postRotate(90);
-                printBitmap = Bitmap.createBitmap(printBitmap, 0, 0, printBitmap.getWidth(), printBitmap.getHeight(), matrix, false);
-            }
+            collageBwBitmaps.add(image);
 
+        }
+        if (lastPicked != Color.parseColor("#000000")) {//If border is not black, make it always white.
+            lastPicked = Color.parseColor("#FFFFFF");
+        }
+
+        Bitmap printBitmap = createCollage(collageBwBitmaps, colsRowsValue, swCropCollageChecked, swHorizontalOrientationChecked, swHalfFrameChecked, extraPaddingMultiplier, lastPicked);
+
+        if (swHorizontalOrientationChecked) {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(90);
+            printBitmap = Bitmap.createBitmap(printBitmap, 0, 0, printBitmap.getWidth(), printBitmap.getHeight(), matrix, false);
+        }
+
+        if (printBitmap.getWidth() <= PRINT_WIDTH || (printBitmap.getWidth() > PRINT_WIDTH && colsRowsValue == 1)) {
+
+            //If only 1 column or row, adjust the padding to fit the 160px wide
             int paddingMult = ((PRINT_WIDTH - printBitmap.getWidth()) / 8) / 2;
             if (paddingMult != 0) {
                 //Add padding on each side to center it
                 printBitmap = addPadding(printBitmap, paddingMult, Color.parseColor("#FFFFFF"));
             }
             return printBitmap;
+
         } else {
-            toast(getContext(), getString(R.string.collage_print_col_rows_error));
-            return null;
+            // Calculate the proportional height
+            int originalWidth = printBitmap.getWidth();
+            int originalHeight = printBitmap.getHeight();
+            float aspectRatio = (float) originalHeight / originalWidth;
+            int desiredHeight = Math.round(160 * aspectRatio);
+
+            // Adjust height to be multiple of 16
+            while (desiredHeight % 16 != 0) {
+                desiredHeight++;
+            }
+            // Scalate the bitmap to new size
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(printBitmap, 160, desiredHeight, false);
+
+            // If new size if not multiple of 16, add white pixels at the bottom
+            if (desiredHeight % 16 != 0) {
+                int extraHeight = 16 - (desiredHeight % 16);
+                Bitmap adjustedBitmap = Bitmap.createBitmap(scaledBitmap.getWidth(), desiredHeight + extraHeight, scaledBitmap.getConfig());
+                Canvas canvas = new Canvas(adjustedBitmap);
+                canvas.drawColor(Color.WHITE);
+                canvas.drawBitmap(scaledBitmap, 0, 0, null);
+                return adjustedBitmap;
+            } else {
+                return scaledBitmap;
+            }
         }
+
     }
 
 }

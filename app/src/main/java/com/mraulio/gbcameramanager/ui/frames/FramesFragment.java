@@ -57,6 +57,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,6 +88,7 @@ public class FramesFragment extends Fragment {
         Button btnExportFramesJson = view.findViewById(R.id.btnExportFramesJson);
         Button btnExportCurrentGroup = view.findViewById(R.id.btnExportCurrentGroup);
         Button btnEditCurrentFrameGroup = view.findViewById(R.id.btnEditCurrentFrameGroup);
+        Button btnDeleteCurrentFrameGroup = view.findViewById(R.id.btnDeleteCurrentFrameGroup);
 
         final List<GbcFrame>[] currentlyShowingFrames = new List[]{Utils.framesList};
         customGridViewAdapterFrames[0] = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false);
@@ -117,6 +119,7 @@ public class FramesFragment extends Fragment {
                     currentlyShowingFrames[0] = Utils.framesList;
                     btnEditCurrentFrameGroup.setEnabled(false);
                     btnExportCurrentGroup.setEnabled(false);
+                    btnDeleteCurrentFrameGroup.setEnabled(false);
                 } else {
                     frameGroupId[0] = frameGroupIds.get(i - 1);
                     currentGroupList[0] = new ArrayList<>();
@@ -130,6 +133,8 @@ public class FramesFragment extends Fragment {
                     currentlyShowingFrames[0] = currentGroupList[0];
                     btnEditCurrentFrameGroup.setEnabled(true);
                     btnExportCurrentGroup.setEnabled(true);
+                    if (!frameGroupId[0].equals("gbcam"))
+                        btnDeleteCurrentFrameGroup.setEnabled(true);
                 }
                 customGridViewAdapterFrames[0] = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false);
                 gridView.setAdapter(customGridViewAdapterFrames[0]);
@@ -160,7 +165,8 @@ public class FramesFragment extends Fragment {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
                 GbcFrame selectedFrame = currentlyShowingFrames[0].get(position);
-
+                List<GbcFrame> framesToDelete = new ArrayList<>();
+                framesToDelete.add(selectedFrame);
                 if (selectedFrame.getFrameId().equals("gbcam01") || selectedFrame.getFrameId().equals("gbcam02") || selectedFrame.getFrameId().equals("gbcam03")) {
                     Utils.toast(getContext(), getString(R.string.cant_delete_base));
                 } else {
@@ -178,7 +184,7 @@ public class FramesFragment extends Fragment {
                     builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            new DeleteFrameAsyncTask(selectedFrame, spFrameGroups, frameGroupList, adapterFrameGroupsSpinner, frameGroupIds, tvNumFrames, customGridViewAdapterFrames[0], gridView, currentlyShowingFrames[0]).execute();
+                            new DeleteFrameAsyncTask(framesToDelete, spFrameGroups, frameGroupList, adapterFrameGroupsSpinner, frameGroupIds, tvNumFrames, customGridViewAdapterFrames[0], gridView, currentlyShowingFrames[0]).execute();
                             //I change the frame index of the images that have the deleted one to 0
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
@@ -227,6 +233,78 @@ public class FramesFragment extends Fragment {
             public void onClick(View v) {
                 //Show dialog to edit current group name
                 showRenameGroupDialog(getContext(), frameGroupId[0], frameGroupName[0], adapterFrameGroupsSpinner);
+            }
+        });
+
+        btnDeleteCurrentFrameGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!frameGroupId[0].equals("gbcam")) {//NEVER DELETE BASE GROUP
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle(getString(R.string.delete_frame_group_dialog) + frameGroupId[0] + "?");
+                    builder.setMessage(getString(R.string.sure_dialog));
+
+                    builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //If framegroup is empty, just delete it
+                            boolean groupIsEmpty = true;
+                            for (GbcFrame allGbcFrames : framesList) {
+                                String frameName = allGbcFrames.getFrameId().replaceAll("^(\\D+).*", "$1");
+                                if (frameName.equals(frameGroupId[0])) {
+                                    groupIsEmpty = false;
+                                    break;
+                                }
+                            }
+                            if (groupIsEmpty) {
+                                for (Iterator<String> iterator = frameGroupList.iterator(); iterator.hasNext(); ) {
+                                    String currentGroup = iterator.next();
+                                    String deletedGroupName = frameGroupsNames.get(frameGroupId[0]) + " (" + frameGroupId[0] + ")";
+                                    if (currentGroup.equals(deletedGroupName)) {
+                                        iterator.remove();
+                                        break;
+                                    }
+                                }
+
+                                for (Iterator<String> iterator = frameGroupIds.iterator(); iterator.hasNext(); ) {
+                                    String currentGroup = iterator.next();
+                                    if (currentGroup.equals(frameGroupId[0])) {
+                                        iterator.remove();
+                                        break;
+                                    }
+                                }
+                                frameGroupsNames.remove(frameGroupId[0]);
+
+                                Thread thread = new Thread(() -> {
+                                    FrameDao frameDao = MainActivity.db.frameDao();
+                                    GbcFrame frameWithFrameGroupNames = hashFrames.get("gbcam01");
+                                    frameWithFrameGroupNames.setFrameGroupsNames(frameGroupsNames);
+                                    frameDao.update(frameWithFrameGroupNames);
+
+                                });
+                                thread.start();
+                                spFrameGroups.setSelection(0);
+                            } else {
+                                new DeleteFrameAsyncTask(currentlyShowingFrames[0], spFrameGroups, frameGroupList, adapterFrameGroupsSpinner, frameGroupIds, tvNumFrames, customGridViewAdapterFrames[0], gridView, currentlyShowingFrames[0]).execute();
+                            }
+
+                            //I change the frame index of the images that have the deleted one to 0
+                            //Also need to change the bitmap on the completeImageList so it changes on the Gallery
+                            //I set the first frame and keep the palette for all the image, will need to check if the image keeps frame color or not
+
+                        }
+                    });
+                    builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //No action
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                } else {
+                    Utils.toast(getContext(), getString(R.string.cant_delete_base_framegroup));
+                }
             }
         });
 
@@ -368,7 +446,7 @@ public class FramesFragment extends Fragment {
     private class DeleteFrameAsyncTask extends AsyncTask<Void, Void, Void> {
 
         //To add the new palette as a parameter
-        private final GbcFrame gbcFrame;
+        private final List<GbcFrame> gbcFramesList;
         private Spinner spFrameGroups;
         private List<String> frameGroupList;
         private List<String> frameGroupIds;
@@ -380,9 +458,9 @@ public class FramesFragment extends Fragment {
 
         boolean putSpToCero = false;
 
-        public DeleteFrameAsyncTask(GbcFrame gbcFrame, Spinner spFrameGroups, List<String> frameGroupList, ArrayAdapter<String> adapter, List<String> frameGroupIds, TextView tvNumFrames, CustomGridViewAdapterFrames customGridViewAdapterFrames,
+        public DeleteFrameAsyncTask(List<GbcFrame> gbcFramesList, Spinner spFrameGroups, List<String> frameGroupList, ArrayAdapter<String> adapter, List<String> frameGroupIds, TextView tvNumFrames, CustomGridViewAdapterFrames customGridViewAdapterFrames,
                                     GridView gridView, List<GbcFrame> currentlyShowingFrames) {
-            this.gbcFrame = gbcFrame;
+            this.gbcFramesList = gbcFramesList;
             this.spFrameGroups = spFrameGroups;
             this.frameGroupList = frameGroupList;
             this.adapter = adapter;
@@ -396,50 +474,51 @@ public class FramesFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             FrameDao frameDao = MainActivity.db.frameDao();
-            frameDao.delete(gbcFrame);
+            frameDao.deleteItems(gbcFramesList);
 
-            String deletedFrameGroupId = gbcFrame.getFrameId().replaceAll("^(\\D+).*", "$1");
-            int numberOfFramesInId = 0;
+            for (int i = 0; i < gbcFramesList.size(); i++) {
+                String deletedFrameGroupId = gbcFramesList.get(i).getFrameId().replaceAll("^(\\D+).*", "$1");
+                int numberOfFramesInId = 0;
 
-            Utils.hashFrames.remove(gbcFrame.getFrameId());
-            for (GbcFrame allGbcFrames : framesList) {
-                String frameName = allGbcFrames.getFrameId().replaceAll("^(\\D+).*", "$1");
-                if (frameName.equals(deletedFrameGroupId)) {
-                    numberOfFramesInId++;
+                Utils.hashFrames.remove(gbcFramesList.get(i).getFrameId());
+                for (GbcFrame allGbcFrames : framesList) {
+                    String frameName = allGbcFrames.getFrameId().replaceAll("^(\\D+).*", "$1");
+                    if (frameName.equals(deletedFrameGroupId)) {
+                        numberOfFramesInId++;
+                    }
                 }
-            }
-            //If it's the last frame from the group, delete the group too and update the frame holding the group names
-            if (numberOfFramesInId < 2) {
-                putSpToCero = true;
-                for (Iterator<String> iterator = frameGroupList.iterator(); iterator.hasNext(); ) {
-                    String currentGroup = iterator.next();
-                    String deletedGroupName = frameGroupsNames.get(deletedFrameGroupId) + " (" + deletedFrameGroupId + ")";
-                    if (currentGroup.equals(deletedGroupName)) {
+                //If it's the last frame from the group, delete the group too and update the frame holding the group names
+                if (numberOfFramesInId < 2) {
+                    putSpToCero = true;
+                    for (Iterator<String> iterator = frameGroupList.iterator(); iterator.hasNext(); ) {
+                        String currentGroup = iterator.next();
+                        String deletedGroupName = frameGroupsNames.get(deletedFrameGroupId) + " (" + deletedFrameGroupId + ")";
+                        if (currentGroup.equals(deletedGroupName)) {
+                            iterator.remove();
+                            break;
+                        }
+                    }
+
+                    for (Iterator<String> iterator = frameGroupIds.iterator(); iterator.hasNext(); ) {
+                        String currentGroup = iterator.next();
+                        if (currentGroup.equals(deletedFrameGroupId)) {
+                            iterator.remove();
+                            break;
+                        }
+                    }
+                    frameGroupsNames.remove(deletedFrameGroupId);
+                    GbcFrame frameWithFrameGroupNames = hashFrames.get("gbcam01");
+                    frameWithFrameGroupNames.setFrameGroupsNames(frameGroupsNames);
+                    frameDao.update(frameWithFrameGroupNames);
+                }
+
+                //Delete the frame from the list of frames
+                for (Iterator<GbcFrame> iterator = framesList.iterator(); iterator.hasNext(); ) {
+                    GbcFrame checkFrame = iterator.next();
+                    if (gbcFramesList.get(i).getFrameId().equals(checkFrame.getFrameId())) {
                         iterator.remove();
                         break;
                     }
-                }
-
-                for (Iterator<String> iterator = frameGroupIds.iterator(); iterator.hasNext(); ) {
-                    String currentGroup = iterator.next();
-                    if (currentGroup.equals(deletedFrameGroupId)) {
-                        iterator.remove();
-                        break;
-                    }
-                }
-
-                frameGroupsNames.remove(deletedFrameGroupId);
-                GbcFrame frameWithFrameGroupNames = hashFrames.get("gbcam01");
-                frameWithFrameGroupNames.setFrameGroupsNames(frameGroupsNames);
-                frameDao.update(frameWithFrameGroupNames);
-            }
-
-            //Delete the frame from the list of frames
-            for (Iterator<GbcFrame> iterator = framesList.iterator(); iterator.hasNext(); ) {
-                GbcFrame checkFrame = iterator.next();
-                if (gbcFrame.getFrameId().equals(checkFrame.getFrameId())) {
-                    iterator.remove();
-                    break;
                 }
             }
             return null;
@@ -448,22 +527,26 @@ public class FramesFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             adapter.notifyDataSetChanged();
+            List<String> listOfDeletedFramesIds = new ArrayList<>();
+            for (GbcFrame gbcFrame : gbcFramesList) {
+                listOfDeletedFramesIds.add(gbcFrame.getFrameId());
+            }
             for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
-                if (Utils.gbcImagesList.get(i).getFrameId() != null && Utils.gbcImagesList.get(i).getFrameId().equals(gbcFrame.getFrameId())) {
-                    Utils.gbcImagesList.get(i).setFrameId(null);
+                GbcImage gbcImageToModify = Utils.gbcImagesList.get(i);
+                if (gbcImageToModify.getFrameId() != null && listOfDeletedFramesIds.contains(gbcImageToModify.getFrameId())) {
+                    gbcImageToModify.setFrameId(null);
                     //If the bitmap cache already has the bitmap, change it. ONLY if it has been loaded, if not it'll crash
-                    if (GalleryFragment.diskCache.get(Utils.gbcImagesList.get(i).getHashCode()) != null) {
+                    if (GalleryFragment.diskCache.get(gbcImageToModify.getHashCode()) != null) {
                         Bitmap image = null;
                         try {
-                            GbcImage gbcImage = Utils.gbcImagesList.get(i);
-                            image = frameChange(gbcImage, null, gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
+                            image = frameChange(gbcImageToModify, null, gbcImageToModify.isInvertPalette(), gbcImageToModify.isInvertFramePalette(), gbcImageToModify.isLockFrame(), true);
                             Utils.imageBitmapCache.put(Utils.gbcImagesList.get(i).getHashCode(), image);
-                            GalleryFragment.diskCache.put(gbcImage.getHashCode(), image);
+                            GalleryFragment.diskCache.put(gbcImageToModify.getHashCode(), image);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
-                    new UpdateImageAsyncTask(Utils.gbcImagesList.get(i)).execute();
+                    new UpdateImageAsyncTask(gbcImageToModify).execute();
                 }
             }
             if (putSpToCero) {
@@ -471,7 +554,7 @@ public class FramesFragment extends Fragment {
             }
             for (Iterator<GbcFrame> iterator = currentlyShowingFrames.iterator(); iterator.hasNext(); ) {
                 GbcFrame frame = iterator.next();
-                if (frame.getFrameId().equals(gbcFrame.getFrameId())) {
+                if (listOfDeletedFramesIds.contains(frame.getFrameId())) {
                     iterator.remove();
                     break;
                 }

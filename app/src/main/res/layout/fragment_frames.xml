@@ -48,17 +48,36 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnEditCurrentFrameGroup"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:autoSizeMaxTextSize="30sp"
-        android:autoSizeMinTextSize="5sp"
-        android:autoSizeTextType="uniform"
-        android:enabled="false"
-        android:maxLines="1"
-        android:text="@string/btn_edit_current_framegroup"></Button>
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnEditCurrentFrameGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:enabled="false"
+            android:maxLines="1"
+            android:text="@string/btn_edit_current_framegroup"></Button>
+
+        <Button
+            android:id="@+id/btnDeleteCurrentFrameGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:enabled="false"
+            android:backgroundTint="@color/listview_selected"
+            android:maxLines="1"
+            android:text="@string/btn_edit_delete_framegroup"></Button>
+    </LinearLayout>
 
     <GridView
         android:id="@+id/gridViewFrames"

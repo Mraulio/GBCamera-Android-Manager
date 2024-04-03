@@ -12,6 +12,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import android.graphics.Matrix;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Adapter;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
+import android.widget.SeekBar;
 
 
 import com.canhub.cropper.CropImageView;
@@ -57,6 +59,7 @@ public class TransformImage {
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
         lp.height = WindowManager.LayoutParams.MATCH_PARENT;
 
+        SeekBar sbRotate = dialog.findViewById(R.id.sb_rotate);
         CropImageView cropImageView = dialog.findViewById(R.id.cropImageView);
         cropImageView.setImageBitmap(originalBitmap);
         cropImageView.setAspectRatio(128, 112);
@@ -70,6 +73,26 @@ public class TransformImage {
         Button btnCrop = dialog.findViewById(R.id.btn_crop);
         Button btnCancel = dialog.findViewById(R.id.btn_cancel);
         Button btnOk = dialog.findViewById(R.id.btn_accept);
+
+        sbRotate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(sbRotate.getProgress());
+                cropImageView.setImageBitmap(Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, false));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Método no utilizado en este ejemplo
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Método no utilizado en este ejemplo
+            }
+        });
+
 
         btnCrop.setOnClickListener(new View.OnClickListener() {
             @Override

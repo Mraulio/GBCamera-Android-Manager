@@ -79,7 +79,15 @@
                 <data
                     android:scheme="content" />
             </intent-filter>
-
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/jpeg" />
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="image/png" />
+                <data android:mimeType="image/bmp" />
+                <data android:mimeType="image/jpg" />
+            </intent-filter>
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/usb_device_filter" />

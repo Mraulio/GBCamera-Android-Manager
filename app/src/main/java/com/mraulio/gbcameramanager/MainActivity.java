@@ -195,6 +195,9 @@ public class MainActivity extends AppCompatActivity {
         String action = intent.getAction();
         String type = intent.getType();
         uri = intent.getData();
+        if (uri == null){
+            uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);// For the SEND action
+        }
 
         if (!doneLoading) {
             new ReadDataAsyncTask().execute();
@@ -250,13 +253,13 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
 
-        if (Intent.ACTION_VIEW.equals(action) && type != null) {
+        if ((Intent.ACTION_VIEW.equals(action) || Intent.ACTION_SEND.equals(action)) && type != null) {
             // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
             openedFromFile = true;
-
         } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
             openedFromUsb = true;
         }
+
         openingFromIntent(navController);
 
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);

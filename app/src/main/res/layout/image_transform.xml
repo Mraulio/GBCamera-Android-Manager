@@ -6,6 +6,16 @@
     android:background="@color/imageview_bg"
     android:padding="30dp">
 
+
+    <SeekBar
+        android:id="@+id/sb_rotate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="360"
+        app:layout_constraintBottom_toTopOf="@id/cropImageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <!-- Image Cropper fill the remaining available height -->
     <com.canhub.cropper.CropImageView
         android:id="@+id/cropImageView"
@@ -15,7 +25,7 @@
         app:layout_constraintBottom_toTopOf="@id/btn_crop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/sb_rotate" />
 
 
     <Button

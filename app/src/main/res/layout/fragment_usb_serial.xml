@@ -84,8 +84,8 @@
                     android:autoSizeMaxTextSize="30sp"
                     android:autoSizeMinTextSize="5sp"
                     android:autoSizeTextType="uniform"
-                    android:maxLines="1"
                     android:backgroundTint="#D64141"
+                    android:maxLines="1"
                     android:text="@string/delete"
                     android:textSize="15sp"
                     android:visibility="gone"></Button>
@@ -128,14 +128,28 @@
                 android:textSize="15sp"
                 android:visibility="gone"></Button>
 
-            <Button
-                android:id="@+id/btnReadRam"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:text="@string/btn_read_ram"
-                android:textSize="15sp"
-                android:visibility="gone"></Button>
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnReadRam"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:text="@string/btn_read_ram"
+                    android:textSize="15sp"
+                    android:visibility="gone"></Button>
+
+                <Switch
+                    android:id="@+id/sw_jp_cart_usb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="Jp Cart"
+                    android:visibility="gone"></Switch>
+            </LinearLayout>
 
             <Button
                 android:id="@+id/btnFullRom"

@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.Switch;
 
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
@@ -56,7 +57,7 @@ public class SaveManagerFragment extends Fragment {
     private List<String> fileList;
     private String saveName;
     private Button btnDelete, btnAdd;
-    private CheckBox cbModDate;
+    Switch swIsJpCart,cbModDate;
     private File selectedFile;
     LoadingDialog loadingDialog;
     private CustomGridViewAdapterImage gridAdapter;
@@ -90,7 +91,8 @@ public class SaveManagerFragment extends Fragment {
         gridviewSaves = view.findViewById(R.id.gridViewSaves);
         btnDelete = view.findViewById(R.id.btnDelete);
         btnAdd = view.findViewById(R.id.btnAdd);
-        cbModDate = view.findViewById(R.id.cbModDate);
+        swIsJpCart = view.findViewById(R.id.sw_jp_cart_manager);
+        cbModDate = view.findViewById(R.id.sw_mod_date);
         loadingDialog = new LoadingDialog(getContext(),"Extracting");
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
 
@@ -279,7 +281,7 @@ public class SaveManagerFragment extends Fragment {
                 } else {
                     String fileName = selectedFile.getName();
 
-                    LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(extractedImageBytes, fileName, 0);
+                    LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(extractedImageBytes, fileName, 0, swIsJpCart.isChecked());
 
                     for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHash.entrySet()) {
                         GbcImage gbcImage = entry.getKey();

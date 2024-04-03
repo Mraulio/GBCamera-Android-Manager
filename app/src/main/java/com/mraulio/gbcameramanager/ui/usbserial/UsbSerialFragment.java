@@ -37,6 +37,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -101,7 +102,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     RadioButton rbGbx, rbApe;
     public static RadioButton rbPrint;
     RadioGroup rbGroup;
-
+    public static Switch swIsCartJpUsb;
     static List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
     static List<GbcImage> extractedImagesList = new ArrayList<>();
     static List<List<GbcImage>> listActiveImages = new ArrayList<>();
@@ -133,6 +134,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         cbLastSeen = view.findViewById(R.id.cbLastSeen);
         cbDeleted = view.findViewById(R.id.cbDeletedImages);
         layoutCb = view.findViewById(R.id.layout_cb);
+        swIsCartJpUsb = view.findViewById(R.id.sw_jp_cart_usb);
 
         btnFullRom = view.findViewById(R.id.btnFullRom);
         btnReadRomName = view.findViewById(R.id.btnReadRom);
@@ -452,6 +454,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         tvMode.setVisibility(View.VISIBLE);
         rbGroup.setVisibility(View.GONE);
         btnReadRam.setVisibility(View.VISIBLE);
+        swIsCartJpUsb.setVisibility(View.VISIBLE);
         btnReadRomName.setVisibility(View.VISIBLE);
         try {
             connect();
@@ -490,7 +493,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             extractedImagesList.clear();
             extractedImagesBitmaps.clear();
             if (file.length() / 1024 == 128) {
-                importedImagesHashUsb = extractor.extractGbcImages(saveBytes, file.getName(), saveBank);
+                importedImagesHashUsb = extractor.extractGbcImages(saveBytes, file.getName(), saveBank, swIsCartJpUsb.isChecked());
                 for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHashUsb.entrySet()) {
                     GbcImage gbcImage = entry.getKey();
                     Bitmap imageBitmap = entry.getValue();

@@ -44,7 +44,7 @@ public interface Extractor {
     List<byte[]> extractBytes(File file, int saveBank) throws IOException;
 
     //Added by Mraulio
-    LinkedHashMap<GbcImage, Bitmap> extractGbcImages(byte[] rawData,String fileName, int saveBank);
+    LinkedHashMap<GbcImage, Bitmap> extractGbcImages(byte[] rawData,String fileName, int saveBank, boolean cartIsJp);
 
     /**
      * Extract images from a local file system file and return as PNG byte data

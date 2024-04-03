@@ -19,11 +19,24 @@
         android:layout_height="wrap_content"
         android:text="@string/tv_select_file" />
 
-    <Button
-        android:id="@+id/btnExtractFile"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_extract_file"></Button>
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnExtractFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_extract_file"></Button>
+
+        <Switch
+            android:id="@+id/sw_jp_cart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="Jp Cart"></Switch>
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnAddImages"
@@ -50,21 +63,22 @@
             android:layout_height="wrap_content"
             android:text="@string/cb_deleted_images"></CheckBox>
     </LinearLayout>
+
     <CheckBox
+        android:id="@+id/cbAddFrame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/cbAddFrame"
-        android:visibility="gone"
         android:text="@string/add_as_frame"
-        />
+        android:visibility="gone" />
+
     <GridView
         android:id="@+id/gridViewImport"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:stretchMode="columnWidth"
         android:horizontalSpacing="10dp"
+        android:numColumns="3"
 
-        android:verticalSpacing="10dp"
-        android:numColumns="3"></GridView>
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="10dp"></GridView>
 
 </LinearLayout>

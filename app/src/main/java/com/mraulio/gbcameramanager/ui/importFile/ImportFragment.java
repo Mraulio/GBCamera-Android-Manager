@@ -43,6 +43,7 @@ import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.model.ImageData;
@@ -113,6 +114,7 @@ public class ImportFragment extends Fragment {
     List<?> receivedList;
     int numImagesAdded;
     Button btnExtractFile, btnAddImages;
+    Switch swCartIsJp;
     CheckBox cbLastSeen, cbDeleted, cbAddFrame;
     LinearLayout layoutCb;
     CustomGridViewAdapterPalette customAdapterPalette;
@@ -157,6 +159,8 @@ public class ImportFragment extends Fragment {
         Button btnSelectFile = view.findViewById(R.id.btnSelectFile);
         btnExtractFile = view.findViewById(R.id.btnExtractFile);
         btnExtractFile.setVisibility(View.GONE);
+        swCartIsJp = view.findViewById(R.id.sw_jp_cart);
+        swCartIsJp.setVisibility(View.GONE);
         cbLastSeen = view.findViewById(R.id.cbLastSeen);
         cbDeleted = view.findViewById(R.id.cbDeletedImages);
         cbAddFrame = view.findViewById(R.id.cbAddFrame);
@@ -430,7 +434,7 @@ public class ImportFragment extends Fragment {
             }
             case PHOTO_ROM:
                 RomExtractor romExtractor = new RomExtractor(fileBytes, fileName);
-                romExtractor.romExtract();
+                romExtractor.romExtract(swCartIsJp.isChecked());
                 listActiveImages = romExtractor.getListActiveImages();
                 listActiveBitmaps = romExtractor.getListActiveBitmaps();
                 lastSeenImage = romExtractor.getLastSeenImage();
@@ -801,6 +805,7 @@ public class ImportFragment extends Fragment {
 
                                     }
                                     btnExtractFile.setVisibility(View.GONE);
+                                    swCartIsJp.setVisibility(View.GONE);
                                     btnAddImages.setVisibility(View.VISIBLE);
                                     btnAddImages.setEnabled(true);
                                     adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
@@ -850,6 +855,8 @@ public class ImportFragment extends Fragment {
             fileBytes = byteStream.toByteArray();
             tvFileName.setText(getString(R.string.file_name) + fileName);
             btnExtractFile.setVisibility(View.VISIBLE);
+            swCartIsJp.setVisibility(View.VISIBLE);
+
         } else if (fileName.toLowerCase().endsWith("gbc")) {
             ByteArrayOutputStream byteStream = null;
             fileType = FILE_TYPE.PHOTO_ROM;
@@ -871,7 +878,7 @@ public class ImportFragment extends Fragment {
             fileBytes = byteStream.toByteArray();
             tvFileName.setText(getString(R.string.file_name) + fileName);
             btnExtractFile.setVisibility(View.VISIBLE);
-
+            swCartIsJp.setVisibility(View.VISIBLE);
         } else if (fileName.toLowerCase().endsWith("txt")) {
             fileType = FILE_TYPE.TXT;
             try {
@@ -961,6 +968,7 @@ public class ImportFragment extends Fragment {
                 finalListImages.add(gbcImage);
                 tvFileName.setText(getString(R.string.file_name) + fileName);
                 btnExtractFile.setVisibility(View.GONE);
+                swCartIsJp.setVisibility(View.GONE);
                 btnAddImages.setVisibility(View.VISIBLE);
                 btnAddImages.setEnabled(true);
 
@@ -980,7 +988,7 @@ public class ImportFragment extends Fragment {
 
         } else {
             btnExtractFile.setVisibility(View.GONE);
-
+            swCartIsJp.setVisibility(View.GONE);
             tvFileName.setText(getString(R.string.no_valid_file));
         }
     }
@@ -1012,7 +1020,7 @@ public class ImportFragment extends Fragment {
             return false;
         }
         //Extract the images
-        importedImagesHash = extractor.extractGbcImages(fileBytes, fileName, 0);
+        importedImagesHash = extractor.extractGbcImages(fileBytes, fileName, 0, swCartIsJp.isChecked());
 
         for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHash.entrySet()) {
             GbcImage gbcImage = entry.getKey();

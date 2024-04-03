@@ -139,7 +139,7 @@ public class SaveImageExtractor implements Extractor {
 
     //Added by Mraulio
     @Override
-    public LinkedHashMap<GbcImage, Bitmap> extractGbcImages(byte[] rawData, String fileName, int saveBank) {
+    public LinkedHashMap<GbcImage, Bitmap> extractGbcImages(byte[] rawData, String fileName, int saveBank, boolean cartIsJp) {
         LinkedHashMap<GbcImage, Bitmap> allImagesGB = new LinkedHashMap<>(31);
         LinkedHashMap<GbcImage, Bitmap> deletedImagesGB = new LinkedHashMap<>();
         LinkedHashMap<GbcImage, Bitmap> lastSeenImageGB = new LinkedHashMap<>();
@@ -227,7 +227,7 @@ public class SaveImageExtractor implements Extractor {
                             String deletedGbcImageName = fileName + " [deleted]";
                             GbcImage deletedGbcImage = getGbcImage(image, deletedGbcImageName, hashImageBitmap);
                             Bitmap deletedBitmap = gbcImageBitmap(deletedGbcImage, image);
-                            deletedGbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage));
+                            deletedGbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage, cartIsJp));
                             deletedImagesGB.put(deletedGbcImage,deletedBitmap);
                             MainActivity.deletedCount[saveBank]++;
                         }
@@ -238,7 +238,7 @@ public class SaveImageExtractor implements Extractor {
                                 String formattedIndex = String.format("%02d", (b + 1));
                                 String gbcImageName = fileName + " " + formattedIndex;
                                 GbcImage gbcImage = getGbcImage(image, gbcImageName, hashImageBitmap);
-                                gbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage));
+                                gbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage, cartIsJp));
 
                                 allImages.set(b, gbcImage);
                             }
@@ -271,10 +271,10 @@ public class SaveImageExtractor implements Extractor {
         return allImagesGB;
     }
 
-    private LinkedHashMap<String, String> getMetadata(byte[] imageMetadata, byte[] thumbImage) {
+    private LinkedHashMap<String, String> getMetadata(byte[] imageMetadata, byte[] thumbImage, boolean cartIsJp) {
         FileMetaParser fileMetaParser = new FileMetaParser();
         LinkedHashMap<String, String> metadataOriginal;
-        metadataOriginal = fileMetaParser.getFileMeta(imageMetadata, false);
+        metadataOriginal = fileMetaParser.getFileMeta(imageMetadata, cartIsJp);
 
         LinkedHashMap<String, String> metadataHomebrew;
         HomebrewRomsMetaParser homebrewRomsMetaParser = new HomebrewRomsMetaParser();

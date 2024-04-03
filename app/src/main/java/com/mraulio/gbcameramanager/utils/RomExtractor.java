@@ -57,9 +57,9 @@ public class RomExtractor {
         this.fileName = fileName;
     }
 
-    public void romExtract() {
+    public void romExtract(boolean isCartJp) {
         romSplitter();
-        readRomSavs();
+        readRomSavs(isCartJp);
     }
 
     public void romSplitter() {
@@ -83,10 +83,10 @@ public class RomExtractor {
         }
     }
 
-    public void readRomSavs() {
+    public void readRomSavs(boolean isCartJp) {
         try {
             for (int i = 0; i < romByteList.size(); i++) {
-                readSavBytes(romByteList.get(i), i, filePartNames.get(i));
+                readSavBytes(romByteList.get(i), i, filePartNames.get(i), isCartJp);
             }
 
         } catch (Exception e) {
@@ -94,13 +94,13 @@ public class RomExtractor {
         }
     }
 
-    public void readSavBytes(byte[] fileBytes, int saveBank, String filePartName) {
+    public void readSavBytes(byte[] fileBytes, int saveBank, String filePartName, boolean isCartJp) {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         extractedImagesList.clear();
         extractedImagesBitmaps.clear();
         try {
             if (fileBytes.length == 131072) {
-                LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(fileBytes, filePartName, saveBank);
+                LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(fileBytes, filePartName, saveBank,isCartJp);
 
                 for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHash.entrySet()) {
                     GbcImage gbcImage = entry.getKey();

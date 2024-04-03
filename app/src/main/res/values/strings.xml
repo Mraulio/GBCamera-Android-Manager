@@ -234,5 +234,6 @@
     <string name="collage_print_col_rows_error">Only 1 row/column allowed.</string>
     <string name="delete_frame_group_dialog">Delete frame group\u0020</string>
     <string name="cant_delete_base_framegroup">Can\'t delete a base frame group</string>
+    <string name="btn_transform_image">Transform</string>
 
 </resources>

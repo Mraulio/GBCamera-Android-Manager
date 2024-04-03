@@ -64,12 +64,26 @@
             android:text="@string/cb_deleted_images"></CheckBox>
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/cbAddFrame"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/add_as_frame"
-        android:visibility="gone" />
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/cbAddFrame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_as_frame"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_transform_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="@string/btn_transform_image"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <GridView
         android:id="@+id/gridViewImport"

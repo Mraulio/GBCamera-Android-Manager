@@ -109,9 +109,9 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     static List<List<GbcImage>> listDeletedImages = new ArrayList<>();
     static List<List<Bitmap>> listDeletedBitmaps = new ArrayList<>();
     static List<List<Bitmap>> listDeletedBitmapsRedStroke = new ArrayList<>();
-    static List<GbcImage> finalListImages = new ArrayList<>();
+    public static List<GbcImage> finalListImages = new ArrayList<>();
     static List<List<Bitmap>> listActiveBitmaps = new ArrayList<>();
-    static List<Bitmap> finalListBitmaps = new ArrayList<>();
+    public static List<Bitmap> finalListBitmaps = new ArrayList<>();
     static List<GbcImage> lastSeenImage = new ArrayList<>();
     static List<Bitmap> lastSeenBitmap = new ArrayList<>();
     static LinkedHashMap<GbcImage, Bitmap> importedImagesHashUsb = new LinkedHashMap<>();

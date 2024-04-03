@@ -5,6 +5,7 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.che
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.resizeImage;
+import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.finalListImages;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
@@ -91,13 +92,15 @@ public class ImportFragment extends Fragment {
     static LinkedHashMap<GbcImage, Bitmap> importedImagesHash = new LinkedHashMap<>();
     public static LinkedHashMap<String, String> importedFrameGroupIdNames = new LinkedHashMap<>();
     int totalImages = 0;
+
+    Bitmap importedBitmap;
     List<List<GbcImage>> listActiveImages = new ArrayList<>();
     List<List<GbcImage>> listDeletedImages = new ArrayList<>();
     List<List<Bitmap>> listDeletedBitmaps = new ArrayList<>();
     List<List<Bitmap>> listDeletedBitmapsRedStroke = new ArrayList<>();
-    List<GbcImage> finalListImages = new ArrayList<>();
     List<List<Bitmap>> listActiveBitmaps = new ArrayList<>();
-    List<Bitmap> finalListBitmaps = new ArrayList<>();
+    public static List<GbcImage> finalListImages = new ArrayList<>();
+    public static List<Bitmap> finalListBitmaps = new ArrayList<>();
     List<GbcImage> lastSeenImage = new ArrayList<>();
     List<Bitmap> lastSeenBitmap = new ArrayList<>();
     DocumentFile selectedFile;
@@ -113,7 +116,7 @@ public class ImportFragment extends Fragment {
     String fileContent = "";
     List<?> receivedList;
     int numImagesAdded;
-    Button btnExtractFile, btnAddImages;
+    Button btnExtractFile, btnAddImages, btnTransform;
     Switch swCartIsJp;
     CheckBox cbLastSeen, cbDeleted, cbAddFrame;
     LinearLayout layoutCb;
@@ -143,7 +146,7 @@ public class ImportFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loadingDialog = new LoadingDialog(getContext(),"Extracting file");
+        loadingDialog = new LoadingDialog(getContext(), "Extracting file");
 
         if (getArguments() != null) {
             String fileUri = getArguments().getString("fileUri");
@@ -157,8 +160,12 @@ public class ImportFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_import, container, false);
         Button btnSelectFile = view.findViewById(R.id.btnSelectFile);
+
         btnExtractFile = view.findViewById(R.id.btnExtractFile);
         btnExtractFile.setVisibility(View.GONE);
+
+        btnTransform = view.findViewById(R.id.btn_transform_image);
+
         swCartIsJp = view.findViewById(R.id.sw_jp_cart);
         swCartIsJp.setVisibility(View.GONE);
         cbLastSeen = view.findViewById(R.id.cbLastSeen);
@@ -208,6 +215,7 @@ public class ImportFragment extends Fragment {
                 switch (addEnum) {
                     case PALETTES:
                         btnAddImages.setEnabled(false);
+                        btnTransform.setVisibility(View.GONE);
                         List<GbcPalette> newPalettes = new ArrayList<>();
                         for (Object palette : receivedList) {
                             boolean alreadyAdded = false;
@@ -717,6 +725,7 @@ public class ImportFragment extends Fragment {
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         cbAddFrame.setVisibility(View.GONE);
+                        btnTransform.setVisibility(View.GONE);
                         cbAddFrame.setChecked(false);
                         Intent data = result.getData();
 
@@ -811,7 +820,6 @@ public class ImportFragment extends Fragment {
                                     adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
                                     gridViewImport.setAdapter((ListAdapter) adapter);
                                     ImportFragment.addEnum = ImportFragment.ADD_WHAT.IMAGES;
-//                                    cbAddFrame.setVisibility(View.VISIBLE);
                                     gridViewImport.setAdapter((ListAdapter) adapter);
 
                                 } else {
@@ -942,11 +950,13 @@ public class ImportFragment extends Fragment {
             try {
                 InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
 
+                boolean showTransformButton = true;
+
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                importedBitmap = BitmapFactory.decodeStream(inputStream);
 
-                bitmap = resizeImage(bitmap);
+                Bitmap bitmap = resizeImage(importedBitmap);
                 GbcImage gbcImage = new GbcImage();
                 boolean hasAllColors = checkPaletteColors(bitmap);
                 if (!hasAllColors) {
@@ -976,8 +986,22 @@ public class ImportFragment extends Fragment {
                 gridViewImport.setAdapter((ListAdapter) adapter);
                 addEnum = ImportFragment.ADD_WHAT.IMAGES;
                 cbAddFrame.setVisibility(View.VISIBLE);
-                gridViewImport.setAdapter((ListAdapter) adapter);
+                final List<Bitmap> bitmapHolder = new ArrayList<>();
+                bitmapHolder.add(bitmap);
 
+                if (showTransformButton) {
+                    btnTransform.setVisibility(View.VISIBLE);
+                    btnTransform.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            TransformImage transformImage = new TransformImage(importedBitmap, gbcImage,getContext(), gridViewImport);
+                            transformImage.createTransformDialog();
+
+                        }
+                    });
+                }
+
+                gridViewImport.setAdapter((ListAdapter) adapter);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (NoSuchAlgorithmException e) {

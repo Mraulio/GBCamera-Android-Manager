@@ -69,7 +69,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
@@ -91,7 +90,6 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -1054,15 +1052,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             IOException {
         Bitmap resultBitmap;
         gbcImage.setFrameId(frameId);
-        GbcFrame gbcFrame = Utils.hashFrames.get(frameId);
+        GbcFrame gbcFrame = hashFrames.get(frameId);
         if ((gbcImage.getImageBytes().length / 40) == 144 && gbcFrame != null || (gbcImage.getImageBytes().length / 40) == 224 && gbcFrame != null) {
-//            boolean wasWildFrame = Utils.hashFrames.get(gbcImage.getFrameId()).isWildFrame();
-            //To safecheck, maybe it's an image added with a wild frame size
-//            if (!wasWildFrame && (gbcImage.getImageBytes().length / 40) == 224) {
-//                wasWildFrame = true;
-//            }
-//            if (wasWildFrame)
-//                yIndexActualImage= 40;
+
             int yIndexActualImage = 16;// y Index where the actual image starts
             if ((gbcImage.getImageBytes().length / 40) == 224) {
                 yIndexActualImage = 40;

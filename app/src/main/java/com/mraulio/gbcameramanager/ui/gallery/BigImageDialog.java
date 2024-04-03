@@ -586,7 +586,7 @@ public class BigImageDialog {
                         tagsToSave.addAll(gbcImageToUpdate.getTags());//Add all previous tags from the image
                         tagsToSave.addAll(tempTags);//Add all the new tags
                         for (String st : removedTags) {
-                            if (tagsToSave.contains(st)){
+                            if (tagsToSave.contains(st)) {
                                 tagsToSave.remove(st);//Remove the deselected tags
                             }
                         }
@@ -641,13 +641,20 @@ public class BigImageDialog {
     private void createTagCheckBoxSingleImage(String tag, LinearLayout tagsLayout, List<String> tempTags, int imageIndex, boolean[] editingTags, boolean editingName, Button btnUpdateImages) {
         CheckBox tagCb = new CheckBox(context);
         String cbText;
+        boolean removableTag = true;
         if (tag.equals("__filter:favourite__")) {
             cbText = "Favourite \u2764\ufe0f";
+        } else if (tag.equals("__filter:duplicated__")) {
+            cbText = "Duplicated \uD83D\uDC11";
+            removableTag = false;
+        } else if (tag.equals("__filter:transformed__")) {
+            cbText = "Transformed \uD83D\uDD04";
+            removableTag = false;
         } else cbText = tag;
 
         tagCb.setText(cbText);
         tagCb.setChecked(true);
-
+        tagCb.setEnabled(removableTag);
         String finalTag = tag;
         tagCb.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -691,12 +698,22 @@ public class BigImageDialog {
             tagCb.setButtonDrawable(android.R.drawable.checkbox_off_background);
         }
         String cbText;
+        boolean removableTag = true;
+
         if (tag.equals("__filter:favourite__")) {
             cbText = "Favourite \u2764\ufe0f";
+        } else if (tag.equals("__filter:duplicated__")) {
+            cbText = "Duplicated \uD83D\uDC11 ";
+            removableTag = false;
+        } else if (tag.equals("__filter:transformed__")) {
+            cbText = "Transformed \uD83D\uDD04";
+            removableTag = false;
         } else cbText = tag;
 
         tagCb.setText(cbText);
         tagCb.setChecked(true);
+        tagCb.setEnabled(removableTag);
+
         String finalTag = tag;
         tagCb.setOnClickListener(new View.OnClickListener() {
             @Override

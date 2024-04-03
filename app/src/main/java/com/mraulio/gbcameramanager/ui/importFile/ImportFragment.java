@@ -8,9 +8,7 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.res
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
-import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
-import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 
 import android.annotation.SuppressLint;
@@ -107,7 +105,6 @@ public class ImportFragment extends Fragment {
     byte[] fileBytes;
     private Adapter adapter;
     boolean isGoodSave = true;
-    public static List<LinkedHashMap<String, Object>> metadataHashes = new ArrayList<>(31);//31 to get the last seen, which will be the first at i = 0;
     LoadingDialog loadingDialog;
     static TextView tvFileName;
     static String fileName;
@@ -770,25 +767,26 @@ public class ImportFragment extends Fragment {
                                             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
                                             bitmap = resizeImage(bitmap);
+                                            GbcImage gbcImage = new GbcImage();
                                             boolean hasAllColors = checkPaletteColors(bitmap);
                                             if (!hasAllColors) {
                                                 bitmap = convertToGrayScale(bitmap);
                                                 bitmap = ditherImage(bitmap);
+                                                //If image transformed, add metadata and tag
+                                                LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
+                                                metadata.put("Type", "Transformed");
+                                                gbcImage.setImageMetadata(metadata);
+                                                gbcImage.getTags().add("__filter:transformed__");
+
                                             }
-                                            GbcImage gbcImage = new GbcImage();
-                                            //Add a null frame id for imported images. Need to use a "NO FRAME OPTION, AS IMPORTED"
-//                                if (bitmap.getHeight()!=144){
-//                                    gbcImage.setFrameId(null);
-//                                }
+
+
                                             byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
                                             gbcImage.setImageBytes(imageBytes);
                                             byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                                             String hashHex = Utils.bytesToHex(hash);
                                             gbcImage.setHashCode(hashHex);
-//                                            ImageData imageData = new ImageData();
-//                                            imageData.setImageId(hashHex);
-//                                            imageData.setData(imageBytes);
-//                                            importedImageDatas.add(imageData);
+
                                             gbcImage.setName(fileName);
                                             finalListBitmaps.add(bitmap);
                                             finalListImages.add(gbcImage);
@@ -942,16 +940,17 @@ public class ImportFragment extends Fragment {
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
                 bitmap = resizeImage(bitmap);
+                GbcImage gbcImage = new GbcImage();
                 boolean hasAllColors = checkPaletteColors(bitmap);
                 if (!hasAllColors) {
                     bitmap = convertToGrayScale(bitmap);
                     bitmap = ditherImage(bitmap);
+                    LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
+                    metadata.put("Type", "Transformed");
+                    gbcImage.setImageMetadata(metadata);
+                    gbcImage.getTags().add("__filter:transformed__");
                 }
-                GbcImage gbcImage = new GbcImage();
-                //Add a null frame id for imported images. Need to use a "NO FRAME OPTION, AS IMPORTED"
-//                                if (bitmap.getHeight()!=144){
-//                                    gbcImage.setFrameId(null);
-//                                }
+
                 byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
                 gbcImage.setImageBytes(imageBytes);
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);

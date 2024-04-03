@@ -54,13 +54,11 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.ddyos.unicode.exifinterface.UnicodeExifInterface;
+import com.google.gson.Gson;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
-import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.db.ImageDao;
-import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
-import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -84,7 +82,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.TreeSet;
 import java.util.zip.Deflater;
 
 public class GalleryUtils {
@@ -570,7 +567,12 @@ public class GalleryUtils {
 
             if (item.equals("__filter:favourite__")) {
                 item = "Favourite \u2764\ufe0f";//The heart emoticon
+            } else if (item.equals("__filter:duplicated__")) {
+                item = "Duplicated \uD83D\uDC11";
+            } else if (item.equals("__filter:transformed__")) {
+                item = "Transformed \uD83D\uDD04";
             }
+
             checkBox.setCompoundDrawablePadding(10);
             checkBox.setText(item);
             checkBox.setTextSize(20);
@@ -578,9 +580,15 @@ public class GalleryUtils {
                 @Override
                 public void onClick(View v) {
                     String selectedTag = ((Button) v).getText().toString();
+
                     if (selectedTag.equals("Favourite \u2764\ufe0f")) {
                         selectedTag = "__filter:favourite__";//Reverse the tag
+                    } else if (selectedTag.equals("Duplicated \uD83D\uDC11")) {
+                        selectedTag = "__filter:duplicated__";
+                    } else if (selectedTag.equals("Transformed \uD83D\uDD04")) {
+                        selectedTag = "__filter:transformed__";
                     }
+
                     if (selectedTags.contains(selectedTag)) {
                         selectedTags.remove(selectedTag);
                         hiddenTags.add(selectedTag);
@@ -620,7 +628,11 @@ public class GalleryUtils {
         btnAccept.setOnClickListener(v -> {
 
             selectedFilterTags = selectedTags;
+            Gson gson = new Gson();
+            MainActivity.selectedTags = gson.toJson(selectedTags);
             hiddenFilterTags = hiddenTags;
+            MainActivity.hiddenTags = gson.toJson(hiddenTags);
+
             saveTagsSet(selectedTags, false);
             saveTagsSet(hiddenTags, true);
             editor.putInt("current_page", 0).apply();
@@ -683,6 +695,10 @@ public class GalleryUtils {
         for (String tag : selectedTags) {
             if (tag.equals("__filter:favourite__")) {
                 tag = "Favourite \u2764\ufe0f";
+            } else if (tag.equals("__filter:duplicated__")) {
+                tag = "Duplicated \uD83D\uDC11";
+            } else if (tag.equals("__filter:transformed__")) {
+                tag = "Transformed \uD83D\uDD04";
             }
             selectedTagsBuilder.append(tag).append(", ");
         }
@@ -691,6 +707,11 @@ public class GalleryUtils {
         for (String tag : notShowingTags) {
             if (tag.equals("__filter:favourite__")) {
                 tag = "Favourite \u2764\ufe0f";
+            }
+            if (tag.equals("__filter:duplicated__")) {
+                tag = "Duplicated \uD83D\uDC11";
+            } else if (tag.equals("__filter:transformed__")) {
+                tag = "Transformed \uD83D\uDD04";
             }
             notShowingTagsSB.append(tag).append(", ");
         }

@@ -267,7 +267,7 @@ public class ImagesImportDialog {
                     }
                     if (editingTags[0]) {
                         HashSet<String> tagsToSave = new HashSet<>(tempTags);//So it doesn't follow the temptags if I select another
-                        gbcImageToAdd.setTags(tagsToSave);
+                        gbcImageToAdd.getTags().addAll(tagsToSave);
                     }
                 }
                 LoadingDialog saveDialog = new LoadingDialog(context, "Saving images");

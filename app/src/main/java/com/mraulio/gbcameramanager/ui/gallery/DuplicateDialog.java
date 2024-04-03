@@ -50,7 +50,6 @@ public class DuplicateDialog {
             public void onClick(DialogInterface dialog, int which) {
                 int selectedNumber = numberPicker.getValue();
                 saveDuplicatedImages(selectedNumber);
-                saveDuplicatedImages(selectedNumber);
             }
         });
 
@@ -66,8 +65,6 @@ public class DuplicateDialog {
     }
 
     private void saveDuplicatedImages(int numberOfDuplicates) {
-
-
         Collections.sort(selectedImages);
         for (int i : selectedImages) {
             gbcImagesToDuplicate.add(filteredGbcImages.get(i));
@@ -156,7 +153,7 @@ public class DuplicateDialog {
                     duplicatedImage.setHashCode(duplicatedHash);
 
                     HashSet tags = new HashSet(duplicatedImage.getTags());
-                    tags.add("Duplicated");
+                    tags.add("__filter:duplicated__");
                     duplicatedImage.setTags(tags);
                     duplicatedImages.add(duplicatedImage);
                     Bitmap originalBitmap = imageBitmapCache.get(gbcImage.getHashCode());
@@ -164,7 +161,7 @@ public class DuplicateDialog {
                     duplicatedBitmaps.add(duplicatedBitmap);
 
                 }
-
+//                System.out.println("Duplicated bitmaps: "+duplicatedBitmaps.size());
             }
             return null;
         }

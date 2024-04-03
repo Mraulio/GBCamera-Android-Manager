@@ -44,7 +44,7 @@ public class GbcImage implements Cloneable{
     private Date creationDate;
 
     @ColumnInfo(name = "tags_list")
-    private HashSet<String> tags = new HashSet<>();
+    private HashSet<String> tags;
 
     public String getFramePaletteId() {
         return framePaletteId;
@@ -86,6 +86,7 @@ public class GbcImage implements Cloneable{
         this.invertFramePalette = false;
         this.creationDate = new Date(System.currentTimeMillis());
         this.rotation = 0;
+        this.tags = new HashSet<>();
     }
 
     @Override

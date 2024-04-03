@@ -236,7 +236,7 @@ public class GalleryUtils {
                 });
     }
 
-    private static String addSpacesAndNewLines(String input) {
+    public static String addSpacesAndNewLines(String input) {
         StringBuilder sb = new StringBuilder();
         int count = 0;
         for (int i = 0; i < input.length(); i++) {

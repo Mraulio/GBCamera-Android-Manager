@@ -2,9 +2,7 @@ package com.mraulio.gbcameramanager.ui.importFile;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.importFile.ImportFragment.importedFrameGroupIdNames;
-import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;
 import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
-import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.graphics.Bitmap;
@@ -381,7 +379,7 @@ public class JsonReader {
                 } else {
                     data = jsonObject.getString("frame-" + id);
                 }
-                String decompHash = recreateFrame(data);
+                String decompHash = recreateWebAppFrame(data);
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
                 ImageCodec imageCodec = new ImageCodec(160, height, false);
@@ -492,8 +490,8 @@ public class JsonReader {
         return sb.toString();
     }
 
-    //The frame json only has the actual frame, top, bottom and sides, so I create a String of the hex data of an image with the frame filled with white color
-    public static String recreateFrame(String value) {
+    //The web app frame json only has the actual frame, top, bottom and sides, so I create a String of the hex data of an image with the frame filled with white color
+    public static String recreateWebAppFrame(String value) {
         byte[] compressedBytes = value.getBytes(StandardCharsets.ISO_8859_1);
         Inflater inflater = new Inflater();
         inflater.setInput(compressedBytes);

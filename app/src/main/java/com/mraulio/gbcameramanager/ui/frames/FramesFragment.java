@@ -9,6 +9,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparent
 import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -208,10 +209,23 @@ public class FramesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    framesJsonCreator(framesList, "gbcam_all_frames");
+                    framesJsonCreator(framesList, "gbcam_all_frames", false);
                 } catch (JSONException | IOException | NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        btnExportFramesJson.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                toast(getContext(), "Creating compatible json with web app");
+                try {
+                    framesJsonCreator(framesList, "gbcam_all_frames(webapp)", true);
+                } catch (JSONException | IOException | NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                }
+                return true;
             }
         });
 
@@ -219,12 +233,27 @@ public class FramesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    framesJsonCreator(currentGroupList[0], "gbcam_framegroup_" + frameGroupId[0]);
+                    framesJsonCreator(currentGroupList[0], "gbcam_framegroup_" + frameGroupId[0], false);
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        btnExportCurrentGroup.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                toast(getContext(), "Creating compatible json group export with web app");
+                try {
+                    framesJsonCreator(currentGroupList[0], "gbcam_framegroup(webapp)_" + frameGroupId[0], true);
+                } catch (JSONException | IOException e) {
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                }
+                return true;
             }
         });
 
@@ -307,7 +336,6 @@ public class FramesFragment extends Fragment {
                 }
             }
         });
-
         // Inflate the layout for this fragment
         gridView.setAdapter(customGridViewAdapterFrames[0]);
         tvNumFrames.setText(getString(R.string.frames_total) + Utils.framesList.size());
@@ -315,7 +343,7 @@ public class FramesFragment extends Fragment {
     }
 
 
-    private void framesJsonCreator(List<GbcFrame> frameListToExport, String fileName) throws JSONException, IOException, NoSuchAlgorithmException {
+    private void framesJsonCreator(List<GbcFrame> frameListToExport, String fileName, boolean isWebAppCompatible) throws JSONException, IOException, NoSuchAlgorithmException {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
         JSONArray framesArr = new JSONArray();
@@ -335,7 +363,15 @@ public class FramesFragment extends Fragment {
                 gbcFrame.setFrameHash(hash);
             }
             frameObj.put("hash", hash);
-            frameObj.put("isWildFrame", gbcFrame.isWildFrame());
+
+            if (!isWebAppCompatible) {//Not adding the isWildFrame for web app exports, so when importing it this app doesn't recognize it as a gbcam json, for the decoding method
+                frameObj.put("isWildFrame", gbcFrame.isWildFrame());
+            }
+
+            //Not adding wild frames to the web app json compatible export
+            if (isWebAppCompatible && gbcFrame.isWildFrame()) {
+                continue;
+            }
             framesArr.put(frameObj);
 
             Matcher matcher = pattern.matcher(frameId);
@@ -371,29 +407,68 @@ public class FramesFragment extends Fragment {
 
         for (int i = 0; i < frameListToExport.size(); i++) {
             GbcFrame gbcFrame = frameListToExport.get(i);
-
-            String txt = Utils.bytesToHex(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
+            String deflated;
             StringBuilder sb = new StringBuilder();
-            for (int j = 0; j < txt.length(); j++) {
-                if (j > 0 && j % 32 == 0) {
-                    sb.append("\n");
+            String txt = Utils.bytesToHex(Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw"));
+
+            if (!isWebAppCompatible) {
+                for (int j = 0; j < txt.length(); j++) {
+                    if (j > 0 && j % 32 == 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(txt.charAt(j));
                 }
-                sb.append(txt.charAt(j));
+                String tileData = sb.toString();
+
+                deflated = encodeData(tileData);
+
+            } else { // If it's compatible with the web app, generate only the data for the actual frame
+                String firstPart = txt.substring(0, 1280);
+                sb.append(firstPart);
+
+                String central = txt.substring(1280, txt.length() - 1280);
+
+                for (int j = 0; j < 14; j++) {
+                    int start1 = (j * 640);
+                    int end1 = start1 + 64;
+                    int end2 = start1 + 640;
+                    int start2 = end2 - 64;
+
+                    String partStart = central.substring(start1, end1);
+                    String partEnd = central.substring(start2, end2);
+                    sb.append(partStart);
+                    sb.append(partEnd);
+
+                }
+
+                String lastPart = txt.substring(txt.length() - 1280);
+                sb.append(lastPart);
+                String finalString = sb.toString();
+
+                StringBuilder finalBuiler = new StringBuilder();
+                for (int j = 0; j < finalString.length(); j++) {
+                    if (j > 0 && j % 32 == 0) {
+                        finalBuiler.append("\n");
+                    }
+                    finalBuiler.append(finalString.charAt(j));
+                }
+                String tileData = finalBuiler.toString();
+                deflated = encodeData(tileData);
             }
-            String tileData = sb.toString();
-            String deflated = encodeData(tileData);
+
             json.put("frame-" + gbcFrame.getFrameHash(), deflated);
 
             //Now put the transparency data
-            HashSet<int[]> transparencyHashSet = Utils.transparencyHashSet(gbcFrame.getFrameBitmap());
-            if (transparencyHashSet.size() == 0) {
-                transparencyHashSet = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+            if (!isWebAppCompatible) {
+                HashSet<int[]> transparencyHashSet = Utils.transparencyHashSet(gbcFrame.getFrameBitmap());
+                if (transparencyHashSet.size() == 0) {
+                    transparencyHashSet = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+                }
+                String toStringHash = hashSetToString(transparencyHashSet);
+
+                String encodedTransparency = encodeData(toStringHash);
+                json.put("frame-transparency-" + gbcFrame.getFrameHash(), encodedTransparency);
             }
-            String toStringHash = hashSetToString(transparencyHashSet);
-
-            String encodedTransparency = encodeData(toStringHash);
-            json.put("frame-transparency-" + gbcFrame.getFrameHash(), encodedTransparency);
-
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());

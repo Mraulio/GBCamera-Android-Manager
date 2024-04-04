@@ -311,13 +311,13 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     List<Bitmap> bitmapsToPaperize = new ArrayList<>();
                     indexToPaperize.add(globalImageIndex);
                     for (int i = 0; i < indexToPaperize.size(); i++) {
-                        GbcImage gbcImage = filteredGbcImages.get(i);
+                        GbcImage gbcImage = filteredGbcImages.get(indexToPaperize.get(0));
                         Bitmap bw_image = null;
                         try {
                             bw_image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
 
                             //Not rotate wild frames
-                            if (!hashFrames.get(gbcImage.getFrameId()).isWildFrame() ||
+                            if ((gbcImage.getFrameId() != null && !hashFrames.get(gbcImage.getFrameId()).isWildFrame()) ||
                                     (bw_image.getHeight() > 144 && gbcImage.getRotation() == 2)) {//If image is higher than a normal one, only rotate if it's 180º
                                 bw_image = rotateBitmap(bw_image, gbcImage);
                             }
@@ -626,7 +626,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                             Bitmap image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
 
                             //Not rotate wild frames
-                            if (!hashFrames.get(gbcImage.getFrameId()).isWildFrame() ||
+                            if ((gbcImage.getFrameId() != null && !hashFrames.get(gbcImage.getFrameId()).isWildFrame()) ||
                                     (image.getHeight() > 144 && gbcImage.getRotation() == 2)) {//If image is higher than a normal one, only rotate if it's 180º
                                 image = rotateBitmap(image, gbcImage);
                             }
@@ -762,7 +762,20 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                     for (GbcImage gbcImage : selectedGbcImages) {
 
                                         Bitmap image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+
+                                        //Not rotate wild frames
+                                        if ((gbcImage.getFrameId() != null && !hashFrames.get(gbcImage.getFrameId()).isWildFrame()) ||
+                                                (image.getHeight() > 144 && gbcImage.getRotation() == 2)) {//If image is higher than a normal one, only rotate if it's 180º
+                                            image = rotateBitmap(image, gbcImage);
+                                        }
+
+                                        //If image is rotated sideways, add 8px on each side to print it in that orientation
+                                        if (image.getWidth() == 144 && image.getHeight() == 160) {
+                                            image = addPadding(image, 1, Color.parseColor("#FFFFFF"));
+                                        }
                                         imageByteList.add(Utils.encodeImage(image, "bw"));
+
+
                                     }
                                     printOverArduino.sendThreadDelay(connection, driver.getDevice(), tvResponseBytes, imageByteList);
                                 } catch (Exception e) {

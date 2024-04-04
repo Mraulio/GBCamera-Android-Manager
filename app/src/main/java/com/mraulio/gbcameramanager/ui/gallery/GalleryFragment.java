@@ -419,6 +419,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     Switch swCropCollage = collageView.findViewById(R.id.swCropCollage);
                     Switch swHorizontalOrientation = collageView.findViewById(R.id.sw_orientation);
                     Switch swHalfFrame = collageView.findViewById(R.id.sw_half_frame);
+                    Switch swRounded = collageView.findViewById(R.id.sw_rounded);
                     TextView tvExtraPadding = collageView.findViewById(R.id.tv_extra_padding);
                     SeekBar swExtraPadding = collageView.findViewById(R.id.sb_extra_padding);
                     ImageView ivPaddingColor = collageView.findViewById(R.id.iv_padding_color);
@@ -432,7 +433,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     final int[] extraPaddingMultiplier = {0};
 
                     btnPrint.setOnClickListener(view -> {
-                        Bitmap printBitmap = getPrintBitmap(colsRowsValue[0], lastPicked[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0]);
+                        Bitmap printBitmap = getPrintBitmap(colsRowsValue[0], lastPicked[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], swRounded.isChecked());
                         if (printBitmap != null) {
                             try {
 //                                imageView.setImageBitmap(Bitmap.createScaledBitmap(printBitmap, printBitmap.getWidth() * 5, printBitmap.getHeight() * 5, false));
@@ -477,7 +478,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     });
 
                     btnPaperizeCollage.setOnClickListener(view -> {
-                        Bitmap printBitmap = getPrintBitmap(colsRowsValue[0], lastPicked[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0]);
+                        Bitmap printBitmap = getPrintBitmap(colsRowsValue[0], lastPicked[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], swRounded.isChecked());
                         if (printBitmap != null) {
                             List<Bitmap> printHolder = new ArrayList<>();
                             printHolder.add(printBitmap);
@@ -539,7 +540,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         @Override
                         public void onClick(View view) {
                             colsRowsValue[0] = nPColsRows.getValue();
-                            collagedImage[0] = createCollage(collageBitmapList, colsRowsValue[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
+                            collagedImage[0] = createCollage(collageBitmapList, colsRowsValue[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0], swRounded.isChecked(), false);
                             Bitmap bitmap = Bitmap.createScaledBitmap(collagedImage[0], collagedImage[0].getWidth() * finalScaledCollage, collagedImage[0].getHeight() * finalScaledCollage, false);
                             imageView.setImageBitmap(bitmap);
                         }
@@ -603,12 +604,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 collageBitmapList.add(image);
                             }
                             try {
-                                collagedImage[0] = createCollage(collageBitmapList, colsRowsValue[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0]);
+                                collagedImage[0] = createCollage(collageBitmapList, colsRowsValue[0], swCropCollage.isChecked(), swHorizontalOrientation.isChecked(), swHalfFrame.isChecked(), extraPaddingMultiplier[0], lastPicked[0], swRounded.isChecked(), false);
                                 Bitmap bitmap = Bitmap.createScaledBitmap(collagedImage[0], collagedImage[0].getWidth() * finalScaledCollage, collagedImage[0].getHeight() * finalScaledCollage, false);
                                 imageView.setImageBitmap(bitmap);
                                 dialog.setContentView(collageView);
                                 int screenHeight = displayMetrics.heightPixels;
-                                int desiredHeight = (int) (screenHeight * 0.8);
+                                int desiredHeight = screenHeight;
                                 Window window = dialog.getWindow();
                                 window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, desiredHeight);
                                 lastPicked[0] = collagedImage[0].getPixel(0, 0);
@@ -1336,7 +1337,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     }
 
-    private Bitmap getPrintBitmap(int colsRowsValue, int lastPicked, boolean swCropCollageChecked, boolean swHorizontalOrientationChecked, boolean swHalfFrameChecked, int extraPaddingMultiplier) {
+    private Bitmap getPrintBitmap(int colsRowsValue, int lastPicked, boolean swCropCollageChecked, boolean swHorizontalOrientationChecked, boolean swHalfFrameChecked, int extraPaddingMultiplier, boolean rounded) {
         final int PRINT_WIDTH = 160; //  Prints need to be 160px in width
         List<Bitmap> collageBwBitmaps = new ArrayList<>();
 
@@ -1360,7 +1361,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             lastPicked = Color.parseColor("#FFFFFF");
         }
 
-        Bitmap printBitmap = createCollage(collageBwBitmaps, colsRowsValue, swCropCollageChecked, swHorizontalOrientationChecked, swHalfFrameChecked, extraPaddingMultiplier, lastPicked);
+        Bitmap printBitmap = createCollage(collageBwBitmaps, colsRowsValue, swCropCollageChecked, swHorizontalOrientationChecked, swHalfFrameChecked, extraPaddingMultiplier, lastPicked, rounded,true);
 
         if (swHorizontalOrientationChecked) {
             Matrix matrix = new Matrix();

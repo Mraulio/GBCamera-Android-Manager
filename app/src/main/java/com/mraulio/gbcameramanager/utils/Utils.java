@@ -86,7 +86,6 @@ public class Utils {
     public static final String CHANNEL_ID = "gbcam_channel";
     public static final String CHANNEL_NAME = "GBCAM Channel";
 
-
     private static final String DB_NAME = "Database";
     private static final String DB_NAME_SHM = "Database-shm";
     private static final String DB_NAME_WAL = "Database-wal";
@@ -273,7 +272,6 @@ public class Utils {
         String hashHex = Utils.bytesToHex(hash);
         return hashHex;
     }
-
 
     public static String removeNumbersFromEnd(String input) {
         return input.replaceAll("\\d+$", "");

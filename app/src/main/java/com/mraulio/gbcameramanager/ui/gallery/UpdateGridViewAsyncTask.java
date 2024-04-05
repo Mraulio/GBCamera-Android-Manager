@@ -3,8 +3,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.gridView;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updatingFromChangeImage;
-import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.newPosition;
-
+import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.isChanging;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
@@ -90,8 +89,9 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
         //Notifies the adapter
         gridView.setAdapter(GalleryFragment.customGridViewAdapterImage);
         if (updatingFromChangeImage) {
-            gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+            MainImageDialog.fastImageChange();
             updatingFromChangeImage = false;
+            isChanging = false;
         }
         loadDialog.dismissDialog();
 

@@ -5,6 +5,8 @@ import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.addPadding;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.itemsPerPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.nextPage;
@@ -75,43 +77,56 @@ import java.util.List;
 import javax.xml.transform.Result;
 
 public class MainImageDialog implements SerialInputOutputManager.Listener {
-
-    private boolean keepFrame;
-    private int currentPage;
-    private int lastPage;
-    private int position;
-    private int itemsPerPage;
-    private List<GbcImage> filteredGbcImages;
-    private int lastSeenGalleryImage;
-    private Context context;
+    static final Bitmap[] selectedImage = new Bitmap[1];
+    static final FramesFragment.CustomGridViewAdapterFrames[] frameAdapter = new FramesFragment.CustomGridViewAdapterFrames[1];
+    static int frameIndex = 0;
+    static int paletteIndex = 0;
+    static CustomGridViewAdapterPalette adapterPalette;
+    private static boolean keepFrame;
+    private static int lastPage;
+    private static int position;
+    private static List<GbcImage> filteredGbcImages;
+    private static int lastSeenGalleryImage;
+    private static Context context;
     private DisplayMetrics displayMetrics;
-    private boolean showPalettes;
+    private static boolean showPalettes;
     private Activity activity;
     UsbSerialPort port;
     SerialInputOutputManager usbIoManager;
     TextView tvResponseBytes;
     UsbDeviceConnection connection;
     TextView tv;
+    public static boolean isChanging = false;
     UsbManager manager;
     GridView gridView;
     boolean multiEdition;
-    List<Integer> selectedImages = new ArrayList<>();
+    List<Integer> selectedImages;
     CustomGridViewAdapterImage customGridViewAdapterImage;
     private int imageViewMiniIndex = 0;
-    final int[] globalImageIndex = new int[1];
-    static int newPosition;
+    static final int[] globalImageIndex = new int[1];
+    Button printButton;
+    Button btnPaperize;
+    Button shareButton;
+    Button saveButton;
+    static Button paletteFrameSelButton;
+    Button rotateButton;
+    static ImageView imageView;
+    static GridView gridViewPalette;
+    static GridView gridViewFrames;
+    static CheckBox cbFrameKeep;
+    CheckBox cbCrop;
+    static CheckBox cbInvert;
+    static Spinner spFrameGroupsImage;
 
-    public MainImageDialog(boolean multiEdition, GridView gridView, boolean keepFrame, int currentPage, int lastPage, int position, int itemsPerPage,
+    public MainImageDialog(boolean multiEdition, GridView gridView, boolean keepFrame, int lastPage, int position,
                            List<GbcImage> filteredGbcImages, int lastSeenGalleryImage, Context context, DisplayMetrics displayMetrics,
                            boolean showPalettes, Activity activity, UsbSerialPort port, SerialInputOutputManager usbIoManager,
                            TextView tvResponseBytes, UsbDeviceConnection connection, TextView tv, UsbManager manager, List<Integer> selectedImages, CustomGridViewAdapterImage customGridViewAdapterImage) {
         this.multiEdition = multiEdition;
         this.gridView = gridView;
         this.keepFrame = keepFrame;
-        this.currentPage = currentPage;
         this.lastPage = lastPage;
         this.position = position;
-        this.itemsPerPage = itemsPerPage;
         this.filteredGbcImages = filteredGbcImages;
         this.lastSeenGalleryImage = lastSeenGalleryImage;
         this.context = context;
@@ -132,21 +147,36 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         if (!multiEdition) {
             keepFrame = false;
             //Obtain selected image
-            int globalImageIndex;
+            isChanging = false;
             if (currentPage != lastPage) {
-                globalImageIndex = position + (currentPage * itemsPerPage);
+                globalImageIndex[0] = position + (currentPage * itemsPerPage);
             } else {
-                globalImageIndex = filteredGbcImages.size() - (itemsPerPage - position);
+                globalImageIndex[0] = filteredGbcImages.size() - (itemsPerPage - position);
             }
             //Put the last seen image as this one
-            lastSeenGalleryImage = globalImageIndex;
+            lastSeenGalleryImage = globalImageIndex[0];
 
-            final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode())};
+            selectedImage[0] = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
             // Create custom dialog
             final Dialog dialog = new Dialog(context);
             dialog.setContentView(R.layout.image_main_dialog);
             dialog.setCancelable(true);//So it closes when clicking outside or back button
             View dialogBackground = dialog.findViewById(android.R.id.content).getRootView();
+            imageView = dialog.findViewById(R.id.image_view);
+            printButton = dialog.findViewById(R.id.print_button);
+            btnPaperize = dialog.findViewById(R.id.btn_paperize_collage);
+
+            shareButton = dialog.findViewById(R.id.share_button);
+            saveButton = dialog.findViewById(R.id.save_button);
+            paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
+            rotateButton = dialog.findViewById(R.id.btnRotate);
+
+            gridViewPalette = dialog.findViewById(R.id.gridViewPal);
+            gridViewFrames = dialog.findViewById(R.id.gridViewFra);
+            cbFrameKeep = dialog.findViewById(R.id.cbFrameKeep);
+            cbCrop = dialog.findViewById(R.id.cbCrop);
+            cbInvert = dialog.findViewById(R.id.cbInvert);
+            spFrameGroupsImage = dialog.findViewById(R.id.spFrameGroupsImage);
 
             dialogBackground.setOnTouchListener(new View.OnTouchListener() {
                 boolean eventHandled = false;
@@ -154,8 +184,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
+
                     final int SWIPE_THRESHOLD = 200;
-                    final int SWIPE_VELOCITY_THRESHOLD = 100;
                     float y = event.getY();
                     float x = event.getX();
                     float upY = 0;
@@ -171,19 +201,24 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                             break;
                         case MotionEvent.ACTION_UP:
                             upY = event.getY();
-                            float diffY = upY - downY;
                             if (upY > (downY + SWIPE_THRESHOLD)) {
                                 //Swipe down
-                                changeImage(true, dialog, globalImageIndex);
+                                if (!isChanging) {
+                                    changeImage(true, globalImageIndex[0]);
+                                }
                             } else if (upY < (downY - SWIPE_THRESHOLD)) {
                                 //Swipe up
-                                changeImage(false, dialog, globalImageIndex);
+                                if (!isChanging) {
+                                    changeImage(false, globalImageIndex[0]);
+                                }
                             } else {//a click
                                 if (y < topTwoThirdsHeight) {
                                     if (eventHandled) {
                                         return true; //If event already handled, so it doesn't add up
                                     }
-                                    changeImage(!(x > leftHalf), dialog, globalImageIndex);
+                                    if (!isChanging) {
+                                        changeImage(!(x > leftHalf), globalImageIndex[0]);
+                                    }
                                 } else {
                                     dialog.dismiss();
                                 }
@@ -193,66 +228,42 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     return true;
                 }
             });
-            ImageView imageView = dialog.findViewById(R.id.image_view);
-            Button btnPaperize = dialog.findViewById(R.id.btn_paperize_collage);
+
             if (MainActivity.showPaperizeButton) {
                 btnPaperize.setVisibility(VISIBLE);
             }
 
-            selectedImage[0] = rotateBitmap(selectedImage[0], filteredGbcImages.get(globalImageIndex));
+            selectedImage[0] = rotateBitmap(selectedImage[0], filteredGbcImages.get(globalImageIndex[0]));
             imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0],
                     selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
             int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
             imageView.setMaxHeight(maxHeight);
 
-            Button printButton = dialog.findViewById(R.id.print_button);
             if (MainActivity.printingEnabled) {
                 printButton.setVisibility(VISIBLE);
             } else printButton.setVisibility(GONE);
-
-            Button shareButton = dialog.findViewById(R.id.share_button);
-            Button saveButton = dialog.findViewById(R.id.save_button);
-            Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
-            Button rotateButton = dialog.findViewById(R.id.btnRotate);
-
-            GridView gridViewPalette = dialog.findViewById(R.id.gridViewPal);
-            GridView gridViewFrames = dialog.findViewById(R.id.gridViewFra);
-            CheckBox cbFrameKeep = dialog.findViewById(R.id.cbFrameKeep);
-            CheckBox cbCrop = dialog.findViewById(R.id.cbCrop);
-            CheckBox cbInvert = dialog.findViewById(R.id.cbInvert);
-            Spinner spFrameGroupsImage = dialog.findViewById(R.id.spFrameGroupsImage);
 
             if (MainActivity.showRotationButton) {
                 rotateButton.setVisibility(VISIBLE);
             }
 
             showPalettes = true;
-            if (filteredGbcImages.get(globalImageIndex).
-
-                    getTags().
-
-                    contains("__filter:favourite__")) {
+            if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains("__filter:favourite__")) {
                 imageView.setBackgroundColor(context.getColor(R.color.favorite));
             }
-            if (filteredGbcImages.get(globalImageIndex).
-
-                    isLockFrame()) {
+            if (filteredGbcImages.get(globalImageIndex[0]).isLockFrame()) {
                 keepFrame = true;
                 cbFrameKeep.setChecked(true);
             }
-            if (!keepFrame && filteredGbcImages.get(globalImageIndex).
-
-                    isInvertPalette()) {
+            if (!keepFrame && filteredGbcImages.get(globalImageIndex[0]).isInvertPalette()) {
                 cbInvert.setChecked(true);
-            } else if (keepFrame && filteredGbcImages.get(globalImageIndex).
-
-                    isInvertFramePalette()) {
+            } else if (keepFrame && filteredGbcImages.get(globalImageIndex[0]).isInvertFramePalette()) {
                 cbInvert.setChecked(true);
             }
             cbInvert.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex[0]);
                     if (!keepFrame) {
                         gbcImage.setInvertPalette(cbInvert.isChecked());
                     } else
@@ -281,21 +292,21 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 public void onClick(View v) {
                     if (keepFrame) {
                         keepFrame = false;
-                        if (filteredGbcImages.get(globalImageIndex).isInvertPalette()) {
+                        if (filteredGbcImages.get(globalImageIndex[0]).isInvertPalette()) {
                             cbInvert.setChecked(true);
                         } else cbInvert.setChecked(false);
                     } else {
                         keepFrame = true;
-                        if (filteredGbcImages.get(globalImageIndex).isInvertFramePalette()) {
+                        if (filteredGbcImages.get(globalImageIndex[0]).isInvertFramePalette()) {
                             cbInvert.setChecked(true);
                         } else cbInvert.setChecked(false);
                     }
-                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex[0]);
                     try {
                         gbcImage.setLockFrame(keepFrame);
                         Bitmap bitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), keepFrame, true);
-                        Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
-                        bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
+                        Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex[0]).getHashCode(), bitmap);
+                        bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex[0]));
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                         updateGridView();
                     } catch (Exception e) {
@@ -309,7 +320,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 public void onClick(View v) {
                     List<Integer> indexToPaperize = new ArrayList<>();
                     List<Bitmap> bitmapsToPaperize = new ArrayList<>();
-                    indexToPaperize.add(globalImageIndex);
+                    indexToPaperize.add(globalImageIndex[0]);
                     for (int i = 0; i < indexToPaperize.size(); i++) {
                         GbcImage gbcImage = filteredGbcImages.get(indexToPaperize.get(0));
                         Bitmap bw_image = null;
@@ -337,14 +348,14 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             rotateButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex[0]);
                     Bitmap bitmap = Utils.imageBitmapCache.get(gbcImage.getHashCode());
                     int rotation = gbcImage.getRotation();
                     if (rotation != 0) {
                         rotation--;
                     } else rotation = 3;
                     gbcImage.setRotation(rotation);
-                    bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
+                    bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex[0]));
                     imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                     new UpdateImageAsyncTask(gbcImage).execute();
                     updateGridView();
@@ -359,7 +370,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     public void run() {
                         //Single tap action
                         BigImageDialog bigImageDialog = new BigImageDialog(filteredGbcImages, context, activity);
-                        bigImageDialog.showBigImageDialogSingleImage(globalImageIndex, imageView);
+                        bigImageDialog.showBigImageDialogSingleImage(globalImageIndex[0], imageView);
                         clickCount = 0;
                     }
                 };
@@ -374,27 +385,27 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
                         // Stop timer and make double tap action
                         handler.removeCallbacks(runnable);
-                        if (filteredGbcImages.get(globalImageIndex).getTags().contains("__filter:favourite__")) {
-                            HashSet<String> tags = filteredGbcImages.get(globalImageIndex).getTags();
+                        if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains("__filter:favourite__")) {
+                            HashSet<String> tags = filteredGbcImages.get(globalImageIndex[0]).getTags();
                             for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
                                 String nombre = iter.next();
                                 if (nombre.equals("__filter:favourite__")) {
                                     iter.remove();
                                 }
-                                filteredGbcImages.get(globalImageIndex).setTags(tags);
+                                filteredGbcImages.get(globalImageIndex[0]).setTags(tags);
                                 if (!selectedFilterTags.isEmpty())//Because right now I'm only filtering favourites
                                     dialog.dismiss();
                                 imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
                             }
                         } else {
-                            filteredGbcImages.get(globalImageIndex).addTag("__filter:favourite__");
+                            filteredGbcImages.get(globalImageIndex[0]).addTag("__filter:favourite__");
                             imageView.setBackgroundColor(context.getColor(R.color.favorite));
                         }
                         retrieveTags(gbcImagesList);
 
                         clickCount = 0;
                         //To save the image with the favorite tag to the database
-                        new UpdateImageAsyncTask(filteredGbcImages.get(globalImageIndex)).execute();
+                        new UpdateImageAsyncTask(filteredGbcImages.get(globalImageIndex[0])).execute();
                         reloadTags();
                         updateGridView();
                     }
@@ -403,11 +414,10 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
             final List<GbcFrame>[] currentlyShowingFrames = new List[]{framesList};
 
-            final FramesFragment.CustomGridViewAdapterFrames[] frameAdapter = {new FramesFragment.CustomGridViewAdapterFrames(context, R.layout.frames_row_items, currentlyShowingFrames[0], false, false)};
-            int frameIndex = 0;
-            for (
-                    int i = 0; i < framesList.size(); i++) {
-                if (framesList.get(i).getFrameId().equals(filteredGbcImages.get(globalImageIndex).getFrameId())) {
+            frameAdapter[0] = new FramesFragment.CustomGridViewAdapterFrames(context, R.layout.frames_row_items, currentlyShowingFrames[0], false, false);
+
+            for (int i = 0; i < framesList.size(); i++) {
+                if (framesList.get(i).getFrameId().equals(filteredGbcImages.get(globalImageIndex[0]).getFrameId())) {
                     frameIndex = i;
                     break;
                 }
@@ -417,15 +427,14 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             framesWithNull.add(null);
             framesWithNull.addAll(framesList);
 
-            frameAdapter[0].
-
-                    setLastSelectedPosition(frameIndex);
+            frameAdapter[0].setLastSelectedPosition(frameIndex);
             gridViewFrames.setAdapter(frameAdapter[0]);
             List<String> frameGroupList = new ArrayList<>();
             frameGroupList.add(context.getString(R.string.sp_all_frame_groups));
+
             List<String> frameGroupIds = new ArrayList<>();//To access with index
-            for (
-                    LinkedHashMap.Entry<String, String> entry : frameGroupsNames.entrySet()) {
+
+            for (LinkedHashMap.Entry<String, String> entry : frameGroupsNames.entrySet()) {
                 frameGroupList.add(entry.getValue() + " (" + entry.getKey() + ")");
                 frameGroupIds.add(entry.getKey());
             }
@@ -457,7 +466,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     frameAdapter[0] = new FramesFragment.CustomGridViewAdapterFrames(context, R.layout.frames_row_items, currentlyShowingFrames[0], false, false);
 
                     //Set the selected frame if it's in the selected group
-                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex[0]);
                     for (int x = 0; x < currentlyShowingFrames[0].size(); x++) {
                         if (currentlyShowingFrames[0].get(x) == null) {
                             frameAdapter[0].setLastSelectedPosition(0);
@@ -474,15 +483,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 }
             });
 
-
             //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
-            if (selectedImage[0].
-
-                    getHeight() != 144 && selectedImage[0].
-
-                    getHeight() != 160 && selectedImage[0].
-
-                    getHeight() != 224) {
+            if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
                 cbFrameKeep.setVisibility(GONE);
                 paletteFrameSelButton.setVisibility(GONE);
             }
@@ -492,7 +494,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 public void onItemClick(AdapterView<?> parent, View view,
                                         int selectedFrameIndex, long id) {
                     //Action when clicking a frame inside the Dialog
-                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex[0]);
 
                     try {
                         String frameId = null;
@@ -500,8 +502,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                             frameId = currentlyShowingFrames[0].get(selectedFrameIndex).getFrameId();
                         }
                         Bitmap bitmap = frameChange(gbcImage, frameId, gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), keepFrame, true);
-                        Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
-                        bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
+                        Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex[0]).getHashCode(), bitmap);
+                        bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex[0]));
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
 
                         frameAdapter[0].setLastSelectedPosition(selectedFrameIndex);
@@ -512,24 +514,20 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     }
                 }
             });
-            CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(context, R.layout.palette_grid_item, Utils.gbcPalettesList, false, false);
-            int paletteIndex = 0;
-            for (
-                    int i = 0; i < Utils.gbcPalettesList.size(); i++) {
-                if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex).getPaletteId())) {
+            adapterPalette = new CustomGridViewAdapterPalette(context, R.layout.palette_grid_item, Utils.gbcPalettesList, false, false);
+
+            for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
+                if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
                     paletteIndex = i;
                     break;
                 }
             }
             adapterPalette.setLastSelectedImagePosition(paletteIndex);
-            if (filteredGbcImages.get(globalImageIndex).
-
-                    getFramePaletteId() == null) {
+            if (filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId() == null) {
                 paletteIndex = 0;
             } else {
                 for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
-
-                    if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex).getFramePaletteId())) {
+                    if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
                         paletteIndex = i;
                         break;
                     }
@@ -537,31 +535,32 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             }
             adapterPalette.setLastSelectedFramePosition(paletteIndex);
             gridViewPalette.setAdapter(adapterPalette);
+
             gridViewPalette.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view,
                                         int palettePosition, long id) {
                     //Action when clicking a palette inside the Dialog
-                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                    GbcImage gbcImage = filteredGbcImages.get(globalImageIndex[0]);
 
                     //Set the new palette to the gbcImage image or frame
                     if (!keepFrame) {
-                        filteredGbcImages.get(globalImageIndex).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
+                        filteredGbcImages.get(globalImageIndex[0]).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
                         adapterPalette.setLastSelectedImagePosition(palettePosition);
 
                     } else {
-                        filteredGbcImages.get(globalImageIndex).setFramePaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
+                        filteredGbcImages.get(globalImageIndex[0]).setFramePaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
                         adapterPalette.setLastSelectedFramePosition(palettePosition);
 
                     }
                     try {
                         Bitmap bitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), keepFrame, true);
 
-                        Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
+                        Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex[0]).getHashCode(), bitmap);
 
                         adapterPalette.notifyDataSetChanged();
-                        Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex).getHashCode(), bitmap);
-                        bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
+                        Utils.imageBitmapCache.put(filteredGbcImages.get(globalImageIndex[0]).getHashCode(), bitmap);
+                        bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex[0]));
 
                         imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
                         updateGridView();
@@ -621,7 +620,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                 return;
                             }
                             UsbSerialDriver driver = availableDrivers.get(0);
-                            GbcImage gbcImage = filteredGbcImages.get(globalImageIndex);
+                            GbcImage gbcImage = filteredGbcImages.get(globalImageIndex[0]);
                             List<byte[]> imageByteList = new ArrayList();
                             Bitmap image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
 
@@ -651,7 +650,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             shareButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    GbcImage sharedImage = filteredGbcImages.get(globalImageIndex);
+                    GbcImage sharedImage = filteredGbcImages.get(globalImageIndex[0]);
 //                            Bitmap sharedBitmap = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
                     List sharedList = new ArrayList();
                     sharedList.add(sharedImage);
@@ -662,7 +661,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 @Override
                 public void onClick(View v) {
                     List saveList = new ArrayList();
-                    saveList.add(filteredGbcImages.get(globalImageIndex));
+                    saveList.add(filteredGbcImages.get(globalImageIndex[0]));
                     saveImage(saveList, context, cbCrop.isChecked());
                 }
             });
@@ -682,7 +681,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             });
 
             dialog.show();
-        } else {
+
+        } else {//Multi Edition
             Collections.sort(selectedImages);
             List<Integer> indexesToLoad = new ArrayList<>();
             for (int i : selectedImages) {
@@ -1102,7 +1102,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                         paletteIndex = 0;
                     } else {
                         for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
-
                             if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
                                 paletteIndex = i;
                                 break;
@@ -1217,43 +1216,124 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         }
     }
 
-    private void changeImage(boolean prevImage, Dialog dialog, int globalImageIndex) {
+    public static void fastImageChange() {
+
+        if (currentPage != lastPage) {
+            globalImageIndex[0] = position + (currentPage * itemsPerPage);
+        } else {
+            globalImageIndex[0] = filteredGbcImages.size() - (itemsPerPage - position);
+        }
+        //Put the last seen image as this one
+        lastSeenGalleryImage = globalImageIndex[0];
+
+        selectedImage[0] = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
+        selectedImage[0] = rotateBitmap(selectedImage[0], filteredGbcImages.get(globalImageIndex[0]));
+
+        imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0],
+                selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
+
+        if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains("__filter:favourite__")) {
+            imageView.setBackgroundColor(context.getColor(R.color.favorite));
+        } else {
+            imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
+        }
+
+        //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
+        if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
+            cbFrameKeep.setVisibility(GONE);
+            paletteFrameSelButton.setVisibility(GONE);
+            showPalettes = true;
+            paletteFrameSelButton.setText(context.getString(R.string.btn_show_frames));
+            gridViewFrames.setVisibility(GONE);
+            gridViewPalette.setVisibility(VISIBLE);
+            spFrameGroupsImage.setVisibility(GONE);
+        } else {
+            cbFrameKeep.setVisibility(VISIBLE);
+            paletteFrameSelButton.setVisibility(VISIBLE);
+        }
+        spFrameGroupsImage.setSelection(0);
+
+        for (int i = 0; i < framesList.size(); i++) {
+            if (framesList.get(i).getFrameId().equals(filteredGbcImages.get(globalImageIndex[0]).getFrameId())) {
+                frameIndex = i;
+                break;
+            }
+        }
+        frameAdapter[0].setLastSelectedPosition(frameIndex + 1);
+        frameAdapter[0].notifyDataSetChanged();
+
+        for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
+            if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
+                paletteIndex = i;
+                break;
+            }
+        }
+        adapterPalette.setLastSelectedImagePosition(paletteIndex);
+        if (filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId() == null) {
+            paletteIndex = 0;
+        } else {
+            for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
+
+                if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
+                    paletteIndex = i;
+                    break;
+                }
+            }
+        }
+        adapterPalette.setLastSelectedFramePosition(paletteIndex);
+        adapterPalette.notifyDataSetChanged();
+
+        if (!keepFrame && filteredGbcImages.get(globalImageIndex[0]).isInvertPalette()) {
+            cbInvert.setChecked(true);
+        } else if (keepFrame && filteredGbcImages.get(globalImageIndex[0]).isInvertFramePalette()) {
+            cbInvert.setChecked(true);
+        } else {
+            cbInvert.setChecked(false);
+        }
+
+        if (filteredGbcImages.get(globalImageIndex[0]).isLockFrame()) {
+            keepFrame = true;
+            cbFrameKeep.setChecked(true);
+        } else {
+            keepFrame = false;
+            cbFrameKeep.setChecked(false);
+        }
+    }
+
+    private void changeImage(boolean prevImage, int globalImageIndex) {
         //Touching 2/3 superior part of the exterior of the dialog
-        boolean updateHere = false; //Because updatingFromChangeImage changes in an asynctask and it's status not to be trusted
+        boolean updateOutside = false; //Because updatingFromChangeImage changes in an asynctask and it's status not to be trusted
         if (!prevImage) {//Touching right part of the screen outside dialog
             if (position == itemsPerPage - 1 && currentPage != lastPage) {
                 //We are at the end of the current page.
                 //Do a nextPage and select first item if possible
                 updatingFromChangeImage = true;
-                updateHere = true;
-                newPosition = 0;
+                updateOutside = true;
+                position = 0;
+                isChanging = true;
                 nextPage();
-            } else {
-                newPosition = position + 1;
             }
             if (globalImageIndex < filteredGbcImages.size() - 1) {
-                if (!updateHere) {
-                    gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+                if (!updateOutside) {
+                    position++;
+                    fastImageChange();
                 }
-                dialog.dismiss();
             } else {
                 toast(context, context.getString(R.string.toast_last_image));
             }
         } else {//Touching left part of the screen outside dialog
             if (position == 0 && currentPage != 0) {
                 updatingFromChangeImage = true;
-                updateHere = true;
-                newPosition = MainActivity.imagesPage - 1;
+                updateOutside = true;
+                position = MainActivity.imagesPage - 1;
+                isChanging = true;
                 prevPage();
-                //We are at the end of the current page.
-            } else {
-                newPosition = position - 1;
             }
             if (globalImageIndex > 0) {
-                if (!updateHere) {
-                    gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+                if (!updateOutside) {
+                    position--;
+                    fastImageChange();
                 }
-                dialog.dismiss();
             } else {
                 toast(context, context.getString(R.string.toast_first_image));
             }
@@ -1283,7 +1363,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
         usbIoManager = new SerialInputOutputManager(port, this);
     }
-
 
     private void reloadLayout(LinearLayout layoutSelected, ImageView imageView, CheckBox
             keepFrameCb, CheckBox invertCb, Button

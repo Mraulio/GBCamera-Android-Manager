@@ -189,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
 
-
         // Obtain Intent information
         Intent intent = getIntent();
         String action = intent.getAction();

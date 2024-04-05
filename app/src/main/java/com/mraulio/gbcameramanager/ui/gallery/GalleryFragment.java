@@ -19,7 +19,6 @@ import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.showFilterDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.sortImages;
 
-import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.newPosition;
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.getHiddenTags;
@@ -240,8 +239,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 if (!selectionMode[0]) {
-                    MainImageDialog mainImageDialog = new MainImageDialog(selectionMode[0], gridView, keepFrame, currentPage, lastPage, position,
-                            itemsPerPage, filteredGbcImages, lastSeenGalleryImage, getContext(), displayMetrics, showPalettes, getActivity(),
+                    MainImageDialog mainImageDialog = new MainImageDialog(selectionMode[0], gridView, keepFrame, lastPage, position,
+                            filteredGbcImages, lastSeenGalleryImage, getContext(), displayMetrics, showPalettes, getActivity(),
                             port, usbIoManager, tvResponseBytes, connection, tv, manager, null, null);
                     mainImageDialog.showImageDialog();
                 } else {
@@ -361,8 +360,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         switch (item.getItemId()) {
             case R.id.action_multi_edit:
                 if (selectionMode[0] && selectedImages.size() > 1) {
-                    MainImageDialog mainImageDialog = new MainImageDialog(selectionMode[0], gridView, keepFrame, currentPage, lastPage, 0,
-                            itemsPerPage, filteredGbcImages, lastSeenGalleryImage, getContext(), displayMetrics, showPalettes, getActivity(),
+                    MainImageDialog mainImageDialog = new MainImageDialog(selectionMode[0], gridView, keepFrame, lastPage, 0,
+                            filteredGbcImages, lastSeenGalleryImage, getContext(), displayMetrics, showPalettes, getActivity(),
                             port, usbIoManager, tvResponseBytes, connection, tv, manager, selectedImages, customGridViewAdapterImage);
                     mainImageDialog.showImageDialog();
                 } else Utils.toast(getContext(), getString(R.string.select_minimum_toast));
@@ -1254,10 +1253,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         bitmapList.add(imageBitmapCache.get(gbcImage.getHashCode()));
                     }
                     customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, filteredGbcImages.subList(startIndex, endIndex), bitmapList, false, false, true, selectedImages);
+
                     if (updatingFromChangeImage) {
-                        gridView.performItemClick(gridView.getChildAt(newPosition), newPosition, gridView.getAdapter().getItemId(newPosition));
+                        MainImageDialog.fastImageChange();
                         updatingFromChangeImage = false;
                     }
+                    MainImageDialog.isChanging = false;
                     gridView.setAdapter(customGridViewAdapterImage);
                 }
                 tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));

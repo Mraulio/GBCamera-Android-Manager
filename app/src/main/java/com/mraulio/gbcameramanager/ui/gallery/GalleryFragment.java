@@ -153,6 +153,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         galleryActivity = getActivity();
+        if (selectionMode[0]) MainActivity.fab.show();
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.GALLERY;
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;

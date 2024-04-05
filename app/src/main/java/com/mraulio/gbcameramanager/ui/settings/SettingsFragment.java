@@ -2,12 +2,12 @@ package com.mraulio.gbcameramanager.ui.settings;
 
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.utils.Utils.backupDatabase;
-import static com.mraulio.gbcameramanager.utils.Utils.restoreDatabase;
 import static com.mraulio.gbcameramanager.utils.Utils.showDbBackups;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -248,7 +248,7 @@ public class SettingsFragment extends Fragment {
                 if (userSelect) {
                     // I set the export size on the Main activity int as the selected one
                     MainActivity.languageCode = langs.get(position);
-                    ChangeLanguage(langs.get(position));
+                    changeLanguage(langs.get(position));
                 } else {
                     userSelect = true; // Because the spinner executes an item selection on startup
                 }
@@ -289,7 +289,7 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
-    private void ChangeLanguage(String languageCode) {
+    private void changeLanguage(String languageCode) {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);
         Configuration configuration = new Configuration();
@@ -299,4 +299,6 @@ public class SettingsFragment extends Fragment {
         editor.putString("language", languageCode);
         editor.apply();
     }
+
+
 }

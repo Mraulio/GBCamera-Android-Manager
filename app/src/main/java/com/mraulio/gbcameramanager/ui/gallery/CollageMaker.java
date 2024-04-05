@@ -1,12 +1,10 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Shader;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.ImageView;
 
@@ -15,7 +13,7 @@ import java.util.List;
 
 public class CollageMaker {
 
-    public static Bitmap createCollage(List<Bitmap> bitmaps, int value, boolean crop, boolean horizontalOrientation, boolean halfFrame, int extraPaddingMultiplier, int paddingColor, boolean rounded, boolean print) {
+    public static Bitmap createCollage(List<Bitmap> bitmaps, int value, boolean crop, boolean horizontalOrientation, boolean halfFrame, int extraPaddingMultiplier, int paddingColor) {
 
         int width = bitmaps.get(0).getWidth();
         int height = bitmaps.get(0).getHeight();
@@ -31,35 +29,21 @@ public class CollageMaker {
             return null;
         }
 
-        if (rounded) {
-            List<Bitmap> roundedBitmaps = new ArrayList<>();
-            for (Bitmap bitmap : bitmaps) {
-                Bitmap roundedBitmap = getRoundedBitmap(bitmap, print);
-                Bitmap roundedWithPadding = Bitmap.createBitmap(roundedBitmap.getWidth()+32, roundedBitmap.getHeight()+32, Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(roundedWithPadding);
-                canvas.drawColor(paddingColor);
-                Paint paint = new Paint();
-                Matrix matrix = new Matrix();
-                matrix.setTranslate(16, 16);
-                canvas.drawBitmap(roundedBitmap, matrix, paint);
-                roundedBitmaps.add(roundedWithPadding);
-                bitmaps = roundedBitmaps;
-            }
-        }
 
         if (crop) {
             int cropX = 16;
             int cropY = (height == 224) ? 40 : 16;
             List<Bitmap> croppedBitmaps = new ArrayList<>();
             for (Bitmap bt : bitmaps) {
-                Bitmap croppedBitmap = Bitmap.createBitmap(bt, cropX, cropY, rounded ? 112 : 128, 112);
+                Bitmap croppedBitmap = Bitmap.createBitmap(bt, cropX, cropY, 128, 112);
                 croppedBitmaps.add(croppedBitmap);
             }
             bitmaps = croppedBitmaps;
+
         }
 
-        int rows;
-        int columns;
+        int rows = 0;
+        int columns = 0;
 
         if (!horizontalOrientation) {
             columns = value;
@@ -68,6 +52,7 @@ public class CollageMaker {
             rows = value;
             columns = Math.max(1, (int) Math.ceil((double) totalImages / rows));
         }
+
 
         int collageWidth = bitmaps.get(0).getWidth() * columns;
         int collageHeight = bitmaps.get(0).getHeight() * rows;
@@ -93,15 +78,14 @@ public class CollageMaker {
                     int horizontalOffset = 0;
                     if (halfFrame && !crop && col != 0) {
                         horizontalOffset = -8 * (col - 1);
-                        System.out.println(bitmap.getWidth()+"/"+bitmap.getHeight());
-                        bitmap = Bitmap.createBitmap(bitmap, 8, 0, rounded ? 136 : 152, 144);//Crop 50% of the left frame
+                        bitmap = Bitmap.createBitmap(bitmap, 8, 0, 152, 144);//Crop 50% of the left frame
                     }
 
                     // Calculate vertical offset
                     int verticalOffset = 0;
                     if (halfFrame && !crop && row != 0) {
                         verticalOffset = -8 * (row - 1);
-                        bitmap = Bitmap.createBitmap(bitmap, 0, 8, bitmap.getWidth(), rounded ? 128 : 136);//Crop 50% of the top frame
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 8, bitmap.getWidth(), 136);//Crop 50% of the top frame
                     }
                     Matrix matrix = new Matrix();
                     matrix.setTranslate((col * bitmap.getWidth()) + horizontalOffset, (row * bitmap.getHeight()) + verticalOffset);
@@ -120,28 +104,6 @@ public class CollageMaker {
         return collageBitmap;
     }
 
-    public static Bitmap getRoundedBitmap(Bitmap originalBitmap, boolean antiAlias) {
-        int diameter = 112;
-        int cropY = (originalBitmap.getHeight() == 224) ? 40 : 16;
-        Bitmap croppedBitmap = Bitmap.createBitmap(originalBitmap, 16, cropY, 128, 112);
-        Bitmap roundedBitmap = Bitmap.createBitmap(diameter, diameter, Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(roundedBitmap);
-
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        if (antiAlias) {
-            paint.setAntiAlias(false);
-        }
-        Shader shader = new BitmapShader(croppedBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-        paint.setShader(shader);
-
-        float radius = diameter / 2.0f;
-        float centerX = diameter / 2.0f; // Coordenada X del centro
-        float centerY = diameter / 2.0f; // Coordenada Y del centro
-        canvas.drawCircle(centerX, centerY, radius, paint); // Dibujar el círculo en el centro
-        return roundedBitmap;
-    }
-
     public static Bitmap addPadding(Bitmap originalBitmap, int paddingMult, int paddingColor) {
 
         int paddingSize = paddingMult * 8;
@@ -158,6 +120,7 @@ public class CollageMaker {
         canvas.drawBitmap(originalBitmap, paddingSize, paddingSize, null);
 
         return paddedBitmap;
+
     }
 
     public static void applyBorderToIV(ImageView imageView, int colorBackground) {
@@ -172,5 +135,4 @@ public class CollageMaker {
 
         imageView.setBackground(borderDrawable);
     }
-
 }

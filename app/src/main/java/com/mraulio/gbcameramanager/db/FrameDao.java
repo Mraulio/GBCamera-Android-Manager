@@ -35,7 +35,7 @@ public interface FrameDao {
 
     @Transaction
     @Delete
-    void deleteItems(List<GbcFrame> objects);
+    void deleteItems(List<GbcFrame> gbcFrames);
 
     @Query("DELETE FROM gbcframe")
     void deleteAll();

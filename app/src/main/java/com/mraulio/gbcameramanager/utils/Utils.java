@@ -5,6 +5,7 @@ import static com.mraulio.gbcameramanager.MainActivity.selectedTags;
 import static com.mraulio.gbcameramanager.MainActivity.sharedPreferences;
 import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -17,6 +18,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -391,10 +394,42 @@ public class Utils {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectedDirectory[0] = directories.get(position);
+                getBackupDatabaseVersion(new File(selectedDirectory[0], "Database"));
             }
         });
     }
+//    private boolean isBackupCompatible(String backupDirectoryPath) {
+//        // Obtener la versión de la base de datos actual
+//        int currentVersion = AppD.getDatabase(context).getOpenHelper().getReadableDatabase().getVersion();
+//
+//        // Verificar la existencia de los archivos de la copia de seguridad
+//        File databaseFile = new File(backupDirectoryPath, "my_database");
+//        File shmFile = new File(backupDirectoryPath, "my_database-shm");
+//        File walFile = new File(backupDirectoryPath, "my_database-wal");
+//
+//        if (!databaseFile.exists() || !shmFile.exists() || !walFile.exists()) {
+//            return false; // Al menos uno de los archivos no existe
+//        }
+//
+//        // Obtener la versión de la copia de seguridad (asumiendo que la versión está codificada en el nombre del archivo o se almacena en otra parte)
+//        int backupVersion = getBackupDatabaseVersion(databaseFile);
+//
+//        // Comparar versiones
+//        return backupVersion <= currentVersion;
+//    }
 
+    @SuppressLint("Range")
+    private static int getBackupDatabaseVersion(File databaseFile) {
+        SQLiteDatabase backupDB = SQLiteDatabase.openDatabase(databaseFile.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
+        Cursor cursor = backupDB.query("DatabaseVersion", new String[]{"version"}, null, null, null, null, null);
+        int backupVersion = -1;
+        if (cursor != null && cursor.moveToFirst()) {
+            backupVersion = cursor.getInt(cursor.getColumnIndex("version"));
+            cursor.close();
+        }
+        backupDB.close();
+        return backupVersion;
+    }
     public static void restoreDatabase(Context context, File backupDir, Activity activity) {
         try {
             File dataDir = Environment.getDataDirectory();

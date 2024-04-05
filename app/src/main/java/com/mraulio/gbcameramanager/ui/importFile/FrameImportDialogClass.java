@@ -34,7 +34,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -43,6 +42,7 @@ import com.mraulio.gbcameramanager.ui.frames.UpdateFrameAsyncTask;
 import com.mraulio.gbcameramanager.ui.gallery.UpdateImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -346,7 +346,10 @@ public class FrameImportDialogClass {
         try {
             byte[] gbFrameBytes = Utils.encodeImage(bitmap, "bw");
             gbcFrame.setFrameBytes(gbFrameBytes);
-            String gbFrameHash = generateHashFromBytes(gbFrameBytes);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            String gbFrameHash = generateHashFromBytes(byteArray);//Getting the hash from the transparent bitmap, and not the encoded bitmap because it can be all white when encoding, causing false duplicated hashes
             gbcFrame.setFrameHash(gbFrameHash);
         } catch (Exception e) {
             e.printStackTrace();

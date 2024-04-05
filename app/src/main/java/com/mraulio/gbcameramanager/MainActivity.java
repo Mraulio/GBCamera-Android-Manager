@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager;
 import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.content.Context;
@@ -339,6 +340,8 @@ public class MainActivity extends AppCompatActivity {
                     Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
                 Utils.gbcPalettesList.addAll(palettes);
+                //Sort the palettes for the palette grid, showing first the favorites
+                sortPalettes();
             } else {
                 StringBuilder stringBuilder = new StringBuilder();
                 int resourcePalettes = R.raw.palettes;
@@ -359,6 +362,8 @@ public class MainActivity extends AppCompatActivity {
                 String fileContent = stringBuilder.toString();
                 List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
                 Utils.gbcPalettesList.addAll(receivedList);
+                //Sort the palettes for the palette grid, showing first the favorites
+                sortPalettes();
                 for (GbcPalette gbcPalette : receivedList) {
                     Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }

@@ -525,7 +525,7 @@ public class ImportFragment extends Fragment {
                     switch (addEnum) {
                         case PALETTES:
                             btnAddImages.setEnabled(true);
-                            adapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true);
+                            adapter = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, (ArrayList<GbcPalette>) receivedList, true, true, true);
                             customAdapterPalette = (CustomGridViewAdapterPalette) adapter;
                             btnAddImages.setText(getString(R.string.btn_add_palettes));
                             btnAddImages.setVisibility(View.VISIBLE);

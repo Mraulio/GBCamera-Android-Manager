@@ -5,7 +5,9 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 
 import java.util.List;
@@ -31,6 +33,9 @@ public interface PaletteDao {
 
     @Delete
     void delete(GbcPalette gbcpalette);
+
+    @Update
+    void update(GbcPalette gbcpalette);
 
     @Query("DELETE FROM gbcpalette")
     void deleteAll();

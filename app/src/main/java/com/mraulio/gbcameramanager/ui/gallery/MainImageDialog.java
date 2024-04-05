@@ -514,10 +514,10 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     }
                 }
             });
-            adapterPalette = new CustomGridViewAdapterPalette(context, R.layout.palette_grid_item, Utils.gbcPalettesList, false, false);
+            adapterPalette = new CustomGridViewAdapterPalette(context, R.layout.palette_grid_item, Utils.sortedPalettes, false, false, false);
 
-            for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
-                if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
+            for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
+                if (Utils.sortedPalettes.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
                     paletteIndex = i;
                     break;
                 }
@@ -526,8 +526,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             if (filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId() == null) {
                 paletteIndex = 0;
             } else {
-                for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
-                    if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
+                for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
+                    if (Utils.sortedPalettes.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
                         paletteIndex = i;
                         break;
                     }
@@ -545,11 +545,11 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
                     //Set the new palette to the gbcImage image or frame
                     if (!keepFrame) {
-                        filteredGbcImages.get(globalImageIndex[0]).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
+                        filteredGbcImages.get(globalImageIndex[0]).setPaletteId(Utils.sortedPalettes.get(palettePosition).getPaletteId());
                         adapterPalette.setLastSelectedImagePosition(palettePosition);
 
                     } else {
-                        filteredGbcImages.get(globalImageIndex[0]).setFramePaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
+                        filteredGbcImages.get(globalImageIndex[0]).setFramePaletteId(Utils.sortedPalettes.get(palettePosition).getPaletteId());
                         adapterPalette.setLastSelectedFramePosition(palettePosition);
 
                     }
@@ -803,7 +803,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     CheckBox cbInvert = dialog.findViewById(R.id.cbInvert);
                     Spinner spFrameGroupsImage = dialog.findViewById(R.id.spFrameGroupsImage);
 
-                    CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(context, R.layout.palette_grid_item, Utils.gbcPalettesList, false, false);
+                    CustomGridViewAdapterPalette adapterPalette = new CustomGridViewAdapterPalette(context, R.layout.palette_grid_item, Utils.sortedPalettes, false, false, false);
 
                     final List<GbcFrame>[] currentlyShowingFrames = new List[]{Utils.framesList};
 
@@ -1091,8 +1091,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                         }
                     });
                     int paletteIndex = 0;
-                    for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
-                        if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
+                    for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
+                        if (Utils.sortedPalettes.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
                             paletteIndex = i;
                             break;
                         }
@@ -1101,8 +1101,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     if (filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId() == null) {
                         paletteIndex = 0;
                     } else {
-                        for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
-                            if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
+                        for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
+                            if (Utils.sortedPalettes.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
                                 paletteIndex = i;
                                 break;
                             }
@@ -1116,10 +1116,10 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                             //Action when clicking a palette inside the Dialog
 
                             if (!keepFrame) {
-                                filteredGbcImages.get(globalImageIndex[0]).setPaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
+                                filteredGbcImages.get(globalImageIndex[0]).setPaletteId(Utils.sortedPalettes.get(palettePosition).getPaletteId());
                                 adapterPalette.setLastSelectedImagePosition(palettePosition);
                             } else {
-                                filteredGbcImages.get(globalImageIndex[0]).setFramePaletteId(Utils.gbcPalettesList.get(palettePosition).getPaletteId());
+                                filteredGbcImages.get(globalImageIndex[0]).setFramePaletteId(Utils.sortedPalettes.get(palettePosition).getPaletteId());
                                 adapterPalette.setLastSelectedFramePosition(palettePosition);
                             }
                             boolean showingImageIsLockFrame = filteredGbcImages.get(globalImageIndex[0]).isLockFrame();
@@ -1262,8 +1262,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         frameAdapter[0].setLastSelectedPosition(frameIndex + 1);
         frameAdapter[0].notifyDataSetChanged();
 
-        for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
-            if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
+        for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
+            if (Utils.sortedPalettes.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
                 paletteIndex = i;
                 break;
             }
@@ -1272,9 +1272,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         if (filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId() == null) {
             paletteIndex = 0;
         } else {
-            for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
+            for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
 
-                if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
+                if (Utils.sortedPalettes.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
                     paletteIndex = i;
                     break;
                 }
@@ -1432,8 +1432,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     }
                     int paletteIndex = 0;
 
-                    for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
-                        if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
+                    for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
+                        if (Utils.sortedPalettes.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getPaletteId())) {
                             paletteIndex = i;
                             break;
                         }
@@ -1442,9 +1442,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     if (filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId() == null) {
                         paletteIndex = 0;
                     } else {
-                        for (int i = 0; i < Utils.gbcPalettesList.size(); i++) {
+                        for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
 
-                            if (Utils.gbcPalettesList.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
+                            if (Utils.sortedPalettes.get(i).getPaletteId().equals(filteredGbcImages.get(globalImageIndex[0]).getFramePaletteId())) {
                                 paletteIndex = i;
                                 break;
                             }

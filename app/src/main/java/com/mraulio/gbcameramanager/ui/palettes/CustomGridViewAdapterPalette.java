@@ -29,14 +29,15 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
     private boolean showTextView, checkDuplicate;
     int lastSelectedImagePosition = -1; //No image palette selected initially
     int lastSelectedFramePosition = -1; //No frame palette selected initially
-
+    boolean showFavorite;
     public CustomGridViewAdapterPalette(Context context, int layoutResourceId,
-                                        ArrayList<GbcPalette> data, boolean showTextView, boolean checkDuplicate) {
+                                        ArrayList<GbcPalette> data, boolean showTextView, boolean checkDuplicate, boolean showFavorite) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
         this.data = data;
         this.showTextView = showTextView;
+        this.showFavorite = showFavorite;
         this.checkDuplicate = checkDuplicate;
     }
 
@@ -71,7 +72,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
             holder.cardView.setBackgroundColor(selectedFrameColor);
             holder.imageItem.setBackgroundColor(selectedFrameColor);
         }
-        if (position == lastSelectedImagePosition && position ==  lastSelectedFramePosition) {
+        if (position == lastSelectedImagePosition && position == lastSelectedFramePosition) {
             holder.cardView.setBackgroundColor(sameSelectedPalette);
             holder.imageItem.setBackgroundColor(sameSelectedPalette);
         }
@@ -79,15 +80,23 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
             holder.txtTitle.setVisibility(View.GONE);
         }
         Bitmap image = data.get(position).paletteViewer();
-        String name = data.get(position).getPaletteId();
+        String id = data.get(position).getPaletteId();
+        String paletteName = data.get(position).getPaletteName();
+        String showingName = (paletteName != null ? paletteName : "") + " (" + id + ")";
+
+        if (showFavorite && data.get(position).isFavorite()) {
+            holder.imageItem.setBackgroundColor(context.getResources().getColor(R.color.favorite));
+        }
+
         if (checkDuplicate) {
             for (GbcPalette objeto : Utils.gbcPalettesList) {
-                if (objeto.getPaletteId().equals(name)) {
+                if (objeto.getPaletteId().equals(id)) {
                     holder.imageItem.setBackgroundColor(context.getResources().getColor(R.color.duplicated));
                 }
             }
         }
-        holder.txtTitle.setText(name);
+
+        holder.txtTitle.setText(showingName);
         holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
         if (image != null && !image.isRecycled()) {
             image.recycle();
@@ -105,6 +114,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
     public void setLastSelectedImagePosition(int position) {
         lastSelectedImagePosition = position;
     }
+
     // Method to update the last palette used for the image
     public void setLastSelectedFramePosition(int position) {
         lastSelectedFramePosition = position;

@@ -28,6 +28,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.imageBitmapCache;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
+import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
@@ -153,6 +154,9 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                              ViewGroup container, Bundle savedInstanceState) {
         galleryActivity = getActivity();
         if (selectionMode[0]) MainActivity.fab.show();
+
+
+
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.GALLERY;
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;

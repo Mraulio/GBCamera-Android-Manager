@@ -30,10 +30,11 @@
             android:id="@+id/tvPaletteName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textColor="@color/black"
-            android:scrollHorizontally="true"
-            android:text="nombre paleta"></TextView>
+            android:singleLine="true"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="2sp"
+            android:autoSizeTextType="uniform"
+            android:textColor="@color/black"></TextView>
 
     </LinearLayout>
 

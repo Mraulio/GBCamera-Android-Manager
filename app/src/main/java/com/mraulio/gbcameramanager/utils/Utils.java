@@ -82,7 +82,6 @@ public class Utils {
     public static final File ARDUINO_HEX_FOLDER = new File(MAIN_FOLDER, "Arduino Printer Hex");
     public static final File PHOTO_DUMPS_FOLDER = new File(MAIN_FOLDER, "PHOTO Rom Dumps");
     public static final File DB_BACKUP_FOLDER = new File(MAIN_FOLDER, "DB Backup");
-
     public static final String CHANNEL_ID = "gbcam_channel";
     public static final String CHANNEL_NAME = "GBCAM Channel";
 
@@ -95,6 +94,7 @@ public class Utils {
     public static final int[] ROTATION_VALUES = {0, 90, 180, 270};
     public static List<GbcImage> gbcImagesList = new ArrayList<>();
     public static ArrayList<GbcPalette> gbcPalettesList = new ArrayList<>();
+    public static ArrayList<GbcPalette> sortedPalettes = new ArrayList<>();
     public static List<GbcFrame> framesList = new ArrayList<>();
     public static HashMap<String, Bitmap> imageBitmapCache = new HashMap<>();
     public static LinkedHashMap<String, GbcFrame> hashFrames = new LinkedHashMap<>();
@@ -396,25 +396,6 @@ public class Utils {
             }
         });
     }
-//    private boolean isBackupCompatible(String backupDirectoryPath) {
-//        // Obtener la versión de la base de datos actual
-//        int currentVersion = AppD.getDatabase(context).getOpenHelper().getReadableDatabase().getVersion();
-//
-//        // Verificar la existencia de los archivos de la copia de seguridad
-//        File databaseFile = new File(backupDirectoryPath, "my_database");
-//        File shmFile = new File(backupDirectoryPath, "my_database-shm");
-//        File walFile = new File(backupDirectoryPath, "my_database-wal");
-//
-//        if (!databaseFile.exists() || !shmFile.exists() || !walFile.exists()) {
-//            return false; // Al menos uno de los archivos no existe
-//        }
-//
-//        // Obtener la versión de la copia de seguridad (asumiendo que la versión está codificada en el nombre del archivo o se almacena en otra parte)
-//        int backupVersion = getBackupDatabaseVersion(databaseFile);
-//
-//        // Comparar versiones
-//        return backupVersion <= currentVersion;
-//    }
 
     @SuppressLint("Range")
     private static int getBackupDatabaseVersion(File databaseFile) {
@@ -428,6 +409,7 @@ public class Utils {
         backupDB.close();
         return backupVersion;
     }
+
     public static void restoreDatabase(Context context, File backupDir, Activity activity) {
         try {
             File dataDir = Environment.getDataDirectory();
@@ -553,5 +535,20 @@ public class Utils {
         Utils.framesList = sortedFrameList;
     }
 
+    public static void sortPalettes() {
+        sortedPalettes.clear();
+        //First add the favorites on top
+        for (GbcPalette palette : gbcPalettesList) {
+            if (palette.isFavorite()){
+                sortedPalettes.add(palette);
+            }
+        }
+        //Then add the rest of the palettes
+        for (GbcPalette palette : gbcPalettesList) {
+            if (!palette.isFavorite()){
+                sortedPalettes.add(palette);
+            }
+        }
+    }
 }
 

@@ -197,16 +197,20 @@ public class JsonReader {
         for (int i = 0; i < palettesArr.length(); i++) {
             JSONObject paletteObj;
             try {
+                GbcPalette gbcPalette = new GbcPalette();
                 paletteObj = palettesArr.getJSONObject(i);
                 String paletteId = paletteObj.getString("shortName");
                 String paletteName = paletteObj.getString("name");
+                if (paletteObj.has("favorite")){
+                    boolean isFavorite = paletteObj.getBoolean("favorite");
+                    gbcPalette.setFavorite(isFavorite);
+                }
                 JSONArray paletteArr = paletteObj.getJSONArray("palette");
                 int[] paletteIntArray = new int[paletteArr.length()];
                 for (int j = 0; j < paletteArr.length(); j++) {
                     String color = paletteArr.getString(j);
                     paletteIntArray[j] = Color.parseColor(color);
                 }
-                GbcPalette gbcPalette = new GbcPalette();
                 gbcPalette.setPaletteId(paletteId);
                 gbcPalette.setPaletteName(paletteName);
                 gbcPalette.setPaletteColors(paletteIntArray);

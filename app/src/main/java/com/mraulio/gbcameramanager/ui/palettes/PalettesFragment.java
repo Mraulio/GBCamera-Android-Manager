@@ -2,8 +2,11 @@ package com.mraulio.gbcameramanager.ui.palettes;
 
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
+
+import static com.mraulio.gbcameramanager.utils.Utils.gbcPalettesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
+import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,6 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
@@ -56,13 +60,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import java.util.Locale;
 
 //Using this color picker:https://github.com/QuadFlask/colorpicker
 //Another color picker: https://github.com/yukuku/ambilwarna
 public class PalettesFragment extends Fragment {
 
-    CustomGridViewAdapterPalette imageAdapter;
+    CustomGridViewAdapterPalette paletteAdapter;
     GridView gridViewPalettes;
     ImageView iv1, iv2, iv3, iv4;
     int lastPicked = Color.rgb(155, 188, 15);
@@ -83,24 +88,57 @@ public class PalettesFragment extends Fragment {
 
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
 
-        CustomGridViewAdapterPalette customGridViewAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, true, false);
+        CustomGridViewAdapterPalette customGridViewAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, true, false, true);
+
         gridViewPalettes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            private int clickCount = 0;
+            private final Handler handler = new Handler();
+            private int palettePos = 0;
+
+            private final Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    //Single tap action
+                    //Ask to create a new palette using this as a base, or edit this palette name/colors
+                    clickCount = 0;
+                    palette = Utils.gbcPalettesList.get(palettePos).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
+                    newPaletteName = Utils.gbcPalettesList.get(palettePos).getPaletteId();
+                    paletteDialog(palette, newPaletteName);
+                }
+            };
+
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Ask to create a new palette using this as a base, or edit this palette name/colors
-                palette = Utils.gbcPalettesList.get(position).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
-                newPaletteName = Utils.gbcPalettesList.get(position).getPaletteId();
-                paletteDialog(palette, newPaletteName);
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                clickCount++;
+                if (clickCount == 1) {
+                    // Start timer to detect the double tap
+                    palettePos = position;
+                    handler.postDelayed(runnable, 300);
+                } else if (clickCount == 2) {
+                    clickCount = 0;
+                    // Stop timer and make double tap action
+                    handler.removeCallbacks(runnable);
+                    if (lastPicked == position) {
+                        GbcPalette pal = Utils.gbcPalettesList.get(palettePos);
+                        pal.setFavorite(pal.isFavorite() ? false : true);
+                        paletteAdapter.notifyDataSetChanged();
+                        new UpdatePaletteAsyncTask(pal).execute();
+                        sortPalettes();
+                    }
+                }
+                lastPicked = position;
             }
         });
 
         gridViewPalettes.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position <= 56) {
+                GbcPalette selectedPalette = gbcPalettesList.get(position);
+
+                if (selectedPalette.getPaletteId().equals("bw")) {
                     Utils.toast(getContext(), getString(R.string.cant_delete_base_palette));
-                }
-                if (position > 56) {
+                } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle(getString(R.string.delete_dialog_palette) + Utils.gbcPalettesList.get(position).getPaletteId() + "?");
                     builder.setMessage(getString(R.string.sure_dialog_palette));
@@ -120,6 +158,7 @@ public class PalettesFragment extends Fragment {
                             new SavePaletteAsyncTask(Utils.gbcPalettesList.get(position), false).execute();
                             String paletteToDelete = Utils.gbcPalettesList.get(position).getPaletteId();
                             Utils.gbcPalettesList.remove(position);
+                            sortPalettes();
                             //If an image has the deleted palette in image or frame the palette is set to to default bw
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
@@ -144,7 +183,7 @@ public class PalettesFragment extends Fragment {
                                 }
 
                             }
-                            imageAdapter.notifyDataSetChanged();
+                            paletteAdapter.notifyDataSetChanged();
                         }
                     });
                     builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -180,8 +219,8 @@ public class PalettesFragment extends Fragment {
         });
 
 
-        imageAdapter = customGridViewAdapterPalette;
-        gridViewPalettes.setAdapter(imageAdapter);
+        paletteAdapter = customGridViewAdapterPalette;
+        gridViewPalettes.setAdapter(paletteAdapter);
         return view;
     }
 
@@ -216,6 +255,8 @@ public class PalettesFragment extends Fragment {
             JSONObject paletteObj = new JSONObject();
             paletteObj.put("shortName", palette.getPaletteId());
             paletteObj.put("name", palette.getPaletteName());
+            paletteObj.put("favorite", palette.isFavorite());
+
             JSONArray paletteArr = new JSONArray();
             for (int color : palette.getPaletteColorsInt()) {
                 String hexColor = "#" + Integer.toHexString(color).substring(2);
@@ -292,7 +333,7 @@ public class PalettesFragment extends Fragment {
 
                         }
                     }
-                }else{
+                } else {
                     etPaletteName.setHint(getString(R.string.set_palette_name));
                 }
 
@@ -623,7 +664,7 @@ public class PalettesFragment extends Fragment {
                         newPalette.setPaletteColors(palette);
                         Utils.gbcPalettesList.add(newPalette);
                         Utils.hashPalettes.put(newPalette.getPaletteId(), newPalette);
-                        gridViewPalettes.setAdapter(imageAdapter);
+                        gridViewPalettes.setAdapter(paletteAdapter);
                         Utils.toast(getContext(), getString(R.string.palette_added));
                         dialog.hide();
                         //To add it to the database

@@ -22,6 +22,9 @@ public class GbcPalette {
     @ColumnInfo(name = "palette_colors")
     private String paletteColors;
 
+    @ColumnInfo(name = "is_favorite")
+    private boolean isFavorite;
+
     public GbcPalette() {
     }
 
@@ -31,9 +34,11 @@ public class GbcPalette {
     public String getPaletteColors() {
         return this.paletteColors;
     }
+
     public GbcPalette(String paletteColors, String name) {
         this.paletteColors = paletteColors;
         this.paletteId = name;
+        this.isFavorite = false;
     }
 
     //Because the database can't store int[]
@@ -55,6 +60,14 @@ public class GbcPalette {
             builder.append(color).append(",");
         }
         paletteColors = builder.toString();
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 
     public String getPaletteId() {

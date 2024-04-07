@@ -1,8 +1,7 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
-
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcPalettesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
@@ -685,7 +684,7 @@ public class PalettesFragment extends Fragment {
     }
 
     private Bitmap paletteMaker(int[] palette) throws IOException {
-        ImageCodec imageCodec = new ImageCodec(160, 144, false);//imageBytes.length/40 to get the height of the image
+        ImageCodec imageCodec = new ImageCodec(160, 144);//imageBytes.length/40 to get the height of the image
         Bitmap bitmap;
         Bitmap upscaledBitmap;
         byte[] imageBytes;

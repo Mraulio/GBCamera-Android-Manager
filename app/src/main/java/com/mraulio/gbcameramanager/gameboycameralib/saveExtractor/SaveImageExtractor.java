@@ -43,8 +43,8 @@ public class SaveImageExtractor implements Extractor {
     private final ImageCodec smallImageCodec;
 
     public SaveImageExtractor(IndexedPalette palette) {
-        this.imageCodec = new ImageCodec(IMAGE_WIDTH, IMAGE_HEIGHT, false);
-        this.smallImageCodec = new ImageCodec(SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT, false);
+        this.imageCodec = new ImageCodec(IMAGE_WIDTH, IMAGE_HEIGHT);
+        this.smallImageCodec = new ImageCodec(SMALL_IMAGE_WIDTH, SMALL_IMAGE_HEIGHT);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class SaveImageExtractor implements Extractor {
 
     private Bitmap gbcImageBitmap(GbcImage gbcImage, byte[] imageBytes) {
         try {
-            ImageCodec imageCodec = new ImageCodec(128, 112, gbcImage.isLockFrame());
+            ImageCodec imageCodec = new ImageCodec(128, 112);
             Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
             if (image.getHeight() == 112 && image.getWidth() == 128) {
                 //I need to use copy because if not it's inmutable bitmap

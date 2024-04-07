@@ -112,7 +112,7 @@ public class Utils {
     }
 
     public static byte[] encodeImage(Bitmap bitmap, String paletteId) throws IOException {
-        Codec decoder = new ImageCodec(160, bitmap.getHeight(), false);
+        Codec decoder = new ImageCodec(160, bitmap.getHeight());
         return decoder.encodeInternal(bitmap, paletteId);
     }
 
@@ -483,7 +483,7 @@ public class Utils {
         Uri fileUri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", downloadedFile);
         intent.setDataAndType(fileUri, context.getContentResolver().getType(fileUri));
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_download)

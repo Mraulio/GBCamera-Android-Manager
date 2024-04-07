@@ -15,14 +15,11 @@ public class ImageCodec implements Codec {
 
     private final int imageWidth;
     private final int imageHeight;
-    private IndexedPalette palette = new IndexedPalette(Utils.gbcPalettesList.get(1).getPaletteColorsInt());
     private int paletteIndex;
-    private boolean keepFrame;
 
-    public ImageCodec(int imageWidth, int imageHeight, boolean keepFrame) {
+    public ImageCodec(int imageWidth, int imageHeight) {
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
-        this.keepFrame = keepFrame;
     }
 
     @Override

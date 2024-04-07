@@ -1,8 +1,7 @@
 package com.mraulio.gbcameramanager.ui.frames;
 
-
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateDefaultTransparentPixelPositions;

@@ -7,11 +7,11 @@ import static com.mraulio.gbcameramanager.MainActivity.sortDescending;
 import static com.mraulio.gbcameramanager.MainActivity.sortMode;
 import static com.mraulio.gbcameramanager.MainActivity.sortModeEnum;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.diskCache;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.galleryActivity;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.hiddenFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.ui.gallery.MetadataValues.metadataTexts;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
@@ -23,6 +23,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.saveTagsSet;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
+import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -32,7 +33,10 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -58,6 +62,8 @@ import com.google.gson.Gson;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.ImageDao;
+import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
@@ -776,6 +782,86 @@ public class GalleryUtils {
         return editingTags;
     }
 
+    public static Bitmap frameChange(GbcImage gbcImage, String frameId, boolean invertImagePalette,
+                                     boolean invertFramePalette, boolean keepFrame, Boolean save) throws IOException {
+        Bitmap resultBitmap;
+        gbcImage.setFrameId(frameId);
+        GbcFrame gbcFrame = hashFrames.get(frameId);
 
+        //If image has a null frame but has the size of a "framable" image, create the placeholder frame
+        if (gbcFrame == null && keepFrame && ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224)) {
+            Bitmap originalBwBitmap = paletteChanger("bw", gbcImage.getImageBytes(), false, false);
+
+            gbcFrame = new GbcFrame();
+            gbcFrame.setFrameBitmap(originalBwBitmap);
+            gbcFrame.setWildFrame(originalBwBitmap.getHeight() == 144 ? false : true);
+        }
+
+        if (gbcFrame != null && ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224)) {
+
+            int yIndexActualImage = 16;// y Index where the actual image starts
+            if ((gbcImage.getImageBytes().length / 40) == 224) {
+                yIndexActualImage = 40;
+            }
+            int yIndexNewFrame = 16;
+            boolean isWildFrameNow = gbcFrame.isWildFrame();
+            if (isWildFrameNow) yIndexNewFrame = 40;
+
+            Bitmap framed = gbcFrame.getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+            resultBitmap = Bitmap.createBitmap(framed.getWidth(), framed.getHeight(), Bitmap.Config.ARGB_8888);
+
+            Canvas canvas = new Canvas(resultBitmap);
+            String paletteId = gbcImage.getPaletteId();
+            if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
+                paletteId = "bw";
+            Bitmap setToPalette = paletteChanger(paletteId, gbcImage.getImageBytes(), keepFrame, invertImagePalette);
+            Bitmap croppedBitmap = Bitmap.createBitmap(setToPalette, 16, yIndexActualImage, 128, 112); //Getting the internal 128x112 image
+            canvas.drawBitmap(croppedBitmap, 16, yIndexNewFrame, null);
+            String framePaletteId = gbcImage.getFramePaletteId();
+            if (!keepFrame) {
+                framePaletteId = gbcImage.getPaletteId();
+                invertFramePalette = gbcImage.isInvertPalette();
+            }
+
+            if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
+                framePaletteId = "bw";
+
+            byte[] frameBytes = gbcFrame.getFrameBytes();
+            if (frameBytes == null) {
+                try {
+                    frameBytes = Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw");
+                    gbcFrame.setFrameBytes(frameBytes);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            framed = paletteChanger(framePaletteId, frameBytes, true, invertFramePalette);
+            framed = transparentBitmap(framed, gbcFrame);
+
+            canvas.drawBitmap(framed, 0, 0, null);
+        } else {
+            gbcImage.setFrameId(frameId);
+            String imagePaletteId = gbcImage.getPaletteId();
+            if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
+                imagePaletteId = "bw";
+            resultBitmap = paletteChanger(imagePaletteId, gbcImage.getImageBytes(), keepFrame, invertImagePalette);
+        }
+        //Because when exporting to json, hex or printing I use this method but don't want to keep the changes
+        if (save != null && save) {
+            diskCache.put(gbcImage.getHashCode(), resultBitmap);
+            new UpdateImageAsyncTask(gbcImage).execute();
+        }
+        return resultBitmap;
+    }
+
+    //Change palette
+    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, boolean keepFrame,
+                                        boolean invertPalette) {
+        ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
+        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
+
+        return image;
+    }
 
 }

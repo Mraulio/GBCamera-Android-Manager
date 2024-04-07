@@ -862,7 +862,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             imageData.setData(bytes);
             gbcImage.setName(index++ + "-" + " arduino");
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(160, height, false);
+            ImageCodec imageCodec = new ImageCodec(160, height);
             Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false);
             finalListBitmaps.add(image);
             finalListImages.add(gbcImage);

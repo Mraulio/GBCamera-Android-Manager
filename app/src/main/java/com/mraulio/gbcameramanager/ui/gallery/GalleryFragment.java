@@ -13,6 +13,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.createCollage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 
@@ -75,7 +76,6 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
-import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.ui.usbserial.PrintOverArduino;
 import com.mraulio.gbcameramanager.utils.AnimatedGifEncoder;
@@ -85,7 +85,6 @@ import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.TouchImageView;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
-import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcImage;
 
 import org.json.JSONArray;
@@ -154,7 +153,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                              ViewGroup container, Bundle savedInstanceState) {
         galleryActivity = getActivity();
         if (selectionMode[0]) MainActivity.fab.show();
-
 
 
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.GALLERY;
@@ -1051,78 +1049,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         return false;
     }
 
-    public static Bitmap frameChange(GbcImage gbcImage, String frameId,
-                                     boolean invertImagePalette, boolean invertFramePalette, boolean keepFrame, Boolean save) throws
-            IOException {
-        Bitmap resultBitmap;
-        gbcImage.setFrameId(frameId);
-        GbcFrame gbcFrame = hashFrames.get(frameId);
-        if ((gbcImage.getImageBytes().length / 40) == 144 && gbcFrame != null || (gbcImage.getImageBytes().length / 40) == 224 && gbcFrame != null) {
 
-            int yIndexActualImage = 16;// y Index where the actual image starts
-            if ((gbcImage.getImageBytes().length / 40) == 224) {
-                yIndexActualImage = 40;
-            }
-            int yIndexNewFrame = 16;
-            boolean isWildFrameNow = gbcFrame.isWildFrame();
-            if (isWildFrameNow) yIndexNewFrame = 40;
-
-            Bitmap framed = gbcFrame.getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
-            resultBitmap = Bitmap.createBitmap(framed.getWidth(), framed.getHeight(), Bitmap.Config.ARGB_8888);
-
-            Canvas canvas = new Canvas(resultBitmap);
-            String paletteId = gbcImage.getPaletteId();
-            if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
-                paletteId = "bw";
-            Bitmap setToPalette = paletteChanger(paletteId, gbcImage.getImageBytes(), keepFrame, invertImagePalette);
-            Bitmap croppedBitmap = Bitmap.createBitmap(setToPalette, 16, yIndexActualImage, 128, 112); //Getting the internal 128x112 image
-            canvas.drawBitmap(croppedBitmap, 16, yIndexNewFrame, null);
-            String framePaletteId = gbcImage.getFramePaletteId();
-            if (!keepFrame) {
-                framePaletteId = gbcImage.getPaletteId();
-                invertFramePalette = gbcImage.isInvertPalette();
-            }
-
-            if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
-                framePaletteId = "bw";
-
-            byte[] frameBytes = gbcFrame.getFrameBytes();
-            if (frameBytes == null) {
-                try {
-                    frameBytes = Utils.encodeImage(gbcFrame.getFrameBitmap(), "bw");
-                    gbcFrame.setFrameBytes(frameBytes);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            framed = paletteChanger(framePaletteId, frameBytes, true, invertFramePalette);
-            framed = transparentBitmap(framed, Utils.hashFrames.get(gbcImage.getFrameId()));
-
-            canvas.drawBitmap(framed, 0, 0, null);
-        } else {
-            gbcImage.setFrameId(frameId);
-            String imagePaletteId = gbcImage.getPaletteId();
-            if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
-                imagePaletteId = "bw";
-            resultBitmap = paletteChanger(imagePaletteId, gbcImage.getImageBytes(), keepFrame, invertImagePalette);
-        }
-        //Because when exporting to json, hex or printing I use this method but don't want to keep the changes
-        if (save != null && save) {
-            diskCache.put(gbcImage.getHashCode(), resultBitmap);
-            new UpdateImageAsyncTask(gbcImage).execute();
-        }
-        return resultBitmap;
-    }
-
-    //Change palette
-    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, boolean keepFrame,
-                                        boolean invertPalette) {
-        ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40, keepFrame);//imageBytes.length/40 to get the height of the image
-        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
-
-        return image;
-    }
 
     public static void prevPage() {
         if (currentPage > 0) {

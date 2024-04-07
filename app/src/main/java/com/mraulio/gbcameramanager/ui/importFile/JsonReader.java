@@ -1,6 +1,6 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.ui.importFile.ImportFragment.importedFrameGroupIdNames;
 import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
@@ -279,7 +279,7 @@ public class JsonReader {
                 String decompHash = decodeDataImage(hash);//Change this for a full image
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(160, height, false);
+                ImageCodec imageCodec = new ImageCodec(160, height);
                 Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), bytes, false);//False for now, need to add the wild frame to the json
 
                 gbcFrame.setFrameBitmap(image);
@@ -386,7 +386,7 @@ public class JsonReader {
                 String decompHash = recreateWebAppFrame(data);
                 byte[] bytes = Utils.convertToByteArray(decompHash);
                 int height = (decompHash.length() + 1) / 120;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(160, height, false);
+                ImageCodec imageCodec = new ImageCodec(160, height);
                 Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), bytes, false);//False for now, need to add the wild frame to the json
                 gbcFrame.setFrameBitmap(image);
                 gbcFrame.setFrameBytes(bytes);

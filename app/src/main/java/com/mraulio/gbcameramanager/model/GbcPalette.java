@@ -22,7 +22,7 @@ public class GbcPalette {
     @ColumnInfo(name = "palette_colors")
     private String paletteColors;
 
-    @ColumnInfo(name = "is_favorite")
+    @ColumnInfo(name = "is_favorite", defaultValue = "false")
     private boolean isFavorite;
 
     public GbcPalette() {

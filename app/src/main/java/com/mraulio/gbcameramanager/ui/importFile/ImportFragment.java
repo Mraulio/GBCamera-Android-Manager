@@ -1080,7 +1080,7 @@ public class ImportFragment extends Fragment {
             String formattedIndex = String.format("%02d", index++);
             gbcImage.setName(fileName + " " + formattedIndex);
             int height = (data.length() + 1) / 120;//To get the real height of the image
-            ImageCodec imageCodec = new ImageCodec(160, height, false);
+            ImageCodec imageCodec = new ImageCodec(160, height);
             Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), gbcImage.getImageBytes(), false);
             importedImagesBitmaps.add(image);
             importedImagesList.add(gbcImage);

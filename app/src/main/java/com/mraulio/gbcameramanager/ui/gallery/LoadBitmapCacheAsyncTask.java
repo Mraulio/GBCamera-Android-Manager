@@ -10,6 +10,7 @@ import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
                 }
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
+                ImageCodec imageCodec = new ImageCodec(160, height);
                 GbcFrame gbcFrame = Utils.hashFrames.get(gbcImage.getFrameId());
 
                 image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette());//Add the bitmap to the cache
@@ -59,7 +60,7 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
                     if (image.getHeight() == 144 && gbcImage.getFrameId() != null) {
-                        image = GalleryFragment.frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
+                        image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
                     }
                     Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                     GalleryFragment.diskCache.put(imageHash, image);

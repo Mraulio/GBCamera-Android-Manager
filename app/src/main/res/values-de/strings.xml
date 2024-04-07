@@ -57,7 +57,7 @@
     <string name="delete_dialog_palette">Palette löschen\u0020</string>
     <string name="choose_color">Farbe wählen</string>
     <string name="selected_color">Gewählte Farbe: #</string>
-    <string name="toast_palettes_error">2 Paletten dürfen nicht den selben Namen haben.</string>
+    <string name="toast_palettes_error">2 Paletten dürfen nicht den selben Id haben.</string>
     <string name="palette_added">Palette hinzugefügt</string>
 
     <string name="btn_save">Speichern</string>

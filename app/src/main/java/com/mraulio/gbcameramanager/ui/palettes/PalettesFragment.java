@@ -72,8 +72,10 @@ public class PalettesFragment extends Fragment {
     int lastPicked = Color.rgb(155, 188, 15);
     EditText et1, et2, et3, et4;
     String placeholderString = "";
+    String newPaletteId = "";
     String newPaletteName = "";
     int[] palette;
+    final String PALETTE_ID_REGEX = "^[a-z0-9]{2,}$";
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -84,7 +86,6 @@ public class PalettesFragment extends Fragment {
 
         Button btnAdd = view.findViewById(R.id.btnAdd);
         Button btnExportPaletteJson = view.findViewById(R.id.btnExportPaletteJson);
-
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
 
         CustomGridViewAdapterPalette customGridViewAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, true, false, true);
@@ -102,8 +103,9 @@ public class PalettesFragment extends Fragment {
                     //Ask to create a new palette using this as a base, or edit this palette name/colors
                     clickCount = 0;
                     palette = Utils.gbcPalettesList.get(palettePos).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
-                    newPaletteName = Utils.gbcPalettesList.get(palettePos).getPaletteId();
-                    paletteDialog(palette, newPaletteName);
+                    newPaletteId = Utils.gbcPalettesList.get(palettePos).getPaletteId();
+                    newPaletteName = Utils.gbcPalettesList.get(palettePos).getPaletteName();
+                    paletteDialog(palette, newPaletteId, newPaletteName);
                 }
             };
 
@@ -202,7 +204,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 palette = Utils.gbcPalettesList.get(0).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
-                paletteDialog(palette, newPaletteName);
+                paletteDialog(palette, "", "");
             }
         });
 
@@ -216,7 +218,6 @@ public class PalettesFragment extends Fragment {
                 }
             }
         });
-
 
         paletteAdapter = customGridViewAdapterPalette;
         gridViewPalettes.setAdapter(paletteAdapter);
@@ -281,30 +282,35 @@ public class PalettesFragment extends Fragment {
         }
     }
 
-    private void paletteDialog(int[] palette, String paletteName) {
+    private void paletteDialog(int[] palette, String paletteId, String paletteName) {
         final Dialog dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.palette_creator);
+        final boolean[] validId = {false};
+
         ImageView ivPalette = dialog.findViewById(R.id.ivPalette);
         Button btnSavePalette = dialog.findViewById(R.id.btnSavePalette);
-        EditText etPaletteName = dialog.findViewById(R.id.etPaletteId);
+        btnSavePalette.setEnabled(false);
+
+        EditText etPaletteId = dialog.findViewById(R.id.etPaletteId);
+        EditText etPaletteName = dialog.findViewById(R.id.etPaletteName);
         et1 = dialog.findViewById(R.id.et1);
         et2 = dialog.findViewById(R.id.et2);
         et3 = dialog.findViewById(R.id.et3);
         et4 = dialog.findViewById(R.id.et4);
-        etPaletteName.setImeOptions(EditorInfo.IME_ACTION_DONE);//WHen pressing enter
+        etPaletteId.setImeOptions(EditorInfo.IME_ACTION_DONE);//WHen pressing enter
         et1.setImeOptions(EditorInfo.IME_ACTION_DONE);
         et2.setImeOptions(EditorInfo.IME_ACTION_DONE);
         et3.setImeOptions(EditorInfo.IME_ACTION_DONE);
         et4.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
-        etPaletteName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        etPaletteId.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    placeholderString = etPaletteName.getText().toString();
+                    placeholderString = etPaletteId.getText().toString();
 
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(etPaletteName.getWindowToken(), 0);
+                    imm.hideSoftInputFromWindow(etPaletteId.getWindowToken(), 0);
 
                     return true;
                 }
@@ -312,30 +318,48 @@ public class PalettesFragment extends Fragment {
             }
         });
 
-        etPaletteName.addTextChangedListener(new TextWatcher() {
+        etPaletteId.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                placeholderString = etPaletteName.getText().toString();
+                placeholderString = etPaletteId.getText().toString();
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                placeholderString = etPaletteName.getText().toString();
+                placeholderString = etPaletteId.getText().toString();
+
                 if (!placeholderString.equals("")) {
 
-                    for (GbcPalette palette : Utils.gbcPalettesList) {
-                        if (palette.getPaletteId().toLowerCase(Locale.ROOT).equals(placeholderString.trim().toLowerCase(Locale.ROOT))) {
-                            etPaletteName.setBackgroundColor(Color.parseColor("#FF0000"));
-                            break;
-                        } else {
-                            etPaletteName.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    //Check if the ID is valid
+                    if (placeholderString.matches(PALETTE_ID_REGEX)) {
+                        validId[0] = true;
+                        btnSavePalette.setEnabled(validId[0]);
 
+                        etPaletteId.setError(null);
+
+                        for (GbcPalette palette : Utils.gbcPalettesList) {
+                            if (palette.getPaletteId().equals(placeholderString)) {
+                                etPaletteId.setError(getString(R.string.toast_palettes_error));
+                                validId[0] = false;
+                                btnSavePalette.setEnabled(validId[0]);
+                                break;
+                            } else {
+                                validId[0] = false;
+                                btnSavePalette.setEnabled(validId[0]);
+                                etPaletteId.setError(null);
+                            }
                         }
+                    } else {
+                        etPaletteId.setError(getString(R.string.et_palette_id_error));
+                        validId[0] = false;
+                        btnSavePalette.setEnabled(validId[0]);
                     }
-                } else {
-                    etPaletteName.setHint(getString(R.string.set_palette_name));
-                }
 
+                } else {
+                    etPaletteId.setHint(getString(R.string.et_palette_id));
+                    validId[0] = false;
+                    btnSavePalette.setEnabled(validId[0]);
+                }
             }
 
             @Override
@@ -343,7 +367,24 @@ public class PalettesFragment extends Fragment {
             }
         });
 
+        etPaletteName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    placeholderString = etPaletteId.getText().toString();
+
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(etPaletteId.getWindowToken(), 0);
+
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        etPaletteId.setText(paletteId);
         etPaletteName.setText(paletteName);
+
         et1.setText("#" + Integer.toHexString(palette[0]).substring(2).toUpperCase());
         et2.setText("#" + Integer.toHexString(palette[1]).substring(2).toUpperCase());
         et3.setText("#" + Integer.toHexString(palette[2]).substring(2).toUpperCase());
@@ -356,7 +397,7 @@ public class PalettesFragment extends Fragment {
                     placeholderString = et1.getText().toString();
                     // El usuario ha confirmado la escritura.
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(etPaletteName.getWindowToken(), 0);
+                    imm.hideSoftInputFromWindow(etPaletteId.getWindowToken(), 0);
 
                     return true;
                 }
@@ -439,19 +480,16 @@ public class PalettesFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                // Este método se llama después de que el texto cambie.
             }
         });
         et4.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Este método se llama antes de que el texto cambie.
                 placeholderString = et4.getText().toString();
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Este método se llama cuando el texto cambia.
                 try {
                     iv4.setBackgroundColor(parseColor(et4.getText().toString()));
                     palette[3] = parseColor(et4.getText().toString());
@@ -644,22 +682,29 @@ public class PalettesFragment extends Fragment {
                         .show();
             }
         });
+
         btnSavePalette.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean addPaleteName = false;
+                boolean alreadyExistingPaletteId = false;
+                newPaletteId = etPaletteId.getText().toString().trim();
                 newPaletteName = etPaletteName.getText().toString().trim();
-                if (!newPaletteName.equals("")) {
+
+                if (!newPaletteId.equals("")) {
                     for (GbcPalette paleta : Utils.gbcPalettesList) {
-                        if (paleta.getPaletteId().toLowerCase(Locale.ROOT).equals(newPaletteName.toLowerCase(Locale.ROOT))) {
-                            addPaleteName = true;
+                        if (paleta.getPaletteId().equals(newPaletteId)) {
+                            alreadyExistingPaletteId = true;
                             Utils.toast(getContext(), getString(R.string.toast_palettes_error));
                             break;
                         }
                     }
-                    if (!addPaleteName) {
+                    if (!alreadyExistingPaletteId) {
                         GbcPalette newPalette = new GbcPalette();
-                        newPalette.setPaletteId(newPaletteName.toLowerCase(Locale.ROOT));//To lower case to be compatible with web app
+
+                        //CHANGE THIS WITH A REGEX, ALL LOWERCASE, MIN 2 CHARS, ONLY LETTERS AND NUMBERS
+                        newPalette.setPaletteId(newPaletteId);
+                        newPalette.setPaletteName(newPaletteName);
+
                         newPalette.setPaletteColors(palette);
                         Utils.gbcPalettesList.add(newPalette);
                         Utils.hashPalettes.put(newPalette.getPaletteId(), newPalette);

@@ -400,7 +400,6 @@ public class GBxCartCommands {
             } else {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
                 fileName += sdf.format(nowDate) + ".sav";
-
             }
 
             File file = new File(Utils.SAVE_FOLDER, fileName);

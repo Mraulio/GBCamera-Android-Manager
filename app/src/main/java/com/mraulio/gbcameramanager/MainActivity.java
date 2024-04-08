@@ -185,8 +185,6 @@ public class MainActivity extends AppCompatActivity {
         configuration.setLocale(locale);
         resources.updateConfiguration(configuration, resources.getDisplayMetrics());
 
-        fab = findViewById(R.id.fab);
-
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
 
@@ -252,8 +250,8 @@ public class MainActivity extends AppCompatActivity {
                 .setOpenableLayout(drawer)
                 .build();
 
-
         if ((Intent.ACTION_VIEW.equals(action) || Intent.ACTION_SEND.equals(action)) && type != null) {
+
             // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
             openedFromFile = true;
         } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
@@ -278,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
             // Ask for permission
+            System.out.println("NO PERMISOS MAIN ACTIVITY");
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);

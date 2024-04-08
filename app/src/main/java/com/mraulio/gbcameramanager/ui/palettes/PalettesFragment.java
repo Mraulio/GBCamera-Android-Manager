@@ -344,7 +344,7 @@ public class PalettesFragment extends Fragment {
                                 btnSavePalette.setEnabled(validId[0]);
                                 break;
                             } else {
-                                validId[0] = false;
+                                validId[0] = true;
                                 btnSavePalette.setEnabled(validId[0]);
                                 etPaletteId.setError(null);
                             }

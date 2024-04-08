@@ -117,7 +117,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     CheckBox cbCrop;
     static CheckBox cbInvert;
     static Spinner spFrameGroupsImage;
-
+    static GbcImage gbcImage;
     public MainImageDialog(boolean multiEdition, GridView gridView, boolean keepFrame, int lastPage, int position,
                            List<GbcImage> filteredGbcImages, int lastSeenGalleryImage, Context context, DisplayMetrics displayMetrics,
                            boolean showPalettes, Activity activity, UsbSerialPort port, SerialInputOutputManager usbIoManager,
@@ -158,7 +158,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
             selectedImage[0] = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode());
 
-            GbcImage gbcImage = filteredGbcImages.get(globalImageIndex[0]);
+            gbcImage = filteredGbcImages.get(globalImageIndex[0]);
 
             // Create custom dialog
             final Dialog dialog = new Dialog(context);
@@ -1218,15 +1218,15 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         }
         //Put the last seen image as this one
         lastSeenGalleryImage = globalImageIndex[0];
-        GbcImage showingGbcImage = filteredGbcImages.get(globalImageIndex[0]);
+        gbcImage = filteredGbcImages.get(globalImageIndex[0]);
 
-        selectedImage[0] = Utils.imageBitmapCache.get(showingGbcImage.getHashCode());
-        selectedImage[0] = rotateBitmap(selectedImage[0], showingGbcImage);
+        selectedImage[0] = Utils.imageBitmapCache.get(gbcImage.getHashCode());
+        selectedImage[0] = rotateBitmap(selectedImage[0], gbcImage);
 
         imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0],
                 selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
 
-        if (showingGbcImage.getTags().contains("__filter:favourite__")) {
+        if (gbcImage.getTags().contains("__filter:favourite__")) {
             imageView.setBackgroundColor(context.getColor(R.color.favorite));
         } else {
             imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
@@ -1248,7 +1248,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         spFrameGroupsImage.setSelection(0);
 
         for (int i = 0; i < framesList.size(); i++) {
-            if (framesList.get(i).getFrameId().equals(showingGbcImage.getFrameId())) {
+            if (framesList.get(i).getFrameId().equals(gbcImage.getFrameId())) {
                 frameIndex = i;
                 break;
             }
@@ -1257,19 +1257,19 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         frameAdapter[0].notifyDataSetChanged();
 
         for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
-            if (Utils.sortedPalettes.get(i).getPaletteId().equals(showingGbcImage.getPaletteId())) {
+            if (Utils.sortedPalettes.get(i).getPaletteId().equals(gbcImage.getPaletteId())) {
                 paletteIndex = i;
                 break;
             }
         }
         adapterPalette.setLastSelectedImagePosition(paletteIndex);
 
-        if (showingGbcImage.getFramePaletteId() == null) {
+        if (gbcImage.getFramePaletteId() == null) {
             paletteIndex = 0;
         } else {
             for (int i = 0; i < Utils.sortedPalettes.size(); i++) {
 
-                if (Utils.sortedPalettes.get(i).getPaletteId().equals(showingGbcImage.getFramePaletteId())) {
+                if (Utils.sortedPalettes.get(i).getPaletteId().equals(gbcImage.getFramePaletteId())) {
                     paletteIndex = i;
                     break;
                 }
@@ -1278,7 +1278,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         adapterPalette.setLastSelectedFramePosition(paletteIndex);
         adapterPalette.notifyDataSetChanged();
 
-        if (showingGbcImage.isLockFrame()) {
+        if (gbcImage.isLockFrame()) {
             keepFrame = true;
             cbFrameKeep.setChecked(true);
         } else {
@@ -1286,9 +1286,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             cbFrameKeep.setChecked(false);
         }
 
-        if (!keepFrame && showingGbcImage.isInvertPalette()) {
+        if (!keepFrame && gbcImage.isInvertPalette()) {
             cbInvert.setChecked(true);
-        } else if (keepFrame && showingGbcImage.isInvertFramePalette()) {
+        } else if (keepFrame && gbcImage.isInvertFramePalette()) {
             cbInvert.setChecked(true);
         } else {
             cbInvert.setChecked(false);

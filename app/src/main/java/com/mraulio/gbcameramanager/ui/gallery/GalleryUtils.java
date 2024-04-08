@@ -25,19 +25,20 @@ import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
+
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.text.SpannableString;
@@ -65,7 +66,6 @@ import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
-import com.mraulio.gbcameramanager.model.GbcPalette;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -142,7 +142,6 @@ public class GalleryUtils {
                     scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
                     out.flush();
 
-                    UnicodeExifInterface exifInterface = new UnicodeExifInterface(file.getAbsolutePath());
                     //Create the metadata text
                     StringBuilder stringBuilder = new StringBuilder();
                     LinkedHashMap lhm = gbcImage.getImageMetadata();
@@ -167,12 +166,26 @@ public class GalleryUtils {
                         }
                     }
 
+                    mediaScanner(file, context);
+
                     String metadataComment = stringBuilder.toString();
 
-                    exifInterface.setAttribute(UnicodeExifInterface.TAG_USER_COMMENT, metadataComment);
-                    exifInterface.saveAttributes();
+                    try {
+                        //For recent android API, the other library gives error
+                        ExifInterface exifInterface = new ExifInterface(file.getAbsolutePath());
+                        exifInterface.setAttribute(ExifInterface.TAG_USER_COMMENT, metadataComment);
+                        exifInterface.saveAttributes();
+                    } catch (Exception e) {
+                        //For older androids APIs that give error with PNGs
+                        try {
+                            UnicodeExifInterface exifInterface = new UnicodeExifInterface(file.getAbsolutePath());
+                            exifInterface.setAttribute(ExifInterface.TAG_USER_COMMENT, metadataComment);
+                            exifInterface.saveAttributes();
+                        } catch (Exception ex) {
+                            e.printStackTrace();
+                        }
+                    }
 
-                    mediaScanner(file, context);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

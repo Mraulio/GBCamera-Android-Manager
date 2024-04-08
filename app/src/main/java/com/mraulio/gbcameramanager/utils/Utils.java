@@ -35,9 +35,11 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.FileProvider;
+import androidx.room.RoomOpenHelper;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.Codec;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -63,6 +65,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Class with puclic static variables and methods that are shared alongside the app
@@ -279,9 +283,12 @@ public class Utils {
 
     public static void backupDatabase(Context context) {
         try {
+            //Get the database version first.
+            int databaseVersion = MainActivity.db.getOpenHelper().getReadableDatabase().getVersion();
+
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
             Date date = new Date();
-            File backupDir = new File(DB_BACKUP_FOLDER + "/" + sdf.format(date));
+            File backupDir = new File(DB_BACKUP_FOLDER + "/" + sdf.format(date) + "_v" + databaseVersion);
 
             if (!backupDir.exists()) {
                 backupDir.mkdirs();
@@ -313,7 +320,7 @@ public class Utils {
             src.close();
             dst.close();
 
-            toast(context, context.getString(R.string.toast_backup_db));
+            toast(context, context.getString(R.string.toast_backup_db) + "Version: " + databaseVersion);
         } catch (IOException e) {
             e.printStackTrace();
             toast(context, "Error creating DB backup");
@@ -321,6 +328,9 @@ public class Utils {
     }
 
     public static void showDbBackups(Context context, Activity activity) {
+
+        //Show only the database backups with version equal to actual version
+        int databaseVersion = MainActivity.db.getOpenHelper().getReadableDatabase().getVersion();
 
         File directory = new File(DB_BACKUP_FOLDER.toURI());
         if (!directory.isDirectory()) {
@@ -331,19 +341,21 @@ public class Utils {
         }
         final List<File> directories = new ArrayList<>();
         File[] files = directory.listFiles();
+        final List<String> directoriesNames = new ArrayList<>();
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    directories.add(file);
-                }
-            }
-        }
-        final List<String> directoriesNames = new ArrayList<>();
-        File[] filesNames = directory.listFiles();
-        if (filesNames != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    directoriesNames.add(file.getName());
+                    //If the directory name matches the database version, show it
+
+                    Pattern pattern = Pattern.compile("\\d+$");
+                    Matcher matcher = pattern.matcher(file.getName());
+                    if (matcher.find()) {
+                        int version = Integer.parseInt(matcher.group());
+                        if (version == databaseVersion) {
+                            directories.add(file);
+                            directoriesNames.add(file.getName());
+                        }
+                    }
                 }
             }
         }
@@ -539,13 +551,13 @@ public class Utils {
         sortedPalettes.clear();
         //First add the favorites on top
         for (GbcPalette palette : gbcPalettesList) {
-            if (palette.isFavorite()){
+            if (palette.isFavorite()) {
                 sortedPalettes.add(palette);
             }
         }
         //Then add the rest of the palettes
         for (GbcPalette palette : gbcPalettesList) {
-            if (!palette.isFavorite()){
+            if (!palette.isFavorite()) {
                 sortedPalettes.add(palette);
             }
         }

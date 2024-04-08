@@ -1,6 +1,8 @@
 package com.mraulio.gbcameramanager.gameboycameralib.saveExtractor;
 
 import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.*;
+import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -101,14 +103,13 @@ public class SaveImageExtractor implements Extractor {
         }
     }
 
-    private GbcImage getGbcImage(byte[] imageBytes, String gbcImageName, HashMap<GbcImage, Bitmap> hashImageBitmap) {
-        GbcImage gbcImage = new GbcImage();
+    private GbcImage getGbcImage(GbcImage gbcImage, byte[] imageBytes, String gbcImageName, HashMap<GbcImage, Bitmap> hashImageBitmap, boolean cartIsJp) {
         try {
             gbcImage.setName(gbcImageName);
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
             String hashHex = Utils.bytesToHex(hash);
             gbcImage.setHashCode(hashHex);
-            Bitmap imageBitmap = gbcImageBitmap(gbcImage, imageBytes);
+            Bitmap imageBitmap = gbcImageBitmap(gbcImage, imageBytes, cartIsJp);
             hashImageBitmap.put(gbcImage, imageBitmap);
         } catch (
                 Exception e) {
@@ -117,13 +118,49 @@ public class SaveImageExtractor implements Extractor {
         return gbcImage;
     }
 
-    private Bitmap gbcImageBitmap(GbcImage gbcImage, byte[] imageBytes) {
+    private Bitmap gbcImageBitmap(GbcImage gbcImage, byte[] imageBytes, boolean cartIsJp) {
         try {
             ImageCodec imageCodec = new ImageCodec(128, 112);
             Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
             if (image.getHeight() == 112 && image.getWidth() == 128) {
+                //Get the frame id, according to the frame index coded in the bytes, if it exists in the app
+                LinkedHashMap metadata = gbcImage.getImageMetadata();
+                int frameNumber = 0;
+                String frameId = "gbcam01";
+                if (metadata != null) {
+                    Object frameNumberObj = gbcImage.getImageMetadata().get("frameIndex");
+                    if (frameNumberObj != null) {
+                        frameNumber = Integer.parseInt((String) frameNumberObj) +1; //+1 Because the Ids begin with 1 and not 0
+                    }
+                }
+                String jpId = "jp";
+                String intId = "int";
+                if (cartIsJp) {
+                    if (frameGroupsNames.containsKey(jpId)) {
+                        //Use the 4 different jp frames, 01, 02, 07 and 09
+                        //Rest of the frames are from the int group, if it exists
+                        if (frameNumber == 1 || frameNumber == 2 || frameNumber == 7 || frameNumber == 9){
+                            frameId = jpId + String.format("%02d", frameNumber);
+                        }else {
+                            frameId = intId + String.format("%02d", frameNumber);
+                        }
+                        if (!hashFrames.containsKey(frameId)){
+                            frameId = "gbcam01";//If the group exists but the frame doesn't
+                        }
+                    }
+                } else {
+                    //Use the int frame group
+                    if (frameGroupsNames.containsKey(intId)) {
+                        frameId = intId + String.format("%02d", frameNumber);
+                    }
+                    if (!hashFrames.containsKey(frameId)){
+                        frameId = "gbcam01";//If the group exists but the frame doesn't
+                    }
+                }
+
+
                 //I need to use copy because if not it's inmutable bitmap
-                Bitmap framed = Utils.hashFrames.get("gbcam01").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                Bitmap framed = Utils.hashFrames.get(frameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                 Canvas canvas = new Canvas(framed);
                 canvas.drawBitmap(image, 16, 16, null);
                 image = framed;
@@ -153,10 +190,10 @@ public class SaveImageExtractor implements Extractor {
         ByteArrayInputStream bais = new ByteArrayInputStream(rawData);
         bais.skip(PHOTOS_LOCATION);
         bais.read(photosPositions, 0, PHOTOS_READ_COUNT);
+
         //For the development rom, in which the vector doesn't exist and has repeated bytes.
         photosPositions = checkDuplicates(photosPositions);
         List<byte[]> deletedImages = new ArrayList<>();
-        List<LinkedHashMap<String, Object>> deletedMetadataHases = new ArrayList<>();
         int activePhotos = 0;
         StringBuilder sb = new StringBuilder();
         for (byte x : photosPositions) {
@@ -215,8 +252,9 @@ public class SaveImageExtractor implements Extractor {
                 if (i == 0) {
                     i = NEXT_IMAGE_START_OFFSET;//0 means it's the last seen, then we need to continue on 0x2000(2 * NEXT_IMAGE_START_OFFSET)
                     String lastSeenGbcImageName = fileName + " [last seen]";
-                    GbcImage lastSeenGbcImage = getGbcImage(image, lastSeenGbcImageName, hashImageBitmap);
-                    Bitmap lastSeenBitmap = gbcImageBitmap(lastSeenGbcImage, image);
+                    GbcImage lastSeenGbcImage = new GbcImage();
+                    lastSeenGbcImage = getGbcImage(lastSeenGbcImage, image, lastSeenGbcImageName, hashImageBitmap, cartIsJp);
+                    Bitmap lastSeenBitmap = gbcImageBitmap(lastSeenGbcImage, image, cartIsJp);
                     lastSeenImageGB.put(lastSeenGbcImage, lastSeenBitmap);
 
                 } else {
@@ -225,10 +263,11 @@ public class SaveImageExtractor implements Extractor {
                         if (!isEmptyImage(image)) {//In case the image is not FF, because of the isEmptyImage method
                             deletedImages.add(image);//Can't order it, all are -1 (0xFF)
                             String deletedGbcImageName = fileName + " [deleted]";
-                            GbcImage deletedGbcImage = getGbcImage(image, deletedGbcImageName, hashImageBitmap);
-                            Bitmap deletedBitmap = gbcImageBitmap(deletedGbcImage, image);
+                            GbcImage deletedGbcImage = new GbcImage();
+                            deletedGbcImage = getGbcImage(deletedGbcImage, image, deletedGbcImageName, hashImageBitmap, cartIsJp);
                             deletedGbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage, cartIsJp));
-                            deletedImagesGB.put(deletedGbcImage,deletedBitmap);
+                            Bitmap deletedBitmap = gbcImageBitmap(deletedGbcImage, image, cartIsJp);
+                            deletedImagesGB.put(deletedGbcImage, deletedBitmap);
                             MainActivity.deletedCount[saveBank]++;
                         }
                     } else {//If not a deleted photo
@@ -237,8 +276,9 @@ public class SaveImageExtractor implements Extractor {
                             if (noFFarray[b] == photosPositions[j]) {
                                 String formattedIndex = String.format("%02d", (b + 1));
                                 String gbcImageName = fileName + " " + formattedIndex;
-                                GbcImage gbcImage = getGbcImage(image, gbcImageName, hashImageBitmap);
+                                GbcImage gbcImage = new GbcImage();
                                 gbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage, cartIsJp));
+                                gbcImage = getGbcImage(gbcImage, image, gbcImageName, hashImageBitmap, cartIsJp);
 
                                 allImages.set(b, gbcImage);
                             }

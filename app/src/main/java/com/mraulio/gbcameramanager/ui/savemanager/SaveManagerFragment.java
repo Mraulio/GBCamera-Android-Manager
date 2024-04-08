@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.savemanager;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
+import static com.mraulio.gbcameramanager.utils.Utils.saveTypeNames;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -24,6 +25,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Switch;
 
 import com.mraulio.gbcameramanager.MainActivity;
@@ -57,7 +59,10 @@ public class SaveManagerFragment extends Fragment {
     private List<String> fileList;
     private String saveName;
     private Button btnDelete, btnAdd;
-    Switch swIsJpCart,cbModDate;
+    Switch cbModDate;
+    static Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk;
+
+    Spinner spSaveType;
     private File selectedFile;
     LoadingDialog loadingDialog;
     private CustomGridViewAdapterImage gridAdapter;
@@ -91,11 +96,35 @@ public class SaveManagerFragment extends Fragment {
         gridviewSaves = view.findViewById(R.id.gridViewSaves);
         btnDelete = view.findViewById(R.id.btnDelete);
         btnAdd = view.findViewById(R.id.btnAdd);
-        swIsJpCart = view.findViewById(R.id.sw_jp_cart_manager);
+//        swIsJpCart = view.findViewById(R.id.sw_jp_cart_manager);
         cbModDate = view.findViewById(R.id.sw_mod_date);
-        loadingDialog = new LoadingDialog(getContext(),"Extracting");
+        loadingDialog = new LoadingDialog(getContext(), "Extracting");
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
 
+        spSaveType = view.findViewById(R.id.sp_save_type_manager);
+        List saveTypes = new ArrayList();
+        saveTypes.add("International");
+        saveTypes.add("Japanese");
+        saveTypes.add("Hello Kitty");
+
+        ArrayAdapter<String> adapterSaveType = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, saveTypes);
+        adapterSaveType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spSaveType.setAdapter(adapterSaveType);
+
+        saveTypeIntJpHk = Utils.SAVE_TYPE_INT_JP_HK.INT;
+        spSaveType.setSelection(0);
+        spSaveType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                saveTypeIntJpHk = Utils.SAVE_TYPE_INT_JP_HK.valueOf(saveTypeNames.get(saveTypes.get(position)));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         fileList = new ArrayList<>();
         loadFileNames();
@@ -281,7 +310,7 @@ public class SaveManagerFragment extends Fragment {
                 } else {
                     String fileName = selectedFile.getName();
 
-                    LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(extractedImageBytes, fileName, 0, swIsJpCart.isChecked());
+                    LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(extractedImageBytes, fileName, 0, saveTypeIntJpHk);
 
                     for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHash.entrySet()) {
                         GbcImage gbcImage = entry.getKey();

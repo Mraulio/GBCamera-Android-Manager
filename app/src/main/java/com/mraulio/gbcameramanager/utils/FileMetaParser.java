@@ -18,22 +18,31 @@ import java.util.Map;
  */
 public class FileMetaParser {
 
-    public LinkedHashMap<String, String> getFileMeta(byte[] data, boolean cartIsJP) {
+    public LinkedHashMap<String, String> getFileMeta(byte[] data, Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk) {
+        boolean cartIsJP;
+        switch (saveTypeIntJpHk) {
+            case JP:
+            case HK:
+                cartIsJP = true;
+                break;
+            default:
+                cartIsJP = false;
+        }
 
-        byte[] userId = Arrays.copyOfRange(data, 0x00000,  0x00003 + 1);
+        byte[] userId = Arrays.copyOfRange(data, 0x00000, 0x00003 + 1);
 
-        byte[] userName = Arrays.copyOfRange(data,  0x00004,  0x0000C + 1);
-        byte genderAndBloodType = data[ 0x0000D];
+        byte[] userName = Arrays.copyOfRange(data, 0x00004, 0x0000C + 1);
+        byte genderAndBloodType = data[0x0000D];
 
-        byte[] birthDate = Arrays.copyOfRange(data,  0x0000E,  0x00011 + 1);
+        byte[] birthDate = Arrays.copyOfRange(data, 0x0000E, 0x00011 + 1);
 
-        byte[] comment = Arrays.copyOfRange(data,  0x00015,  0x0002F + 1);
+        byte[] comment = Arrays.copyOfRange(data, 0x00015, 0x0002F + 1);
 
-        boolean isCopy = data[ 0x00033] != 0;
+        boolean isCopy = data[0x00033] != 0;
 
-        byte frameNumber = data[ 0x00054];
+        byte frameNumber = data[0x00054];
 
-        String parsedUserId = parseUserId(userId,cartIsJP);
+        String parsedUserId = parseUserId(userId, cartIsJP);
         String parsedBirthDate = parseBirthDate(birthDate, cartIsJP);
         String parsedUserName = convertToReadable(userName, cartIsJP);
         String parsedGender = parseGender(genderAndBloodType);
@@ -43,6 +52,7 @@ public class FileMetaParser {
 
         LinkedHashMap<String, String> meta = new LinkedHashMap<>();
         meta.put("userId", parsedUserId);
+        meta.put("origin", saveTypeNames.get(saveTypeIntJpHk.name()));
         meta.put("userName", parsedUserName);
         meta.put("birthDate", parsedBirthDate);
         meta.put("gender", parsedGender);
@@ -147,4 +157,11 @@ public class FileMetaParser {
                 return "-";
         }
     }
+
+    public static HashMap<String, String> saveTypeNames = new HashMap<String, String>() {{
+        put("INT", "International Camera");
+        put("JP", "Japanese Camera");
+        put("HK", "Hello Kitty Camera");
+    }};
+
 }

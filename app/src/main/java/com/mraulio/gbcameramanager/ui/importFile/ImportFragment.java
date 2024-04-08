@@ -5,11 +5,11 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.che
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.resizeImage;
-import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.finalListImages;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.saveTypeNames;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 
 import android.annotation.SuppressLint;
@@ -39,12 +39,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.Switch;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.model.ImageData;
@@ -92,7 +94,8 @@ public class ImportFragment extends Fragment {
     static LinkedHashMap<GbcImage, Bitmap> importedImagesHash = new LinkedHashMap<>();
     public static LinkedHashMap<String, String> importedFrameGroupIdNames = new LinkedHashMap<>();
     int totalImages = 0;
-
+    public static Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk;
+    Spinner spSaveType;
     Bitmap importedBitmap;
     List<List<GbcImage>> listActiveImages = new ArrayList<>();
     List<List<GbcImage>> listDeletedImages = new ArrayList<>();
@@ -117,7 +120,7 @@ public class ImportFragment extends Fragment {
     List<?> receivedList;
     int numImagesAdded;
     Button btnExtractFile, btnAddImages, btnTransform;
-    Switch swCartIsJp;
+//    Switch swCartIsJp;
     CheckBox cbLastSeen, cbDeleted, cbAddFrame;
     LinearLayout layoutCb;
     CustomGridViewAdapterPalette customAdapterPalette;
@@ -166,8 +169,32 @@ public class ImportFragment extends Fragment {
 
         btnTransform = view.findViewById(R.id.btn_transform_image);
 
-        swCartIsJp = view.findViewById(R.id.sw_jp_cart);
-        swCartIsJp.setVisibility(View.GONE);
+        spSaveType = view.findViewById(R.id.sp_save_type_import);
+        List saveTypes = new ArrayList();
+        saveTypes.add("International");
+        saveTypes.add("Japanese");
+        saveTypes.add("Hello Kitty");
+
+        ArrayAdapter<String> adapterSaveType = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, saveTypes);
+        adapterSaveType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spSaveType.setAdapter(adapterSaveType);
+
+        saveTypeIntJpHk = Utils.SAVE_TYPE_INT_JP_HK.INT;
+        spSaveType.setSelection(0);
+        spSaveType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                saveTypeIntJpHk = Utils.SAVE_TYPE_INT_JP_HK.valueOf(saveTypeNames.get(saveTypes.get(position)));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        spSaveType.setVisibility(View.GONE);
         cbLastSeen = view.findViewById(R.id.cbLastSeen);
         cbDeleted = view.findViewById(R.id.cbDeletedImages);
         cbAddFrame = view.findViewById(R.id.cbAddFrame);
@@ -179,6 +206,7 @@ public class ImportFragment extends Fragment {
 
         tvFileName = view.findViewById(R.id.tvFileName);
         gridViewImport = view.findViewById(R.id.gridViewImport);
+
         btnSelectFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -442,7 +470,7 @@ public class ImportFragment extends Fragment {
             }
             case PHOTO_ROM:
                 RomExtractor romExtractor = new RomExtractor(fileBytes, fileName);
-                romExtractor.romExtract(swCartIsJp.isChecked());
+                romExtractor.romExtract(saveTypeIntJpHk);
                 listActiveImages = romExtractor.getListActiveImages();
                 listActiveBitmaps = romExtractor.getListActiveBitmaps();
                 lastSeenImage = romExtractor.getLastSeenImage();
@@ -814,7 +842,7 @@ public class ImportFragment extends Fragment {
 
                                     }
                                     btnExtractFile.setVisibility(View.GONE);
-                                    swCartIsJp.setVisibility(View.GONE);
+                                    spSaveType.setVisibility(View.GONE);
                                     btnAddImages.setVisibility(View.VISIBLE);
                                     btnAddImages.setEnabled(true);
                                     adapter = new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
@@ -863,7 +891,7 @@ public class ImportFragment extends Fragment {
             fileBytes = byteStream.toByteArray();
             tvFileName.setText(getString(R.string.file_name) + fileName);
             btnExtractFile.setVisibility(View.VISIBLE);
-            swCartIsJp.setVisibility(View.VISIBLE);
+            spSaveType.setVisibility(View.VISIBLE);
 
         } else if (fileName.toLowerCase().endsWith("gbc")) {
             ByteArrayOutputStream byteStream = null;
@@ -886,7 +914,7 @@ public class ImportFragment extends Fragment {
             fileBytes = byteStream.toByteArray();
             tvFileName.setText(getString(R.string.file_name) + fileName);
             btnExtractFile.setVisibility(View.VISIBLE);
-            swCartIsJp.setVisibility(View.VISIBLE);
+            spSaveType.setVisibility(View.VISIBLE);
         } else if (fileName.toLowerCase().endsWith("txt")) {
             fileType = FILE_TYPE.TXT;
             try {
@@ -978,7 +1006,7 @@ public class ImportFragment extends Fragment {
                 finalListImages.add(gbcImage);
                 tvFileName.setText(getString(R.string.file_name) + fileName);
                 btnExtractFile.setVisibility(View.GONE);
-                swCartIsJp.setVisibility(View.GONE);
+                spSaveType.setVisibility(View.GONE);
                 btnAddImages.setVisibility(View.VISIBLE);
                 btnAddImages.setEnabled(true);
 
@@ -1012,7 +1040,7 @@ public class ImportFragment extends Fragment {
 
         } else {
             btnExtractFile.setVisibility(View.GONE);
-            swCartIsJp.setVisibility(View.GONE);
+            spSaveType.setVisibility(View.GONE);
             tvFileName.setText(getString(R.string.no_valid_file));
         }
     }
@@ -1044,7 +1072,7 @@ public class ImportFragment extends Fragment {
             return false;
         }
         //Extract the images
-        importedImagesHash = extractor.extractGbcImages(fileBytes, fileName, 0, swCartIsJp.isChecked());
+        importedImagesHash = extractor.extractGbcImages(fileBytes, fileName, 0,saveTypeIntJpHk);
 
         for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHash.entrySet()) {
             GbcImage gbcImage = entry.getKey();

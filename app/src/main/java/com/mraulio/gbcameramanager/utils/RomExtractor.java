@@ -8,25 +8,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 
 import com.mraulio.gbcameramanager.MainActivity;
-import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
-import com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,15 +38,16 @@ public class RomExtractor {
     List<byte[]> romByteList = new ArrayList<>();
     List<String> filePartNames = new ArrayList<>();
     String fileName;
+    Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk;
 
     public RomExtractor(byte[] fileBytes, String fileName) {
         this.fileBytes = fileBytes;
         this.fileName = fileName;
     }
 
-    public void romExtract(boolean isCartJp) {
+    public void romExtract(Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk) {
         romSplitter();
-        readRomSavs(isCartJp);
+        readRomSavs(saveTypeIntJpHk);
     }
 
     public void romSplitter() {
@@ -83,10 +71,10 @@ public class RomExtractor {
         }
     }
 
-    public void readRomSavs(boolean isCartJp) {
+    public void readRomSavs(Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk) {
         try {
             for (int i = 0; i < romByteList.size(); i++) {
-                readSavBytes(romByteList.get(i), i, filePartNames.get(i), isCartJp);
+                readSavBytes(romByteList.get(i), i, filePartNames.get(i), saveTypeIntJpHk);
             }
 
         } catch (Exception e) {
@@ -94,13 +82,13 @@ public class RomExtractor {
         }
     }
 
-    public void readSavBytes(byte[] fileBytes, int saveBank, String filePartName, boolean isCartJp) {
+    public void readSavBytes(byte[] fileBytes, int saveBank, String filePartName, Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk) {
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         extractedImagesList.clear();
         extractedImagesBitmaps.clear();
         try {
             if (fileBytes.length == 131072) {
-                LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(fileBytes, filePartName, saveBank,isCartJp);
+                LinkedHashMap<GbcImage, Bitmap> importedImagesHash = extractor.extractGbcImages(fileBytes, filePartName, saveBank, saveTypeIntJpHk);
 
                 for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHash.entrySet()) {
                     GbcImage gbcImage = entry.getKey();

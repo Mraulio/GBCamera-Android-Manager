@@ -103,13 +103,13 @@ public class SaveImageExtractor implements Extractor {
         }
     }
 
-    private GbcImage getGbcImage(GbcImage gbcImage, byte[] imageBytes, String gbcImageName, HashMap<GbcImage, Bitmap> hashImageBitmap, boolean cartIsJp) {
+    private GbcImage getGbcImage(GbcImage gbcImage, byte[] imageBytes, String gbcImageName, HashMap<GbcImage, Bitmap> hashImageBitmap, Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk) {
         try {
             gbcImage.setName(gbcImageName);
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
             String hashHex = Utils.bytesToHex(hash);
             gbcImage.setHashCode(hashHex);
-            Bitmap imageBitmap = gbcImageBitmap(gbcImage, imageBytes, cartIsJp);
+            Bitmap imageBitmap = gbcImageBitmap(gbcImage, imageBytes, saveTypeIntJpHk);
             hashImageBitmap.put(gbcImage, imageBitmap);
         } catch (
                 Exception e) {
@@ -118,7 +118,7 @@ public class SaveImageExtractor implements Extractor {
         return gbcImage;
     }
 
-    private Bitmap gbcImageBitmap(GbcImage gbcImage, byte[] imageBytes, boolean cartIsJp) {
+    private Bitmap gbcImageBitmap(GbcImage gbcImage, byte[] imageBytes, Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk) {
         try {
             ImageCodec imageCodec = new ImageCodec(128, 112);
             Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
@@ -130,32 +130,45 @@ public class SaveImageExtractor implements Extractor {
                 if (metadata != null) {
                     Object frameNumberObj = gbcImage.getImageMetadata().get("frameIndex");
                     if (frameNumberObj != null) {
-                        frameNumber = Integer.parseInt((String) frameNumberObj) +1; //+1 Because the Ids begin with 1 and not 0
+                        frameNumber = Integer.parseInt((String) frameNumberObj) + 1; //+1 Because the Ids begin with 1 and not 0
                     }
                 }
                 String jpId = "jp";
                 String intId = "int";
-                if (cartIsJp) {
-                    if (frameGroupsNames.containsKey(jpId)) {
-                        //Use the 4 different jp frames, 01, 02, 07 and 09
-                        //Rest of the frames are from the int group, if it exists
-                        if (frameNumber == 1 || frameNumber == 2 || frameNumber == 7 || frameNumber == 9){
-                            frameId = jpId + String.format("%02d", frameNumber);
-                        }else {
+                String hkId = "hk";
+                switch (saveTypeIntJpHk) {
+                    case JP:
+                        if (frameGroupsNames.containsKey(jpId)) {
+                            //Use the 4 different jp frames, 01, 02, 07 and 09
+                            //Rest of the frames are from the int group, if it exists
+                            if (frameNumber == 1 || frameNumber == 2 || frameNumber == 7 || frameNumber == 9) {
+                                frameId = jpId + String.format("%02d", frameNumber);
+                            } else {
+                                frameId = intId + String.format("%02d", frameNumber);
+                            }
+                            if (!hashFrames.containsKey(frameId)) {
+                                frameId = "gbcam01";//If the group exists but the frame doesn't
+                            }
+                        }
+                        break;
+                    case INT:
+                        //Use the int frame group
+                        if (frameGroupsNames.containsKey(intId)) {
                             frameId = intId + String.format("%02d", frameNumber);
                         }
-                        if (!hashFrames.containsKey(frameId)){
+                        if (!hashFrames.containsKey(frameId)) {
                             frameId = "gbcam01";//If the group exists but the frame doesn't
                         }
-                    }
-                } else {
-                    //Use the int frame group
-                    if (frameGroupsNames.containsKey(intId)) {
-                        frameId = intId + String.format("%02d", frameNumber);
-                    }
-                    if (!hashFrames.containsKey(frameId)){
-                        frameId = "gbcam01";//If the group exists but the frame doesn't
-                    }
+                        break;
+                    case HK:
+                        if (frameGroupsNames.containsKey(hkId)) {
+
+                            frameId = hkId + String.format("%02d", frameNumber);
+                            if (!hashFrames.containsKey(frameId)) {
+                                frameId = "gbcam01";//If the group exists but the frame doesn't
+                            }
+                        }
+                        break;
                 }
 
 
@@ -176,7 +189,7 @@ public class SaveImageExtractor implements Extractor {
 
     //Added by Mraulio
     @Override
-    public LinkedHashMap<GbcImage, Bitmap> extractGbcImages(byte[] rawData, String fileName, int saveBank, boolean cartIsJp) {
+    public LinkedHashMap<GbcImage, Bitmap> extractGbcImages(byte[] rawData, String fileName, int saveBank, Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk) {
         LinkedHashMap<GbcImage, Bitmap> allImagesGB = new LinkedHashMap<>(31);
         LinkedHashMap<GbcImage, Bitmap> deletedImagesGB = new LinkedHashMap<>();
         LinkedHashMap<GbcImage, Bitmap> lastSeenImageGB = new LinkedHashMap<>();
@@ -253,8 +266,8 @@ public class SaveImageExtractor implements Extractor {
                     i = NEXT_IMAGE_START_OFFSET;//0 means it's the last seen, then we need to continue on 0x2000(2 * NEXT_IMAGE_START_OFFSET)
                     String lastSeenGbcImageName = fileName + " [last seen]";
                     GbcImage lastSeenGbcImage = new GbcImage();
-                    lastSeenGbcImage = getGbcImage(lastSeenGbcImage, image, lastSeenGbcImageName, hashImageBitmap, cartIsJp);
-                    Bitmap lastSeenBitmap = gbcImageBitmap(lastSeenGbcImage, image, cartIsJp);
+                    lastSeenGbcImage = getGbcImage(lastSeenGbcImage, image, lastSeenGbcImageName, hashImageBitmap, saveTypeIntJpHk);
+                    Bitmap lastSeenBitmap = gbcImageBitmap(lastSeenGbcImage, image, saveTypeIntJpHk);
                     lastSeenImageGB.put(lastSeenGbcImage, lastSeenBitmap);
 
                 } else {
@@ -264,9 +277,11 @@ public class SaveImageExtractor implements Extractor {
                             deletedImages.add(image);//Can't order it, all are -1 (0xFF)
                             String deletedGbcImageName = fileName + " [deleted]";
                             GbcImage deletedGbcImage = new GbcImage();
-                            deletedGbcImage = getGbcImage(deletedGbcImage, image, deletedGbcImageName, hashImageBitmap, cartIsJp);
-                            deletedGbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage, cartIsJp));
-                            Bitmap deletedBitmap = gbcImageBitmap(deletedGbcImage, image, cartIsJp);
+                            deletedGbcImage = getGbcImage(deletedGbcImage, image, deletedGbcImageName, hashImageBitmap, saveTypeIntJpHk);
+
+
+                            deletedGbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage, saveTypeIntJpHk));
+                            Bitmap deletedBitmap = gbcImageBitmap(deletedGbcImage, image, saveTypeIntJpHk);
                             deletedImagesGB.put(deletedGbcImage, deletedBitmap);
                             MainActivity.deletedCount[saveBank]++;
                         }
@@ -277,8 +292,9 @@ public class SaveImageExtractor implements Extractor {
                                 String formattedIndex = String.format("%02d", (b + 1));
                                 String gbcImageName = fileName + " " + formattedIndex;
                                 GbcImage gbcImage = new GbcImage();
-                                gbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage, cartIsJp));
-                                gbcImage = getGbcImage(gbcImage, image, gbcImageName, hashImageBitmap, cartIsJp);
+
+                                gbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage, saveTypeIntJpHk));
+                                gbcImage = getGbcImage(gbcImage, image, gbcImageName, hashImageBitmap, saveTypeIntJpHk);
 
                                 allImages.set(b, gbcImage);
                             }
@@ -311,10 +327,10 @@ public class SaveImageExtractor implements Extractor {
         return allImagesGB;
     }
 
-    private LinkedHashMap<String, String> getMetadata(byte[] imageMetadata, byte[] thumbImage, boolean cartIsJp) {
+    private LinkedHashMap<String, String> getMetadata(byte[] imageMetadata, byte[] thumbImage, Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk) {
         FileMetaParser fileMetaParser = new FileMetaParser();
         LinkedHashMap<String, String> metadataOriginal;
-        metadataOriginal = fileMetaParser.getFileMeta(imageMetadata, cartIsJp);
+        metadataOriginal = fileMetaParser.getFileMeta(imageMetadata, saveTypeIntJpHk);
 
         LinkedHashMap<String, String> metadataHomebrew;
         HomebrewRomsMetaParser homebrewRomsMetaParser = new HomebrewRomsMetaParser();

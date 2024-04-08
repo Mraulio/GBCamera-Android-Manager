@@ -28,6 +28,7 @@ public class MetadataValues {
         put("userId", "User ID");
         put("birthDate", "Birthday");
         put("cpuFast", "Double speed");
+        put("origin", "Origin");
 
     }};
 }

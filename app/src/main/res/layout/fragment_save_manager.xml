@@ -68,13 +68,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lyBtns">
 
-        <Switch
-            android:id="@+id/sw_jp_cart_manager"
+        <Spinner
+            android:id="@+id/sp_save_type_manager"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:text="Jp Cart"
-            ></Switch>
+            android:layout_marginLeft="10dp"
+            android:layout_height="wrap_content"></Spinner>
 
         <Switch
             android:id="@+id/sw_mod_date"

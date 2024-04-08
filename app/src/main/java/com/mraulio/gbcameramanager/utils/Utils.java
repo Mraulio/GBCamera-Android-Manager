@@ -46,6 +46,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -105,6 +106,18 @@ public class Utils {
     public static HashMap<String, GbcPalette> hashPalettes = new HashMap<>();
 
     public static LinkedHashSet<String> tagsHash = new LinkedHashSet<>();
+
+    public static enum SAVE_TYPE_INT_JP_HK {
+        INT,
+        JP,
+        HK
+    }
+
+    public static HashMap<String, String> saveTypeNames = new HashMap<String, String>() {{
+        put("International", "INT");
+        put("Japanese", "JP");
+        put("Hello Kitty", "HK");
+    }};
 
     //Auxiliary method to convert byte[] to hexadecimal String
     public static String bytesToHex(byte[] bytes) {

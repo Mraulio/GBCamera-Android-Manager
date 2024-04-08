@@ -224,9 +224,9 @@ public class HomebrewRomValues {
     }};
 
     public static final HashMap<String, String> SAVE_TYPE_NAMES = new HashMap<String, String>() {{
-        put("ORIGINAL","Original");
-        put("PXLR","PXLR");
-        put("PHOTO","Photo!");
+        put("ORIGINAL", "Original");
+        put("PXLR", "PXLR");
+        put("PHOTO", "Photo!");
 
     }};
 

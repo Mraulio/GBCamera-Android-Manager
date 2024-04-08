@@ -4,6 +4,7 @@ import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.deleteFolderRecursive;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
+import static com.mraulio.gbcameramanager.utils.Utils.saveTypeNames;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.AlertDialog;
@@ -30,6 +31,7 @@ import android.view.LayoutInflater;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -37,6 +39,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -102,7 +105,10 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     RadioButton rbGbx, rbApe;
     public static RadioButton rbPrint;
     RadioGroup rbGroup;
-    public static Switch swIsCartJpUsb;
+    //    public static Switch swIsCartJpUsb;
+    Spinner spSaveType;
+
+    static Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk;
     static List<Bitmap> extractedImagesBitmaps = new ArrayList<>();
     static List<GbcImage> extractedImagesList = new ArrayList<>();
     static List<List<GbcImage>> listActiveImages = new ArrayList<>();
@@ -116,7 +122,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     static List<Bitmap> lastSeenBitmap = new ArrayList<>();
     static LinkedHashMap<GbcImage, Bitmap> importedImagesHashUsb = new LinkedHashMap<>();
     boolean isPhotoSave = false;
-
+    List saveTypes = new ArrayList();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -134,8 +140,30 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         cbLastSeen = view.findViewById(R.id.cbLastSeen);
         cbDeleted = view.findViewById(R.id.cbDeletedImages);
         layoutCb = view.findViewById(R.id.layout_cb);
-        swIsCartJpUsb = view.findViewById(R.id.sw_jp_cart_usb);
+        spSaveType = view.findViewById(R.id.sp_save_type_usb);
 
+        saveTypes.add("International");
+        saveTypes.add("Japanese");
+        saveTypes.add("Hello Kitty");
+
+        ArrayAdapter<String> adapterSaveType = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, saveTypes);
+        adapterSaveType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spSaveType.setAdapter(adapterSaveType);
+
+        saveTypeIntJpHk = Utils.SAVE_TYPE_INT_JP_HK.INT;
+        spSaveType.setSelection(0);
+        spSaveType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                saveTypeIntJpHk = Utils.SAVE_TYPE_INT_JP_HK.valueOf(saveTypeNames.get(saveTypes.get(position)));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
         btnFullRom = view.findViewById(R.id.btnFullRom);
         btnReadRomName = view.findViewById(R.id.btnReadRom);
         btnReadRam = view.findViewById(R.id.btnReadRam);
@@ -298,8 +326,8 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 }
                 if (newGbcImages.size() > 0) {
                     Uri uri = Uri.fromFile(latestFile);
-                    DocumentFile documentFile =  DocumentFile.fromFile(latestFile);
-                    toast(getContext(),documentFile.getName());
+                    DocumentFile documentFile = DocumentFile.fromFile(latestFile);
+                    toast(getContext(), documentFile.getName());
                     ImagesImportDialog imagesImportDialog = new ImagesImportDialog(newGbcImages, listNewBitmaps, documentFile, getContext(), getActivity(), tv, numImagesAdded);
                     imagesImportDialog.createImagesImportDialog();
                 } else {
@@ -360,49 +388,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         return view;
     }
 
-//    private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
-//        List<GbcImage> gbcImagesList;
-//        List<ImageData> imageDataList;
-//
-//        public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<ImageData> imageDataList) {
-//            this.gbcImagesList = gbcImagesList;
-//            this.imageDataList = imageDataList;
-//        }
-//
-//        @Override
-//        protected Void doInBackground(Void... voids) {
-//
-//            ImageDao imageDao = MainActivity.db.imageDao();
-//            ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
-//            //Need to insert first the gbcImage because of the Foreign Key
-//            try {
-//
-//                for (GbcImage gbcImage : gbcImagesList) {
-//                    imageDao.insert(gbcImage);
-//                }
-//            } catch (Exception e) {
-//                tv.setText("Error en gbcImage\n" + e.toString());
-//
-//            }
-//            try {
-//                for (ImageData imageData : imageDataList) {
-//                    imageDataDao.insert(imageData);
-//                }
-//            } catch (Exception e) {
-//                tv.setText("Error en ImageData\n" + e.toString());
-//
-//            }
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void aVoid) {
-//            checkSorting();
-//            tv.append("\n" + numImagesAdded + getString(R.string.done_adding_images));
-//            Utils.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
-//        }
-//    }
-
     public void arduinoPrinterMode() {
         try {
             gbxMode = false;
@@ -454,7 +439,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         tvMode.setVisibility(View.VISIBLE);
         rbGroup.setVisibility(View.GONE);
         btnReadRam.setVisibility(View.VISIBLE);
-        swIsCartJpUsb.setVisibility(View.VISIBLE);
+        spSaveType.setVisibility(View.VISIBLE);
         btnReadRomName.setVisibility(View.VISIBLE);
         try {
             connect();
@@ -465,16 +450,14 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         try {
             usbIoManager.stop();
         } catch (Exception e) {
-//            Toast toast = Toast.makeText(getContext(), "Error in usbio STOP\n" + e.toString(), Toast.LENGTH_LONG);
-//            toast.show();
+            e.printStackTrace();
         }
         try {
             port.setParameters(BAUDRATE, 8, UsbSerialPort.STOPBITS_2, UsbSerialPort.PARITY_NONE);
             port.setDTR(true);
             port.setRTS(true);
         } catch (Exception e) {
-//            Toast toast = Toast.makeText(getContext(), "Error in gbx\n" + e.toString(), Toast.LENGTH_LONG);
-//            toast.show();
+            e.printStackTrace();
         }
         completeReadRomName();
     }
@@ -493,7 +476,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             extractedImagesList.clear();
             extractedImagesBitmaps.clear();
             if (file.length() / 1024 == 128) {
-                importedImagesHashUsb = extractor.extractGbcImages(saveBytes, file.getName(), saveBank, swIsCartJpUsb.isChecked());
+                importedImagesHashUsb = extractor.extractGbcImages(saveBytes, file.getName(), saveBank, saveTypeIntJpHk);
                 for (HashMap.Entry<GbcImage, Bitmap> entry : importedImagesHashUsb.entrySet()) {
                     GbcImage gbcImage = entry.getKey();
                     Bitmap imageBitmap = entry.getValue();
@@ -587,6 +570,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
             public void run() {
                 romName = GBxCartCommands.ReadRomName(port, getContext(), tv);
                 tv.setText(getString(R.string.rom_name) + romName);
+                //Changing the Spinner if the rom is International, Japanese or Hello Kitty
             }
         }, 200);
         handler.postDelayed(new Runnable() {
@@ -604,6 +588,13 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 } else {
                     btnFullRom.setVisibility(View.GONE);
                     isPhotoSave = false;
+                }
+
+                //Select the spinner value if HK or JP
+                if (romName.trim().equals("POCKETCAMERA")){
+                    spSaveType.setSelection(saveTypes.indexOf("Japanese"));
+                } else if (romName.trim().equals("POCKETCAMERA_SN")){
+                    spSaveType.setSelection(saveTypes.indexOf("Hello Kitty"));
                 }
             }
         }, 200);

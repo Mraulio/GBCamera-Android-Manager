@@ -276,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
             // Ask for permission
-            System.out.println("NO PERMISOS MAIN ACTIVITY");
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
@@ -434,19 +433,4 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-
-//    @Override
-//    protected void onNewIntent(Intent intent) {
-//        super.onNewIntent(intent);
-//
-//        if (Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getType() != null) {
-//            // Crear una nueva intención para reiniciar la actividad
-//            Intent restartIntent = new Intent(this, MainActivity.class);
-//            restartIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-//
-//            // Reiniciar la actividad con la nueva intención
-//            startActivity(restartIntent);
-//            finish();  // Opcional: terminar la actividad actual si es necesario
-//        }
-//    }
 }

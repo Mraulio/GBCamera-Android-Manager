@@ -12,7 +12,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Adapter;
@@ -21,6 +25,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.SeekBar;
+import android.widget.Switch;
+import android.widget.TextView;
 
 
 import com.canhub.cropper.CropImageView;
@@ -42,27 +48,34 @@ public class TransformImage {
     Context context;
     Bitmap croppedBitmap;
     GridView gridViewImport;
+    Bitmap originalBitmapCopy;
 
-    public TransformImage(Bitmap originalBitmap,GbcImage gbcImage, Context context,GridView gridViewImport) {
+    public TransformImage(Bitmap originalBitmap, GbcImage gbcImage, Context context, GridView gridViewImport) {
         this.originalBitmap = originalBitmap;
         this.gbcImage = gbcImage;
         this.context = context;
         this.gridViewImport = gridViewImport;
+        originalBitmapCopy = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
     }
-
 
     public void createTransformDialog() {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.image_transform);
+
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(dialog.getWindow().getAttributes());
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
         lp.height = WindowManager.LayoutParams.MATCH_PARENT;
 
+        TextView tvBrightness = dialog.findViewById(R.id.tv_brightness);
+        TextView tvContrast = dialog.findViewById(R.id.tv_contrast);
+
+        Switch swOriginalRatio = dialog.findViewById(R.id.sw_original_ratio);
         SeekBar sbRotate = dialog.findViewById(R.id.sb_rotate);
-        CropImageView cropImageView = dialog.findViewById(R.id.cropImageView);
-        cropImageView.setImageBitmap(originalBitmap);
-        cropImageView.setAspectRatio(128, 112);
+        SeekBar sbBrightness = dialog.findViewById(R.id.sb_brightness);
+        SeekBar sbContrast = dialog.findViewById(R.id.sb_contrast);
+        CropImageView cropImageView = dialog.findViewById(R.id.crop_iv);
+        cropImageView.setImageBitmap(originalBitmapCopy);
         cropImageView.setMinCropResultSize(128, 112);
         cropImageView.setMinimumWidth(128);
         cropImageView.setMinimumHeight(112);
@@ -70,44 +83,95 @@ public class TransformImage {
         ImageView ivTransformed = dialog.findViewById(R.id.iv_transformed);
         final boolean[] convertedOnce = {false};
 
-        Button btnCrop = dialog.findViewById(R.id.btn_crop);
+        Button btnReload = dialog.findViewById(R.id.btn_reload_transform);
         Button btnCancel = dialog.findViewById(R.id.btn_cancel);
         Button btnOk = dialog.findViewById(R.id.btn_accept);
+
+
+        tvBrightness.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sbBrightness.setProgress(255);
+            }
+        });
+
+        tvContrast.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sbContrast.setProgress(100);
+            }
+        });
+
+
+        swOriginalRatio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (swOriginalRatio.isChecked()) {
+                    cropImageView.setAspectRatio(128, 112);
+                    cropImageView.setFixedAspectRatio(true);
+
+                } else {
+                    cropImageView.setFixedAspectRatio(false);
+                }
+            }
+        });
+        sbContrast.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Bitmap adjustedBitmap = changeContrast(originalBitmapCopy, sbContrast.getProgress() - 100);
+                adjustedBitmap = changeBrightness(adjustedBitmap, sbBrightness.getProgress() - 255);
+                cropImageView.setImageBitmap(adjustedBitmap);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+        sbBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Bitmap adjustedBitmap = changeContrast(originalBitmapCopy, sbContrast.getProgress() - 100);
+                adjustedBitmap = changeBrightness(adjustedBitmap, sbBrightness.getProgress() - 255);
+                cropImageView.setImageBitmap(adjustedBitmap);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
 
         sbRotate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 Matrix matrix = new Matrix();
                 matrix.postRotate(sbRotate.getProgress());
-                cropImageView.setImageBitmap(Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, false));
+                originalBitmapCopy = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, false);
+                Bitmap adjustedBitmap = changeContrast(originalBitmapCopy, sbContrast.getProgress() - 100);
+                adjustedBitmap = changeBrightness(adjustedBitmap, sbBrightness.getProgress() - 255);
+                cropImageView.setImageBitmap(adjustedBitmap);
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // Método no utilizado en este ejemplo
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // Método no utilizado en este ejemplo
             }
         });
 
-
-        btnCrop.setOnClickListener(new View.OnClickListener() {
+        btnReload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                convertedOnce[0] = true;
-                croppedBitmap = cropImageView.getCroppedImage();
-                croppedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 128, 112, false);
-                croppedBitmap = resizeImage(croppedBitmap);
-                boolean hasAllColors = checkPaletteColors(croppedBitmap);
-                if (!hasAllColors) {
-                    croppedBitmap = convertToGrayScale(croppedBitmap);
-                    croppedBitmap = ditherImage(croppedBitmap);
-                }
-                ivTransformed.setImageBitmap(Bitmap.createScaledBitmap(croppedBitmap, croppedBitmap.getWidth() * 3, croppedBitmap.getHeight() * 3, false));
-
+                reloadImage(convertedOnce, cropImageView, ivTransformed, swOriginalRatio.isChecked());
             }
         });
 
@@ -142,6 +206,63 @@ public class TransformImage {
 
         dialog.getWindow().setAttributes(lp);
         dialog.show();
+    }
+
+    private void reloadImage(boolean[] convertedOnce, CropImageView cropImageView, ImageView ivTransformed, boolean cropOriginal) {
+        convertedOnce[0] = true;
+        croppedBitmap = cropImageView.getCroppedImage();
+        if (cropOriginal) {
+            croppedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 128, 112, false);
+        }
+        croppedBitmap = resizeImage(croppedBitmap);
+        boolean hasAllColors = checkPaletteColors(croppedBitmap);
+        if (!hasAllColors) {
+            croppedBitmap = convertToGrayScale(croppedBitmap);
+            croppedBitmap = ditherImage(croppedBitmap);
+        }
+        ivTransformed.setImageBitmap(Bitmap.createScaledBitmap(croppedBitmap, croppedBitmap.getWidth() * 3, croppedBitmap.getHeight() * 3, false));
+    }
+
+    private Bitmap changeBrightness(Bitmap src, int brightnessValue) {
+        Bitmap dest = Bitmap.createBitmap(
+                src.getWidth(), src.getHeight(), src.getConfig());
+
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(new float[]{
+                1, 0, 0, 0, brightnessValue, // Red
+                0, 1, 0, 0, brightnessValue, // Green
+                0, 0, 1, 0, brightnessValue, // Blue
+                0, 0, 0, 1, 0 // Alpha
+        });
+
+        Canvas canvas = new Canvas(dest);
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+        canvas.drawBitmap(src, 0, 0, paint);
+
+        return dest;
+    }
+
+    private Bitmap changeContrast(Bitmap src, float contrastValue) {
+        Bitmap dest = Bitmap.createBitmap(
+                src.getWidth(), src.getHeight(), src.getConfig());
+
+        float contrast = (100 + contrastValue) / 100f;
+        float offset = (float) (128 * (1 - contrast));
+
+        ColorMatrix colorMatrix = new ColorMatrix(new float[]{
+                contrast, 0, 0, 0, offset, // Red
+                0, contrast, 0, 0, offset, // Green
+                0, 0, contrast, 0, offset, // Blue
+                0, 0, 0, 1, 0 // Alpha
+        });
+
+        Canvas canvas = new Canvas(dest);
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+        canvas.drawBitmap(src, 0, 0, paint);
+
+        return dest;
     }
 
 

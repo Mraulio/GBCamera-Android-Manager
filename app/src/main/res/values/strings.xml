@@ -236,5 +236,6 @@
     <string name="cant_delete_base_framegroup">Can\'t delete a base frame group</string>
     <string name="btn_transform_image">Transform</string>
     <string name="et_palette_id_error">Not a valid palette Id. Only lowercase chars and numbers, min 2.</string>
+    <string name="sp_preferred_locale">Select preferred locale</string>
 
 </resources>

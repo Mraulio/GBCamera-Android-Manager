@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.savemanager;
 
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
@@ -135,8 +136,14 @@ public class SaveManagerFragment extends Fragment {
                 loadingDialog.showDialog();
                 saveName = (String) parent.getItemAtPosition(position);
                 selectedFile = new File(Utils.SAVE_FOLDER, saveName);
+                String loc = "";
                 lastModDate = new Date(selectedFile.lastModified());
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss", Locale.getDefault());
+                if (dateLocale.equals("yyyy-MM-dd")){
+                    loc = "dd-MM-yyyy";
+                }else {
+                    loc = "MM-dd-yyyy";
+                }
+                SimpleDateFormat dateFormat = new SimpleDateFormat(loc+" HH-mm-ss", Locale.getDefault());
                 String dateString = dateFormat.format(lastModDate);
                 cbModDate.setText(getString(R.string.cb_use_mod_date) + ": " + dateString);
                 new loadDataTask().execute();

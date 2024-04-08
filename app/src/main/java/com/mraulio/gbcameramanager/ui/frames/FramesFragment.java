@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.frames;
 
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
@@ -468,7 +469,7 @@ public class FramesFragment extends Fragment {
             }
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
         fileName = fileName + "_" + dateFormat.format(new Date()) + ".json";
         File file = new File(Utils.FRAMES_FOLDER, fileName);
 

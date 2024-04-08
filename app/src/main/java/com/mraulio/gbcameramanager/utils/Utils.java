@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.utils;
 
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.MainActivity.hiddenTags;
 import static com.mraulio.gbcameramanager.MainActivity.selectedTags;
 import static com.mraulio.gbcameramanager.MainActivity.sharedPreferences;
@@ -299,7 +300,7 @@ public class Utils {
             //Get the database version first.
             int databaseVersion = MainActivity.db.getOpenHelper().getReadableDatabase().getVersion();
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
             Date date = new Date();
             File backupDir = new File(DB_BACKUP_FOLDER + "/" + sdf.format(date) + "_v" + databaseVersion);
 

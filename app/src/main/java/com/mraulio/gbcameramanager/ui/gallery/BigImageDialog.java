@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
@@ -167,7 +168,7 @@ public class BigImageDialog {
 
         TextView tvCreationDate = dialog.findViewById(R.id.tvMetadata);
         StringBuilder stringBuilder = new StringBuilder();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+        SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+" HH:mm:ss:SSS");
 
         LinkedHashMap lhm = filteredGbcImages.get(globalImageIndex).getImageMetadata();
         stringBuilder.append(sdf.format(filteredGbcImages.get(globalImageIndex).getCreationDate()).toString() + "\n");

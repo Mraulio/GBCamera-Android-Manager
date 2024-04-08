@@ -36,6 +36,7 @@ public class SettingsFragment extends Fragment {
     SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
     private boolean userSelect = false;
     private boolean userSelectPage = false;
+    private boolean userSelectLocale = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -43,6 +44,7 @@ public class SettingsFragment extends Fragment {
         Spinner spinnerExport = view.findViewById(R.id.spExportSize);
         Spinner spinnerImages = view.findViewById(R.id.spImagesPage);
         Spinner spinnerLanguage = view.findViewById(R.id.spLanguage);
+        Spinner spinnerLocale = view.findViewById(R.id.sp_locale_date);
         RadioButton rbPng = view.findViewById(R.id.rbPng);
         RadioButton rbTxt = view.findViewById(R.id.rbTxt);
         CheckBox cbPrint = view.findViewById(R.id.cbPrint);
@@ -234,7 +236,6 @@ public class SettingsFragment extends Fragment {
         languages.add("Français");
         languages.add("Português Brasileiro");
 
-
         ArrayAdapter<String> adapterLanguage = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, languages);
         adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -258,6 +259,36 @@ public class SettingsFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
+        List<String> locales = new ArrayList<>();
+        locales.add("yyyy-MM-dd");
+        locales.add("yyyy-dd-MM");
+
+        ArrayAdapter<String> adapterLocale = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, locales);
+        adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinnerLocale.setAdapter(adapterLocale);
+        spinnerLocale.setSelection(locales.indexOf(MainActivity.dateLocale));
+        spinnerLocale.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (userSelectLocale) {
+                    // I set the export size on the Main activity int as the selected one
+                    MainActivity.dateLocale = locales.get(position);
+                    editor.putString("date_locale", locales.get(position));
+                    editor.apply();
+                } else {
+                    userSelectLocale = true; // Because the spinner executes an item selection on startup
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
 
         cbRotation.setChecked(MainActivity.showRotationButton);
         cbRotation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

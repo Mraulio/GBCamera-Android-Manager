@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.usbserial;
 
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.deleteFolderRecursive;
@@ -729,7 +730,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         LocalDateTime now = null;
         DateTimeFormatter dtf = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+            dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
             now = LocalDateTime.now();
         }
         String fileName = "hex_";

@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.importFile;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 
@@ -80,7 +81,7 @@ public class ImagesImportDialog {
             cbUseModDate.setVisibility(GONE);
             etImageName.setText("----");
         }
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale + " HH-mm-ss", Locale.getDefault());
         String dateString = dateFormat.format(lastModifiedTime);
         if (lastModifiedTime != 0) {
             cbUseModDate.setChecked(true);
@@ -272,7 +273,7 @@ public class ImagesImportDialog {
                 }
                 LoadingDialog saveDialog = new LoadingDialog(context, "Saving images");
                 saveDialog.showDialog();
-                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded, null,saveDialog);
+                SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded, null, saveDialog);
                 saveImageAsyncTask.execute();
 
                 dialog.dismiss();

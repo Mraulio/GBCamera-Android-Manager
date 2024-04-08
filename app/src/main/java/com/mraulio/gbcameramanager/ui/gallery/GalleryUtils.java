@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.SORT_MODE.*;
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.MainActivity.db;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.MainActivity.sortDescending;
@@ -107,10 +108,10 @@ public class GalleryUtils {
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
             String fileName = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
                 fileName = fileNameBase + dtf.format(now);
             } else {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
                 fileName = fileNameBase + sdf.format(nowDate);
             }
 
@@ -150,7 +151,7 @@ public class GalleryUtils {
                     if (gbcImage.getFrameId() != null)
                         stringBuilder.append("Frame: " + hashFrames.get(gbcImage.getFrameId()).getFrameName() + " (" + gbcImage.getFrameId() + ")\n");
 
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+                    SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+" HH:mm:ss:SSS");
                     stringBuilder.append("Creation date: " + sdf.format(gbcImage.getCreationDate()) + "\n");
 
                     if (lhm != null) { //Last seen images don't have metadata

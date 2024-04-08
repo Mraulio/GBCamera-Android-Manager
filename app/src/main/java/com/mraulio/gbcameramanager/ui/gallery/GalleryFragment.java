@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.MainActivity.exportSize;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
@@ -565,11 +566,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                             File file = null;
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dateLocale+\"_HH-mm-ss");
 
                                 file = new File(Utils.IMAGES_FOLDER, "Collage_" + dtf.format(now) + ".png");
                             } else {
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
                                 file = new File(Utils.IMAGES_FOLDER, "Collage_" + sdf.format(nowDate) + ".png");
                             }
                             try (FileOutputStream out = new FileOutputStream(file)) {
@@ -729,11 +730,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                         File file = null;
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
 
                             file = new File(Utils.IMAGES_FOLDER, "HDR" + dtf.format(now) + ".png");
                         } else {
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                            SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
                             file = new File(Utils.IMAGES_FOLDER, "HDR" + sdf.format(nowDate) + ".png");
 
                         }
@@ -849,10 +850,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             Date nowDate = new Date();
                             File gifFile = null;
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dateLocale+\"_HH-mm-ss");
                                 gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".gif");
                             } else {
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
                                 gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + sdf.format(nowDate) + ".gif");
 
                             }
@@ -1020,7 +1021,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             }
                             String jsonString = jsonObject.toString(2);
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                            SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
 
                             String fileName = "imagesJson" + dateFormat.format(new Date()) + ".json";
 

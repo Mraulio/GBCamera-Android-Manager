@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.gbxcart;
 
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.btnAddImages;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.btnDelSav;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.cbDeleted;
@@ -240,11 +241,11 @@ public class GBxCartCommands {
 
             String folderName = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"HH-mm-ss");
                 folderName = "PhotoFullRom_" + dtf.format(now);
                 fileName += dtf.format(now) + "-full.gbc";
             } else {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
                 folderName = "PhotoFullRom_" + sdf.format(nowDate);
                 fileName += sdf.format(nowDate) + "-full.gbc";
             }
@@ -395,10 +396,10 @@ public class GBxCartCommands {
             String fileName = "gbCamera_";
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
                 fileName += dtf.format(now) + ".sav";
             } else {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
                 fileName += sdf.format(nowDate) + ".sav";
             }
 

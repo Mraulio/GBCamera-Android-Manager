@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.utils;
 
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.utils.Utils.MAIN_FOLDER;
 
 import android.app.AlertDialog;
@@ -53,7 +54,7 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
     public static void logError(String message) {
         try {
             Date nowDate = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+" HH:mm:ss", Locale.getDefault());
             String date = sdf.format(nowDate);
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(MAIN_FOLDER + "/error_log.txt", true));

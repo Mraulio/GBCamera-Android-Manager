@@ -51,8 +51,8 @@ public class FileMetaParser {
 
 
         LinkedHashMap<String, String> meta = new LinkedHashMap<>();
-        meta.put("userId", parsedUserId);
         meta.put("origin", saveTypeNames.get(saveTypeIntJpHk.name()));
+        meta.put("userId", parsedUserId);
         meta.put("userName", parsedUserName);
         meta.put("birthDate", parsedBirthDate);
         meta.put("gender", parsedGender);

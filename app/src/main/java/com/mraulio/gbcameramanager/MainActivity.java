@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
     public static int lastSeenGalleryImage = 0;
     public static boolean exportSquare = false;
 
+
     public enum SORT_MODE {
         CREATION_DATE,
         IMPORT_DATE,
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static SORT_MODE sortModeEnum = SORT_MODE.CREATION_DATE;
     public static String sortMode = "";
+    public static String dateLocale = "";
 
     public static boolean sortDescending = false;
     public static String selectedTags = "";
@@ -138,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         customColorPaper = sharedPreferences.getInt("custom_paper_color", Color.WHITE);
         exportSquare = sharedPreferences.getBoolean("export_square", false);
         sortMode = sharedPreferences.getString("sort_by_date", SORT_MODE.CREATION_DATE.name());
+        dateLocale = sharedPreferences.getString("date_locale", "yyyy-MM-dd");
 
         if (sortMode != null) {
             sortModeEnum = SORT_MODE.valueOf(sortMode);

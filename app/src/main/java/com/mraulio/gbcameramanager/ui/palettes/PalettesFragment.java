@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcPalettesList;
@@ -269,7 +270,7 @@ public class PalettesFragment extends Fragment {
         stateObj.put("palettes", palettesArr);
         json.put("state", stateObj);
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
         String fileName = "palettes_" + dateFormat.format(new Date()) + ".json";
         File file = new File(Utils.PALETTES_FOLDER, fileName);
 

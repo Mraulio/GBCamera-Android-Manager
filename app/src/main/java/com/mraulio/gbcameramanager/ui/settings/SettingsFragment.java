@@ -264,8 +264,12 @@ public class SettingsFragment extends Fragment {
         locales.add("yyyy-MM-dd");
         locales.add("yyyy-dd-MM");
 
+        List<String> localeSpinner = new ArrayList<>();
+        localeSpinner.add("D-M-Y  Ej: 27-04-2024");
+        localeSpinner.add("M-D-Y  Ej: 04-27-2024");
+
         ArrayAdapter<String> adapterLocale = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_spinner_item, locales);
+                android.R.layout.simple_spinner_item, localeSpinner);
         adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         spinnerLocale.setAdapter(adapterLocale);

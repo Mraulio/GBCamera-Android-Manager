@@ -566,7 +566,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                             File file = null;
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dateLocale+\"_HH-mm-ss");
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
 
                                 file = new File(Utils.IMAGES_FOLDER, "Collage_" + dtf.format(now) + ".png");
                             } else {
@@ -850,7 +850,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             Date nowDate = new Date();
                             File gifFile = null;
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dateLocale+\"_HH-mm-ss");
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
                                 gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".gif");
                             } else {
                                 SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());

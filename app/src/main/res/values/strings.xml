@@ -173,15 +173,14 @@
 
     <string name="collage">Collage</string>
 
-    <string name="collage_too_many_images">Too many images selected. Collage would probably fail, resulting image too big.</string>
+    <string name="collage_too_many_images">Too many images selected. Collage will fail.</string>
     <string name="square_download">Export square image</string>
 
     <string name="toast_frames_json">Frames Json saved.</string>
-    <string name="import_valid_images">Please, select only valid image files (.jpg, .jpeg, .png, .bmp).</string>
+    <string name="import_valid_images">Please, select only valid image formats (.jpg, .jpeg, .png, .bmp).</string>
     <string name="no_filtered_images">No available filtered images</string>
-    <string name="tags_dialog_title">~ Filter tags ~</string>
+    <string name="tags_dialog_title">Filter tags</string>
     <string name="tags_dialog_clear">Clear</string>
-    <string name="sort_dialog_title">Select sorting options</string>
     <string name="sort_by_date">By creation date</string>
     <string name="sort_by_import_date">By import date</string>
 
@@ -189,16 +188,16 @@
     <string name="sort_ascending">Ascending</string>
     <string name="sort_descending">Descending</string>
 
-    <string name="rb_edit_tags">Edit tags</string>
+    <string name="rb_edit_tags">Tags</string>
     <string name="rb_misc">Misc.</string>
     <string name="btn_update_image">Update image</string>
-    <string name="et_write_tag">Write tag: </string>
+    <string name="et_write_tag">Write tag:\u0020</string>
 
     <string name="menu_filter">Filter by tag</string>
     <string name="menu_sort">Sort</string>
 
     <string name="et_frame_group_name">Set frame group name</string>
-    <string name="tv_frame_index">Frame index: </string>
+    <string name="tv_frame_index">Frame index:\u0020</string>
 
     <string name="et_frame_index_error">Value must be between 1 and 99</string>
     <string name="et_frame_id_error">Already existing frame id</string>
@@ -211,8 +210,7 @@
     <string name="toast_backup_db">Database backup finished</string>
     <string name="toast_restore_db">Database restore finished</string>
     <string name="dialog_restore_db_title">Select database to restore</string>
-    <string name="dialog_confirm_restore_db">Restoring a database will reset all settings.\nMaking a database backup is recommended.\nApp will reset.\nAre you sure? </string>
-    <string name="no_db_backup">Restoring a database will reset all settings.\nMaking a database backup is recommended.\nApp will reset.\nAre you sure? </string>
+    <string name="dialog_confirm_restore_db">Restoring a database will reset all settings.\nMaking a database backup and Json exports is recommended.\nApp will reset.\nAre you sure? </string>
     <string name="as_imported_frame">As imported</string>
     <string name="btn_export_current_framegroup">Export Group</string>
     <string name="btn_edit_current_framegroup">Rename Group</string>
@@ -225,17 +223,26 @@
     <string name="btn_edit_frame">Edit frame</string>
     <string name="sp_new_frame_group">New Frame Group</string>
     <string name="et_palette_id">*Set Palette Id*</string>
+    <string name="et_frame_group_id">Frame group Id</string>
     <string name="btn_realod_anim">Reload</string>
     <string name="toast_first_image">This is the first image</string>
     <string name="toast_last_image">This is the last image</string>
     <string name="action_duplicate">Duplicate</string>
     <string name="sw_half_frame">Half frame</string>
     <string name="tv_extra_padding">Extra padding:\u0020</string>
-    <string name="collage_print_col_rows_error">Only 1 row/column allowed.</string>
     <string name="delete_frame_group_dialog">Delete frame group\u0020</string>
     <string name="cant_delete_base_framegroup">Can\'t delete a base frame group</string>
     <string name="btn_transform_image">Transform</string>
     <string name="et_palette_id_error">Not a valid palette Id. Only lowercase chars and numbers, min 2.</string>
     <string name="sp_date_format">Date format\u0020</string>
+
+    <string name="sb_rotation">Rotation</string>
+    <string name="sb_brightness">Brightness</string>
+    <string name="sb_contrast">Contrast</string>
+    <string name="sw_original_ratio">Original ratio</string>
+
+    <string name="load_saving_dup">Saving duplicates</string>
+    <string name="load_cache">Loading cache</string>
+    <string name="load_saving_images">Saving images</string>
 
 </resources>

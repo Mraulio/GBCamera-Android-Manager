@@ -74,7 +74,7 @@ public class DuplicateDialog {
                 indexesToLoad.add(i);
             }
         }
-        LoadingDialog loadDialogCache = new LoadingDialog(context, "Loading cache");
+        LoadingDialog loadDialogCache = new LoadingDialog(context, context.getString(R.string.load_cache));
         loadDialogCache.showDialog();
         //Need to get the bitmaps if they are not created
         LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialogCache, result -> {
@@ -170,7 +170,7 @@ public class DuplicateDialog {
         protected void onPostExecute(Void aVoid) {
             loadDialogCache.dismissDialog();
 
-            LoadingDialog loadDialogSave = new LoadingDialog(context, "Saving data");
+            LoadingDialog loadDialogSave = new LoadingDialog(context, context.getString(R.string.load_saving_dup));
             loadDialogSave.showDialog();
 
             new SaveImageAsyncTask(duplicatedImages, duplicatedBitmaps, context, null, 0, customGridViewAdapterImage, loadDialogSave).execute();

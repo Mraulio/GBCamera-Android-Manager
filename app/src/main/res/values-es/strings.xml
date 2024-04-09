@@ -51,7 +51,7 @@
     <string name="long_press_delete_palette">Pulsación larga para borrar</string>
     <string name="cant_delete_base_palette">No se puede borrar una paleta base.</string>
     <string name="toast_palettes_json">Json de paletas guardado.</string>
-    <string name="set_palette_name">*Set Palette Name*</string>
+    <string name="set_palette_name">*Nombre de paleta*</string>
     <string name="sure_dialog_palette">¿Estás seguro? Es recomendado exportar un Json antes de continuar.</string>
     <string name="delete_dialog_palette">Borrar paleta\u0020</string>
     <string name="choose_color">Elige color</string>
@@ -167,4 +167,83 @@
     <string name="only_image_paper">Solo imagen</string>
     <string name="print_paper_btn">Imprimir</string>
     <string name="custom_paper_color">Otro color de papel:</string>
+
+
+
+    <!--NEW STRINGS-->
+
+    <string name="collage">Collage</string>
+
+    <string name="collage_too_many_images">Demasiadas imagenes seleccionadas. El collage fallará.</string>
+    <string name="square_download">Exportar imagen cuadrada</string>
+
+    <string name="toast_frames_json">Json de marcos guardado</string>
+    <string name="import_valid_images">Por favor, seleciona solo formatos de imágen válidos (.jpg, .jpeg, .png, .bmp).</string>
+    <string name="no_filtered_images">No hay imágenes filtradas disponibles</string>
+    <string name="tags_dialog_title">Filtrar etiquetas</string>
+    <string name="tags_dialog_clear">Limpiar</string>
+    <string name="sort_by_date">Por fecha de creación</string>
+    <string name="sort_by_import_date">Por fecha de importación</string>
+
+    <string name="sort_by_title">Por título</string>
+    <string name="sort_ascending">Ascendente</string>
+    <string name="sort_descending">Descendente</string>
+
+    <string name="rb_edit_tags">Etiquetas</string>
+    <string name="rb_misc">Misc.</string>
+    <string name="btn_update_image">Actualizar imagen</string>
+    <string name="et_write_tag">Escribir etiqueta:\u0020</string>
+
+    <string name="menu_filter">Filtrar por etiquetas</string>
+    <string name="menu_sort">Ordenar</string>
+
+    <string name="et_frame_group_name">Nombre de grupo</string>
+    <string name="tv_frame_index">Índice de marco:\u0020</string>
+
+    <string name="et_frame_index_error">El valor debe estar entre 1 y 99</string>
+    <string name="et_frame_id_error">El Id de marco ya existe</string>
+
+    <string name="et_frame_group_id_error">Solo se permiten minúsculas, mínimo 2 caracteres</string>
+    <string name="sp_all_frame_groups">Todos los marcos</string>
+    <string name="cb_use_mod_date">Usar fecha de modificación</string>
+    <string name="btn_backup_db">Backup Database</string>
+    <string name="btn_restore_db">Restaurar Database</string>
+    <string name="toast_backup_db">Hecho backup de Database</string>
+    <string name="toast_restore_db">Database restaurada</string>
+    <string name="dialog_restore_db_title">Selecciona database a restaurar</string>
+    <string name="dialog_confirm_restore_db">Restaurar una base de datos reseteará todos los ajustes.\nHacer un backup de base de datos y Json exports es recomendado.\nLa aplicación se reiniciará.\nEstás segur@?</string>
+    <string name="as_imported_frame">Como importada</string>
+    <string name="btn_export_current_framegroup">Exportar Grupo</string>
+    <string name="btn_edit_current_framegroup">Renombrar Grupo</string>
+    <string name="btn_edit_delete_framegroup">Borrar Grupo</string>
+    <string name="notification_download_complete">Descarga completada</string>
+    <string name="dialog_rename_frame_group_title">Nuevo nombre de grupo de Marcos</string>
+    <string name="dialog_edit_frame_title">Editing frame:\u0020</string>
+
+    <string name="cant_edit_base">No se puede editar un marco base</string>
+    <string name="btn_edit_frame">Editar marco</string>
+    <string name="sp_new_frame_group">Nuevo grupo de Marcos</string>
+    <string name="et_palette_id">*Id de Paleta*</string>
+    <string name="et_frame_group_id">Id de grupo de Marcos</string>
+
+    <string name="btn_realod_anim">Recargar</string>
+    <string name="toast_first_image">Esta es la primera imagen</string>
+    <string name="toast_last_image">Esta es la última imagen</string>
+    <string name="action_duplicate">Duplicar</string>
+    <string name="sw_half_frame">Medio marco</string>
+    <string name="tv_extra_padding">Extra padding:\u0020</string>
+    <string name="delete_frame_group_dialog">Borrar Grupo de Marcos\u0020</string>
+    <string name="cant_delete_base_framegroup">No se puede borrar un Grupo de Marcos base</string>
+    <string name="btn_transform_image">Transformar</string>
+    <string name="et_palette_id_error">No es un Id de paleta válido. Solo minúsculaas y números, 2 mínimo.</string>
+    <string name="sp_date_format">Formato de fecha\u0020</string>
+
+    <string name="sb_rotation">Rotación</string>
+    <string name="sb_brightness">Brillo</string>
+    <string name="sb_contrast">Contraste</string>
+    <string name="sw_original_ratio">Ratio original</string>
+
+    <string name="load_saving_dup">Guardando duplicadas</string>
+    <string name="load_cache">Cargando caché</string>
+    <string name="load_saving_images">Guardando imágenes</string>
 </resources>

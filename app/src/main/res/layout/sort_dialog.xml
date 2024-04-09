@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="8dp"
-        android:text="@string/sort_dialog_title"
+        android:text="@string/menu_sort"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="25sp"
         android:textStyle="bold" />

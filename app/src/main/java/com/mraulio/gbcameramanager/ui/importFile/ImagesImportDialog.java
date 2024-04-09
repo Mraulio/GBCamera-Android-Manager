@@ -156,7 +156,7 @@ public class ImagesImportDialog {
             }
             availableTotalTagsAutoComplete.add(tag);
         }
-        availableTotalTagsSpinner.add(context.getString(R.string.tags_dialog_title));
+        availableTotalTagsSpinner.add("~ "+context.getString(R.string.tags_dialog_title)+" ~");
         availableTotalTagsSpinner.addAll(availableTotalTagsAutoComplete);
 
         ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(context,
@@ -271,7 +271,7 @@ public class ImagesImportDialog {
                         gbcImageToAdd.getTags().addAll(tagsToSave);
                     }
                 }
-                LoadingDialog saveDialog = new LoadingDialog(context, "Saving images");
+                LoadingDialog saveDialog = new LoadingDialog(context, context.getString(R.string.load_saving_images));
                 saveDialog.showDialog();
                 SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, newImageBitmaps, context, tvFileName, numImagesAdded, null, saveDialog);
                 saveImageAsyncTask.execute();

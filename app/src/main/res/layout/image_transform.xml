@@ -19,7 +19,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Rotation"></TextView>
+            android:text="@string/sb_rotation"></TextView>
 
         <SeekBar
             android:id="@+id/sb_rotate"
@@ -54,7 +54,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tv_brightness"
-            android:text="Brightness"></TextView>
+            android:text="@string/sb_brightness"></TextView>
 
         <SeekBar
             android:id="@+id/sb_brightness"
@@ -78,7 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tv_contrast"
-            android:text="Contrast"></TextView>
+            android:text="@string/sb_contrast"></TextView>
 
         <SeekBar
             android:id="@+id/sb_contrast"
@@ -92,7 +92,7 @@
         android:id="@+id/sw_original_ratio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Original ratio"
+        android:text="@string/sw_original_ratio"
         app:layout_constraintBottom_toTopOf="@id/iv_transformed"
         app:layout_constraintEnd_toStartOf="@id/btn_reload_transform"
         app:layout_constraintStart_toStartOf="parent"

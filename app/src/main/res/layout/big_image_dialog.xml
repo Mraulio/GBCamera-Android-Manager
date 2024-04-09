@@ -95,8 +95,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:layout_weight="3"
-                    android:text="@string/et_write_tag"
-                    android:textSize="20sp" />
+                    android:autoSizeMaxTextSize="20sp"
+                    android:autoSizeMinTextSize="3sp"
+                    android:autoSizeTextType="uniform"
+                    android:singleLine="true"
+                    android:text="@string/et_write_tag" />
 
                 <AutoCompleteTextView
                     android:id="@+id/etWriteTag"

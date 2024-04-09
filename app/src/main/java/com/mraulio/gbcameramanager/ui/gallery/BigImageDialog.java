@@ -138,7 +138,7 @@ public class BigImageDialog {
             }
             availableTotalTagsAutoComplete.add(tag);
         }
-        availableTotalTagsSpinner.add(context.getString(R.string.tags_dialog_title));
+        availableTotalTagsSpinner.add("~ "+context.getString(R.string.tags_dialog_title)+" ~");
         availableTotalTagsSpinner.addAll(availableTotalTagsAutoComplete);
 
         ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(context,
@@ -452,7 +452,7 @@ public class BigImageDialog {
             }
             availableTotalTagsAutoComplete.add(tag);
         }
-        availableTotalTagsSpinner.add(context.getString(R.string.tags_dialog_title));
+        availableTotalTagsSpinner.add("~ "+context.getString(R.string.tags_dialog_title)+" ~");
         availableTotalTagsSpinner.addAll(availableTotalTagsAutoComplete);
 
         ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(context,

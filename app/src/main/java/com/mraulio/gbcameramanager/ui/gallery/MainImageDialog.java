@@ -686,7 +686,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             }
             imageViewMiniIndex = 0;
             final Dialog dialog = new Dialog(context);
-            LoadingDialog loadingDialog = new LoadingDialog(context, "Loading cache");
+            LoadingDialog loadingDialog = new LoadingDialog(context, context.getString(R.string.load_cache));
             loadingDialog.showDialog();
             LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog, new AsyncTaskCompleteListener<Result>() {
                 @Override

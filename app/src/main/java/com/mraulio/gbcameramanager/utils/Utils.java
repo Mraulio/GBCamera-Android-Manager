@@ -334,7 +334,7 @@ public class Utils {
             src.close();
             dst.close();
 
-            toast(context, context.getString(R.string.toast_backup_db) + "Version: " + databaseVersion);
+            toast(context, context.getString(R.string.toast_backup_db) + "\nVersion: " + databaseVersion);
         } catch (IOException e) {
             e.printStackTrace();
             toast(context, "Error creating DB backup");
@@ -347,12 +347,7 @@ public class Utils {
         int databaseVersion = MainActivity.db.getOpenHelper().getReadableDatabase().getVersion();
 
         File directory = new File(DB_BACKUP_FOLDER.toURI());
-        if (!directory.isDirectory()) {
-            //If DB backup directory is empty
-            toast(context, context.getString(R.string.no_db_backup));
-            return;
 
-        }
         final List<File> directories = new ArrayList<>();
         File[] files = directory.listFiles();
         final List<String> directoriesNames = new ArrayList<>();
@@ -418,22 +413,8 @@ public class Utils {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectedDirectory[0] = directories.get(position);
-                getBackupDatabaseVersion(new File(selectedDirectory[0], "Database"));
             }
         });
-    }
-
-    @SuppressLint("Range")
-    private static int getBackupDatabaseVersion(File databaseFile) {
-        SQLiteDatabase backupDB = SQLiteDatabase.openDatabase(databaseFile.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
-        Cursor cursor = backupDB.query("DatabaseVersion", new String[]{"version"}, null, null, null, null, null);
-        int backupVersion = -1;
-        if (cursor != null && cursor.moveToFirst()) {
-            backupVersion = cursor.getInt(cursor.getColumnIndex("version"));
-            cursor.close();
-        }
-        backupDB.close();
-        return backupVersion;
     }
 
     public static void restoreDatabase(Context context, File backupDir, Activity activity) {

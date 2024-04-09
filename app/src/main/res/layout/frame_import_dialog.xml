@@ -24,7 +24,7 @@
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
             android:completionThreshold="1"
-            android:hint="Frame group Id"
+            android:hint="@string/et_frame_group_id"
             android:inputType="text"
             android:singleLine="true"
             android:textSize="20dp"></AutoCompleteTextView>
@@ -49,7 +49,8 @@
                 android:layout_gravity="center"
                 android:autoSizeMaxTextSize="30sp"
                 android:autoSizeMinTextSize="5sp"
-                android:text="Frame index: "
+                android:autoSizeTextType="uniform"
+                android:text="@string/tv_frame_index"
                 android:textSize="20sp"></TextView>
 
             <LinearLayout

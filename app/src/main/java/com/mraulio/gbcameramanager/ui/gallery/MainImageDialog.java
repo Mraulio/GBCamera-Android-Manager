@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
@@ -50,6 +51,8 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -252,7 +255,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
             showPalettes = true;
             if (gbcImage.getTags().contains("__filter:favourite__")) {
-                imageView.setBackgroundColor(context.getColor(R.color.favorite));
+//                imageView.setBackgroundColor(context.getColor(R.color.favorite));
+                imageView.setBackground(ContextCompat.getDrawable(context, R.drawable.corner_color));
             }
             if (gbcImage.isLockFrame()) {
                 keepFrame = true;
@@ -395,11 +399,14 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                 gbcImage.setTags(tags);
                                 if (!selectedFilterTags.isEmpty())//Because right now I'm only filtering favourites
                                     dialog.dismiss();
-                                imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
+//                                imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
+                                imageView.setBackground(null);
+
                             }
                         } else {
                             gbcImage.addTag("__filter:favourite__");
-                            imageView.setBackgroundColor(context.getColor(R.color.favorite));
+//                            imageView.setBackgroundColor(context.getColor(R.color.favorite));
+                            imageView.setBackground(ContextCompat.getDrawable(context, R.drawable.corner_color));
                         }
                         retrieveTags(gbcImagesList);
 
@@ -892,7 +899,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                         }
                     });
                     if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains("__filter:favourite__")) {
-                        imageView.setBackgroundColor(context.getColor(R.color.favorite));
+
+                        imageView.setBackground(ContextCompat.getDrawable(context, R.drawable.corner_color));
+//                        imageView.setBackgroundColor(context.getColor(R.color.favorite));
                     }
                     if (filteredGbcImages.get(globalImageIndex[0]).isLockFrame()) {
                         keepFrame = true;
@@ -984,7 +993,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
                                     } else {
                                         filteredGbcImages.get(i).addTag("__filter:favourite__");
-                                        imageView.setBackgroundColor(context.getColor(R.color.favorite));
+//                                        imageView.setBackgroundColor(context.getColor(R.color.favorite));
+                                        imageView.setBackground(ContextCompat.getDrawable(context, R.drawable.corner_color));
+
                                     }
                                     retrieveTags(gbcImagesList);
                                     //To save the image with the favorite tag to the database
@@ -1227,9 +1238,13 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
 
         if (gbcImage.getTags().contains("__filter:favourite__")) {
-            imageView.setBackgroundColor(context.getColor(R.color.favorite));
+            imageView.setBackground(ContextCompat.getDrawable(context, R.drawable.corner_color));
+
+//            imageView.setBackgroundColor(context.getColor(R.color.favorite));
         } else {
-            imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
+            imageView.setBackground(null);
+
+//            imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
         }
 
         //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
@@ -1374,7 +1389,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
             imageViewMini.setImageBitmap(rotateBitmap(image, gbcImage));
             if (gbcImage.getTags().contains("__filter:favourite__")) {
-                imageViewMini.setBackgroundColor(context.getColor(R.color.favorite));
+//                imageViewMini.setBackgroundColor(context.getColor(R.color.favorite));
+                imageView.setBackground(ContextCompat.getDrawable(context, R.drawable.corner_color));
+
             }
             if (i == imageViewMiniIndex) {
                 imageViewMini.setBackgroundColor(context.getColor(R.color.teal_700));
@@ -1401,18 +1418,26 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     for (int i = 0; i < selectedImages.size(); i++) {
                         GbcImage gbcImage = filteredGbcImages.get(selectedImages.get(i));
                         if (gbcImage.getTags().contains("__filter:favourite__")) {
-                            imageViewList.get(i).setBackgroundColor(context.getColor(R.color.favorite));
+                            imageView.setBackground(ContextCompat.getDrawable(context, R.drawable.corner_color));
+//                            imageViewList.get(i).setBackgroundColor(context.getColor(R.color.favorite));
                         } else {
-                            imageViewList.get(i).setBackgroundColor(context.getColor(R.color.white));
+//                            imageViewList.get(i).setBackgroundColor(context.getColor(R.color.white));
+                            imageView.setBackground(null);
+
                         }
+
                         if (i == imageViewMiniIndex) {
                             imageViewList.get(i).setBackgroundColor(context.getColor(R.color.teal_700));
                         }
                     }
                     if (isFav) {
-                        imageView.setBackgroundColor(context.getColor(R.color.favorite));
+//                        imageView.setBackgroundColor(context.getColor(R.color.favorite));
+                        imageView.setBackground(ContextCompat.getDrawable(context, R.drawable.corner_color));
+
                     } else {
-                        imageView.setBackgroundColor(context.getColor(R.color.white));
+                        imageView.setBackground(null);
+
+//                        imageView.setBackgroundColor(context.getColor(R.color.white));
                     }
                     if (gbcImage.isLockFrame()) {
                         keepFrameCb.setChecked(true);

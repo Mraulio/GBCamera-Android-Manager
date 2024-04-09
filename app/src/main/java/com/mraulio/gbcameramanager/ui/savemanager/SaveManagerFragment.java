@@ -23,7 +23,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -47,7 +46,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -97,7 +98,6 @@ public class SaveManagerFragment extends Fragment {
         gridviewSaves = view.findViewById(R.id.gridViewSaves);
         btnDelete = view.findViewById(R.id.btnDelete);
         btnAdd = view.findViewById(R.id.btnAdd);
-//        swIsJpCart = view.findViewById(R.id.sw_jp_cart_manager);
         cbModDate = view.findViewById(R.id.sw_mod_date);
         loadingDialog = new LoadingDialog(getContext(), "Extracting");
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
@@ -247,13 +247,17 @@ public class SaveManagerFragment extends Fragment {
         try {
             fileList.clear();
             File[] files = Utils.SAVE_FOLDER.listFiles();
-            for (File file : files) {
+
+            List<File> fileListWithDate = Arrays.asList(files);
+            Collections.sort(fileListWithDate, new Comparator<File>() {
+                public int compare(File f1, File f2) {
+                    return Long.compare(f2.lastModified(), f1.lastModified()); // Ordenar por fecha de modificación en orden inverso
+                }
+            });
+
+            for (File file : fileListWithDate) {
                 fileList.add(file.getName());
             }
-
-            //Sort by name and reverse to show last date first
-            Collections.sort(fileList, String.CASE_INSENSITIVE_ORDER);
-            Collections.reverse(fileList);
 
             listViewAdapter = new ArrayAdapter<>(getContext(),
                     android.R.layout.simple_list_item_1, fileList);
@@ -264,6 +268,7 @@ public class SaveManagerFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
 
     private class loadDataTask extends AsyncTask<Void, Void, Void> {
 
@@ -298,6 +303,14 @@ public class SaveManagerFragment extends Fragment {
     private void readSav(int saveBank) {
         extractedImagesBitmaps.clear();
         extractedImagesList.clear();
+        listActiveImages.clear();
+        listActiveBitmaps.clear();
+        lastSeenImage = null;
+        lastSeenBitmap = null;
+        listDeletedImages.clear();
+
+        listDeletedBitmaps.clear();
+        listDeletedBitmapsRedStroke.clear();
         Extractor extractor = new SaveImageExtractor(new IndexedPalette(IndexedPalette.EVEN_DIST_PALETTE));
         //I get the last file from the directory, which I just dumped
         try {
@@ -351,15 +364,6 @@ public class SaveManagerFragment extends Fragment {
                         listDeletedBitmapsRedStroke.add(copiedBitmap);
                     }
                 }
-            } else {
-                listActiveImages.clear();
-                listActiveBitmaps.clear();
-                lastSeenImage = null;
-                lastSeenBitmap = null;
-                listDeletedImages.clear();
-
-                listDeletedBitmaps.clear();
-                listDeletedBitmapsRedStroke.clear();
             }
         } catch (Exception e) {
             e.printStackTrace();

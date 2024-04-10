@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.gameboycameralib.saveExtractor;
 
 import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.*;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 
@@ -121,7 +122,7 @@ public class SaveImageExtractor implements Extractor {
     private Bitmap gbcImageBitmap(GbcImage gbcImage, byte[] imageBytes, Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk) {
         try {
             ImageCodec imageCodec = new ImageCodec(128, 112);
-            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, false);
+            Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get("bw").getPaletteColorsInt(), imageBytes, false);
             if (image.getHeight() == 112 && image.getWidth() == 128) {
                 //Get the frame id, according to the frame index coded in the bytes, if it exists in the app
                 LinkedHashMap metadata = gbcImage.getImageMetadata();
@@ -171,13 +172,13 @@ public class SaveImageExtractor implements Extractor {
                         break;
                 }
 
-
                 //I need to use copy because if not it's inmutable bitmap
                 Bitmap framed = Utils.hashFrames.get(frameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                 Canvas canvas = new Canvas(framed);
                 canvas.drawBitmap(image, 16, 16, null);
                 image = framed;
-                imageBytes = Utils.encodeImage(image, gbcImage.getPaletteId());
+                imageBytes = Utils.encodeImage(image, "bw");
+                image = paletteChanger(gbcImage.getPaletteId(),imageBytes,gbcImage.isInvertPalette());
             }
             gbcImage.setImageBytes(imageBytes);
             return image;

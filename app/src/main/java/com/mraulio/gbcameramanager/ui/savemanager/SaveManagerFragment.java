@@ -99,7 +99,7 @@ public class SaveManagerFragment extends Fragment {
         btnDelete = view.findViewById(R.id.btnDelete);
         btnAdd = view.findViewById(R.id.btnAdd);
         cbModDate = view.findViewById(R.id.sw_mod_date);
-        loadingDialog = new LoadingDialog(getContext(), "Extracting");
+        loadingDialog = new LoadingDialog(getContext(), getContext().getString(R.string.load_extracting_images));
         MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
 
         spSaveType = view.findViewById(R.id.sp_save_type_manager);

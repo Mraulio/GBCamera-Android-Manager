@@ -12,6 +12,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -88,8 +89,8 @@ public class PalettesFragment extends Fragment {
         Button btnAdd = view.findViewById(R.id.btnAdd);
         Button btnExportPaletteJson = view.findViewById(R.id.btnExportPaletteJson);
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
-
-        CustomGridViewAdapterPalette customGridViewAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, true, false, true);
+        CustomGridViewAdapterPalette customGridViewAdapterPalette =  new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, true, false, true);
+        customGridViewAdapterPalette.setCustomGridViewAdapterPalette(customGridViewAdapterPalette);
 
         gridViewPalettes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -158,6 +159,12 @@ public class PalettesFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             new SavePaletteAsyncTask(Utils.gbcPalettesList.get(position), false).execute();
+                            if (Utils.gbcPalettesList.get(position).getPaletteId().equals(MainActivity.defaultPaletteId)){
+                                SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+                                editor.putString("default_palette_id", "bw");
+                                MainActivity.defaultPaletteId = "bw";
+                                editor.apply();
+                            }
                             String paletteToDelete = Utils.gbcPalettesList.get(position).getPaletteId();
                             Utils.gbcPalettesList.remove(position);
                             sortPalettes();

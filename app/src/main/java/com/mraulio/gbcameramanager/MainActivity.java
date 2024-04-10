@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
     public static int exportSize = 4;
     public static int imagesPage = 12;
     public static String languageCode;
+    public static String defaultPaletteId;
     public static boolean magicCheck;
     public static boolean showRotationButton;
     public static int customColorPaper;
@@ -140,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
         customColorPaper = sharedPreferences.getInt("custom_paper_color", Color.WHITE);
         exportSquare = sharedPreferences.getBoolean("export_square", false);
         sortMode = sharedPreferences.getString("sort_by_date", SORT_MODE.CREATION_DATE.name());
+        defaultPaletteId = sharedPreferences.getString("default_palette_id","bw");
         dateLocale = sharedPreferences.getString("date_locale", "yyyy-MM-dd");
 
         if (sortMode != null) {

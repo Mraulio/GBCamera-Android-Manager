@@ -891,7 +891,7 @@ public class GalleryUtils {
 
         //If image has a null frame but has the size of a "framable" image, create the placeholder frame
         if (gbcFrame == null && keepFrame && ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224)) {
-            Bitmap originalBwBitmap = paletteChanger("bw", gbcImage.getImageBytes(), false, false);
+            Bitmap originalBwBitmap = paletteChanger("bw", gbcImage.getImageBytes(), false);
 
             gbcFrame = new GbcFrame();
             gbcFrame.setFrameBitmap(originalBwBitmap);
@@ -915,7 +915,7 @@ public class GalleryUtils {
             String paletteId = gbcImage.getPaletteId();
             if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
                 paletteId = "bw";
-            Bitmap setToPalette = paletteChanger(paletteId, gbcImage.getImageBytes(), keepFrame, invertImagePalette);
+            Bitmap setToPalette = paletteChanger(paletteId, gbcImage.getImageBytes(), invertImagePalette);
             Bitmap croppedBitmap = Bitmap.createBitmap(setToPalette, 16, yIndexActualImage, 128, 112); //Getting the internal 128x112 image
             canvas.drawBitmap(croppedBitmap, 16, yIndexNewFrame, null);
             String framePaletteId = gbcImage.getFramePaletteId();
@@ -937,7 +937,7 @@ public class GalleryUtils {
                 }
             }
 
-            framed = paletteChanger(framePaletteId, frameBytes, true, invertFramePalette);
+            framed = paletteChanger(framePaletteId, frameBytes,  invertFramePalette);
             framed = transparentBitmap(framed, gbcFrame);
 
             canvas.drawBitmap(framed, 0, 0, null);
@@ -946,7 +946,7 @@ public class GalleryUtils {
             String imagePaletteId = gbcImage.getPaletteId();
             if (save != null && !save) //In the cases I don't need to save it, the palette is bw (Hex, json exports, paperize, printing)
                 imagePaletteId = "bw";
-            resultBitmap = paletteChanger(imagePaletteId, gbcImage.getImageBytes(), keepFrame, invertImagePalette);
+            resultBitmap = paletteChanger(imagePaletteId, gbcImage.getImageBytes(),  invertImagePalette);
         }
         //Because when exporting to json, hex or printing I use this method but don't want to keep the changes
         if (save != null && save) {
@@ -957,8 +957,7 @@ public class GalleryUtils {
     }
 
     //Change palette
-    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, boolean keepFrame,
-                                        boolean invertPalette) {
+    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, boolean invertPalette) {
         ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
 

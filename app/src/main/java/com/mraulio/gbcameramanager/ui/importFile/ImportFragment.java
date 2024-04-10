@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
 import static com.mraulio.gbcameramanager.MainActivity.openedFromFile;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
@@ -149,7 +150,7 @@ public class ImportFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loadingDialog = new LoadingDialog(getContext(), "Extracting file");
+        loadingDialog = new LoadingDialog(getContext(), getContext().getString(R.string.load_extracting_images));
 
         if (getArguments() != null) {
             String fileUri = getArguments().getString("fileUri");
@@ -990,14 +991,15 @@ public class ImportFragment extends Fragment {
                 if (!hasAllColors) {
                     bitmap = convertToGrayScale(bitmap);
                     bitmap = ditherImage(bitmap);
+
                     LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                     metadata.put("Type", "Transformed");
                     gbcImage.setImageMetadata(metadata);
                     gbcImage.getTags().add("__filter:transformed__");
                 }
-
                 byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
                 gbcImage.setImageBytes(imageBytes);
+                bitmap = paletteChanger(gbcImage.getPaletteId(),imageBytes, gbcImage.isInvertPalette());
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                 String hashHex = Utils.bytesToHex(hash);
                 gbcImage.setHashCode(hashHex);

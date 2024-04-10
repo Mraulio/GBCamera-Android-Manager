@@ -5,6 +5,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.mraulio.gbcameramanager.MainActivity;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -78,8 +80,8 @@ public class GbcImage implements Cloneable{
     }
 
     public GbcImage() {
-        this.paletteId = "bw";
-        this.framePaletteId = "bw";
+        this.paletteId = MainActivity.defaultPaletteId;
+        this.framePaletteId = MainActivity.defaultPaletteId;
         this.frameId = null;//I set the nintendo frame as the default
         this.lockFrame = false;
         this.invertPalette = false;

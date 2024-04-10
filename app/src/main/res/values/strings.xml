@@ -245,4 +245,7 @@
     <string name="load_cache">Loading cache</string>
     <string name="load_saving_images">Saving images</string>
 
+
+    <string name="load_extracting_images">Extracting images</string>
+
 </resources>

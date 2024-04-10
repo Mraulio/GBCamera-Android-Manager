@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
@@ -215,10 +216,19 @@ public class TransformImage {
             croppedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 128, 112, false);
         }
         croppedBitmap = resizeImage(croppedBitmap);
+
+
         boolean hasAllColors = checkPaletteColors(croppedBitmap);
         if (!hasAllColors) {
             croppedBitmap = convertToGrayScale(croppedBitmap);
             croppedBitmap = ditherImage(croppedBitmap);
+        }
+        try {
+            byte[] imageBytes = Utils.encodeImage(croppedBitmap, "bw");
+            gbcImage.setImageBytes(imageBytes);
+            croppedBitmap = paletteChanger(gbcImage.getPaletteId(), imageBytes, gbcImage.isInvertPalette());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         ivTransformed.setImageBitmap(Bitmap.createScaledBitmap(croppedBitmap, croppedBitmap.getWidth() * 3, croppedBitmap.getHeight() * 3, false));
     }

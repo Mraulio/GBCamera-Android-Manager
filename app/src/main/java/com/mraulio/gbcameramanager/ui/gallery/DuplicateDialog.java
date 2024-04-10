@@ -161,7 +161,6 @@ public class DuplicateDialog {
                     duplicatedBitmaps.add(duplicatedBitmap);
 
                 }
-//                System.out.println("Duplicated bitmaps: "+duplicatedBitmaps.size());
             }
             return null;
         }

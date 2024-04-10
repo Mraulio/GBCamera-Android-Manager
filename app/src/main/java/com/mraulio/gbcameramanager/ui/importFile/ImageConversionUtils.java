@@ -1,5 +1,7 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -53,7 +55,18 @@ public class ImageConversionUtils {
                     if (hasJoeyJrPalette(framelessBitmap)) {
                         framelessBitmap = convertJoeyPalette(framelessBitmap);
                     }
+                    boolean hasAllColors = checkPaletteColors(framelessBitmap);
+                    if (!hasAllColors) {
+                        framelessBitmap = convertToGrayScale(framelessBitmap);
+                        framelessBitmap = ditherImage(framelessBitmap);
+                    }
                     Bitmap framed = Utils.hashFrames.get(MainActivity.defaultFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    try {
+                        byte[] imageBytes = Utils.encodeImage(framed, "bw");
+                        framed = paletteChanger("bw", imageBytes, false);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(framelessBitmap, 16, 16, null);
 
@@ -76,6 +89,11 @@ public class ImageConversionUtils {
 
                     // Scales the image to the 160 width, keeping the height in proportion
                     Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, croppedHeight, false);
+                    boolean hasAllColors = checkPaletteColors(scaledBitmap);
+                    if (!hasAllColors) {
+                        scaledBitmap = convertToGrayScale(scaledBitmap);
+                        scaledBitmap = ditherImage(scaledBitmap);
+                    }
                     return scaledBitmap;
                 }
             }

@@ -39,6 +39,7 @@ import com.mraulio.gbcameramanager.utils.Utils;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedHashMap;
 
 
 public class TransformImage {
@@ -189,17 +190,21 @@ public class TransformImage {
                 if (convertedOnce[0]) {
                     finalListBitmaps.set(0, croppedBitmap);
                     prevBitmap = finalListBitmaps.get(0);
+                    byte[] hash;
                     try {
-                        byte[] imageBytes = Utils.encodeImage(prevBitmap, "bw");
-                        gbcImage.setImageBytes(imageBytes);
-                        byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
-                        String hashHex = Utils.bytesToHex(hash);
-                        gbcImage.setHashCode(hashHex);
-                        Adapter adapter = new CustomGridViewAdapterImage(context, R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
-                        gridViewImport.setAdapter((ListAdapter) adapter);
-                    } catch (IOException | NoSuchAlgorithmException e) {
+                        hash = MessageDigest.getInstance("SHA-256").digest(gbcImage.getImageBytes());
+                    } catch (NoSuchAlgorithmException e) {
                         throw new RuntimeException(e);
                     }
+                    String hashHex = Utils.bytesToHex(hash);
+                    gbcImage.setHashCode(hashHex);
+                    LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
+                    metadata.put("Type", "Transformed");
+                    gbcImage.setImageMetadata(metadata);
+                    gbcImage.getTags().add("__filter:transformed__");
+                    Adapter adapter = new CustomGridViewAdapterImage(context, R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
+                    gridViewImport.setAdapter((ListAdapter) adapter);
+
                     dialog.dismiss();
                 }
             }
@@ -217,12 +222,6 @@ public class TransformImage {
         }
         croppedBitmap = resizeImage(croppedBitmap);
 
-
-        boolean hasAllColors = checkPaletteColors(croppedBitmap);
-        if (!hasAllColors) {
-            croppedBitmap = convertToGrayScale(croppedBitmap);
-            croppedBitmap = ditherImage(croppedBitmap);
-        }
         try {
             byte[] imageBytes = Utils.encodeImage(croppedBitmap, "bw");
             gbcImage.setImageBytes(imageBytes);

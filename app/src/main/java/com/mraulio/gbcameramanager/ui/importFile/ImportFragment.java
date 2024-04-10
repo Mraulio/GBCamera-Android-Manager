@@ -334,7 +334,7 @@ public class ImportFragment extends Fragment {
                                     }
                                 }
                                 if (newGbcImages.size() > 0) {
-                                    LoadingDialog saveDialog = new LoadingDialog(getContext(), "Saving images");
+                                    LoadingDialog saveDialog = new LoadingDialog(getContext(), getString(R.string.load_saving_images));
                                     saveDialog.showDialog();
                                     SaveImageAsyncTask saveImageAsyncTask = new SaveImageAsyncTask(newGbcImages, listNewBitmaps, getContext(), tvFileName, numImagesAdded, null, saveDialog);
                                     saveImageAsyncTask.execute();
@@ -394,11 +394,13 @@ public class ImportFragment extends Fragment {
                                     }
 
                                 } else if (cbAddFrame.isChecked()) {
-                                    if (finalListBitmaps.get(0).getHeight() != 144 && finalListBitmaps.get(0).getHeight() != 224) {
+                                    //Make the frame bw
+                                    Bitmap bwBitmap = paletteChanger("bw",finalListImages.get(0).getImageBytes(),false);
+                                    if (bwBitmap.getHeight() != 144 && bwBitmap.getHeight() != 224) {
                                         Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
                                     } else {
-                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(finalListBitmaps.get(0), getContext(), null, false);
+                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(bwBitmap, getContext(), null, false);
                                         frameImportDialogClass.frameImportDialog();
                                     }
                                 }

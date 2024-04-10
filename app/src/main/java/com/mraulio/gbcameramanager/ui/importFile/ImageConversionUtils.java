@@ -68,7 +68,7 @@ public class ImageConversionUtils {
                         e.printStackTrace();
                     }
                     Canvas canvas = new Canvas(framed);
-                    canvas.drawBitmap(framelessBitmap, 16, 16, null);
+                    canvas.drawBitmap(framelessBitmap, 16, Utils.hashFrames.get(MainActivity.defaultFrameId).isWildFrame() ? 40 : 16, null);
 
                     return framed;
 

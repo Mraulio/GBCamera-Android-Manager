@@ -82,7 +82,7 @@ public class GbcImage implements Cloneable{
     public GbcImage() {
         this.paletteId = MainActivity.defaultPaletteId;
         this.framePaletteId = MainActivity.defaultPaletteId;
-        this.frameId = null;//I set the nintendo frame as the default
+        this.frameId = null;
         this.lockFrame = false;
         this.invertPalette = false;
         this.invertFramePalette = false;

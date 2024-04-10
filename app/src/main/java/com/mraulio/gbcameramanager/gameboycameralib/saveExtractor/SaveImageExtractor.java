@@ -171,7 +171,7 @@ public class SaveImageExtractor implements Extractor {
                         }
                         break;
                 }
-
+                gbcImage.setFrameId(frameId);
                 //I need to use copy because if not it's inmutable bitmap
                 Bitmap framed = Utils.hashFrames.get(frameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                 Canvas canvas = new Canvas(framed);

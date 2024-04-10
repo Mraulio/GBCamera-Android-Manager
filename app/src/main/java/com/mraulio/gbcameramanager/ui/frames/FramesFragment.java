@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -740,6 +741,8 @@ public class FramesFragment extends Fragment {
             holder.txtTitle.setText(gbcFrame != null ? name : context.getResources().getString(R.string.as_imported_frame));
             if (gbcFrame != null) {
                 holder.imageItem.setImageBitmap(image);
+            } else{
+                holder.imageItem.setImageResource(R.drawable.ic_as_imported_frame);
             }
             return row;
         }

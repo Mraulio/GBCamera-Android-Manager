@@ -26,20 +26,18 @@ import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 
 import android.graphics.drawable.Drawable;
-import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.text.SpannableString;
@@ -52,14 +50,17 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.util.Pair;
 
-import com.ddyos.unicode.exifinterface.UnicodeExifInterface;
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.gson.Gson;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
@@ -68,6 +69,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
+import com.mraulio.gbcameramanager.utils.UnicodeExifInterface;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.BufferedWriter;
@@ -81,6 +83,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -93,6 +96,10 @@ import java.util.Locale;
 import java.util.zip.Deflater;
 
 public class GalleryUtils {
+
+    static Date date1, date2;
+    static TextView tvDate;
+
     public static void saveImage(List<GbcImage> gbcImages, Context context, boolean crop) {
         LocalDateTime now = null;
         Date nowDate = new Date();
@@ -108,10 +115,10 @@ public class GalleryUtils {
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
             String fileName = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
                 fileName = fileNameBase + dtf.format(now);
             } else {
-                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
                 fileName = fileNameBase + sdf.format(nowDate);
             }
 
@@ -146,12 +153,12 @@ public class GalleryUtils {
                     //Create the metadata text
                     StringBuilder stringBuilder = new StringBuilder();
                     LinkedHashMap lhm = gbcImage.getImageMetadata();
-                    stringBuilder.append("Origin: GBCamera Android Manager\n");
+                    stringBuilder.append("Created in GBCamera Android Manager\n");
                     stringBuilder.append("Palette: " + hashPalettes.get(gbcImage.getPaletteId()).getPaletteName() + " (" + gbcImage.getPaletteId() + ")\n");
                     if (gbcImage.getFrameId() != null)
                         stringBuilder.append("Frame: " + hashFrames.get(gbcImage.getFrameId()).getFrameName() + " (" + gbcImage.getFrameId() + ")\n");
 
-                    SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+" HH:mm:ss:SSS");
+                    SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + " HH:mm:ss:SSS");
                     stringBuilder.append("Creation date: " + sdf.format(gbcImage.getCreationDate()) + "\n");
 
                     if (lhm != null) { //Last seen images don't have metadata
@@ -172,19 +179,12 @@ public class GalleryUtils {
                     String metadataComment = stringBuilder.toString();
 
                     try {
-                        //For recent android API, the other library gives error
-                        ExifInterface exifInterface = new ExifInterface(file.getAbsolutePath());
-                        exifInterface.setAttribute(ExifInterface.TAG_USER_COMMENT, metadataComment);
-                        exifInterface.saveAttributes();
-                    } catch (Exception e) {
-                        //For older androids APIs that give error with PNGs
-                        try {
-                            UnicodeExifInterface exifInterface = new UnicodeExifInterface(file.getAbsolutePath());
-                            exifInterface.setAttribute(ExifInterface.TAG_USER_COMMENT, metadataComment);
-                            exifInterface.saveAttributes();
-                        } catch (Exception ex) {
-                            e.printStackTrace();
-                        }
+                        UnicodeExifInterface unicodeExifInterface = new UnicodeExifInterface(file.getAbsolutePath());
+                        unicodeExifInterface.setAttribute(UnicodeExifInterface.TAG_USER_COMMENT, metadataComment);
+
+                        unicodeExifInterface.saveAttributes();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
 
                 } catch (IOException e) {
@@ -534,9 +534,77 @@ public class GalleryUtils {
                 break;
             case TITLE:
                 sortByTitle(gbcImagesList, sortDescending);
-
                 break;
         }
+    }
+
+    static void datePickerdialog(Context context) {
+        // Creating a MaterialDatePicker builder for selecting a date range
+        MaterialDatePicker.Builder<Pair<Long, Long>> builder = MaterialDatePicker.Builder.dateRangePicker();
+        builder.setTitleText("Select a date range");
+
+        // Building the date picker dialog
+        MaterialDatePicker<Pair<Long, Long>> datePicker = builder.build();
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            Long startDate = selection.first;
+            Long endDate = selection.second;
+            date1 = new Date(startDate);
+            date2 = new Date(endDate);
+
+            // Formating the selected dates as strings
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String startDateString = sdf.format(new Date(startDate));
+            String endDateString = sdf.format(new Date(endDate));
+
+            String selectedDateRange = startDateString + " - " + endDateString;
+            tvDate.setText(selectedDateRange);
+
+        });
+
+        // Showing the date picker dialog
+        datePicker.show(((AppCompatActivity) context).getSupportFragmentManager(), "DATE_PICKER");
+    }
+
+    static void datePickerDMY(Context context) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
+                String selectedDate = dayOfMonth + "/" + (month + 1) + "/" + year;
+                tvDate.setText(selectedDate);
+                // Definir un objeto Calendar
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(year, month, dayOfMonth);
+
+                date1 = calendar.getTime();
+            }
+        };
+        DatePickerDialog datePickerDialog = new DatePickerDialog(context, dateSetListener, year, month, dayOfMonth);
+        datePickerDialog.show();
+
+    }
+
+    // Método para filtrar objetos por día de fecha
+    public static List<GbcImage> filterObjectsByDay(List<GbcImage> originalList) {
+        List<GbcImage> filteredList = new ArrayList<>();
+
+        // Obtener el día del Date proporcionado
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date1);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        for (GbcImage obj : originalList) {
+            calendar.setTime(obj.getCreationDate());
+            if (calendar.get(Calendar.DAY_OF_MONTH) == day) {
+                filteredList.add(obj);
+            }
+        }
+        return filteredList;
     }
 
     @SuppressLint("ResourceAsColor")
@@ -545,8 +613,23 @@ public class GalleryUtils {
         View dialogView = inflater.inflate(R.layout.tags_dialog, null);
 
         TextView selectedTagsTextView = dialogView.findViewById(R.id.selectedTagsTextView);
+        tvDate = dialogView.findViewById(R.id.tv_date);
         TextView hiddenTagsTv = dialogView.findViewById(R.id.hiddenTagsTv);
+        Button btnCalendar = dialogView.findViewById(R.id.btn_calendar);
+        Button btnDatePicker = dialogView.findViewById(R.id.btn_datePicker);
 
+        btnCalendar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                datePickerdialog(context);
+            }
+        });
+        btnDatePicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                datePickerDMY(context);
+            }
+        });
         Drawable drawableNotSelected = ContextCompat.getDrawable(context, R.drawable.ic_not_selected);
 
         Drawable drawableHidden = ContextCompat.getDrawable(context, R.drawable.ic_hidden_tag);
@@ -638,6 +721,9 @@ public class GalleryUtils {
         btnClear.setOnClickListener(v -> {
             selectedTags.clear();
             hiddenTags.clear();
+            tvDate.setText("");
+            date1 = null;
+            date2 = null;
             for (CheckBox cb : checkBoxList) {
                 cb.setButtonDrawable(drawableNotSelected);
             }
@@ -670,6 +756,7 @@ public class GalleryUtils {
 
         dialog.show();
     }
+
 
     /**
      * To check the tags after deleting images

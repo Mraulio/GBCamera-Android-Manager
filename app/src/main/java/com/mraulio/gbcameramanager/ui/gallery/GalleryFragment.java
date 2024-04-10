@@ -13,6 +13,7 @@ import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.applyBorderToI
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.createCollage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.date1;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
@@ -25,15 +26,12 @@ import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperDialog;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.getHiddenTags;
 import static com.mraulio.gbcameramanager.utils.Utils.getSelectedTags;
-import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.imageBitmapCache;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
-import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
-import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -101,6 +99,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -566,11 +565,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                             File file = null;
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
 
                                 file = new File(Utils.IMAGES_FOLDER, "Collage_" + dtf.format(now) + ".png");
                             } else {
-                                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+                                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
                                 file = new File(Utils.IMAGES_FOLDER, "Collage_" + sdf.format(nowDate) + ".png");
                             }
                             try (FileOutputStream out = new FileOutputStream(file)) {
@@ -730,11 +729,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                         File file = null;
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
+                            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
 
                             file = new File(Utils.IMAGES_FOLDER, "HDR" + dtf.format(now) + ".png");
                         } else {
-                            SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+                            SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
                             file = new File(Utils.IMAGES_FOLDER, "HDR" + sdf.format(nowDate) + ".png");
 
                         }
@@ -850,10 +849,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             Date nowDate = new Date();
                             File gifFile = null;
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
                                 gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + dtf.format(now) + ".gif");
                             } else {
-                                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+                                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
                                 gifFile = new File(Utils.IMAGES_FOLDER, "GIF_" + sdf.format(nowDate) + ".gif");
 
                             }
@@ -1021,7 +1020,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                             }
                             String jsonString = jsonObject.toString(2);
-                            SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+                            SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
 
                             String fileName = "imagesJson" + dateFormat.format(new Date()) + ".json";
 
@@ -1049,7 +1048,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         }
         return false;
     }
-
 
 
     public static void prevPage() {
@@ -1124,6 +1122,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static void updateGridView() {
         //Bitmap list to store current page bitmaps
         filteredGbcImages = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        if (date1 != null) {
+            calendar.setTime(date1);
+        }
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
 
         if (selectedFilterTags.isEmpty() && hiddenFilterTags.isEmpty()) {
             filteredGbcImages = Utils.gbcImagesList;
@@ -1141,6 +1145,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     if (gbcImageToFilter.getTags().contains(tag)) {
                         containsAllTags = false;
                         break; //Doesn't keep checking the rest of the tags
+                    }
+                }
+                //Check the date
+                if (date1 != null) {
+                    calendar.setTime(gbcImageToFilter.getCreationDate());
+                    if (calendar.get(Calendar.DAY_OF_MONTH) != day) {
+                        containsAllTags = false;
                     }
                 }
                 if (containsAllTags) {

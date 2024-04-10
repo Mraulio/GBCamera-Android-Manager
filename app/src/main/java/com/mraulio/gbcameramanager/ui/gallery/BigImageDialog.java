@@ -158,17 +158,15 @@ public class BigImageDialog {
         });
 
 
-//        imageView.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                v.getParent().requestDisallowInterceptTouchEvent(true);
-//                return false;
-//            }
-//        });
-
         TextView tvCreationDate = dialog.findViewById(R.id.tvMetadata);
         StringBuilder stringBuilder = new StringBuilder();
-        SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+" HH:mm:ss:SSS");
+        String loc = "";
+        if (dateLocale.equals("yyyy-MM-dd")){
+            loc = "dd/MM/yyyy";
+        }else {
+            loc = "MM/dd/yyyy";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat(loc+" HH:mm:ss");
 
         LinkedHashMap lhm = filteredGbcImages.get(globalImageIndex).getImageMetadata();
         stringBuilder.append(sdf.format(filteredGbcImages.get(globalImageIndex).getCreationDate()).toString() + "\n");

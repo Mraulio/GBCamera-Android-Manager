@@ -78,8 +78,7 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
         }
 
         Boolean fav = data.get(position).getTags().contains("__filter:favourite__");
-//        holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) : context.getColor(R.color.imageview_bg));
-        holder.imageItem.setBackground(fav ? ContextCompat.getDrawable(context, R.drawable.corner_color) : null);
+        holder.imageItem.setBackgroundColor(fav ? context.getColor(R.color.favorite) : context.getColor(R.color.imageview_bg));
         Boolean dup = false;
         if (checkDuplicate) {
             for (GbcImage gbcImage : Utils.gbcImagesList) {

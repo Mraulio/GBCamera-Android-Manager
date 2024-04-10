@@ -21,10 +21,35 @@
         android:layout_weight="1"
         android:gravity="center">
 
+
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btn_calendar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="calendar"></Button>
+            <Button
+                android:id="@+id/btn_datePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="calendar"></Button>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/tv_date"></TextView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="30dp"
+                android:layout_marginVertical="5dp"
+                android:background="@android:color/darker_gray" />
 
             <LinearLayout
                 android:id="@+id/buttonLayout"

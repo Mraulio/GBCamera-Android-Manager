@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 
+import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class ImageConversionUtils {
                     if (hasJoeyJrPalette(framelessBitmap)) {
                         framelessBitmap = convertJoeyPalette(framelessBitmap);
                     }
-                    Bitmap framed = Utils.hashFrames.get("gbcam01").getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    Bitmap framed = Utils.hashFrames.get(MainActivity.defaultFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(framelessBitmap, 16, 16, null);
 

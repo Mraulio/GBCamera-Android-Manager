@@ -68,7 +68,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
             holder = new RecordHolder();
             holder.txtTitle = (TextView) row.findViewById(R.id.tvPaletteName);
             holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
-            holder.startItem = (ImageView) row.findViewById(R.id.iv_star);
+            holder.starItem = (ImageView) row.findViewById(R.id.iv_star);
             holder.cardView = (CardView) row.findViewById(R.id.cardViewPalette);
             holder.btnMenu = (TextView) row.findViewById(R.id.btn_menu_palette);
             holder.rlTvs = (RelativeLayout) row.findViewById(R.id.ly_tvs);
@@ -78,9 +78,9 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         }
 
         if (showFavorite && data.get(position).getPaletteId().equals(MainActivity.defaultPaletteId)) {
-            holder.startItem.setVisibility(View.VISIBLE);
+            holder.starItem.setVisibility(View.VISIBLE);
         } else {
-            holder.startItem.setVisibility(View.GONE);
+            holder.starItem.setVisibility(View.GONE);
         }
         holder.cardView.setBackgroundColor(notSelectedColor);
         holder.imageItem.setBackgroundColor(notSelectedColor);
@@ -140,7 +140,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
     private class RecordHolder {
         TextView txtTitle, btnMenu;
         CardView cardView;
-        ImageView imageItem, startItem;
+        ImageView imageItem, starItem;
         RelativeLayout rlTvs;
     }
 
@@ -156,12 +156,12 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
 
     public static void showMenu(Context context, RecordHolder finalHolder, String paletteId, CustomGridViewAdapterPalette customGridViewAdapterPalette) {
         PopupMenu popupMenu = new PopupMenu(context, finalHolder.btnMenu);
-        popupMenu.getMenuInflater().inflate(R.menu.menu_palettes, popupMenu.getMenu());
+        popupMenu.getMenuInflater().inflate(R.menu.menu_default_pal_fram, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(android.view.MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.menu_palette_default:
+                    case R.id.menu_default:
                         toast(context, "Default: " + paletteId);
                         SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
                         editor.putString("default_palette_id", paletteId);
@@ -171,8 +171,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
                             customGridViewAdapterPalette.notifyDataSetChanged();
                         }
                         return true;
-                    case R.id.menu_edit_palette:
-                        return true;
+
                     default:
                         return false;
                 }

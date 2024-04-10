@@ -127,7 +127,7 @@ public class SaveImageExtractor implements Extractor {
                 //Get the frame id, according to the frame index coded in the bytes, if it exists in the app
                 LinkedHashMap metadata = gbcImage.getImageMetadata();
                 int frameNumber = 0;
-                String frameId = "gbcam01";
+                String frameId = MainActivity.defaultFrameId;
                 if (metadata != null) {
                     Object frameNumberObj = gbcImage.getImageMetadata().get("frameIndex");
                     if (frameNumberObj != null) {
@@ -148,7 +148,7 @@ public class SaveImageExtractor implements Extractor {
                                 frameId = intId + String.format("%02d", frameNumber);
                             }
                             if (!hashFrames.containsKey(frameId)) {
-                                frameId = "gbcam01";//If the group exists but the frame doesn't
+                                frameId = MainActivity.defaultFrameId;//If the group exists but the frame doesn't
                             }
                         }
                         break;
@@ -158,7 +158,7 @@ public class SaveImageExtractor implements Extractor {
                             frameId = intId + String.format("%02d", frameNumber);
                         }
                         if (!hashFrames.containsKey(frameId)) {
-                            frameId = "gbcam01";//If the group exists but the frame doesn't
+                            frameId = MainActivity.defaultFrameId;//If the group exists but the frame doesn't
                         }
                         break;
                     case HK:
@@ -166,7 +166,7 @@ public class SaveImageExtractor implements Extractor {
 
                             frameId = hkId + String.format("%02d", frameNumber);
                             if (!hashFrames.containsKey(frameId)) {
-                                frameId = "gbcam01";//If the group exists but the frame doesn't
+                                frameId = MainActivity.defaultFrameId;//If the group exists but the frame doesn't
                             }
                         }
                         break;

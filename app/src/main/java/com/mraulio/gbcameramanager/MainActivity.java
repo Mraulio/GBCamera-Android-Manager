@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
     public static int imagesPage = 12;
     public static String languageCode;
     public static String defaultPaletteId;
+    public static String defaultFrameId;
     public static boolean magicCheck;
     public static boolean showRotationButton;
     public static int customColorPaper;
@@ -142,9 +143,11 @@ public class MainActivity extends AppCompatActivity {
         exportSquare = sharedPreferences.getBoolean("export_square", false);
         sortMode = sharedPreferences.getString("sort_by_date", SORT_MODE.CREATION_DATE.name());
         defaultPaletteId = sharedPreferences.getString("default_palette_id","bw");
+        defaultFrameId = sharedPreferences.getString("default_frame_id","gbcam01");
         dateLocale = sharedPreferences.getString("date_locale", "yyyy-MM-dd");
 
         if (sortMode != null) {
+            sortModeEnum = SORT_MODE.valueOf(sortMode);
             sortModeEnum = SORT_MODE.valueOf(sortMode);
         }
         sortDescending = sharedPreferences.getBoolean("sort_descending", false);

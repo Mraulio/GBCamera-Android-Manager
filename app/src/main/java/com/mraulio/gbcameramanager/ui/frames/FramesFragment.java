@@ -15,6 +15,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -31,6 +32,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -38,6 +41,7 @@ import com.google.gson.Gson;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.ui.gallery.UpdateImageAsyncTask;
 import com.mraulio.gbcameramanager.ui.importFile.FrameImportDialogClass;
+import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.FrameDao;
@@ -136,6 +140,8 @@ public class FramesFragment extends Fragment {
                         btnDeleteCurrentFrameGroup.setEnabled(true);
                 }
                 customGridViewAdapterFrames[0] = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames[0], true, false);
+                customGridViewAdapterFrames[0].setCustomGridViewAdapterFrames(customGridViewAdapterFrames[0]);
+
                 gridView.setAdapter(customGridViewAdapterFrames[0]);
             }
 
@@ -469,7 +475,7 @@ public class FramesFragment extends Fragment {
             }
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
         fileName = fileName + "_" + dateFormat.format(new Date()) + ".json";
         File file = new File(Utils.FRAMES_FOLDER, fileName);
 
@@ -550,6 +556,12 @@ public class FramesFragment extends Fragment {
             frameDao.deleteItems(gbcFramesList);
 
             for (int i = 0; i < gbcFramesList.size(); i++) {
+                if (gbcFramesList.get(i).getFrameId().equals(MainActivity.defaultFrameId)){
+                    SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+                    editor.putString("default_frame_id", "gbcam01");
+                    MainActivity.defaultFrameId = "gbcam01";
+                    editor.apply();
+                }
                 String deletedFrameGroupId = gbcFramesList.get(i).getFrameId().replaceAll("^(\\D+).*", "$1");
                 int numberOfFramesInId = 0;
 
@@ -634,7 +646,7 @@ public class FramesFragment extends Fragment {
             }
 
             customGridViewAdapterFrames = new CustomGridViewAdapterFrames(getContext(), R.layout.frames_row_items, currentlyShowingFrames, true, false);
-
+            customGridViewAdapterFrames.setCustomGridViewAdapterFrames(customGridViewAdapterFrames);
             gridView.setAdapter(customGridViewAdapterFrames);
             tvNumFrames.setText(getString(R.string.frames_total) + Utils.framesList.size());
             customGridViewAdapterFrames.notifyDataSetChanged();
@@ -649,6 +661,7 @@ public class FramesFragment extends Fragment {
         int notSelectedColor = Color.parseColor("#C7D3D5");
         int selectedColor = Color.parseColor("#8C97B3");
         int lastSelectedPosition = -1; // No selected element initially
+        CustomGridViewAdapterFrames customGridViewAdapterFrames;
 
         public CustomGridViewAdapterFrames(Context context, int layoutResourceId,
                                            List<GbcFrame> data, boolean showTextView, boolean checkDuplicate) {
@@ -660,6 +673,10 @@ public class FramesFragment extends Fragment {
             this.checkDuplicate = checkDuplicate;
         }
 
+        public void setCustomGridViewAdapterFrames(CustomGridViewAdapterFrames customGridViewAdapterFrames) {
+            this.customGridViewAdapterFrames = customGridViewAdapterFrames;
+        }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View row = convertView;
@@ -669,8 +686,11 @@ public class FramesFragment extends Fragment {
                 row = inflater.inflate(layoutResourceId, parent, false);
 
                 holder = new RecordHolder();
-                holder.txtTitle = (TextView) row.findViewById(R.id.tvFrameName);
+                holder.txtTitle = (TextView) row.findViewById(R.id.tv_frame_name);
+                holder.txtMenu = (TextView) row.findViewById(R.id.tv_menu_frame);
                 holder.imageItem = (ImageView) row.findViewById(R.id.imageViewFrameItem);
+                holder.starItem = (ImageView) row.findViewById(R.id.iv_star_frame);
+                holder.rlTvs = (RelativeLayout) row.findViewById(R.id.ly_tvs_frames);
                 row.setTag(holder);
             } else {
                 holder = (RecordHolder) row.getTag();
@@ -682,8 +702,23 @@ public class FramesFragment extends Fragment {
                 holder.txtTitle.setBackgroundColor(selectedColor);
                 holder.imageItem.setBackgroundColor(selectedColor);
             }
+            if (showTextView && gbcFramesList.get(position).getFrameId().equals(MainActivity.defaultFrameId)) {
+                holder.starItem.setVisibility(View.VISIBLE);
+            } else {
+                holder.starItem.setVisibility(View.GONE);
+            }
             if (showTextView) {
-                holder.txtTitle.setVisibility(View.VISIBLE);
+                holder.rlTvs.setVisibility(View.VISIBLE);
+                CustomGridViewAdapterFrames.RecordHolder finalHolder = holder;
+                holder.rlTvs.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        showMenu(context, finalHolder, gbcFramesList.get(position).getFrameId(), customGridViewAdapterFrames);
+                    }
+                });
+            } else {
+                holder.rlTvs.setVisibility(View.GONE);
+
             }
             GbcFrame gbcFrame = gbcFramesList.get(position);
             Bitmap image = null;
@@ -710,8 +745,9 @@ public class FramesFragment extends Fragment {
         }
 
         private class RecordHolder {
-            TextView txtTitle;
-            ImageView imageItem;
+            TextView txtTitle, txtMenu;
+            ImageView imageItem, starItem;
+            RelativeLayout rlTvs;
         }
 
         // Method to update the last selected position
@@ -748,6 +784,31 @@ public class FramesFragment extends Fragment {
         dialog.show();
     }
 
+    public static void showMenu(Context context, CustomGridViewAdapterFrames.RecordHolder finalHolder, String frameId, CustomGridViewAdapterFrames customGridViewAdapterFrames) {
+        PopupMenu popupMenu = new PopupMenu(context, finalHolder.txtMenu);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_default_pal_fram, popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(android.view.MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_default:
+                        toast(context, "Default: " + frameId);
+                        SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+                        editor.putString("default_frame_id", frameId);
+                        editor.apply();
+                        MainActivity.defaultFrameId = frameId;
+                        if (customGridViewAdapterFrames != null) {
+                            customGridViewAdapterFrames.notifyDataSetChanged();
+                        }
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+        });
+        popupMenu.show();
+    }
     public static void reloadFrameGroupsSpinner(Context context) {
         //Update the name in the spinner
         frameGroupList.clear();

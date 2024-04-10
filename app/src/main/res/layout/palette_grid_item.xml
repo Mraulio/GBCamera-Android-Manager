@@ -15,7 +15,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- ImageView principal -->
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="match_parent"
@@ -27,7 +26,6 @@
             android:scaleType="fitXY"
             android:src="@mipmap/ic_launcher" />
 
-        <!-- Icono en la esquina inferior derecha -->
         <ImageView
             android:id="@+id/iv_star"
             android:layout_width="wrap_content"
@@ -37,20 +35,21 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:src="@drawable/ic_star"
-            android:tint="@color/star_color"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:tint="@color/star_color" />
 
         <RelativeLayout
+            android:id="@+id/ly_tvs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:id="@+id/ly_tvs"
-            android:layout_below="@id/imageView">
+            android:layout_below="@id/imageView"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tvPaletteName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
                 android:layout_marginEnd="8dp"
                 android:layout_toLeftOf="@id/btn_menu_palette"
                 android:autoSizeMaxTextSize="30sp"

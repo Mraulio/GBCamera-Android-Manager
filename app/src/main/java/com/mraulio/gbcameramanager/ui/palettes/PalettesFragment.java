@@ -146,13 +146,11 @@ public class PalettesFragment extends Fragment {
                     builder.setTitle(getString(R.string.delete_dialog_palette) + Utils.gbcPalettesList.get(position).getPaletteId() + "?");
                     builder.setMessage(getString(R.string.sure_dialog_palette));
 
-                    // Crear un ImageView y establecer la imagen deseada
                     ImageView imageView = new ImageView(getContext());
                     imageView.setAdjustViewBounds(true);
                     imageView.setPadding(30, 10, 30, 10);
                     imageView.setImageBitmap(Utils.gbcPalettesList.get(position).paletteViewer());
 
-                    // Agregar el ImageView al diseño del diálogo
                     builder.setView(imageView);
 
                     builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {

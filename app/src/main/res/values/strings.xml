@@ -247,5 +247,6 @@
 
 
     <string name="load_extracting_images">Extracting images</string>
+    <string name="menu_default">Make default</string>
 
 </resources>

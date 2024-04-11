@@ -249,5 +249,10 @@
     <string name="load_extracting_images">Extracting images</string>
     <string name="menu_default">Make default</string>
     <string name="btn_add_new_palette">Add new palette</string>
+    <string name="start_date_datepicker">Start date</string>
+    <string name="end_date_datepicker">End date</string>
+    <string name="month">Month</string>
+    <string name="year">Year</string>
+    <string name="range">Range</string>
 
 </resources>

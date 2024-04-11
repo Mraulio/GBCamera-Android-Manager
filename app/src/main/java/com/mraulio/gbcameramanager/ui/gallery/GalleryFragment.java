@@ -5,6 +5,7 @@ import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.MainActivity.exportSize;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
+import static com.mraulio.gbcameramanager.MainActivity.filterByDate;
 import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
@@ -12,8 +13,8 @@ import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.addPadding;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.applyBorderToIV;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.createCollage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkImageDateFilter;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.date1;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
@@ -48,7 +49,6 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 
 import android.os.Bundle;
-import android.text.method.Touch;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -1123,14 +1123,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static void updateGridView() {
         //Bitmap list to store current page bitmaps
         filteredGbcImages = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        if (date1 != null) {
-            calendar.setTime(date1);
-        }
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-
-        if (selectedFilterTags.isEmpty() && hiddenFilterTags.isEmpty()) {
+        if (selectedFilterTags.isEmpty() && hiddenFilterTags.isEmpty() && !filterByDate) {
             filteredGbcImages = Utils.gbcImagesList;
         } else {
             filteredGbcImages.clear();
@@ -1148,12 +1142,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         break; //Doesn't keep checking the rest of the tags
                     }
                 }
-                //Check the date
-                if (date1 != null) {
-                    calendar.setTime(gbcImageToFilter.getCreationDate());
-                    if (calendar.get(Calendar.DAY_OF_MONTH) != day) {
-                        containsAllTags = false;
-                    }
+
+                //Check the date filter
+                if (filterByDate) {
+                    containsAllTags = checkImageDateFilter(gbcImageToFilter);
                 }
                 if (containsAllTags) {
                     filteredGbcImages.add(gbcImageToFilter);

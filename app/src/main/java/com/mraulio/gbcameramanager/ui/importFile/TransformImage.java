@@ -220,7 +220,7 @@ public class TransformImage {
         if (cropOriginal) {
             croppedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 128, 112, false);
         }
-        croppedBitmap = resizeImage(croppedBitmap);
+        croppedBitmap = resizeImage(croppedBitmap, gbcImage);
 
         try {
             byte[] imageBytes = Utils.encodeImage(croppedBitmap, "bw");

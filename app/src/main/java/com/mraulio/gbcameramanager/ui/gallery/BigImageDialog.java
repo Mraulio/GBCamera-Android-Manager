@@ -135,6 +135,10 @@ public class BigImageDialog {
         for (String tag : availableTotalTags) {
             if (tag.equals("__filter:favourite__")) {
                 tag = "Favourite \u2764\ufe0f";
+            }else if (tag.equals("__filter:duplicated__")) {
+                tag = "Duplicated \uD83D\uDC11";
+            } else if (tag.equals("__filter:transformed__")) {
+                tag = "Transformed \uD83D\uDD04";
             }
             availableTotalTagsAutoComplete.add(tag);
         }
@@ -248,6 +252,10 @@ public class BigImageDialog {
                     return;
                 if (newTag.equals("Favourite \u2764\ufe0f")) {
                     newTag = "__filter:favourite__";//Reverse the tag
+                }else if (newTag.equals("Duplicated \uD83D\uDC11")) {
+                    newTag = "__filter:duplicated__";
+                } else if (newTag.equals("Transformed \uD83D\uDD04")) {
+                    newTag = "__filter:transformed__";
                 }
                 if (!tempTags.contains(newTag)) {
                     //Generate dynamically new checkboxes
@@ -280,6 +288,10 @@ public class BigImageDialog {
                 String selectedTag = adapter.getItem(position);
                 if (selectedTag.equals("Favourite \u2764\ufe0f")) {
                     selectedTag = "__filter:favourite__";//Reverse the tag
+                }else if (selectedTag.equals("Duplicated \uD83D\uDC11")) {
+                    selectedTag = "__filter:duplicated__";
+                } else if (selectedTag.equals("Transformed \uD83D\uDD04")) {
+                    selectedTag = "__filter:transformed__";
                 }
                 if (!tempTags.contains(selectedTag)) {
                     //Generate dynamically new checkboxes
@@ -525,8 +537,12 @@ public class BigImageDialog {
                     return;
                 }
                 String selectedTag = adapter.getItem(position);
-                if (selectedTag.equals("Favourite \u2764\ufe0f")) {
-                    selectedTag = "__filter:favourite__";//Reverse the tag
+                if (selectedTag.equals("__filter:favourite__")) {
+                    selectedTag = "Favourite \u2764\ufe0f";
+                }else if (selectedTag.equals("__filter:duplicated__")) {
+                    selectedTag = "Duplicated \uD83D\uDC11";
+                } else if (selectedTag.equals("__filter:transformed__")) {
+                    selectedTag = "Transformed \uD83D\uDD04";
                 }
                 if (!showingTags.contains(selectedTag)) {
                     if (!tempTags.contains(selectedTag)) {

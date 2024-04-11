@@ -8,17 +8,19 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 
 import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 public class ImageConversionUtils {
 
-    public static Bitmap resizeImage(Bitmap originalBitmap) {
+    public static Bitmap resizeImage(Bitmap originalBitmap, GbcImage gbcImage) {
 
         int originalWidth = originalBitmap.getWidth();
         int originalHeight = originalBitmap.getHeight();
@@ -26,7 +28,6 @@ public class ImageConversionUtils {
             return originalBitmap;
         } else {
             float scaledFactor = originalWidth / 160.0f;
-//            boolean isScaleFactorInteger = scaledFactor == Math.floor(scaledFactor); //To check if it's an integer without decimals
             if (originalHeight / scaledFactor == 1.0f || originalHeight % (16 * scaledFactor) == 0) {//The image is a regular image scaled
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, (int) (originalWidth / scaledFactor), (int) (originalHeight / scaledFactor), false);
                 return scaledBitmap;
@@ -59,6 +60,10 @@ public class ImageConversionUtils {
                     if (!hasAllColors) {
                         framelessBitmap = convertToGrayScale(framelessBitmap);
                         framelessBitmap = ditherImage(framelessBitmap);
+                        LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
+                        metadata.put("Type", "Transformed");
+                        gbcImage.setImageMetadata(metadata);
+                        gbcImage.getTags().add("__filter:transformed__");
                     }
                     Bitmap framed = Utils.hashFrames.get(MainActivity.defaultFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     try {
@@ -94,6 +99,10 @@ public class ImageConversionUtils {
                         scaledBitmap = convertToGrayScale(scaledBitmap);
                         scaledBitmap = ditherImage(scaledBitmap);
                     }
+                    LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
+                    metadata.put("Type", "Transformed");
+                    gbcImage.setImageMetadata(metadata);
+                    gbcImage.getTags().add("__filter:transformed__");
                     return scaledBitmap;
                 }
             }

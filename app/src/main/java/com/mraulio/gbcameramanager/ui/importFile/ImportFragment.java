@@ -810,19 +810,9 @@ public class ImportFragment extends Fragment {
                                             options.inJustDecodeBounds = true;
                                             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-                                            bitmap = resizeImage(bitmap);
                                             GbcImage gbcImage = new GbcImage();
-                                            boolean hasAllColors = checkPaletteColors(bitmap);
-                                            if (!hasAllColors) {
-                                                bitmap = convertToGrayScale(bitmap);
-                                                bitmap = ditherImage(bitmap);
-                                                //If image transformed, add metadata and tag
-                                                LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
-                                                metadata.put("Type", "Transformed");
-                                                gbcImage.setImageMetadata(metadata);
-                                                gbcImage.getTags().add("__filter:transformed__");
+                                            bitmap = resizeImage(bitmap,gbcImage);
 
-                                            }
 
 
                                             byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
@@ -987,18 +977,9 @@ public class ImportFragment extends Fragment {
                 options.inJustDecodeBounds = true;
                 importedBitmap = BitmapFactory.decodeStream(inputStream);
 
-                Bitmap bitmap = resizeImage(importedBitmap);
                 GbcImage gbcImage = new GbcImage();
-                boolean hasAllColors = checkPaletteColors(bitmap);
-                if (!hasAllColors) {
-                    bitmap = convertToGrayScale(bitmap);
-                    bitmap = ditherImage(bitmap);
+                Bitmap bitmap = resizeImage(importedBitmap,gbcImage);
 
-                    LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
-                    metadata.put("Type", "Transformed");
-                    gbcImage.setImageMetadata(metadata);
-                    gbcImage.getTags().add("__filter:transformed__");
-                }
                 byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
                 gbcImage.setImageBytes(imageBytes);
                 bitmap = paletteChanger(gbcImage.getPaletteId(),imageBytes, gbcImage.isInvertPalette());

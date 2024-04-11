@@ -25,13 +25,32 @@ public class ImageConversionUtils {
         int originalWidth = originalBitmap.getWidth();
         int originalHeight = originalBitmap.getHeight();
         if (originalWidth == 160 && originalHeight == 144 || originalWidth == 160 && originalHeight % 16 == 0) {//Regular image, 160 width and *16 height
+            boolean hasAllColors = checkPaletteColors(originalBitmap);
+            if (!hasAllColors) {
+                originalBitmap = convertToGrayScale(originalBitmap);
+                originalBitmap = ditherImage(originalBitmap);
+                LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
+                metadata.put("Type", "Transformed");
+                gbcImage.setImageMetadata(metadata);
+                gbcImage.getTags().add("__filter:transformed__");
+            }
             return originalBitmap;
         } else {
             float scaledFactor = originalWidth / 160.0f;
             if (originalHeight / scaledFactor == 1.0f || originalHeight % (16 * scaledFactor) == 0) {//The image is a regular image scaled
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, (int) (originalWidth / scaledFactor), (int) (originalHeight / scaledFactor), false);
+                boolean hasAllColors = checkPaletteColors(scaledBitmap);
+                if (!hasAllColors) {
+                    scaledBitmap = convertToGrayScale(scaledBitmap);
+                    scaledBitmap = ditherImage(scaledBitmap);
+                    LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
+                    metadata.put("Type", "Transformed");
+                    gbcImage.setImageMetadata(metadata);
+                    gbcImage.getTags().add("__filter:transformed__");
+                }
                 return scaledBitmap;
             } else {
+
                 //For non framed images
                 int noFrameWidth = 128;
                 int noFrameHeight = 112;
@@ -74,7 +93,6 @@ public class ImageConversionUtils {
                     }
                     Canvas canvas = new Canvas(framed);
                     canvas.drawBitmap(framelessBitmap, 16, Utils.hashFrames.get(MainActivity.defaultFrameId).isWildFrame() ? 40 : 16, null);
-
                     return framed;
 
                 } else {

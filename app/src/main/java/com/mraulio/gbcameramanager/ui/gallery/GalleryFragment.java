@@ -48,6 +48,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 
 import android.os.Bundle;
+import android.text.method.Touch;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -703,7 +704,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     builder.setView(averageView);
 
                     CheckBox cbAverageCrop = averageView.findViewById(R.id.cb_average_crop);
-                    ImageView imageView = averageView.findViewById(R.id.iv_average);
+                    TouchImageView imageView = averageView.findViewById(R.id.iv_average);
                     cbAverageCrop.setOnClickListener(v -> {
                         if (!crop) {
                             crop = true;

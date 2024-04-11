@@ -16,7 +16,7 @@
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/image_view_palette"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -30,8 +30,8 @@
             android:id="@+id/iv_star"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignEnd="@id/imageView"
-            android:layout_alignBottom="@id/imageView"
+            android:layout_alignEnd="@id/image_view_palette"
+            android:layout_alignBottom="@id/image_view_palette"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:src="@drawable/ic_star"
@@ -42,7 +42,7 @@
             android:id="@+id/ly_tvs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/imageView"
+            android:layout_below="@id/image_view_palette"
             android:orientation="vertical">
 
             <TextView

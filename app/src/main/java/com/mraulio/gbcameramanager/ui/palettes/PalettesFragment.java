@@ -89,7 +89,7 @@ public class PalettesFragment extends Fragment {
         Button btnAdd = view.findViewById(R.id.btnAdd);
         Button btnExportPaletteJson = view.findViewById(R.id.btnExportPaletteJson);
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
-        CustomGridViewAdapterPalette customGridViewAdapterPalette =  new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, true, false, true);
+        CustomGridViewAdapterPalette customGridViewAdapterPalette = new CustomGridViewAdapterPalette(getContext(), R.layout.palette_grid_item, Utils.gbcPalettesList, true, false, true);
         customGridViewAdapterPalette.setCustomGridViewAdapterPalette(customGridViewAdapterPalette);
 
         gridViewPalettes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -157,7 +157,7 @@ public class PalettesFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             new SavePaletteAsyncTask(Utils.gbcPalettesList.get(position), false).execute();
-                            if (Utils.gbcPalettesList.get(position).getPaletteId().equals(MainActivity.defaultPaletteId)){
+                            if (Utils.gbcPalettesList.get(position).getPaletteId().equals(MainActivity.defaultPaletteId)) {
                                 SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
                                 editor.putString("default_palette_id", "bw");
                                 MainActivity.defaultPaletteId = "bw";
@@ -165,7 +165,6 @@ public class PalettesFragment extends Fragment {
                             }
                             String paletteToDelete = Utils.gbcPalettesList.get(position).getPaletteId();
                             Utils.gbcPalettesList.remove(position);
-                            sortPalettes();
                             //If an image has the deleted palette in image or frame the palette is set to to default bw
                             //Also need to change the bitmap on the completeImageList so it changes on the Gallery
                             for (int i = 0; i < Utils.gbcImagesList.size(); i++) {
@@ -230,29 +229,6 @@ public class PalettesFragment extends Fragment {
         return view;
     }
 
-    private class SavePaletteAsyncTask extends AsyncTask<Void, Void, Void> {
-
-        //To add the new palette as a parameter
-        private final GbcPalette gbcPalette;
-        private final boolean save;
-
-        public SavePaletteAsyncTask(GbcPalette gbcPalette, boolean save) {
-            this.gbcPalette = gbcPalette;
-            this.save = save;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            PaletteDao paletteDao = MainActivity.db.paletteDao();
-            if (save) {
-                paletteDao.insert(gbcPalette);
-            } else {
-                paletteDao.delete(gbcPalette);
-            }
-            return null;
-        }
-    }
-
     private void PaletteJsonCreator() throws JSONException {
         JSONObject json = new JSONObject();
         JSONObject stateObj = new JSONObject();
@@ -275,7 +251,7 @@ public class PalettesFragment extends Fragment {
         stateObj.put("palettes", palettesArr);
         json.put("state", stateObj);
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
         String fileName = "palettes_" + dateFormat.format(new Date()) + ".json";
         File file = new File(Utils.PALETTES_FOLDER, fileName);
 
@@ -377,7 +353,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    placeholderString = etPaletteId.getText().toString();
+                    placeholderString = etPaletteName.getText().toString();
 
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(etPaletteId.getWindowToken(), 0);
@@ -401,7 +377,6 @@ public class PalettesFragment extends Fragment {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     placeholderString = et1.getText().toString();
-                    // El usuario ha confirmado la escritura.
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(etPaletteId.getWindowToken(), 0);
 
@@ -432,19 +407,16 @@ public class PalettesFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                // Este método se llama después de que el texto cambie.
             }
         });
         et2.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Este método se llama antes de que el texto cambie.
                 placeholderString = et2.getText().toString();
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Este método se llama cuando el texto cambia.
                 try {
                     iv2.setBackgroundColor(parseColor(et2.getText().toString()));
                     palette[1] = parseColor(et2.getText().toString());
@@ -459,19 +431,16 @@ public class PalettesFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                // Este método se llama después de que el texto cambie.
             }
         });
         et3.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Este método se llama antes de que el texto cambie.
                 placeholderString = et3.getText().toString();
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Este método se llama cuando el texto cambia.
                 try {
                     iv3.setBackgroundColor(parseColor(et3.getText().toString()));
                     palette[2] = parseColor(et3.getText().toString());
@@ -510,7 +479,6 @@ public class PalettesFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                // Este método se llama después de que el texto cambie.
             }
         });
         try {
@@ -707,7 +675,6 @@ public class PalettesFragment extends Fragment {
                     if (!alreadyExistingPaletteId) {
                         GbcPalette newPalette = new GbcPalette();
 
-                        //CHANGE THIS WITH A REGEX, ALL LOWERCASE, MIN 2 CHARS, ONLY LETTERS AND NUMBERS
                         newPalette.setPaletteId(newPaletteId);
                         newPalette.setPaletteName(newPaletteName);
 
@@ -716,7 +683,8 @@ public class PalettesFragment extends Fragment {
                         Utils.hashPalettes.put(newPalette.getPaletteId(), newPalette);
                         gridViewPalettes.setAdapter(paletteAdapter);
                         Utils.toast(getContext(), getString(R.string.palette_added));
-                        dialog.hide();
+                        sortPalettes();
+                        dialog.dismiss();
                         //To add it to the database
                         new SavePaletteAsyncTask(newPalette, true).execute();//Adding the new palette to the database
 

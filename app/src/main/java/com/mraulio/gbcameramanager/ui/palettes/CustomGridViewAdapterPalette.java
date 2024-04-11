@@ -67,7 +67,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
 
             holder = new RecordHolder();
             holder.txtTitle = (TextView) row.findViewById(R.id.tvPaletteName);
-            holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
+            holder.imageItem = (ImageView) row.findViewById(R.id.image_view_palette);
             holder.starItem = (ImageView) row.findViewById(R.id.iv_star);
             holder.cardView = (CardView) row.findViewById(R.id.cardViewPalette);
             holder.btnMenu = (TextView) row.findViewById(R.id.btn_menu_palette);
@@ -130,7 +130,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         }
 
         holder.txtTitle.setText(showingName);
-        holder.imageItem.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), false));
+        holder.imageItem.setImageBitmap(image.copy(image.getConfig(),false));
         if (image != null && !image.isRecycled()) {
             image.recycle();
         }

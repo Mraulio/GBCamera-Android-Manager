@@ -13,6 +13,7 @@ import android.os.Build;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
+import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.FileMetaParser;
 import com.mraulio.gbcameramanager.utils.HomebrewRomsMetaParser;
@@ -172,10 +173,11 @@ public class SaveImageExtractor implements Extractor {
                         break;
                 }
                 gbcImage.setFrameId(frameId);
+                GbcFrame gbcFrame = hashFrames.get(frameId);
                 //I need to use copy because if not it's inmutable bitmap
-                Bitmap framed = Utils.hashFrames.get(frameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                Bitmap framed = gbcFrame.getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                 Canvas canvas = new Canvas(framed);
-                canvas.drawBitmap(image, 16, 16, null);
+                canvas.drawBitmap(image, 16, gbcFrame.isWildFrame() ? 40 : 16, null);
                 image = framed;
                 imageBytes = Utils.encodeImage(image, "bw");
                 image = paletteChanger(gbcImage.getPaletteId(),imageBytes,gbcImage.isInvertPalette());

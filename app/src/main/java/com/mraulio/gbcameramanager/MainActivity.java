@@ -56,8 +56,6 @@ import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -113,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
     public static String sortMode = "";
     public static String dateLocale = "";
 
-    public static boolean filterMonth, filterYear , filterRange, filterByDate;
-    public static long dateStartFilter, dateEndFilter;
+    public static boolean filterMonth, filterYear , filterByDate;
+    public static long dateFilter;
 
     public static boolean sortDescending = false;
     public static String selectedTags = "";
@@ -152,11 +150,8 @@ public class MainActivity extends AppCompatActivity {
 
         filterMonth = sharedPreferences.getBoolean("date_filter_month", false);
         filterYear = sharedPreferences.getBoolean("date_filter_year", false);
-        filterRange = sharedPreferences.getBoolean("date_filter_range", false);
         filterByDate = sharedPreferences.getBoolean("date_filter_by_date", false);
-
-        dateStartFilter = sharedPreferences.getLong("date_start_filter", System.currentTimeMillis());
-        dateEndFilter = sharedPreferences.getLong("date_end_filter", System.currentTimeMillis());
+        dateFilter = sharedPreferences.getLong("date_filter", System.currentTimeMillis());
 
         if (sortMode != null) {
             sortModeEnum = SORT_MODE.valueOf(sortMode);

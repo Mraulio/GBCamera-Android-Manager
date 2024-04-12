@@ -346,7 +346,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     }
 
     private static void updateTitleText() {
-        if (!selectedFilterTags.isEmpty() || !hiddenFilterTags.isEmpty()) {
+        if (!selectedFilterTags.isEmpty() || !hiddenFilterTags.isEmpty() || filterByDate) {
             sbTitle.append(tv.getContext().getString(R.string.filtered_images) + filteredGbcImages.size());
         } else {
             sbTitle.append(tv.getContext().getString(R.string.total_images) + filteredGbcImages.size());

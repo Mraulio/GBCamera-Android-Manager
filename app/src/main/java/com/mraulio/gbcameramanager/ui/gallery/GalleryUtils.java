@@ -1,20 +1,16 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.SORT_MODE.*;
-import static com.mraulio.gbcameramanager.MainActivity.dateEndFilter;
 import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
-import static com.mraulio.gbcameramanager.MainActivity.dateStartFilter;
+import static com.mraulio.gbcameramanager.MainActivity.dateFilter;
 import static com.mraulio.gbcameramanager.MainActivity.db;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.MainActivity.filterByDate;
 import static com.mraulio.gbcameramanager.MainActivity.filterMonth;
-import static com.mraulio.gbcameramanager.MainActivity.filterRange;
 import static com.mraulio.gbcameramanager.MainActivity.filterYear;
 import static com.mraulio.gbcameramanager.MainActivity.sortDescending;
 import static com.mraulio.gbcameramanager.MainActivity.sortMode;
 import static com.mraulio.gbcameramanager.MainActivity.sortModeEnum;
-import static com.mraulio.gbcameramanager.ui.gallery.DatePickerHelper.buildDateString;
-import static com.mraulio.gbcameramanager.ui.gallery.DatePickerHelper.showDatePickerDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.diskCache;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
@@ -35,7 +31,6 @@ import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -58,7 +53,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Switch;
@@ -67,7 +61,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.core.util.Pair;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.gson.Gson;
@@ -551,8 +544,36 @@ public class GalleryUtils {
         TextView selectedTagsTextView = dialogView.findViewById(R.id.selectedTagsTextView);
         TextView hiddenTagsTv = dialogView.findViewById(R.id.hiddenTagsTv);
         Button btnCalendar = dialogView.findViewById(R.id.btn_show_calendar);
+        Switch swMonth = dialogView.findViewById(R.id.sw_date_month);
+        Switch swYear = dialogView.findViewById(R.id.sw_date_year);
         Switch swFilterByDate = dialogView.findViewById(R.id.sw_fitler_by_date);
+        swMonth.setChecked(filterMonth);
+        swYear.setChecked(filterYear);
         swFilterByDate.setChecked(filterByDate);
+        swMonth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (swMonth.isChecked()) {
+                    swYear.setChecked(false);
+                }
+                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), dateFilter));
+
+            }
+        });
+        swYear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (swYear.isChecked()) {
+                    swMonth.setChecked(false);
+                }
+                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), dateFilter));
+
+            }
+        });
+
+        Date date = new Date(dateFilter);
+
+        btnCalendar.setText(buildDateString(filterMonth, filterYear, dateFilter));
 
         Drawable drawableNotSelected = ContextCompat.getDrawable(context, R.drawable.ic_not_selected);
 
@@ -572,10 +593,10 @@ public class GalleryUtils {
         btnCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showDatePickerDialog(context, btnCalendar);
+                showDatePicker(context, btnCalendar, date, swMonth.isChecked(), swYear.isChecked());
             }
         });
-        btnCalendar.setText(buildDateString(filterMonth, filterYear, filterRange, dateStartFilter, dateEndFilter));
+        btnCalendar.setText(buildDateString(filterMonth, filterYear, dateFilter));
         LinearLayout buttonLayout = dialog.findViewById(R.id.buttonLayout);
 
         HashSet<String> selectedTags = new HashSet<>(selectedFilterTags);
@@ -672,8 +693,16 @@ public class GalleryUtils {
             filterByDate = swFilterByDate.isChecked();
             saveTagsSet(selectedTags, false);
             saveTagsSet(hiddenTags, true);
+            dateFilter = date.getTime();
+            filterMonth = swMonth.isChecked();
+            filterYear = swYear.isChecked();
+            filterByDate = swFilterByDate.isChecked();
+
             editor.putInt("current_page", 0);
+            editor.putBoolean("date_filter_month", filterMonth);
+            editor.putBoolean("date_filter_year", filterYear);
             editor.putBoolean("date_filter_by_date", filterByDate);
+            editor.putLong("date_filter", dateFilter);
 
             editor.apply();
             currentPage = 0;
@@ -690,6 +719,52 @@ public class GalleryUtils {
         dialog.show();
     }
 
+    public static String buildDateString(boolean month, boolean year, long date) {
+        String loc = dateLocale.equals("yyyy-MM-dd") ? "dd/MM/yyyy" : "MM/dd/yyyy";
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat(loc, Locale.getDefault());
+        if (!month && !year) {
+            return dateFormat.format(date);
+        }
+
+        String dateStartString = dateFormat.format(date);
+
+        if (month) {
+            SimpleDateFormat monthFormat = new SimpleDateFormat("MM/yyyy", Locale.getDefault());
+            dateStartString = monthFormat.format(date);
+        }
+
+        if (year) {
+            SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
+
+            dateStartString = yearFormat.format(date);
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(dateStartString);
+
+
+        return stringBuilder.toString();
+    }
+
+    public static void showDatePicker(Context context, Button btnCalendar, Date date, boolean month, boolean year) {
+        MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
+        MaterialDatePicker<Long> materialDatePicker = builder.build();
+
+        materialDatePicker.addOnPositiveButtonClickListener(selection -> {
+            Calendar selectedCalendar = Calendar.getInstance();
+            selectedCalendar.setTimeInMillis(selection);
+            btnCalendar.setText(buildDateString(month, year, selectedCalendar.getTimeInMillis()));
+
+            date.setTime(selectedCalendar.getTimeInMillis());
+
+        });
+
+        builder.setTitleText(context.getString(R.string.date_datepicker));
+
+        AppCompatActivity appCompatActivity = (AppCompatActivity) context;
+        materialDatePicker.show(appCompatActivity.getSupportFragmentManager(), "MATERIAL_DATE_PICKER_TAG");
+    }
 
     /**
      * To check the tags after deleting images
@@ -822,71 +897,22 @@ public class GalleryUtils {
         calendarImage.setTime(gbcImage.getCreationDate());
 
         Calendar calStart = Calendar.getInstance();
-        calStart.setTime(new Date(dateStartFilter));
+        calStart.setTime(new Date(dateFilter));
 
-        //First if not checking range
-        if (!filterRange) {
-            if (!filterMonth && !filterYear) {
-                boolean sameDay = calendarImage.get(Calendar.DAY_OF_MONTH) == calStart.get(Calendar.DAY_OF_MONTH) &&
-                        calendarImage.get(Calendar.MONTH) == calStart.get(Calendar.MONTH) &&
-                        calendarImage.get(Calendar.YEAR) == calStart.get(Calendar.YEAR);
-                return sameDay;
-            } else if (filterMonth) {
-                boolean sameMonth = calendarImage.get(Calendar.MONTH) == calStart.get(Calendar.MONTH) &&
-                        calendarImage.get(Calendar.YEAR) == calStart.get(Calendar.YEAR);
-                return sameMonth;
-            } else {
-                boolean sameYear = calendarImage.get(Calendar.YEAR) == calStart.get(Calendar.YEAR);
-                return sameYear;
-            }
+        if (!filterMonth && !filterYear) {
+            boolean sameDay = calendarImage.get(Calendar.DAY_OF_MONTH) == calStart.get(Calendar.DAY_OF_MONTH) &&
+                    calendarImage.get(Calendar.MONTH) == calStart.get(Calendar.MONTH) &&
+                    calendarImage.get(Calendar.YEAR) == calStart.get(Calendar.YEAR);
+            return sameDay;
+        } else if (filterMonth) {
+            boolean sameMonth = calendarImage.get(Calendar.MONTH) == calStart.get(Calendar.MONTH) &&
+                    calendarImage.get(Calendar.YEAR) == calStart.get(Calendar.YEAR);
+            return sameMonth;
         } else {
-            //Now checking if in range
-            Calendar calEnd = Calendar.getInstance();
-            calEnd.setTime(new Date(dateEndFilter));
-            if (!filterMonth && !filterYear) {
-
-                int compareYear = calendarImage.get(Calendar.YEAR);
-                int compareMonth = calendarImage.get(Calendar.MONTH);
-                int compareDay = calendarImage.get(Calendar.DAY_OF_MONTH);
-
-                int startYear = calStart.get(Calendar.YEAR);
-                int startMonth = calStart.get(Calendar.MONTH);
-                int startDay = calStart.get(Calendar.DAY_OF_MONTH);
-
-                int endYear = calEnd.get(Calendar.YEAR);
-                int endMonth = calEnd.get(Calendar.MONTH);
-                int endDay = calEnd.get(Calendar.DAY_OF_MONTH);
-
-                boolean withinRange = (compareYear > startYear ||
-                        (compareYear == startYear && compareMonth > startMonth) ||
-                        (compareYear == startYear && compareMonth == startMonth && compareDay >= startDay)) &&
-                        (compareYear < endYear ||
-                                (compareYear == endYear && compareMonth < endMonth) ||
-                                (compareYear == endYear && compareMonth == endMonth && compareDay <= endDay));
-                return withinRange;
-            } else if (filterMonth) {
-
-                int startMonth = calStart.get(Calendar.MONTH);
-                int startYear = calStart.get(Calendar.YEAR);
-
-                int endMonth = calEnd.get(Calendar.MONTH);
-                int endYear = calEnd.get(Calendar.YEAR);
-                int compareMonth = calendarImage.get(Calendar.MONTH);
-                int compareYear = calendarImage.get(Calendar.YEAR);
-
-                boolean withinRange = (compareYear > startYear || (compareYear == startYear && compareMonth >= startMonth)) &&
-                        (compareYear < endYear || (compareYear == endYear && compareMonth <= endMonth));
-
-                return withinRange;
-            } else {
-
-                int compareYear = calendarImage.get(Calendar.YEAR);
-                int startYear = calStart.get(Calendar.YEAR);
-                int endYear = calEnd.get(Calendar.YEAR);
-                boolean withinRange = compareYear >= startYear && compareYear <= endYear;
-                return withinRange;
-            }
+            boolean sameYear = calendarImage.get(Calendar.YEAR) == calStart.get(Calendar.YEAR);
+            return sameYear;
         }
+
     }
 
 

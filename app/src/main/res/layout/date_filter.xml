@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <LinearLayout
@@ -14,31 +14,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/start_date_datepicker"></TextView>
+            android:text="@string/date_datepicker"></TextView>
 
         <Button
             android:id="@+id/btn_date_start"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            app:icon="@drawable/ic_calendar"></Button>
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/end_date_datepicker"></TextView>
-
-        <Button
-            android:id="@+id/btn_date_end"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
@@ -53,33 +32,17 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <Switch
-            android:id="@+id/sw_date_month"
+
+
+        <Button
+            android:id="@+id/btn_save_dates"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/month"></Switch>
-
-        <Switch
-            android:id="@+id/sw_date_year"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/year"></Switch>
-
-        <Switch
-            android:id="@+id/sw_date_range"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/range"></Switch>
-
-
+            android:layout_gravity="right"
+            android:layout_marginHorizontal="20dp"
+            android:backgroundTint="@color/save_color"
+            android:text="@string/btn_save"></Button>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_save_dates"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_marginHorizontal="20dp"
-        android:backgroundTint="@color/save_color"
-        android:text="@string/btn_save"></Button>
+
 </LinearLayout>

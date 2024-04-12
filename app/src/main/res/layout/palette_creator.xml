@@ -10,6 +10,17 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+
+        <EditText
+            android:id="@+id/etPaletteId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:hint="@string/et_palette_id"
+            android:singleLine="true"></EditText>
+
         <EditText
             android:id="@+id/etPaletteName"
             android:layout_width="match_parent"
@@ -17,6 +28,7 @@
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
+            android:hint="@string/set_palette_name"
             android:singleLine="true"></EditText>
 
         <ImageView

@@ -8,20 +8,31 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 @Entity
 public class GbcFrame {
+
     @PrimaryKey
+    @ColumnInfo(name = "frame_id")
     @NonNull
+    String frameId;
+
+    @ColumnInfo(name = "frame_name")
     String frameName;
+
+    @ColumnInfo(name = "frame_hash")
+    String frameHash;
 
     @ColumnInfo(name = "frame_bitmap")
     Bitmap frameBitmap;
 
     @ColumnInfo(name = "wild_frame", defaultValue = "false")
     boolean isWildFrame;
+
+    @ColumnInfo(name = "frame_groups_names")
+    LinkedHashMap<String, String> frameGroupsNames;
 
     @Ignore
     HashSet<int[]> transparentPixelPositions = new HashSet<>();
@@ -42,6 +53,22 @@ public class GbcFrame {
 
     public GbcFrame() {
         this.isWildFrame = false;
+    }
+
+    public String getFrameId() {
+        return frameId;
+    }
+
+    public void setFrameId(String frameId) {
+        this.frameId = frameId;
+    }
+
+    public String getFrameHash() {
+        return frameHash;
+    }
+
+    public void setFrameHash(String frameHash) {
+        this.frameHash = frameHash;
     }
 
     public Bitmap getFrameBitmap() {
@@ -82,5 +109,13 @@ public class GbcFrame {
 
     public void setFrameBytes(byte[] frameBytes) {
         this.frameBytes = frameBytes;
+    }
+
+    public LinkedHashMap<String, String> getFrameGroupsNames() {
+        return frameGroupsNames;
+    }
+
+    public void setFrameGroupsNames(LinkedHashMap<String, String> frameGroupsNames) {
+        this.frameGroupsNames = frameGroupsNames;
     }
 }

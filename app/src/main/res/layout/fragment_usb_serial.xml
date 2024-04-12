@@ -84,8 +84,8 @@
                     android:autoSizeMaxTextSize="30sp"
                     android:autoSizeMinTextSize="5sp"
                     android:autoSizeTextType="uniform"
-                    android:maxLines="1"
                     android:backgroundTint="#D64141"
+                    android:maxLines="1"
                     android:text="@string/delete"
                     android:textSize="15sp"
                     android:visibility="gone"></Button>
@@ -128,14 +128,27 @@
                 android:textSize="15sp"
                 android:visibility="gone"></Button>
 
-            <Button
-                android:id="@+id/btnReadRam"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:text="@string/btn_read_ram"
-                android:textSize="15sp"
-                android:visibility="gone"></Button>
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnReadRam"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:text="@string/btn_read_ram"
+                    android:textSize="15sp"
+                    android:visibility="gone"></Button>
+
+                <Spinner
+                    android:id="@+id/sp_save_type_usb"
+                    android:layout_width="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:visibility="gone"
+                    android:layout_height="wrap_content"></Spinner>
+            </LinearLayout>
 
             <Button
                 android:id="@+id/btnFullRom"

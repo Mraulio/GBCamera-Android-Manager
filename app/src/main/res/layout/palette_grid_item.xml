@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardViewPalette"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="1dp"
     android:padding="2dp"
     app:cardBackgroundColor="#fff"
     app:cardCornerRadius="4dp"
-    android:id="@+id/cardViewPalette"
     app:cardElevation="4dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/image_view_palette"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
             android:background="@color/white"
@@ -26,15 +26,47 @@
             android:scaleType="fitXY"
             android:src="@mipmap/ic_launcher" />
 
-        <TextView
-            android:id="@+id/tvPaletteName"
+        <ImageView
+            android:id="@+id/iv_star"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textColor="@color/black"
-            android:scrollHorizontally="true"
-            android:text="nombre paleta"></TextView>
+            android:layout_alignEnd="@id/image_view_palette"
+            android:layout_alignBottom="@id/image_view_palette"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_star"
+            android:visibility="gone"
+            app:tint="@color/star_color" />
 
-    </LinearLayout>
+        <RelativeLayout
+            android:id="@+id/ly_tvs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/image_view_palette"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvPaletteName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="8dp"
+                android:layout_toLeftOf="@id/btn_menu_palette"
+                android:autoSizeMaxTextSize="30sp"
+                android:autoSizeMinTextSize="2sp"
+                android:autoSizeTextType="uniform"
+                android:singleLine="true"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/btn_menu_palette"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginHorizontal="3dp"
+                android:text="&#8942;" />
+        </RelativeLayout>
+    </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

@@ -15,12 +15,14 @@
     <color name="listview_back">#CCCCCC</color>
     <color name="listview_selected">#AE4F4F</color>
     <color name="imageview_bg">#EAE9F3</color>
+    <color name="star_color">#D6C52E</color>
 
     <color name="paper_color_yellow">#F7FADC</color>
     <color name="paper_color_blue">#DCF2FA</color>
     <color name="paper_color_green">#DCFAD2</color>
     <color name="paper_color_pink">#FFDDE8</color>
     <color name="paper_color_purple">#F2E6FF</color>
-
+    <color name="save_color">#69BF6C</color>
+    <color name="update_image_color">#CCEDE8</color>
 
 </resources>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <Spinner
+            android:id="@+id/spFrameGroupsDialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <AutoCompleteTextView
+            android:id="@+id/etFrameId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:completionThreshold="1"
+            android:hint="@string/et_frame_group_id"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textSize="20dp"></AutoCompleteTextView>
+
+        <EditText
+            android:id="@+id/etFrameGroupName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:hint="@string/et_frame_group_name"
+            android:singleLine="true" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:autoSizeMaxTextSize="30sp"
+                android:autoSizeMinTextSize="5sp"
+                android:autoSizeTextType="uniform"
+                android:text="@string/tv_frame_index"
+                android:textSize="20sp"></TextView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/decrementButton"
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+                <EditText
+                    android:id="@+id/numberEditText"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="1"
+                    android:textAlignment="center" />
+
+                <Button
+                    android:id="@+id/incrementButton"
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:text="+" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <EditText
+            android:id="@+id/etFrameName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:hint="@string/frame_name"
+            android:singleLine="true" />
+
+        <ImageView
+            android:id="@+id/ivFrame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@color/imageview_bg"
+            android:padding="5dp"
+            android:scaleType="fitCenter" />
+
+        <Button
+            android:id="@+id/btnSaveFrame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/btn_add_frames" />
+    </LinearLayout>
+</ScrollView>

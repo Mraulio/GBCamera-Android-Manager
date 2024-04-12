@@ -5,12 +5,16 @@ import android.graphics.BitmapFactory;
 
 import androidx.room.TypeConverter;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class TypeConverters {
@@ -29,19 +33,19 @@ public class TypeConverters {
     }
 
     @TypeConverter
-    public static String fromList(List<String> tags) {
-        StringBuilder sb = new StringBuilder();
-        for (String tag : tags) {
-            sb.append(tag);
-            sb.append(",");
+    public static ArrayList<String> toList(String value) {
+        try {
+            return new Gson().fromJson(value, new TypeToken<ArrayList<String>>() {}.getType());
+        } catch (Exception e) {
+            return new ArrayList<>();
         }
-        return sb.toString();
     }
 
     @TypeConverter
-    public static List<String> toList(String data) {
-        String[] tags = data.split(",");
-        return new ArrayList<>(Arrays.asList(tags));
+    public static String fromList(List<String> list) {
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        return json;
     }
 
     @TypeConverter
@@ -58,5 +62,37 @@ public class TypeConverters {
     public static String fromDate(Date date) {
         SimpleDateFormat format = new SimpleDateFormat(FORMAT);
         return format.format(date);
+    }
+
+    @TypeConverter
+    public static LinkedHashMap<String, String> fromString(String value) {
+        if (value == null) {
+            return null;
+        }
+        return new Gson().fromJson(value, LinkedHashMap.class);
+    }
+
+    @TypeConverter
+    public static String fromMap(LinkedHashMap<String, String> map) {
+        if (map == null) {
+            return null;
+        }
+        return new Gson().toJson(map);
+    }
+
+    @TypeConverter
+    public static HashSet<String> tagsFromString(String value) {
+        if (value == null) {
+            return null;
+        }
+        return new Gson().fromJson(value, HashSet.class);
+    }
+
+    @TypeConverter
+    public static String fromHashSet(HashSet<String> set) {
+        if (set == null) {
+            return null;
+        }
+        return new Gson().toJson(set);
     }
 }

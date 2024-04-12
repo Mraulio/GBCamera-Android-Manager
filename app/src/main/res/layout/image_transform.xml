@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/imageview_bg"
+    android:paddingHorizontal="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ly_rotate"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/crop_iv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sb_rotation"></TextView>
+
+        <SeekBar
+            android:id="@+id/sb_rotate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="360"
+             />
+    </LinearLayout>
+    <!-- Image Cropper fill the remaining available height -->
+    <com.canhub.cropper.CropImageView
+        android:id="@+id/crop_iv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toTopOf="@id/btn_reload_transform"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ly_rotate" />
+
+    <LinearLayout
+        android:id="@+id/ly_brightness"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/ly_contrast"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/crop_iv">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_brightness"
+            android:text="@string/sb_brightness"></TextView>
+
+        <SeekBar
+            android:id="@+id/sb_brightness"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="512"
+            android:progress="255" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ly_contrast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/sw_original_ratio"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ly_brightness">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_contrast"
+            android:text="@string/sb_contrast"></TextView>
+
+        <SeekBar
+            android:id="@+id/sb_contrast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="100" />
+    </LinearLayout>
+
+    <Switch
+        android:id="@+id/sw_original_ratio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sw_original_ratio"
+        app:layout_constraintBottom_toTopOf="@id/iv_transformed"
+        app:layout_constraintEnd_toStartOf="@id/btn_reload_transform"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/crop_iv"></Switch>
+
+    <Button
+        android:id="@+id/btn_reload_transform"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:text="@string/btn_realod_anim"
+        app:layout_constraintBottom_toTopOf="@id/iv_transformed"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/sw_original_ratio"
+        app:layout_constraintTop_toBottomOf="@id/crop_iv"></Button>
+
+
+    <ImageView
+        android:id="@+id/iv_transformed"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/ly_btns"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_reload_transform" />
+
+    <LinearLayout
+        android:id="@+id/ly_btns"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_transformed">
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:text="@string/cancel"></Button>
+
+        <Button
+            android:id="@+id/btn_accept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/save_color"
+            android:text="OK"></Button>
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

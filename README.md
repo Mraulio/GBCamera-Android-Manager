@@ -35,6 +35,7 @@ Clone this repo, prepare [Android Studio](https://developer.android.com/studio) 
 * [Gameboycameralib](https://github.com/KodeMunkie/gameboycameralib) to decode images, modified to work on Android and adapted to my needs.
 * Serial communication: [https://github.com/mik3y/usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android).
 * [Color picker](https://github.com/QuadFlask/colorpicker).
+* [UnicodeExifInterface](https://github.com/ddyos/UnicodeExifInterface) to save Unicode chars in the User Comments Exif tag. Modified for recent Android APIs.
   
 ## Special thanks
 * [Raphaël Boichot](https://github.com/Raphael-Boichot), for testing, French translations and help implementing some of his great projects as features, such as the [Printer Paper Simulation](https://github.com/Raphael-Boichot/GameboyPrinterPaperSimulation) and the [Arduino interface](https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface) to print on real Game Boy Printer hardware. 
@@ -47,6 +48,7 @@ Clone this repo, prepare [Android Studio](https://developer.android.com/studio) 
 ## License
 As the project uses different libraries with different licenses I'll try to adapt it. Please contact me if there is any problem.
 * Everything under the folder [gameboycameralib](https://github.com/Mraulio/GBCamera-Android-Manager/tree/main/app/src/main/java/com/mraulio/gbcameramanager/gameboycameralib) is licensed under [APGL](https://www.gnu.org/licenses/#AGPL).
+* The modified [UnicodeExifInterface](https://github.com/Mraulio/GBCamera-Android-Manager/tree/main/app/src/main/java/com/mraulio/gbcameramanager/utils/UnicodeExifInterrace.java) is licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 * Everything else, including my own work is [MIT Licensed](https://opensource.org/license/mit/).
 
 ## Contact
@@ -56,6 +58,7 @@ You may find me in my Instagram account [@gbcameroid](https://www.instagram.com/
   * [Gameboy 2BPP Graphics Format](https://www.huderlem.com/demos/gameboy2bpp.html) info.
   * Some info on the deleted images [here](https://www.insidegadgets.com/2017/07/11/learning-about-gameboy-camera-saves-and-converting-stored-images-to-bitmap/).
   * More info on deleted images and order in the sav [here](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves#part-1-injecting-custom-pictures-into-the-save).
+  * [Structure of the Game Boy Camera Save Data](https://funtography.online/wiki/Structure_of_the_Game_Boy_Camera_Save_Data)
 
 ## Some images from the app.
 <img src="https://github.com/Mraulio/GBCamera-Android-Manager/assets/12874082/6505c36b-e362-415f-808a-cd4336169fd6" width="300"/>

@@ -1,5 +1,10 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.gridView;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadDialog;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updatingFromChangeImage;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
+import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.isChanging;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
@@ -7,7 +12,6 @@ import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
-import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -25,8 +29,6 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
 
         List<String> currentPageHashes = new ArrayList<>();
         ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
-        //foreach index
-        int index = 0;
         //Loop for each gbcImage in a sublist in all gbcImages objects for the current page
         for (GbcImage gbcImage : GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex)) {
             //Add the hashcode to the list of current hashes
@@ -38,37 +40,33 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
 
 //                Get the image bytes from the database for the current gbcImage
             if (image == null) {
-                if (!GalleryFragment.loadingDialog.isShowing())
+                if (!loadDialog.isShowing())
                     publishProgress();
                 imageBytes = imageDataDao.getDataByImageId(imageHash);
                 //Set the image bytes to the object
                 gbcImage.setImageBytes(imageBytes);
-                if (gbcImage.getFramePaletteId()==null){
+                if (gbcImage.getFramePaletteId() == null) {
                     gbcImage.setFramePaletteId("bw");
                 }
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
-                GbcFrame gbcFrame = Utils.hashFrames.get(gbcImage.getFrameId());
-                if (gbcFrame == null){
-                    gbcFrame= Utils.hashFrames.get("Nintendo_Frame");
-                }
-                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcFrame.isWildFrame());
+                ImageCodec imageCodec = new ImageCodec(160, height);
+
+                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette());
                 //Add the bitmap to the cache
                 Utils.imageBitmapCache.put(imageHash, image);
                 GalleryFragment.diskCache.put(imageHash, image);
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
-                    if ((image.getHeight() == 144 || image.getHeight() == 160) && !gbcImage.getFrameId().equals("") /*&& !gbcImage.getFrameId().equals("Nintendo_Frame")*/)
-                        image = GalleryFragment.frameChange(gbcImage, gbcImage.getFrameId(),gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(),gbcImage.isLockFrame(),true);
+                    if ((image.getHeight() == 144 || image.getHeight() == 160) && gbcImage.getFrameId() != null)
+                        image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
                     Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                     GalleryFragment.diskCache.put(imageHash, image);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-            index++;
         }
         GalleryFragment.gbcImagesForPage = GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex);
         //Create a list of bitmaps to use in the adapter, getting the bitmaps from the cache map for each image in the current page
@@ -76,21 +74,27 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
         for (GbcImage gbcImage : GalleryFragment.gbcImagesForPage) {
             bitmapList.add(Utils.imageBitmapCache.get(gbcImage.getHashCode()));
         }
-        GalleryFragment.customGridViewAdapterImage = new CustomGridViewAdapterImage(GalleryFragment.gridView.getContext(), R.layout.row_items, GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex), bitmapList, false, false, true, GalleryFragment.selectedImages);
+        GalleryFragment.customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex), bitmapList, false, false, true, GalleryFragment.selectedImages);
         return null;
     }
 
     @Override
     protected void onProgressUpdate(Void... values) {
         super.onProgressUpdate(values);
-        if (!GalleryFragment.loadingDialog.isShowing())
-            GalleryFragment.loadingDialog.show();
+        if (!loadDialog.isShowing())
+            loadDialog.showDialog();
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         //Notifies the adapter
-        GalleryFragment.gridView.setAdapter(GalleryFragment.customGridViewAdapterImage);
-        GalleryFragment.loadingDialog.dismiss();
+        gridView.setAdapter(GalleryFragment.customGridViewAdapterImage);
+        if (updatingFromChangeImage) {
+            MainImageDialog.fastImageChange();
+            updatingFromChangeImage = false;
+            isChanging = false;
+        }
+        loadDialog.dismissDialog();
+
     }
 }

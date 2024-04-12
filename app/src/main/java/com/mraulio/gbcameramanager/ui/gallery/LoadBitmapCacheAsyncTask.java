@@ -8,7 +8,9 @@ import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.Utils;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 
 import java.util.List;
 
@@ -17,10 +19,12 @@ import javax.xml.transform.Result;
 public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
     private List<Integer> indexesToLoad;
     private AsyncTaskCompleteListener<Result> listener;
+    private LoadingDialog loadDialog;
 
-    public LoadBitmapCacheAsyncTask(List<Integer> indexesToLoad, AsyncTaskCompleteListener<Result> listener) {
+    public LoadBitmapCacheAsyncTask(List<Integer> indexesToLoad, LoadingDialog loadDialog, AsyncTaskCompleteListener<Result> listener) {
         this.indexesToLoad = indexesToLoad;
         this.listener = listener;
+        this.loadDialog = loadDialog;
     }
 
     //I could add a isCancelled flag
@@ -41,24 +45,23 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
                 imageBytes = imageDataDao.getDataByImageId(imageHash);
                 //Set the image bytes to the object
                 gbcImage.setImageBytes(imageBytes);
-                if (gbcImage.getFramePaletteId()==null){
+                if (gbcImage.getFramePaletteId() == null) {
                     gbcImage.setFramePaletteId("bw");
                 }
                 //Create the image bitmap
                 int height = (imageBytes.length + 1) / 40;//To get the real height of the image
-                ImageCodec imageCodec = new ImageCodec(160, height, gbcImage.isLockFrame());
+                ImageCodec imageCodec = new ImageCodec(160, height);
                 GbcFrame gbcFrame = Utils.hashFrames.get(gbcImage.getFrameId());
-                if (gbcFrame == null){
-                    gbcFrame= Utils.hashFrames.get("Nintendo_Frame");
-                }
-                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), Utils.hashPalettes.get(gbcImage.getFramePaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcFrame.isWildFrame());                //Add the bitmap to the cache
+
+                image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(gbcImage.getPaletteId()).getPaletteColorsInt(), imageBytes, gbcImage.isInvertPalette());//Add the bitmap to the cache
                 Utils.imageBitmapCache.put(imageHash, image);
                 GalleryFragment.diskCache.put(imageHash, image);
                 //Do a frameChange to create the Bitmap of the image
                 try {
                     //Only do frameChange if the image is 144 height AND THE FRAME IS NOT EMPTY (AS SET WHEN READING WITH ARDUINO PRINTER EMULATOR)
-                    if (image.getHeight() == 144 && !gbcImage.getFrameId().equals(""))
-                        image = GalleryFragment.frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(),gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(),true);
+                    if (image.getHeight() == 144 && gbcImage.getFrameId() != null) {
+                        image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), true);
+                    }
                     Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
                     GalleryFragment.diskCache.put(imageHash, image);
 
@@ -76,6 +79,7 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
         if (listener != null) {
             listener.onTaskComplete(result); //Notify the finalization from the interface
         }
-        GalleryFragment.loadingDialog.dismiss();
+
+
     }
 }

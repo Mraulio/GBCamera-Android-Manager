@@ -4,7 +4,8 @@
     <string name="navigation_drawer_open">Navigation öffnen</string>
     <string name="navigation_drawer_close">Navigation schließen</string>
     <string name="nav_header_title">GBCamera Manager</string>
-    <string name="nav_header_subtitle">https://github.com/Mraulio</string>
+    <string name="nav_header_subtitle">Github</string>
+    <string name="nav_header_wiki">Wiki</string>
     <string name="nav_header_desc">Navigation</string>
     <string name="action_settings">Einstellungen</string>
 
@@ -50,13 +51,13 @@
     <string name="btn_export_json">JSON exportieren</string>
     <string name="long_press_delete_palette">Halten zum löschen</string>
     <string name="cant_delete_base_palette">Kann Basispalette nicht löschen</string>
-    <string name="toast_palettes_json">Paletten im Download-Ordner gespeichert.</string>
+    <string name="toast_palettes_json">Paletten gespeichert.</string>
     <string name="set_palette_name">*Palettenname setzen*</string>
     <string name="sure_dialog_palette">Sicher?\nVor dem Fortsetzen ist ein JSON export empfohlen.</string>
     <string name="delete_dialog_palette">Palette löschen\u0020</string>
     <string name="choose_color">Farbe wählen</string>
     <string name="selected_color">Gewählte Farbe: #</string>
-    <string name="toast_palettes_error">2 Paletten dürfen nicht den selben Namen haben.</string>
+    <string name="toast_palettes_error">2 Paletten dürfen nicht den selben Id haben.</string>
     <string name="palette_added">Palette hinzugefügt</string>
 
     <string name="btn_save">Speichern</string>
@@ -157,7 +158,7 @@
     <string name="rotation_button">Zeige Button "Rotation".</string>
     <string name="frame_name">Frame-Namen festlegen</string>
     <string name="cant_add_frame">Dieses Bild kann nicht als Frame hinzugefügt werden</string>
-    <string name="no_empty_frame_name">Der Name darf nicht leer sein</string>
+    <string name="no_empty_frame_name">Der Id darf nicht leer sein</string>
     <string name="no_spaces_frame_name">Der Name darf keine Leerzeichen enthalten</string>
     <string name="frame_name_exists">Dieser Framename existiert bereits</string>
     <string name="no_valid_image_file">Keine gültige Bilddatei</string>

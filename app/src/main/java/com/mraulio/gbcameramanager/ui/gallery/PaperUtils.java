@@ -1,9 +1,10 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.MainActivity.customColorPaper;
+import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.crop;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.rotateBitmapImport;
@@ -212,7 +213,7 @@ public class PaperUtils {
         return modifiedImage;
     }
 
-    public static void paperDialog(List<Integer> indexToPaperize, Context context) {
+    public static void paperDialog(List<Bitmap> bitmapsToPaperize, Context context) {
 
         //Do a dialog class extending DialogFragment with onDismiss for recycles
         final Dialog dialog = new Dialog(context);
@@ -314,10 +315,10 @@ public class PaperUtils {
             public void onClick(View v) {
                 btnSavePaper.setEnabled(true);
                 paperizedBitmaps.clear();
-                if (!loadingDialog.isShowing()) {
-                    loadingDialog.show();
-                }
-                new PaperizeAsyncTask(indexToPaperize, paperColor[0], paperizedBitmaps, ivPaperized, cbOnlyImagePaper.isChecked(), context).execute();
+                loadDialog.showDialog();
+                loadDialog.setLoadingDialogText("Paperizing...");
+
+                new PaperizeAsyncTask(bitmapsToPaperize, paperColor[0], paperizedBitmaps, ivPaperized, cbOnlyImagePaper.isChecked(), context, loadDialog).execute();
             }
         });
         btnSavePaper.setOnClickListener(new View.OnClickListener() {
@@ -330,10 +331,10 @@ public class PaperUtils {
                 }
                 String date = null;
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
                     date = dtf.format(now);
                 } else {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+                    SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
                     date = sdf.format(nowDate);
                 }
                 int index = 1;

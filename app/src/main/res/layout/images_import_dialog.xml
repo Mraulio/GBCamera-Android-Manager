@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <EditText
+        android:id="@+id/etImageNameImport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:autoSizeMaxTextSize="30sp"
+        android:autoSizeMinTextSize="5sp"
+        android:autoSizeTextType="uniform"
+        android:background="@color/white"
+        android:drawableEnd="@drawable/ic_edit"
+        android:singleLine="true"
+        android:textSize="20dp"></EditText>
+
+    <CheckBox
+        android:id="@+id/cbUseModDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cb_use_mod_date"/>
+
+    <HorizontalScrollView
+        android:id="@+id/hSVMultipleImagesImport"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3">
+
+                <LinearLayout
+                    android:id="@+id/lyMultipleImagesImport"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+            </ScrollView>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/editTagsLayoutImport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="10">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_weight="3"
+                android:text="@string/et_write_tag"
+                android:textSize="20sp" />
+
+            <AutoCompleteTextView
+                android:id="@+id/etWriteTagImport"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:autoSizeMaxTextSize="30sp"
+                android:autoSizeMinTextSize="5sp"
+                android:autoSizeTextType="uniform"
+                android:background="@color/white"
+                android:backgroundTint="@color/imageview_bg"
+                android:completionThreshold="1"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textSize="20dp"></AutoCompleteTextView>
+
+            <Button
+                android:id="@+id/btnOkWriteTagImport"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="OK"></Button>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/imageview_bg"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="3dp">
+
+            <Spinner
+                android:id="@+id/spAvailableTagsImport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            </Spinner>
+
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginVertical="10dp"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <LinearLayout
+                android:id="@+id/tagsCheckBoxesImport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginHorizontal="20dp"
+                android:orientation="vertical"></LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btbCancelImport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:text="@string/cancel" />
+
+        <Button
+            android:id="@+id/btnAddImagesImport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:backgroundTint="@color/save_color"
+            android:text="@string/btn_add_images" />
+
+    </LinearLayout>
+</LinearLayout>

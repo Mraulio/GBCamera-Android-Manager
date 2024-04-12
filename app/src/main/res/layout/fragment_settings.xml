@@ -8,11 +8,11 @@
     tools:context=".ui.settings.SettingsFragment">
 
     <ScrollView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
@@ -55,6 +55,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"></Spinner>
             </LinearLayout>
+
             <CheckBox
                 android:id="@+id/cbSquare"
                 android:layout_width="wrap_content"
@@ -65,6 +66,7 @@
                 android:autoSizeTextType="uniform"
                 android:maxLines="1"
                 android:text="@string/square_download" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -137,6 +139,47 @@
                 android:autoSizeTextType="uniform"
                 android:maxLines="1"
                 android:text="@string/check_magic" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sp_date_format"></TextView>
+
+                <Spinner
+                    android:id="@+id/sp_locale_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"></Spinner>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnExportDB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:text="@string/btn_backup_db"></Button>
+
+                <Button
+                    android:id="@+id/btnRestoreDB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:text="@string/btn_restore_db"></Button>
+
+            </LinearLayout>
+
 
             <TextView
                 android:layout_width="match_parent"

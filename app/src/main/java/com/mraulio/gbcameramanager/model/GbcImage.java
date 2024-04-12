@@ -5,12 +5,14 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import java.util.ArrayList;
+import com.mraulio.gbcameramanager.MainActivity;
+
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 @Entity
-public class GbcImage {
+public class GbcImage implements Cloneable{
 
     @PrimaryKey
     @NonNull
@@ -31,6 +33,9 @@ public class GbcImage {
     @ColumnInfo(name = "invert_palette")
     private boolean invertPalette;
 
+    @ColumnInfo(name = "image_metadata")
+    private LinkedHashMap imageMetadata;
+
     @ColumnInfo(name = "invert_frame_palette", defaultValue = "false")
     private boolean invertFramePalette;
 
@@ -41,7 +46,7 @@ public class GbcImage {
     private Date creationDate;
 
     @ColumnInfo(name = "tags_list")
-    private List<String> tags = new ArrayList<>();
+    private HashSet<String> tags;
 
     public String getFramePaletteId() {
         return framePaletteId;
@@ -66,15 +71,33 @@ public class GbcImage {
 
     private byte[] imageBytes;
 
+    public LinkedHashMap getImageMetadata() {
+        return imageMetadata;
+    }
+
+    public void setImageMetadata(LinkedHashMap imageMetadata) {
+        this.imageMetadata = imageMetadata;
+    }
+
     public GbcImage() {
-        this.paletteId = "bw";
-        this.framePaletteId = "bw";
-        this.frameId = "Nintendo_Frame";//I set the nintendo frame as the default
+        this.paletteId = MainActivity.defaultPaletteId;
+        this.framePaletteId = MainActivity.defaultPaletteId;
+        this.frameId = null;
         this.lockFrame = false;
         this.invertPalette = false;
         this.invertFramePalette = false;
         this.creationDate = new Date(System.currentTimeMillis());
         this.rotation = 0;
+        this.tags = new HashSet<>();
+    }
+
+    @Override
+    public GbcImage clone() {
+        try {
+            return (GbcImage) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
     public int getRotation() {
@@ -118,11 +141,11 @@ public class GbcImage {
         this.lockFrame = lockFrame;
     }
 
-    public List<String> getTags() {
+    public HashSet<String> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(HashSet<String> tags) {
         this.tags = tags;
     }
 
@@ -162,11 +185,4 @@ public class GbcImage {
         this.frameId = frameId;
     }
 
-    public static int getNumImages() {
-        return numImages;
-    }
-
-    public static void setNumImages(int numImages) {
-        GbcImage.numImages = numImages;
-    }
 }

@@ -4,9 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "image_data", foreignKeys = @ForeignKey(entity = GbcImage.class, parentColumns = "hashCode", childColumns = "image_id", onDelete = ForeignKey.CASCADE))
+@Entity(tableName = "image_data", foreignKeys = @ForeignKey(entity = GbcImage.class, parentColumns = "hashCode", childColumns = "image_id", onDelete = ForeignKey.CASCADE), indices = {@Index("image_id")})
 public class ImageData {
     @PrimaryKey(autoGenerate = true)
     private int id;

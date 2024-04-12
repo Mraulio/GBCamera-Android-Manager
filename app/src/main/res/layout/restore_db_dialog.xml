@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="3dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/dialog_restore_db_title"
+        android:layout_marginVertical="20dp">
+
+    </TextView>
+    <ListView
+        android:id="@+id/listViewRestoreDb"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_weight="1"
+        android:background="@drawable/listview"
+        android:choiceMode="singleChoice"
+        android:divider="@color/background_dark"
+        android:dividerHeight="1dp"
+        android:listSelector="@color/listview_selected" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginVertical="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnCancelRestoreDb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:text="@string/cancel"></Button>
+
+        <Button
+            android:id="@+id/btnOkRestoreDb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:text="OK"></Button>
+    </LinearLayout>
+
+</LinearLayout>

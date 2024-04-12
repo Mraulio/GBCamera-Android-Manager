@@ -4,7 +4,8 @@
     <string name="navigation_drawer_open">Ouvrir menu principal</string>
     <string name="navigation_drawer_close">Fermer menu principal</string>
     <string name="nav_header_title">GBCamera Manager</string>
-    <string name="nav_header_subtitle">https://github.com/Mraulio</string>
+    <string name="nav_header_subtitle">Github</string>
+    <string name="nav_header_wiki">Wiki</string>
     <string name="nav_header_desc">Menu principal</string>
     <string name="action_settings">Paramètres</string>
     <string name="menu_gallery">Galerie</string>
@@ -39,13 +40,13 @@
     <string name="btn_export_json">Exporter Json</string>
     <string name="long_press_delete_palette">Appui long pour effacer</string>
     <string name="cant_delete_base_palette">Palette par défaut. Ne peut être effacée</string>
-    <string name="toast_palettes_json">Palettes Json sauvegardées vers le dossier Download.</string>
+    <string name="toast_palettes_json">Palettes Json sauvegardées.</string>
     <string name="set_palette_name">*Nommer la palette*</string>
     <string name="sure_dialog_palette">Confirmer?\Export préalable en Json recommandé.</string>
     <string name="delete_dialog_palette">Effacer palette\u0020</string>
     <string name="choose_color">Choix de la couleur</string>
     <string name="selected_color">Couleur choisie: #</string>
-    <string name="toast_palettes_error">2 palettes ne peuvent avoir le même nom.</string>
+    <string name="toast_palettes_error">2 palettes ne peuvent avoir le même Id.</string>
     <string name="palette_added">Palette ajoutée</string>
     <string name="btn_save">Sauvegarder</string>
     <string name="btn_decode">Décoder</string>
@@ -139,7 +140,7 @@
     <string name="rotation_button">Bouton Afficher la rotation</string>
     <string name="frame_name">Définir le nom du bordure</string>
     <string name="cant_add_frame">Impossible d\'ajouter cette image en tant que bordure</string>
-    <string name="no_empty_frame_name">Le nom ne doit pas être vide</string>
+    <string name="no_empty_frame_name">Le Id ne doit pas être vide</string>
     <string name="no_spaces_frame_name">Le nom ne doit pas contenir d\'espaces</string>
     <string name="frame_name_exists">Ce nom de bordure existe déjà</string>
     <string name="no_valid_image_file">Fichier image non valide</string>

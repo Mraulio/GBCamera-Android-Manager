@@ -5,21 +5,12 @@
 package com.mraulio.gbcameramanager.gameboycameralib.constants;
 
 import android.graphics.Color;
+
 /**
  * Modified from https://github.com/KodeMunkie/gameboycameralib
  * Indexed palette representation with default choices for Gameboy colour conversion
  */
 public class IndexedPalette {
-
-    /**
-     * Colours that are an approximation of the original Gameboy LCD green
-     */
-    public static final int[] GAMEBOY_LCD_PALETTE = {
-            Color.rgb(155, 188, 15),
-            Color.rgb(139, 172, 15),
-            Color.rgb(48, 98, 48),
-            Color.rgb(15, 56, 15)
-    };
 
     /**
      * Colours evenly distributed across RGB range
@@ -28,16 +19,6 @@ public class IndexedPalette {
             Color.rgb(255, 255, 255),
             Color.rgb(170, 170, 170),
             Color.rgb(85, 85, 85),
-            Color.rgb(0, 0, 0)
-    };
-
-    /**
-     * Colours (assumed) evenly distributed across "intensity" (luminance?) range, taken from the GB_CAMERA_DUMP app
-     */
-    public static final int[] GB_CAMERA_DUMP_PALETTE = {
-            Color.rgb(255, 255, 255),
-            Color.rgb(192, 192, 192),
-            Color.rgb(128, 128, 128),
             Color.rgb(0, 0, 0)
     };
 
@@ -56,16 +37,17 @@ public class IndexedPalette {
     }
 
     public int getIndex(int rgb) {
-        int alpha = (rgb >> 24) & 0xFF; // Obtener el valor del canal alfa
+
+        int alpha = (rgb >> 24) & 0xFF;
         if (alpha == 0) {
-            System.out.println("alpha");
-            return 0; // Devolver un valor que indique transparencia total
+            return 0;
         }
-        for (int i=0; i<palette.length;++i) {
+        for (int i = 0; i < palette.length; ++i) {
             if (palette[i] == rgb) {
                 return i;
             }
         }
-        throw new IllegalArgumentException("Specified RGB colour does not exist in the indexed palette");
+        throw new IllegalArgumentException("Specified RGB colour does not exist in the indexed palette\nRGB: " + rgb
+        +"\nIP: " + palette[0] + "" + palette[1] + "" + palette[2] + "" + palette[3]);
     }
 }

@@ -18,6 +18,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.Utils;
@@ -64,7 +66,7 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
             holder = (RecordHolder) row.getTag();
         }
         Bitmap image = images.get(position);
-        image= rotateBitmap(image,data.get(position));
+        image = rotateBitmap(image, data.get(position));
         String name = data.get(position).getName();
         String hash = data.get(position).getHashCode();
         List<String> hashToCheck = new ArrayList<>();

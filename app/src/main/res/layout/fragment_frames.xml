@@ -7,19 +7,88 @@
     tools:context=".ui.frames.FramesFragment">
 
     <TextView
+        android:id="@+id/tvNumFrames"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tvNumFrames"></TextView>
+        android:layout_marginStart="10dp"></TextView>
+
+    <Spinner
+        android:id="@+id/spFrameGroups"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"></Spinner>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnExportFramesJson"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
+            android:text="@string/btn_export_json"></Button>
+
+        <Button
+            android:id="@+id/btnExportCurrentGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:enabled="false"
+            android:maxLines="1"
+            android:text="@string/btn_export_current_framegroup"></Button>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnEditCurrentFrameGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:enabled="false"
+            android:maxLines="1"
+            android:text="@string/btn_edit_current_framegroup"></Button>
+
+        <Button
+            android:id="@+id/btnDeleteCurrentFrameGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="5sp"
+            android:autoSizeTextType="uniform"
+            android:enabled="false"
+            android:backgroundTint="@color/listview_selected"
+            android:maxLines="1"
+            android:text="@string/btn_edit_delete_framegroup"></Button>
+    </LinearLayout>
+
     <GridView
         android:id="@+id/gridViewFrames"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:horizontalSpacing="10dp"
-        android:stretchMode="columnWidth"
-        android:scrollbars="horizontal"
-        android:padding="2dp"
-        android:numColumns="3"
         android:layout_margin="5dp"
-        android:verticalSpacing="10dp"/>
+        android:horizontalSpacing="10dp"
+        android:numColumns="3"
+        android:padding="2dp"
+        android:scrollbars="horizontal"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="10dp" />
 
 </LinearLayout>

@@ -1,25 +1,26 @@
 package com.mraulio.gbcameramanager;
 
-import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
+import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
+import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
+import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.LocaleList;
-import android.util.Log;
 import android.view.Menu;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -28,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -52,13 +54,11 @@ import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.ui.importFile.JsonReader;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 
 public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
@@ -66,8 +66,10 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
+    Uri uri;
+    NavController navController;
 
-    public static enum CURRENT_FRAGMENT {
+    public enum CURRENT_FRAGMENT {
         GALLERY,
         PALETTES,
         FRAMES,
@@ -77,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
         SETTINGS
     }
 
-    public static CURRENT_FRAGMENT current_fragment;
+    public static boolean showEditMenuButton = false;
+    public static CURRENT_FRAGMENT currentFragment;
 
     public static FloatingActionButton fab;
 
@@ -89,42 +92,42 @@ public class MainActivity extends AppCompatActivity {
     public static int exportSize = 4;
     public static int imagesPage = 12;
     public static String languageCode;
+    public static String defaultPaletteId;
+    public static String defaultFrameId;
     public static boolean magicCheck;
     public static boolean showRotationButton;
     public static int customColorPaper;
     public static int lastSeenGalleryImage = 0;
     public static boolean exportSquare = false;
 
-    private boolean openedSav = false;
+
+    public enum SORT_MODE {
+        CREATION_DATE,
+        IMPORT_DATE,
+        TITLE
+    }
+
+    public static SORT_MODE sortModeEnum = SORT_MODE.CREATION_DATE;
+    public static String sortMode = "";
+    public static String dateLocale = "";
+
+    public static boolean filterMonth, filterYear , filterByDate;
+    public static long dateFilter;
+
+    public static boolean sortDescending = false;
+    public static String selectedTags = "";
+    public static String hiddenTags = "";
+    public static boolean openedFromFile = false;
+    boolean openedFromUsb = false;
     public static UsbManager manager;
     public static int[] deletedCount = new int[7];
 
     public static AppDatabase db;
-    private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
-    private UsbDevice device;
-    private UsbManager usbManager;
-    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (ACTION_USB_PERMISSION.equals(action)) {
-                synchronized (this) {
-                    device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        if (device != null) {
-                            //call method to set up device communication
-                        }
-                    } else {
-                        Log.d("TAG", "permission denied for device " + device);
-                    }
-                }
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //Unhandled Exception Manager
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
 
@@ -140,10 +143,26 @@ public class MainActivity extends AppCompatActivity {
         showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
         customColorPaper = sharedPreferences.getInt("custom_paper_color", Color.WHITE);
         exportSquare = sharedPreferences.getBoolean("export_square", false);
+        sortMode = sharedPreferences.getString("sort_by_date", SORT_MODE.CREATION_DATE.name());
+        defaultPaletteId = sharedPreferences.getString("default_palette_id","bw");
+        defaultFrameId = sharedPreferences.getString("default_frame_id","gbcam01");
+        dateLocale = sharedPreferences.getString("date_locale", "yyyy-MM-dd");
+
+        filterMonth = sharedPreferences.getBoolean("date_filter_month", false);
+        filterYear = sharedPreferences.getBoolean("date_filter_year", false);
+        filterByDate = sharedPreferences.getBoolean("date_filter_by_date", false);
+        dateFilter = sharedPreferences.getLong("date_filter", System.currentTimeMillis());
+
+        if (sortMode != null) {
+            sortModeEnum = SORT_MODE.valueOf(sortMode);
+            sortModeEnum = SORT_MODE.valueOf(sortMode);
+        }
+        sortDescending = sharedPreferences.getBoolean("sort_descending", false);
+        selectedTags = sharedPreferences.getString("selected_tags", "");
+        hiddenTags = sharedPreferences.getString("hidden_tags", "");
 
         String previousVersion = sharedPreferences.getString("previous_version", "0");
         GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
-
         //To get the locale on the first startup and set the def value
         Resources resources = getResources();
         Configuration configuration = resources.getConfiguration();
@@ -158,14 +177,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String currentVersion = BuildConfig.VERSION_NAME;
+
         if (Float.valueOf(currentVersion) > Float.valueOf(previousVersion)) {
             //App has been updated, do something if necessary
-            deleteImageCache();
+//            deleteImageCache(getBaseContext());
             // Update version name for future comparisons
             editor.putString("previous_version", currentVersion);
             editor.apply();
-
         }
+
         if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
                 && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
             languageCode = "en";
@@ -180,27 +200,18 @@ public class MainActivity extends AppCompatActivity {
         configuration.setLocale(locale);
         resources.updateConfiguration(configuration, resources.getDisplayMetrics());
 
-        fab = findViewById(R.id.fab);
-
-        Utils.makeDirs();
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
-        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        registerReceiver(usbReceiver, filter);
 
         // Obtain Intent information
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
-        Uri uri = intent.getData();
-
-        if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/octet-stream") && uri != null && uri.toString().endsWith(".sav")) {
-            // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
-            // the type is "application/octet-stream" and the URI of the Intent ends in ".sav", make the desired action
-            Utils.toast(this, "Opened from file");
-            openedSav = true;
+        uri = intent.getData();
+        if (uri == null){
+            uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);// For the SEND action
         }
+
         if (!doneLoading) {
             new ReadDataAsyncTask().execute();
         }
@@ -212,7 +223,38 @@ public class MainActivity extends AppCompatActivity {
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
-        if (openedSav) navigationView.setCheckedItem(R.id.nav_import);
+
+        View headerView = navigationView.getHeaderView(0);
+        TextView tvGit = headerView.findViewById(R.id.tvGit);
+        TextView tvWiki = headerView.findViewById(R.id.tvWiki);
+
+        tvGit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String wikiUrl = "https://github.com/Mraulio/GBCamera-Android-Manager";
+
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(wikiUrl));
+
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+        });
+
+        tvWiki.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String gitUrl = "https://github.com/Mraulio/GBCamera-Android-Manager/wiki";
+
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(gitUrl));
+
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+        });
+
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         fab = binding.appBarMain.fab;
         fab.hide();
 
@@ -223,8 +265,16 @@ public class MainActivity extends AppCompatActivity {
                 .setOpenableLayout(drawer)
                 .build();
 
+        if ((Intent.ACTION_VIEW.equals(action) || Intent.ACTION_SEND.equals(action)) && type != null) {
 
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+            // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
+            openedFromFile = true;
+        } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+            openedFromUsb = true;
+        }
+
+        openingFromIntent(navController);
+
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
@@ -245,36 +295,30 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         }
-
-
+        Utils.makeDirs();//If permissions granted, create the folders(Keep this for the updated versions with already permissions, to create the frame json folder)
+        createNotificationChannel(getBaseContext());
     }
 
-    public void restartApplication() {
-        Intent intent = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
-    }
-    private void deleteImageCache() {
-        //Deleting cache for the next version only
-        File cacheDir = new File(getApplicationContext().getCacheDir(), CACHE_DIR_NAME);
-        // Borra todos los archivos dentro del directorio de caché
-        if (cacheDir != null && cacheDir.isDirectory()) {
-            File[] cacheFiles = cacheDir.listFiles();
-            if (cacheFiles != null) {
-                for (File cacheFile : cacheFiles) {
-                    cacheFile.delete();
-                }
-            }
+    private void openingFromIntent(NavController navController) {
+
+        if (openedFromFile) {
+            Bundle bundle = new Bundle();
+            bundle.putString("fileUri", uri.toString());
+            navController.navigate(R.id.nav_import, bundle);
+        } else if (openedFromUsb) {
+            navController.navigate(R.id.nav_usbserial);
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        switch (current_fragment) {
+        switch (currentFragment) {
             case GALLERY:
                 menu.clear(); // Cleans the current menu
                 getMenuInflater().inflate(R.menu.gallery_menu, menu); // Inflates the menu
+                if (showEditMenuButton) {
+                    menu.getItem(0).setVisible(true);
+                }
                 break;
 
             case PALETTES:
@@ -287,7 +331,6 @@ public class MainActivity extends AppCompatActivity {
                 fab.hide();
                 menu.close();
                 break;
-
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -296,6 +339,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
+
             PaletteDao paletteDao = db.paletteDao();
             FrameDao frameDao = db.frameDao();
             ImageDao imageDao = db.imageDao();
@@ -309,6 +353,8 @@ public class MainActivity extends AppCompatActivity {
                     Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
                 Utils.gbcPalettesList.addAll(palettes);
+                //Sort the palettes for the palette grid, showing first the favorites
+                sortPalettes();
             } else {
                 StringBuilder stringBuilder = new StringBuilder();
                 int resourcePalettes = R.raw.palettes;
@@ -329,6 +375,8 @@ public class MainActivity extends AppCompatActivity {
                 String fileContent = stringBuilder.toString();
                 List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
                 Utils.gbcPalettesList.addAll(receivedList);
+                //Sort the palettes for the palette grid, showing first the favorites
+                sortPalettes();
                 for (GbcPalette gbcPalette : receivedList) {
                     Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
@@ -339,15 +387,18 @@ public class MainActivity extends AppCompatActivity {
 
             if (frames.size() > 0) {
                 for (GbcFrame gbcFrame : frames) {
-                    Utils.hashFrames.put(gbcFrame.getFrameName(), gbcFrame);
+                    Utils.hashFrames.put(gbcFrame.getFrameId(), gbcFrame);
                 }
+                Utils.frameGroupsNames = hashFrames.get("gbcam01").getFrameGroupsNames();
                 Utils.framesList.addAll(frames);
+                //Now sort them by group and id
+                frameGroupSorting();
             } else {
                 //First time add it to the database
                 StartCreation.addFrames(getBaseContext());
                 for (Map.Entry<String, GbcFrame> entry : Utils.hashFrames.entrySet()) {
                     GbcFrame value = entry.getValue();
-                    frameDao.insert(value);
+                    frameDao.insert(value);//Saving frames to database
                 }
             }
             //Now that I have palettes and frames, I can add images:
@@ -363,7 +414,12 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
-            gf.updateFromMain();
+//            for (GbcImage gbcImage: gbcImagesList){
+//                Bitmap image = GalleryFragment.diskCache.get(gbcImage.getHashCode());
+//                Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
+//            }
+
+            gf.updateFromMain(MainActivity.this);
         }
     }
 
@@ -373,8 +429,8 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             //resume tasks needing this permission
-            Toast toast = Toast.makeText(this, getString(R.string.permissions_toast), Toast.LENGTH_LONG);
-            toast.show();
+            toast(this, getString(R.string.permissions_toast));
+            Utils.makeDirs();//If permissions granted, create the folders
         }
     }
 
@@ -384,4 +440,12 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+
+    private void openFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_gallery, fragment)
+                .commit();
+    }
+
 }

@@ -15,14 +15,11 @@ public class ImageCodec implements Codec {
 
     private final int imageWidth;
     private final int imageHeight;
-    private IndexedPalette palette = new IndexedPalette(Utils.gbcPalettesList.get(1).getPaletteColorsInt());
     private int paletteIndex;
-    private boolean keepFrame;
 
-    public ImageCodec(int imageWidth, int imageHeight, boolean keepFrame) {
+    public ImageCodec(int imageWidth, int imageHeight) {
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
-        this.keepFrame = keepFrame;
     }
 
     @Override
@@ -51,7 +48,7 @@ public class ImageCodec implements Codec {
         return image;
     }
 
-    public Bitmap decodeWithPalette(int[] imagePalette, int[] framePalette, byte[] data, boolean invertImagePalette, boolean invertFramePalette, boolean isWildFrame) {
+    public Bitmap decodeWithPalette(int[] imagePalette, byte[] data, boolean invertImagePalette) {
 
         Bitmap image = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
 
@@ -95,7 +92,6 @@ public class ImageCodec implements Codec {
                 try {
                     baos.write(tileCodec.encode(Bitmap.createBitmap(buf, x, y, TileCodec.TILE_WIDTH, TileCodec.TILE_HEIGHT)));
                 } catch (Exception e) {
-                    System.out.println("Exception: "+e.toString());
                     e.printStackTrace();
                 }
             }

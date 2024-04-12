@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_margin="1dp"
-    android:padding="10dp"
-    app:cardElevation="4dp"
-    app:cardCornerRadius="4dp"
     android:backgroundTint="#C7D3D5"
-    android:layout_height="match_parent">
-    <LinearLayout
+    android:padding="10dp"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="4dp">
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <ImageView
@@ -19,20 +20,53 @@
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
-            android:padding="6dp"
             android:background="#C7D3D5"
-            android:src="@mipmap/ic_launcher"
-            android:scaleType="fitCenter"/>
-        <TextView
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_as_imported_frame" />
+
+        <ImageView
+            android:id="@+id/iv_star_frame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Frame name"
-            android:maxLines="1"
-            android:background="#C7D3D5"
-            android:textColor="@color/black"
-            android:scrollHorizontally="true"
-            android:id="@+id/tvFrameName"></TextView>
+            android:layout_alignEnd="@id/imageViewFrameItem"
+            android:layout_alignBottom="@id/imageViewFrameItem"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_star"
+            android:visibility="gone"
+            app:tint="@color/star_color" />
 
-    </LinearLayout>
+        <RelativeLayout
+            android:id="@+id/ly_tvs_frames"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imageViewFrameItem"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_frame_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="8dp"
+                android:layout_toLeftOf="@id/tv_menu_frame"
+                android:autoSizeMaxTextSize="30sp"
+                android:autoSizeMinTextSize="2sp"
+                android:autoSizeTextType="uniform"
+                android:singleLine="true"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/tv_menu_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginHorizontal="3dp"
+                android:text="&#8942;" />
+        </RelativeLayout>
+
+    </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

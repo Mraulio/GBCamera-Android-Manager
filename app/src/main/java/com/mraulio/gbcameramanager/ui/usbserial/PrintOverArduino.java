@@ -126,7 +126,7 @@ public class PrintOverArduino {
                 if (((bytesTileData.length / chunkSize) % 9) != 0) {
                     printsNeeded += 1;
                 }
-                tv.append("\nNEEDED PRINTS = " + printsNeeded);
+                tv.append("\nNEEDED PRINTS = " + printsNeeded+"\n");
                 for (int x = 0; x < printsNeeded; x++) {
                     listBytes.add(getCommandBytes(INIT));//listBytes.get(0)
                     byte[] splittedArray;
@@ -190,7 +190,6 @@ public class PrintOverArduino {
         }
         UsbEndpoint finalEndpoint = endpoint;
         List<List<byte[]>> listOfBytes = createDataDelay(textView, listImages);
-        textView.append("\nThere are this byte arrays" + listOfBytes.size() + "\n");
 
         Thread sendThread = new Thread(new Runnable() {
             @Override
@@ -208,7 +207,7 @@ public class PrintOverArduino {
                     }
                     //Wait 14s between each print. Can play with this number
                     try {
-                        Thread.sleep(14000);
+                        Thread.sleep(16000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

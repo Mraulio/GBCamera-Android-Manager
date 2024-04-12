@@ -1,16 +1,20 @@
 package com.mraulio.gbcameramanager.ui.settings;
 
 import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
+import static com.mraulio.gbcameramanager.utils.Utils.backupDatabase;
+import static com.mraulio.gbcameramanager.utils.Utils.showDbBackups;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
@@ -32,6 +36,7 @@ public class SettingsFragment extends Fragment {
     SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
     private boolean userSelect = false;
     private boolean userSelectPage = false;
+    private boolean userSelectLocale = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -39,6 +44,7 @@ public class SettingsFragment extends Fragment {
         Spinner spinnerExport = view.findViewById(R.id.spExportSize);
         Spinner spinnerImages = view.findViewById(R.id.spImagesPage);
         Spinner spinnerLanguage = view.findViewById(R.id.spLanguage);
+        Spinner spinnerLocale = view.findViewById(R.id.sp_locale_date);
         RadioButton rbPng = view.findViewById(R.id.rbPng);
         RadioButton rbTxt = view.findViewById(R.id.rbTxt);
         CheckBox cbPrint = view.findViewById(R.id.cbPrint);
@@ -46,8 +52,10 @@ public class SettingsFragment extends Fragment {
         CheckBox cbMagicCheck = view.findViewById(R.id.cbMagic);
         CheckBox cbRotation = view.findViewById(R.id.cbRotation);
         CheckBox cbSquare = view.findViewById(R.id.cbSquare);
+        Button btnExportDB = view.findViewById(R.id.btnExportDB);
+        Button btnRestoreDB = view.findViewById(R.id.btnRestoreDB);
 
-        MainActivity.current_fragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
+        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
 
         cbPrint.setChecked(MainActivity.printingEnabled);
         cbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -166,6 +174,7 @@ public class SettingsFragment extends Fragment {
                 editor.putInt("export_size", sizesInteger.get(position));
                 editor.apply();
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
@@ -227,7 +236,6 @@ public class SettingsFragment extends Fragment {
         languages.add("Français");
         languages.add("Português Brasileiro");
 
-
         ArrayAdapter<String> adapterLanguage = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, languages);
         adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -241,15 +249,50 @@ public class SettingsFragment extends Fragment {
                 if (userSelect) {
                     // I set the export size on the Main activity int as the selected one
                     MainActivity.languageCode = langs.get(position);
-                    ChangeLanguage(langs.get(position));
+                    changeLanguage(langs.get(position));
                 } else {
                     userSelect = true; // Because the spinner executes an item selection on startup
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
+        List<String> locales = new ArrayList<>();
+        locales.add("yyyy-MM-dd");
+        locales.add("yyyy-dd-MM");
+
+        List<String> localeSpinner = new ArrayList<>();
+        localeSpinner.add("D-M-Y  Ej: 27-04-2024");
+        localeSpinner.add("M-D-Y  Ej: 04-27-2024");
+
+        ArrayAdapter<String> adapterLocale = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, localeSpinner);
+        adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinnerLocale.setAdapter(adapterLocale);
+        spinnerLocale.setSelection(locales.indexOf(MainActivity.dateLocale));
+        spinnerLocale.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (userSelectLocale) {
+                    // I set the export size on the Main activity int as the selected one
+                    MainActivity.dateLocale = locales.get(position);
+                    editor.putString("date_locale", locales.get(position));
+                    editor.apply();
+                } else {
+                    userSelectLocale = true; // Because the spinner executes an item selection on startup
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
 
         cbRotation.setChecked(MainActivity.showRotationButton);
         cbRotation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -266,11 +309,22 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-
+        btnExportDB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                backupDatabase(getContext());
+            }
+        });
+        btnRestoreDB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDbBackups(getContext(), getActivity());
+            }
+        });
         return view;
     }
 
-    private void ChangeLanguage(String languageCode) {
+    private void changeLanguage(String languageCode) {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);
         Configuration configuration = new Configuration();
@@ -280,4 +334,6 @@ public class SettingsFragment extends Fragment {
         editor.putString("language", languageCode);
         editor.apply();
     }
+
+
 }

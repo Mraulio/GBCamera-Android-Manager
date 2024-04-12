@@ -19,11 +19,25 @@
         android:layout_height="wrap_content"
         android:text="@string/tv_select_file" />
 
-    <Button
-        android:id="@+id/btnExtractFile"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_extract_file"></Button>
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnExtractFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_extract_file"></Button>
+
+        <Spinner
+            android:id="@+id/sp_save_type_import"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:visibility="gone"
+            android:layout_height="wrap_content"></Spinner>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnAddImages"
@@ -50,21 +64,57 @@
             android:layout_height="wrap_content"
             android:text="@string/cb_deleted_images"></CheckBox>
     </LinearLayout>
-    <CheckBox
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/cbAddFrame"
-        android:visibility="gone"
-        android:text="@string/add_as_frame"
-        />
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/cbAddFrame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_as_frame"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_transform_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="@string/btn_transform_image"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ly_new_palette"
+        android:visibility="visible"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/iv_new_palette"
+            android:layout_margin="5dp"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"/>
+
+        <Button
+            android:id="@+id/btn_add_new_palette"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="@string/btn_add_new_palette"/>
+    </LinearLayout>
+
     <GridView
         android:id="@+id/gridViewImport"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:stretchMode="columnWidth"
         android:horizontalSpacing="10dp"
+        android:numColumns="3"
 
-        android:verticalSpacing="10dp"
-        android:numColumns="3"></GridView>
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="10dp"></GridView>
 
 </LinearLayout>

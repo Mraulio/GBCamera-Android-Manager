@@ -1,10 +1,7 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
-
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filteredGbcImages;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.frameChange;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadingDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.PaperUtils.paperize;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -14,40 +11,34 @@ import android.os.AsyncTask;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 
-import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 
-import java.io.IOException;
 import java.util.List;
 
-public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
-    private List<Integer> gbcImagesList;
+ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
+    private List<Bitmap> bitmapList;
     private Context context;
     private int paperColor;
     private ImageView ivPaperized;
     private List<Bitmap> paperizedBitmaps;
     private boolean onlyImage;
+    private LoadingDialog loadDialog;
 
-    public PaperizeAsyncTask(List<Integer> gbcImagesList, int paperColor, List<Bitmap> paperizedBitmaps, ImageView ivPaperized, boolean onlyImage, Context context) {
-        this.gbcImagesList = gbcImagesList;
+    public PaperizeAsyncTask(List<Bitmap> bitmapList, int paperColor, List<Bitmap> paperizedBitmaps, ImageView ivPaperized, boolean onlyImage, Context context, LoadingDialog loadDialog) {
+        this.bitmapList = bitmapList;
         this.paperColor = paperColor;
         this.paperizedBitmaps = paperizedBitmaps;
         this.ivPaperized = ivPaperized;
         this.onlyImage = onlyImage;
         this.context = context;
+        this.loadDialog = loadDialog;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
 
-        for (int i : gbcImagesList) {
-            GbcImage gbcImage = filteredGbcImages.get(i);
-            Bitmap bw_image = null;
-            try {
-                bw_image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Bitmap paperized = paperize(bw_image, paperColor, onlyImage, context);
+        for (Bitmap bitmap : bitmapList) {
+            Bitmap paperized = paperize(bitmap, paperColor, onlyImage, context);
             paperizedBitmaps.add(paperized);
         }
 
@@ -56,7 +47,8 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        ivPaperized.setImageBitmap(paperizedBitmaps.get(0));
+        try {
+            ivPaperized.setImageBitmap(paperizedBitmaps.get(0));
 
         final long imageViewHeight = ivPaperized.getHeight();
         // Starting position outside the screen
@@ -88,7 +80,10 @@ public class PaperizeAsyncTask extends AsyncTask<Void, Void, Void> {
         animatorSet.playSequentially(stopAnimation1, stopAnimation2, stopAnimation3, stopAnimation4,stopAnimation5,stopAnimation6, slideAnimator);
 
         animatorSet.start();
-        loadingDialog.dismiss();
+        } catch (Exception e){
+            toast(context,"Image too big to draw on screen. You can try downloading it");
+        }
+        loadDialog.dismissDialog();
     }
 
     private AnimatorSet createStopAnimation(ImageView imageView, float position, long duration) {

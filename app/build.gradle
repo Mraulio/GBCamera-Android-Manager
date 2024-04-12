@@ -10,8 +10,8 @@ android {
         applicationId "com.mraulio.gbcameramanager"
         minSdk 23
         targetSdk 33
-        versionCode 1
-        versionName "0.3"
+        versionCode 5
+        versionName "0.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -41,13 +41,13 @@ dependencies {
     def room_version = "2.5.0"
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.27'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.github.mik3y:usb-serial-for-android:3.7.0'
-    implementation 'com.google.android.material:material:1.5.0-alpha01'
     implementation 'com.github.QuadFlask:colorpicker:0.0.15'
-
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation("com.vanniktech:android-image-cropper:4.5.0")
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'

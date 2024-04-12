@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_palettes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:padding="8dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="4" />
+
+    <EditText
+        android:id="@+id/et_palette_id_import"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autoSizeMaxTextSize="30sp"
+        android:autoSizeMinTextSize="5sp"
+        android:autoSizeTextType="uniform"
+        android:hint="@string/et_palette_id"
+        android:singleLine="true"></EditText>
+
+    <EditText
+        android:id="@+id/et_palette_name_import"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autoSizeMaxTextSize="30sp"
+        android:autoSizeMinTextSize="5sp"
+        android:autoSizeTextType="uniform"
+        android:hint="@string/set_palette_name"
+        android:singleLine="true"></EditText>
+    <Button
+        android:id="@+id/btn_save_new_palette"
+        android:layout_width="wrap_content"
+        android:layout_marginRight="30dp"
+        android:layout_gravity="right"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="@string/btn_save"></Button>
+</LinearLayout>

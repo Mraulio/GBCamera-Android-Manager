@@ -245,7 +245,6 @@ public class PalettesFragment extends Fragment {
                 paletteArr.put(hexColor);
             }
             paletteObj.put("palette", paletteArr);
-            paletteObj.put("origin", "GbCamera Android Manager");
             palettesArr.put(paletteObj);
         }
         stateObj.put("palettes", palettesArr);

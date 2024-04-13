@@ -60,7 +60,7 @@ public class JsonReader {
                 JSONObject paletteObject = palettesArray.getJSONObject(0);
 
                 // Verify that the keys and values exist in the palette
-                if (paletteObject.has("shortName") && paletteObject.has("name") && paletteObject.has("palette") && paletteObject.has("origin")) {
+                if (paletteObject.has("shortName") && paletteObject.has("name") && paletteObject.has("palette")) {
                     JSONArray paletteArray = paletteObject.getJSONArray("palette");
 
                     if (paletteArray.length() != 4) {

@@ -62,6 +62,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.gson.Gson;
 import com.mraulio.gbcameramanager.MainActivity;
@@ -673,7 +674,6 @@ public class GalleryUtils {
         btnClear.setOnClickListener(v -> {
             selectedTags.clear();
             hiddenTags.clear();
-            btnCalendar.setText("");
             swFilterByDate.setChecked(false);
 
             for (CheckBox cb : checkBoxList) {
@@ -748,9 +748,20 @@ public class GalleryUtils {
     }
 
     public static void showDatePicker(Context context, Button btnCalendar, Date date, boolean month, boolean year) {
-        MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
-        MaterialDatePicker<Long> materialDatePicker = builder.build();
 
+
+        List<Calendar> validDates = convertDatesToCalendars(gbcImagesList);
+
+        CustomDateValidator customDateValidator = new CustomDateValidator(validDates);
+        MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
+
+        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
+        constraintsBuilder.setValidator(customDateValidator);
+
+        builder.setCalendarConstraints(constraintsBuilder.build());
+        builder.setTitleText(context.getString(R.string.date_datepicker));
+//        builder.setTheme(R.style.MaterialCalendarTheme);
+        MaterialDatePicker<Long> materialDatePicker = builder.build();
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar selectedCalendar = Calendar.getInstance();
             selectedCalendar.setTimeInMillis(selection);
@@ -760,12 +771,24 @@ public class GalleryUtils {
 
         });
 
-        builder.setTitleText(context.getString(R.string.date_datepicker));
 
         AppCompatActivity appCompatActivity = (AppCompatActivity) context;
         materialDatePicker.show(appCompatActivity.getSupportFragmentManager(), "MATERIAL_DATE_PICKER_TAG");
     }
+    public static List<Calendar> convertDatesToCalendars(List<GbcImage> gbcImages) {
+        List<Calendar> calendars = new ArrayList<>();
 
+        for (GbcImage gbcImage : gbcImages) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(gbcImage.getCreationDate());
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            calendars.add(calendar);
+        }
+        return calendars;
+    }
     /**
      * To check the tags after deleting images
      */

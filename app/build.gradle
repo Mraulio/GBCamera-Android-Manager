@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'com.mraulio.gbcameramanager'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.mraulio.gbcameramanager"
@@ -41,6 +41,7 @@ dependencies {
     def room_version = "2.5.0"
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation 'com.google.android.material:material:1.10.0'
 
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.27'
     implementation 'androidx.appcompat:appcompat:1.6.1'

@@ -15,7 +15,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -46,7 +45,6 @@ import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.gallery.UpdateImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
-import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcPalette;
@@ -71,7 +69,8 @@ public class PalettesFragment extends Fragment {
     CustomGridViewAdapterPalette paletteAdapter;
     GridView gridViewPalettes;
     ImageView iv1, iv2, iv3, iv4;
-    int lastPicked = Color.rgb(155, 188, 15);
+    int lastPickedColor = Color.rgb(155, 188, 15);
+    int favHelper = 0;
     EditText et1, et2, et3, et4;
     String placeholderString = "";
     String newPaletteId = "";
@@ -122,7 +121,7 @@ public class PalettesFragment extends Fragment {
                     clickCount = 0;
                     // Stop timer and make double tap action
                     handler.removeCallbacks(runnable);
-                    if (lastPicked == position) {
+                    if (favHelper == position) {
                         GbcPalette pal = Utils.gbcPalettesList.get(palettePos);
                         pal.setFavorite(pal.isFavorite() ? false : true);
                         paletteAdapter.notifyDataSetChanged();
@@ -130,7 +129,7 @@ public class PalettesFragment extends Fragment {
                         sortPalettes();
                     }
                 }
-                lastPicked = position;
+                favHelper = position;
             }
         });
 
@@ -497,7 +496,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPicked)
+                        .initialColor(lastPickedColor)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
                         .showAlphaSlider(false)
@@ -517,7 +516,7 @@ public class PalettesFragment extends Fragment {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                lastPicked = selectedColor;
+                                lastPickedColor = selectedColor;
                                 et1.setText("#" + Integer.toHexString(palette[0]).substring(2).toUpperCase());
                             }
                         })
@@ -537,7 +536,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPicked)
+                        .initialColor(lastPickedColor)
                         .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
@@ -557,7 +556,7 @@ public class PalettesFragment extends Fragment {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                lastPicked = selectedColor;
+                                lastPickedColor = selectedColor;
                                 et2.setText("#" + Integer.toHexString(palette[1]).substring(2).toUpperCase());
 
                             }
@@ -579,7 +578,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPicked)
+                        .initialColor(lastPickedColor)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
                         .showAlphaSlider(false)
@@ -599,7 +598,7 @@ public class PalettesFragment extends Fragment {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                lastPicked = selectedColor;
+                                lastPickedColor = selectedColor;
                                 et3.setText("#" + Integer.toHexString(palette[2]).substring(2).toUpperCase());
 
                             }
@@ -621,7 +620,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPicked)
+                        .initialColor(lastPickedColor)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
                         .showAlphaSlider(false)
@@ -641,7 +640,7 @@ public class PalettesFragment extends Fragment {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                lastPicked = selectedColor;
+                                lastPickedColor = selectedColor;
                                 et4.setText("#" + Integer.toHexString(palette[3]).substring(2).toUpperCase());
 
                             }

@@ -62,7 +62,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
-import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.gson.Gson;
 import com.mraulio.gbcameramanager.MainActivity;
@@ -551,13 +550,14 @@ public class GalleryUtils {
         swMonth.setChecked(filterMonth);
         swYear.setChecked(filterYear);
         swFilterByDate.setChecked(filterByDate);
+        Date date = new Date(dateFilter);
         swMonth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (swMonth.isChecked()) {
                     swYear.setChecked(false);
                 }
-                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), dateFilter));
+                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), date.getTime()));
 
             }
         });
@@ -567,12 +567,10 @@ public class GalleryUtils {
                 if (swYear.isChecked()) {
                     swMonth.setChecked(false);
                 }
-                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), dateFilter));
+                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), date.getTime()));
 
             }
         });
-
-        Date date = new Date(dateFilter);
 
         btnCalendar.setText(buildDateString(filterMonth, filterYear, dateFilter));
 
@@ -696,7 +694,6 @@ public class GalleryUtils {
             dateFilter = date.getTime();
             filterMonth = swMonth.isChecked();
             filterYear = swYear.isChecked();
-            filterByDate = swFilterByDate.isChecked();
 
             editor.putInt("current_page", 0);
             editor.putBoolean("date_filter_month", filterMonth);
@@ -749,18 +746,17 @@ public class GalleryUtils {
 
     public static void showDatePicker(Context context, Button btnCalendar, Date date, boolean month, boolean year) {
 
+        List<Calendar> listDates = new ArrayList<>();
+        Calendar yesterday = Calendar.getInstance();
+        listDates.add(yesterday);
+        List<Calendar> validDates = convertDatesToCalendars();
+        CalendarIndicator calendarIndicator = new CalendarIndicator(context, validDates);
+        calendarIndicator.initialize(context);
 
-        List<Calendar> validDates = convertDatesToCalendars(gbcImagesList);
-
-        CustomDateValidator customDateValidator = new CustomDateValidator(validDates);
         MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
+        builder.setDayViewDecorator(calendarIndicator);
 
-        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
-        constraintsBuilder.setValidator(customDateValidator);
-
-        builder.setCalendarConstraints(constraintsBuilder.build());
-        builder.setTitleText(context.getString(R.string.date_datepicker));
-//        builder.setTheme(R.style.MaterialCalendarTheme);
+        builder.setTheme(R.style.MaterialCalendarTheme);
         MaterialDatePicker<Long> materialDatePicker = builder.build();
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar selectedCalendar = Calendar.getInstance();
@@ -771,24 +767,21 @@ public class GalleryUtils {
 
         });
 
-
         AppCompatActivity appCompatActivity = (AppCompatActivity) context;
         materialDatePicker.show(appCompatActivity.getSupportFragmentManager(), "MATERIAL_DATE_PICKER_TAG");
     }
-    public static List<Calendar> convertDatesToCalendars(List<GbcImage> gbcImages) {
+
+    public static List<Calendar> convertDatesToCalendars() {
         List<Calendar> calendars = new ArrayList<>();
 
-        for (GbcImage gbcImage : gbcImages) {
+        for (GbcImage gbcImage : gbcImagesList) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(gbcImage.getCreationDate());
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
             calendars.add(calendar);
         }
         return calendars;
     }
+
     /**
      * To check the tags after deleting images
      */

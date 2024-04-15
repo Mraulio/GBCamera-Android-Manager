@@ -3,12 +3,12 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 
@@ -30,7 +30,7 @@ public class LoadBitmapCacheAsyncTask extends AsyncTask<Void, Void, Result> {
     //I could add a isCancelled flag
     @Override
     protected Result doInBackground(Void... voids) {
-        ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
+        ImageDataDao imageDataDao = StaticValues.db.imageDataDao();
         //foreach index
         for (int i : indexesToLoad) {
             GbcImage gbcImage = GalleryFragment.filteredGbcImages.get(i);

@@ -1,13 +1,12 @@
 package com.mraulio.gbcameramanager.ui.settings;
 
-import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
+import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
 import static com.mraulio.gbcameramanager.utils.Utils.backupDatabase;
 import static com.mraulio.gbcameramanager.utils.Utils.showDbBackups;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,9 +22,9 @@ import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +32,7 @@ import java.util.Locale;
 
 
 public class SettingsFragment extends Fragment {
-    SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+    SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
     private boolean userSelect = false;
     private boolean userSelectPage = false;
     private boolean userSelectLocale = false;
@@ -55,33 +54,33 @@ public class SettingsFragment extends Fragment {
         Button btnExportDB = view.findViewById(R.id.btnExportDB);
         Button btnRestoreDB = view.findViewById(R.id.btnRestoreDB);
 
-        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SETTINGS;
+        StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.SETTINGS;
 
-        cbPrint.setChecked(MainActivity.printingEnabled);
+        cbPrint.setChecked(StaticValues.printingEnabled);
         cbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     editor.putBoolean("print_enabled", true);
-                    MainActivity.printingEnabled = true;
+                    StaticValues.printingEnabled = true;
                 } else {
                     editor.putBoolean("print_enabled", false);
-                    MainActivity.printingEnabled = false;
+                    StaticValues.printingEnabled = false;
                 }
                 editor.apply();
             }
         });
 
-        cbPaperize.setChecked(MainActivity.showPaperizeButton);
+        cbPaperize.setChecked(StaticValues.showPaperizeButton);
         cbPaperize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     editor.putBoolean("show_paperize_button", true);
-                    MainActivity.showPaperizeButton = true;
+                    StaticValues.showPaperizeButton = true;
                 } else {
                     editor.putBoolean("show_paperize_button", false);
-                    MainActivity.showPaperizeButton = false;
+                    StaticValues.showPaperizeButton = false;
                 }
                 editor.apply();
             }
@@ -101,7 +100,7 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        if (MainActivity.exportPng) {
+        if (StaticValues.exportPng) {
             rbPng.setChecked(true);
             spinnerExport.setEnabled(true);
         } else {
@@ -109,15 +108,15 @@ public class SettingsFragment extends Fragment {
             spinnerExport.setEnabled(false);
         }
 
-        cbMagicCheck.setChecked(MainActivity.magicCheck);
+        cbMagicCheck.setChecked(StaticValues.magicCheck);
         cbMagicCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    MainActivity.magicCheck = true;
+                    StaticValues.magicCheck = true;
                     editor.putBoolean("magic_check", true);
                 } else {
-                    MainActivity.magicCheck = false;
+                    StaticValues.magicCheck = false;
                     editor.putBoolean("magic_check", false);
                 }
                 editor.apply();
@@ -127,7 +126,7 @@ public class SettingsFragment extends Fragment {
         rbPng.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.exportPng = true;
+                StaticValues.exportPng = true;
                 editor.putBoolean("export_as_png", true);
                 editor.apply();
                 spinnerExport.setEnabled(true);
@@ -136,7 +135,7 @@ public class SettingsFragment extends Fragment {
         rbTxt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.exportPng = false;
+                StaticValues.exportPng = false;
                 editor.putBoolean("export_as_png", false);
                 editor.apply();
                 spinnerExport.setEnabled(false);
@@ -164,13 +163,13 @@ public class SettingsFragment extends Fragment {
                 android.R.layout.simple_spinner_item, sizes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerExport.setAdapter(adapter);
-        spinnerExport.setSelection(sizesInteger.indexOf(MainActivity.exportSize));
+        spinnerExport.setSelection(sizesInteger.indexOf(StaticValues.exportSize));
 
         spinnerExport.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // I set the export size on the Main activity int as the selected one
-                MainActivity.exportSize = sizesInteger.get(position);
+                StaticValues.exportSize = sizesInteger.get(position);
                 editor.putInt("export_size", sizesInteger.get(position));
                 editor.apply();
             }
@@ -200,13 +199,13 @@ public class SettingsFragment extends Fragment {
                 android.R.layout.simple_spinner_item, sizesImages);
         adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerImages.setAdapter(adapterImages);
-        spinnerImages.setSelection(sizesIntegerImages.indexOf(MainActivity.imagesPage));
+        spinnerImages.setSelection(sizesIntegerImages.indexOf(StaticValues.imagesPage));
         spinnerImages.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (userSelectPage) {
                     // I set the export size on the Main activity int as the selected one
-                    MainActivity.imagesPage = sizesIntegerImages.get(position);
+                    StaticValues.imagesPage = sizesIntegerImages.get(position);
                     editor.putInt("images_per_page", sizesIntegerImages.get(position));
                     GalleryFragment.currentPage = 0;
                     editor.putInt("current_page", 0);
@@ -241,14 +240,14 @@ public class SettingsFragment extends Fragment {
         adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         spinnerLanguage.setAdapter(adapterLanguage);
-        spinnerLanguage.setSelection(langs.indexOf(MainActivity.languageCode));
+        spinnerLanguage.setSelection(langs.indexOf(StaticValues.languageCode));
         spinnerLanguage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (userSelect) {
                     // I set the export size on the Main activity int as the selected one
-                    MainActivity.languageCode = langs.get(position);
+                    StaticValues.languageCode = langs.get(position);
                     changeLanguage(langs.get(position));
                 } else {
                     userSelect = true; // Because the spinner executes an item selection on startup
@@ -273,14 +272,14 @@ public class SettingsFragment extends Fragment {
         adapterImages.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         spinnerLocale.setAdapter(adapterLocale);
-        spinnerLocale.setSelection(locales.indexOf(MainActivity.dateLocale));
+        spinnerLocale.setSelection(locales.indexOf(StaticValues.dateLocale));
         spinnerLocale.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (userSelectLocale) {
                     // I set the export size on the Main activity int as the selected one
-                    MainActivity.dateLocale = locales.get(position);
+                    StaticValues.dateLocale = locales.get(position);
                     editor.putString("date_locale", locales.get(position));
                     editor.apply();
                 } else {
@@ -294,16 +293,16 @@ public class SettingsFragment extends Fragment {
         });
 
 
-        cbRotation.setChecked(MainActivity.showRotationButton);
+        cbRotation.setChecked(StaticValues.showRotationButton);
         cbRotation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     editor.putBoolean("rotation_button", true);
-                    MainActivity.showRotationButton = true;
+                    StaticValues.showRotationButton = true;
                 } else {
                     editor.putBoolean("rotation_button", false);
-                    MainActivity.showRotationButton = false;
+                    StaticValues.showRotationButton = false;
                 }
                 editor.apply();
             }

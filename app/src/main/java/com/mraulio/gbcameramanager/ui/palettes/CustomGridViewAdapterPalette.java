@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 
-import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcPalette;
@@ -77,7 +77,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
             holder = (RecordHolder) row.getTag();
         }
 
-        if (showFavorite && data.get(position).getPaletteId().equals(MainActivity.defaultPaletteId)) {
+        if (showFavorite && data.get(position).getPaletteId().equals(StaticValues.defaultPaletteId)) {
             holder.starItem.setVisibility(View.VISIBLE);
         } else {
             holder.starItem.setVisibility(View.GONE);
@@ -163,10 +163,10 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
                 switch (item.getItemId()) {
                     case R.id.menu_default:
                         toast(context, "Default: " + paletteId);
-                        SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+                        SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
                         editor.putString("default_palette_id", paletteId);
                         editor.apply();
-                        MainActivity.defaultPaletteId = paletteId;
+                        StaticValues.defaultPaletteId = paletteId;
                         if (customGridViewAdapterPalette != null) {
                             customGridViewAdapterPalette.notifyDataSetChanged();
                         }

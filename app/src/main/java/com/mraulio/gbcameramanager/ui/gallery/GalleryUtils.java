@@ -1,16 +1,16 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
-import static com.mraulio.gbcameramanager.MainActivity.SORT_MODE.*;
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
-import static com.mraulio.gbcameramanager.MainActivity.dateFilter;
-import static com.mraulio.gbcameramanager.MainActivity.db;
-import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
-import static com.mraulio.gbcameramanager.MainActivity.filterByDate;
-import static com.mraulio.gbcameramanager.MainActivity.filterMonth;
-import static com.mraulio.gbcameramanager.MainActivity.filterYear;
-import static com.mraulio.gbcameramanager.MainActivity.sortDescending;
-import static com.mraulio.gbcameramanager.MainActivity.sortMode;
-import static com.mraulio.gbcameramanager.MainActivity.sortModeEnum;
+import static com.mraulio.gbcameramanager.utils.StaticValues.SORT_MODE.*;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateFilter;
+import static com.mraulio.gbcameramanager.utils.StaticValues.db;
+import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
+import static com.mraulio.gbcameramanager.utils.StaticValues.filterByDate;
+import static com.mraulio.gbcameramanager.utils.StaticValues.filterMonth;
+import static com.mraulio.gbcameramanager.utils.StaticValues.filterYear;
+import static com.mraulio.gbcameramanager.utils.StaticValues.sortDescending;
+import static com.mraulio.gbcameramanager.utils.StaticValues.sortMode;
+import static com.mraulio.gbcameramanager.utils.StaticValues.sortModeEnum;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.diskCache;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
@@ -64,13 +64,13 @@ import androidx.core.content.FileProvider;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.gson.Gson;
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.UnicodeExifInterface;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -108,7 +108,7 @@ public class GalleryUtils {
         }
 
         String fileNameBase = "gbcImage_";
-        String extension = MainActivity.exportPng ? ".png" : ".txt";
+        String extension = StaticValues.exportPng ? ".png" : ".txt";
         for (int i = 0; i < gbcImages.size(); i++) {
             GbcImage gbcImage = gbcImages.get(i);
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
@@ -126,7 +126,7 @@ public class GalleryUtils {
             }
 
             fileName += extension;
-            if (MainActivity.exportPng) {
+            if (StaticValues.exportPng) {
                 file = new File(Utils.IMAGES_FOLDER, fileName);
 
                 if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
@@ -145,7 +145,7 @@ public class GalleryUtils {
                 }
 
                 try (FileOutputStream out = new FileOutputStream(file)) {
-                    Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
+                    Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * StaticValues.exportSize, image.getHeight() * StaticValues.exportSize, false);
                     scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
                     out.flush();
 
@@ -218,10 +218,10 @@ public class GalleryUtils {
             }
             showNotification(context, file);
         }
-        if (MainActivity.exportPng) {
-            toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved) + MainActivity.exportSize);
+        if (StaticValues.exportPng) {
+            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved) + StaticValues.exportSize);
         } else
-            toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved_txt));
+            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved_txt));
     }
 
     public static Bitmap makeSquareImage(Bitmap image) {
@@ -293,7 +293,7 @@ public class GalleryUtils {
                 if (exportSquare) {
                     image = makeSquareImage(image);
                 }
-                image = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
+                image = Bitmap.createScaledBitmap(image, image.getWidth() * StaticValues.exportSize, image.getHeight() * StaticValues.exportSize, false);
                 File file = new File(context.getExternalCacheDir(), "shared_image_" + i + ".png");
                 fileOutputStream = new FileOutputStream(file);
                 image.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
@@ -407,7 +407,7 @@ public class GalleryUtils {
     }
 
     public static void sortImages(Context context, DisplayMetrics displayMetrics) {
-        SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+        SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
 
         LayoutInflater inflater = LayoutInflater.from(context);
         View dialogView = inflater.inflate(R.layout.sort_dialog, null);
@@ -448,7 +448,7 @@ public class GalleryUtils {
             public void onClick(View view) {
                 sortByDate(gbcImagesList, sortDescending);
                 sortMode = CREATION_DATE.name();
-                sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
+                sortModeEnum = StaticValues.SORT_MODE.valueOf(sortMode);
                 editor.putString("sort_by_date", CREATION_DATE.name());
                 editor.apply();
                 checkSorting(context);
@@ -461,7 +461,7 @@ public class GalleryUtils {
             public void onClick(View view) {
                 sortByTitle(gbcImagesList, sortDescending);
                 sortMode = IMPORT_DATE.name();
-                sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
+                sortModeEnum = StaticValues.SORT_MODE.valueOf(sortMode);
                 editor.putString("sort_by_date", IMPORT_DATE.name());
                 editor.apply();
                 checkSorting(context);
@@ -473,7 +473,7 @@ public class GalleryUtils {
             public void onClick(View view) {
                 sortByTitle(gbcImagesList, sortDescending);
                 sortMode = TITLE.name();
-                sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
+                sortModeEnum = StaticValues.SORT_MODE.valueOf(sortMode);
                 editor.putString("sort_by_date", TITLE.name());
                 editor.apply();
                 checkSorting(context);
@@ -685,9 +685,9 @@ public class GalleryUtils {
         btnAccept.setOnClickListener(v -> {
             selectedFilterTags = selectedTags;
             Gson gson = new Gson();
-            MainActivity.selectedTags = gson.toJson(selectedTags);
+            StaticValues.selectedTags = gson.toJson(selectedTags);
             hiddenFilterTags = hiddenTags;
-            MainActivity.hiddenTags = gson.toJson(hiddenTags);
+            StaticValues.hiddenTags = gson.toJson(hiddenTags);
             filterByDate = swFilterByDate.isChecked();
             saveTagsSet(selectedTags, false);
             saveTagsSet(hiddenTags, true);

@@ -1,6 +1,6 @@
 package com.mraulio.gbcameramanager.ui.frames;
 
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.encodeData;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
@@ -21,7 +21,6 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -42,7 +41,7 @@ import com.google.gson.Gson;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.ui.gallery.UpdateImageAsyncTask;
 import com.mraulio.gbcameramanager.ui.importFile.FrameImportDialogClass;
-import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.FrameDao;
@@ -85,8 +84,8 @@ public class FramesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_frames, container, false);
-        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.FRAMES;
-        MainActivity.fab.hide();
+        StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.FRAMES;
+        StaticValues.fab.hide();
         GridView gridView = view.findViewById(R.id.gridViewFrames);
         MainActivity.pressBack = false;
         Button btnExportFramesJson = view.findViewById(R.id.btnExportFramesJson);
@@ -310,7 +309,7 @@ public class FramesFragment extends Fragment {
                                 frameGroupsNames.remove(frameGroupId[0]);
 
                                 Thread thread = new Thread(() -> {
-                                    FrameDao frameDao = MainActivity.db.frameDao();
+                                    FrameDao frameDao = StaticValues.db.frameDao();
                                     GbcFrame frameWithFrameGroupNames = hashFrames.get("gbcam01");
                                     frameWithFrameGroupNames.setFrameGroupsNames(frameGroupsNames);
                                     frameDao.update(frameWithFrameGroupNames);
@@ -553,14 +552,14 @@ public class FramesFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            FrameDao frameDao = MainActivity.db.frameDao();
+            FrameDao frameDao = StaticValues.db.frameDao();
             frameDao.deleteItems(gbcFramesList);
 
             for (int i = 0; i < gbcFramesList.size(); i++) {
-                if (gbcFramesList.get(i).getFrameId().equals(MainActivity.defaultFrameId)){
-                    SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+                if (gbcFramesList.get(i).getFrameId().equals(StaticValues.defaultFrameId)){
+                    SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
                     editor.putString("default_frame_id", "gbcam01");
-                    MainActivity.defaultFrameId = "gbcam01";
+                    StaticValues.defaultFrameId = "gbcam01";
                     editor.apply();
                 }
                 String deletedFrameGroupId = gbcFramesList.get(i).getFrameId().replaceAll("^(\\D+).*", "$1");
@@ -703,7 +702,7 @@ public class FramesFragment extends Fragment {
                 holder.txtTitle.setBackgroundColor(selectedColor);
                 holder.imageItem.setBackgroundColor(selectedColor);
             }
-            if (showTextView && gbcFramesList.get(position).getFrameId().equals(MainActivity.defaultFrameId)) {
+            if (showTextView && gbcFramesList.get(position).getFrameId().equals(StaticValues.defaultFrameId)) {
                 holder.starItem.setVisibility(View.VISIBLE);
             } else {
                 holder.starItem.setVisibility(View.GONE);
@@ -796,10 +795,10 @@ public class FramesFragment extends Fragment {
                 switch (item.getItemId()) {
                     case R.id.menu_default:
                         toast(context, "Default: " + frameId);
-                        SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+                        SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
                         editor.putString("default_frame_id", frameId);
                         editor.apply();
-                        MainActivity.defaultFrameId = frameId;
+                        StaticValues.defaultFrameId = frameId;
                         if (customGridViewAdapterFrames != null) {
                             customGridViewAdapterFrames.notifyDataSetChanged();
                         }

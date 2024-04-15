@@ -60,6 +60,7 @@ import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.RomExtractor;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
@@ -215,7 +216,7 @@ public class ImportFragment extends Fragment {
         btnAddImages = view.findViewById(R.id.btnAddImages);
         btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
-        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.IMPORT;
+        StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.IMPORT;
 
         tvFileName = view.findViewById(R.id.tvFileName);
         gridViewImport = view.findViewById(R.id.gridViewImport);
@@ -483,13 +484,13 @@ public class ImportFragment extends Fragment {
             case SAV: {
                 isGoodSave = extractSavImages();
                 if (isGoodSave) {
-                    listActiveImages.add(new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount[0] - 1)));
-                    listActiveBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1)));
-                    lastSeenImage.add(importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount[0] - 1));
-                    lastSeenBitmap.add(importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1));
-                    listDeletedImages.add(new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount[0], importedImagesList.size())));
+                    listActiveImages.add(new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - StaticValues.deletedCount[0] - 1)));
+                    listActiveBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - StaticValues.deletedCount[0] - 1)));
+                    lastSeenImage.add(importedImagesList.get(importedImagesList.size() - StaticValues.deletedCount[0] - 1));
+                    lastSeenBitmap.add(importedImagesBitmaps.get(importedImagesBitmaps.size() - StaticValues.deletedCount[0] - 1));
+                    listDeletedImages.add(new ArrayList<>(importedImagesList.subList(importedImagesList.size() - StaticValues.deletedCount[0], importedImagesList.size())));
 
-                    listDeletedBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount[0], importedImagesBitmaps.size())));
+                    listDeletedBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - StaticValues.deletedCount[0], importedImagesBitmaps.size())));
                     listDeletedBitmapsRedStroke = new ArrayList<>();
                     listDeletedBitmapsRedStroke.add(new ArrayList<>());
 
@@ -698,7 +699,7 @@ public class ImportFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            PaletteDao paletteDao = MainActivity.db.paletteDao();
+            PaletteDao paletteDao = StaticValues.db.paletteDao();
             for (GbcPalette gbcPalette : gbcPalettesList) {
                 paletteDao.insert(gbcPalette);
             }
@@ -723,7 +724,7 @@ public class ImportFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            FrameDao frameDao = MainActivity.db.frameDao();
+            FrameDao frameDao = StaticValues.db.frameDao();
             for (GbcFrame gbcFrame : gbcFramesList) {
                 frameDao.insert(gbcFrame);
             }

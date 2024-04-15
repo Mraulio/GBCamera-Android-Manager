@@ -1,6 +1,6 @@
 package com.mraulio.gbcameramanager.gbxcart;
 
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.btnAddImages;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.btnDelSav;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment.cbDeleted;
@@ -13,7 +13,6 @@ import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsRea
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Process;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;

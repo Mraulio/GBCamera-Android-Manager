@@ -1,6 +1,6 @@
 package com.mraulio.gbcameramanager.utils;
 
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.Utils.MAIN_FOLDER;
 
 import android.app.AlertDialog;

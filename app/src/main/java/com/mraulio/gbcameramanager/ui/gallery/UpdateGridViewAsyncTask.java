@@ -8,11 +8,11 @@ import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.isChanging;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
         int newEndIndex = GalleryFragment.endIndex;
 
         List<String> currentPageHashes = new ArrayList<>();
-        ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
+        ImageDataDao imageDataDao = StaticValues.db.imageDataDao();
         //Loop for each gbcImage in a sublist in all gbcImages objects for the current page
         for (GbcImage gbcImage : GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex)) {
             //Add the hashcode to the list of current hashes

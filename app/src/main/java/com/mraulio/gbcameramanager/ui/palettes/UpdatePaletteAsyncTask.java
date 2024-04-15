@@ -2,9 +2,9 @@ package com.mraulio.gbcameramanager.ui.palettes;
 
 import android.os.AsyncTask;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 
 public class UpdatePaletteAsyncTask extends AsyncTask<Void, Void, Void>  {
     private GbcPalette gbcPalette;
@@ -16,7 +16,7 @@ public class UpdatePaletteAsyncTask extends AsyncTask<Void, Void, Void>  {
 
     @Override
     protected Void doInBackground(Void... voids) {
-        PaletteDao paletteDao = MainActivity.db.paletteDao();
+        PaletteDao paletteDao = StaticValues.db.paletteDao();
         paletteDao.update(gbcPalette);
         return null;
     }

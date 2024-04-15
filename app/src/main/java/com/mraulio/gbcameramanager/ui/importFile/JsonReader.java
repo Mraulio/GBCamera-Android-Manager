@@ -10,7 +10,7 @@ import android.graphics.Color;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -154,7 +154,7 @@ public class JsonReader {
                         } else {
                             gbcImage.setFrameId(frameId.toLowerCase());
                             if (!Utils.hashFrames.containsKey(frameId)) {
-                                gbcImage.setFrameId(MainActivity.defaultFrameId);
+                                gbcImage.setFrameId(StaticValues.defaultFrameId);
                             }
                         }
                     }

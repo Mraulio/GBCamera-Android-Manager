@@ -1,7 +1,7 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
-import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcPalettesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
@@ -44,6 +44,7 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.gallery.UpdateImageAsyncTask;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
@@ -83,7 +84,7 @@ public class PalettesFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_palettes, container, false);
         MainActivity.pressBack = false;
-        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.PALETTES;
+        StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.PALETTES;
 
         Button btnAdd = view.findViewById(R.id.btnAdd);
         Button btnExportPaletteJson = view.findViewById(R.id.btnExportPaletteJson);
@@ -156,10 +157,10 @@ public class PalettesFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             new SavePaletteAsyncTask(Utils.gbcPalettesList.get(position), false).execute();
-                            if (Utils.gbcPalettesList.get(position).getPaletteId().equals(MainActivity.defaultPaletteId)) {
-                                SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+                            if (Utils.gbcPalettesList.get(position).getPaletteId().equals(StaticValues.defaultPaletteId)) {
+                                SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
                                 editor.putString("default_palette_id", "bw");
-                                MainActivity.defaultPaletteId = "bw";
+                                StaticValues.defaultPaletteId = "bw";
                                 editor.apply();
                             }
                             String paletteToDelete = Utils.gbcPalettesList.get(position).getPaletteId();
@@ -240,7 +241,13 @@ public class PalettesFragment extends Fragment {
 
             JSONArray paletteArr = new JSONArray();
             for (int color : palette.getPaletteColorsInt()) {
-                String hexColor = "#" + Integer.toHexString(color).substring(2);
+                String hexColor;
+                if (color == 0){//For total transparency color
+                    hexColor = "#000000";
+                }else{
+                    hexColor = "#" + Integer.toHexString(color).substring(2);
+                }
+
                 paletteArr.put(hexColor);
             }
             paletteObj.put("palette", paletteArr);

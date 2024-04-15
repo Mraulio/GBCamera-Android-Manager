@@ -7,15 +7,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Set;
 
 public class ImageConversionUtils {
@@ -84,7 +82,7 @@ public class ImageConversionUtils {
                         gbcImage.setImageMetadata(metadata);
                         gbcImage.getTags().add("__filter:transformed__");
                     }
-                    Bitmap framed = Utils.hashFrames.get(MainActivity.defaultFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
+                    Bitmap framed = Utils.hashFrames.get(StaticValues.defaultFrameId).getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
                     try {
                         byte[] imageBytes = Utils.encodeImage(framed, "bw");
                         framed = paletteChanger("bw", imageBytes, false);
@@ -92,7 +90,7 @@ public class ImageConversionUtils {
                         e.printStackTrace();
                     }
                     Canvas canvas = new Canvas(framed);
-                    canvas.drawBitmap(framelessBitmap, 16, Utils.hashFrames.get(MainActivity.defaultFrameId).isWildFrame() ? 40 : 16, null);
+                    canvas.drawBitmap(framelessBitmap, 16, Utils.hashFrames.get(StaticValues.defaultFrameId).isWildFrame() ? 40 : 16, null);
                     return framed;
 
                 } else {

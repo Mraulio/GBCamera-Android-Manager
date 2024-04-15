@@ -1,6 +1,6 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
-import static com.mraulio.gbcameramanager.MainActivity.db;
+import static com.mraulio.gbcameramanager.utils.StaticValues.db;
 import static com.mraulio.gbcameramanager.ui.frames.FramesFragment.customGridViewAdapterFrames;
 import static com.mraulio.gbcameramanager.ui.frames.FramesFragment.frameGroupIds;
 import static com.mraulio.gbcameramanager.ui.frames.FramesFragment.reloadFrameGroupsSpinner;

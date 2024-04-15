@@ -2,8 +2,8 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
-import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
@@ -38,9 +38,9 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.TouchImageView;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -623,7 +623,7 @@ public class BigImageDialog {
                 if (checkIfTagsHide(selectedFilterTags, removedTags)) {
                     selectedImages.clear();
                     showEditMenuButton = false;
-                    MainActivity.fab.hide();
+                    StaticValues.fab.hide();
                     selectionMode[0] = false;
                     activity.invalidateOptionsMenu();
                     previousDialog.dismiss();

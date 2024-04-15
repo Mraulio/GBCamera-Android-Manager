@@ -246,4 +246,11 @@
     <string name="load_saving_dup">Guardando duplicadas</string>
     <string name="load_cache">Cargando caché</string>
     <string name="load_saving_images">Guardando imágenes</string>
+
+    <string name="load_extracting_images">Extrayendo imágenes</string>
+    <string name="menu_default">Por defecto</string>
+    <string name="btn_add_new_palette">Añadir paleta</string>
+    <string name="month">Mes</string>
+    <string name="year">Año</string>
+    <string name="export_metadata">Exportar metadata en PNG</string>
 </resources>

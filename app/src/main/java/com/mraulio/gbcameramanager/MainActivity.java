@@ -6,6 +6,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,11 +17,13 @@ import android.graphics.Color;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
+import static android.os.Build.VERSION.SDK_INT;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -235,10 +238,15 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-        /**
-         * I ask for storage permissions
-         */
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+        requestPermissions();
+
+        Utils.makeDirs();//If permissions granted, create the folders(Keep this for the updated versions with already permissions, to create the frame json folder)
+        createNotificationChannel(getBaseContext());
+    }
+
+    private void requestPermissions(){
+        if ( SDK_INT <= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
             // Ask for permission
@@ -246,10 +254,15 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         }
-        Utils.makeDirs();//If permissions granted, create the folders(Keep this for the updated versions with already permissions, to create the frame json folder)
-        createNotificationChannel(getBaseContext());
+        if (SDK_INT == Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            // Ask for permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    1);
+        }
     }
-
     private void openingFromIntent(NavController navController) {
 
         if (openedFromFile) {

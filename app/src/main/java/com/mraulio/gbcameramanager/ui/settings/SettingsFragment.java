@@ -49,6 +49,7 @@ public class SettingsFragment extends Fragment {
         CheckBox cbPrint = view.findViewById(R.id.cbPrint);
         CheckBox cbPaperize = view.findViewById(R.id.cbPaperize);
         CheckBox cbMagicCheck = view.findViewById(R.id.cbMagic);
+        CheckBox cbExportMetadata = view.findViewById(R.id.cb_export_metadata);
         CheckBox cbRotation = view.findViewById(R.id.cbRotation);
         CheckBox cbSquare = view.findViewById(R.id.cbSquare);
         Button btnExportDB = view.findViewById(R.id.btnExportDB);
@@ -56,6 +57,20 @@ public class SettingsFragment extends Fragment {
 
         StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.SETTINGS;
 
+        cbExportMetadata.setChecked(StaticValues.exportMetadata);
+        cbExportMetadata.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("export_metadata", true);
+                    StaticValues.exportMetadata = true;
+                } else {
+                    editor.putBoolean("export_metadata", false);
+                    StaticValues.exportMetadata = false;
+                }
+                editor.apply();
+            }
+        });
         cbPrint.setChecked(StaticValues.printingEnabled);
         cbPrint.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

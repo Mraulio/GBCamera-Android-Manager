@@ -149,41 +149,43 @@ public class GalleryUtils {
                     scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
                     out.flush();
 
-                    //Create the metadata text
-                    StringBuilder stringBuilder = new StringBuilder();
-                    LinkedHashMap lhm = gbcImage.getImageMetadata();
-                    stringBuilder.append("Created in GBCamera Android Manager\n");
-                    stringBuilder.append("Palette: " + hashPalettes.get(gbcImage.getPaletteId()).getPaletteName() + " (" + gbcImage.getPaletteId() + ")\n");
-                    if (gbcImage.getFrameId() != null)
-                        stringBuilder.append("Frame: " + hashFrames.get(gbcImage.getFrameId()).getFrameName() + " (" + gbcImage.getFrameId() + ")\n");
-
-                    SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + " HH:mm:ss:SSS");
-                    stringBuilder.append("Creation date: " + sdf.format(gbcImage.getCreationDate()) + "\n");
-
-                    if (lhm != null) { //Last seen images don't have metadata
-                        for (Object key : lhm.keySet()) {
-                            if (key.equals("frameIndex")) continue;
-                            String metadata = metadataTexts.get(key);
-                            String value = (String) lhm.get(key);
-                            if (metadata == null) {
-                                metadata = (String) key;
-                            }
-                            stringBuilder.append(metadata).append(": ").append(value).append("\n");
-                            if (key.equals("isCopy")) stringBuilder.append("\n");
-                        }
-                    }
-
                     mediaScanner(file, context);
 
-                    String metadataComment = stringBuilder.toString();
+                    if (StaticValues.exportMetadata) {
+                        //Create the metadata text
+                        StringBuilder stringBuilder = new StringBuilder();
+                        LinkedHashMap lhm = gbcImage.getImageMetadata();
+                        stringBuilder.append("Created in GBCamera Android Manager\n");
+                        stringBuilder.append("Palette: " + hashPalettes.get(gbcImage.getPaletteId()).getPaletteName() + " (" + gbcImage.getPaletteId() + ")\n");
+                        if (gbcImage.getFrameId() != null)
+                            stringBuilder.append("Frame: " + hashFrames.get(gbcImage.getFrameId()).getFrameName() + " (" + gbcImage.getFrameId() + ")\n");
 
-                    try {
-                        UnicodeExifInterface unicodeExifInterface = new UnicodeExifInterface(file.getAbsolutePath());
-                        unicodeExifInterface.setAttribute(UnicodeExifInterface.TAG_USER_COMMENT, metadataComment);
+                        SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + " HH:mm:ss:SSS");
+                        stringBuilder.append("Creation date: " + sdf.format(gbcImage.getCreationDate()) + "\n");
 
-                        unicodeExifInterface.saveAttributes();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                        if (lhm != null) { //Last seen images don't have metadata
+                            for (Object key : lhm.keySet()) {
+                                if (key.equals("frameIndex")) continue;
+                                String metadata = metadataTexts.get(key);
+                                String value = (String) lhm.get(key);
+                                if (metadata == null) {
+                                    metadata = (String) key;
+                                }
+                                stringBuilder.append(metadata).append(": ").append(value).append("\n");
+                                if (key.equals("isCopy")) stringBuilder.append("\n");
+                            }
+                        }
+
+                        String metadataComment = stringBuilder.toString();
+
+                        try {
+                            UnicodeExifInterface unicodeExifInterface = new UnicodeExifInterface(file.getAbsolutePath());
+                            unicodeExifInterface.setAttribute(UnicodeExifInterface.TAG_USER_COMMENT, metadataComment);
+
+                            unicodeExifInterface.saveAttributes();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
 
                 } catch (IOException e) {
@@ -739,7 +741,6 @@ public class GalleryUtils {
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(dateStartString);
-
 
         return stringBuilder.toString();
     }

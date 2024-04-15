@@ -37,6 +37,7 @@ public class StaticValues {
     public static SORT_MODE sortModeEnum = SORT_MODE.CREATION_DATE;
     public static int[] deletedCount = new int[7];
     public static boolean showEditMenuButton = false;
+    public static boolean exportMetadata = false;
 
     public enum CURRENT_FRAGMENT {
         GALLERY,

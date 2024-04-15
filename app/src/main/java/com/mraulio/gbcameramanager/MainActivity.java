@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         StaticValues.defaultPaletteId = StaticValues.sharedPreferences.getString("default_palette_id","bw");
         StaticValues.defaultFrameId = StaticValues.sharedPreferences.getString("default_frame_id","gbcam01");
         StaticValues.dateLocale = StaticValues.sharedPreferences.getString("date_locale", "yyyy-MM-dd");
+        StaticValues.exportMetadata = StaticValues.sharedPreferences.getBoolean("export_metadata", false);
 
         StaticValues.filterMonth = StaticValues.sharedPreferences.getBoolean("date_filter_month", false);
         StaticValues.filterYear = StaticValues.sharedPreferences.getBoolean("date_filter_year", false);

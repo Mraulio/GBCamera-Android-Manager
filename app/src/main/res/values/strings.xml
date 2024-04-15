@@ -251,5 +251,6 @@
     <string name="btn_add_new_palette">Add new palette</string>
     <string name="month">Month</string>
     <string name="year">Year</string>
+    <string name="export_metadata">Export metadata on PNG</string>
 
 </resources>

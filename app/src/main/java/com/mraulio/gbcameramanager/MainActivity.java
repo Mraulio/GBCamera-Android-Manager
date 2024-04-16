@@ -119,15 +119,24 @@ public class MainActivity extends AppCompatActivity {
         GalleryFragment.currentPage = StaticValues.sharedPreferences.getInt("current_page", 0);
         //To get the locale on the first startup and set the def value
         Resources resources = getResources();
-        Configuration configuration = resources.getConfiguration();
         LocaleList locales = null;
         Locale currentLocale = null;
+
+        Configuration configuration = resources.getConfiguration();
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             locales = configuration.getLocales();
             currentLocale = locales.get(0);
         } else {
             //For SDK 23 or lower
             currentLocale = configuration.locale;
+        }
+
+        if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
+                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
+            StaticValues.languageCode = "en";
+        } else {
+            StaticValues.languageCode = currentLocale.getLanguage();
         }
 
         String currentVersion = BuildConfig.VERSION_NAME;
@@ -138,13 +147,6 @@ public class MainActivity extends AppCompatActivity {
             // Update version name for future comparisons
             editor.putString("previous_version", currentVersion);
             editor.apply();
-        }
-
-        if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
-                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
-            StaticValues.languageCode = "en";
-        } else {
-            StaticValues.languageCode = currentLocale.getLanguage();
         }
 
         StaticValues.languageCode = StaticValues.sharedPreferences.getString("language", StaticValues.languageCode);

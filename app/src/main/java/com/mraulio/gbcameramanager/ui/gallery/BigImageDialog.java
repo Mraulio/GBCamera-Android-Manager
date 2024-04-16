@@ -136,9 +136,9 @@ public class BigImageDialog {
             if (tag.equals("__filter:favourite__")) {
                 tag = "Favourite \u2764\ufe0f";
             }else if (tag.equals("__filter:duplicated__")) {
-                tag = "Duplicated \uD83D\uDC11";
+                continue; // Not adding this tags, as they are non removable
             } else if (tag.equals("__filter:transformed__")) {
-                tag = "Transformed \uD83D\uDD04";
+                continue;
             }
             availableTotalTagsAutoComplete.add(tag);
         }
@@ -164,7 +164,7 @@ public class BigImageDialog {
 
         TextView tvCreationDate = dialog.findViewById(R.id.tvMetadata);
         StringBuilder stringBuilder = new StringBuilder();
-        String loc = "";
+        String loc;
         if (dateLocale.equals("yyyy-MM-dd")){
             loc = "dd/MM/yyyy";
         }else {

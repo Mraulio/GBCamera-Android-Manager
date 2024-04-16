@@ -1130,6 +1130,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             filteredGbcImages.clear();
             for (GbcImage gbcImageToFilter : Utils.gbcImagesList) {
                 boolean containsAllTags = true;
+
+                //Check the date filter
+                if (filterByDate) {
+                    containsAllTags = checkImageDateFilter(gbcImageToFilter);
+                }
+
                 for (String tag : selectedFilterTags) {
                     if (!gbcImageToFilter.getTags().contains(tag)) {
                         containsAllTags = false;
@@ -1143,10 +1149,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     }
                 }
 
-                //Check the date filter
-                if (filterByDate) {
-                    containsAllTags = checkImageDateFilter(gbcImageToFilter);
-                }
                 if (containsAllTags) {
                     filteredGbcImages.add(gbcImageToFilter);
                 }

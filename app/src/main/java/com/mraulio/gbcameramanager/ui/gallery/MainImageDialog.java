@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectionMode;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
@@ -906,8 +907,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                             updateGridView();
                         }
                     });
-                    if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains(FILTER_FAVOURITE)) {
-
+                    if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains(FILTER_SUPER_FAVOURITE)) {
+                        imageView.setBackgroundColor(context.getColor(R.color.star_color));
+                    } else if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains(FILTER_FAVOURITE)) {
                         imageView.setBackgroundColor(context.getColor(R.color.favorite));
                     }
                     if (filteredGbcImages.get(globalImageIndex[0]).isLockFrame()) {
@@ -1026,6 +1028,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                     showEditMenuButton = false;
                                     StaticValues.fab.hide();
                                     multiEdition = false;
+                                    selectionMode[0] = false;
                                     activity.invalidateOptionsMenu();
                                 }
 
@@ -1252,7 +1255,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
 
         if (gbcImage.getTags().contains(FILTER_SUPER_FAVOURITE)) {
-            imageView.setBackgroundColor(context.getColor(R.color.favorite));
+            imageView.setBackgroundColor(context.getColor(R.color.star_color));
         } else if (gbcImage.getTags().contains(FILTER_FAVOURITE)) {
             imageView.setBackgroundColor(context.getColor(R.color.favorite));
         } else {

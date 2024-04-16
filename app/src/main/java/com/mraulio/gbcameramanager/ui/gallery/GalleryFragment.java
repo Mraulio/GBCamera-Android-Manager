@@ -240,7 +240,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 if (!selectionMode[0]) {
                     MainImageDialog mainImageDialog = new MainImageDialog(selectionMode[0], gridView, keepFrame, lastPage, position,
                             filteredGbcImages, lastSeenGalleryImage, getContext(), displayMetrics, showPalettes, getActivity(),

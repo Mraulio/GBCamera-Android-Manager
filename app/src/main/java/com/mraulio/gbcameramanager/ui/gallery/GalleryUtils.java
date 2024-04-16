@@ -612,10 +612,10 @@ public class GalleryUtils {
         HashSet<String> hiddenTags = new HashSet<>(hiddenFilterTags);
 
         LinkedHashSet newTagsSetWithTopFavorite = new LinkedHashSet();
-        newTagsSetWithTopFavorite.add(FILTER_FAVOURITE); //adding it in case it doesn't exist, so it appears at the top with the comparator
         if (hashTags.contains(FILTER_SUPER_FAVOURITE)) {
             newTagsSetWithTopFavorite.add(FILTER_SUPER_FAVOURITE);
         }
+        newTagsSetWithTopFavorite.add(FILTER_FAVOURITE); //adding it in case it doesn't exist, so it appears at the top with the comparator
         if (hashTags.contains(FILTER_DUPLICATED)) {
             newTagsSetWithTopFavorite.add(FILTER_DUPLICATED);
         }

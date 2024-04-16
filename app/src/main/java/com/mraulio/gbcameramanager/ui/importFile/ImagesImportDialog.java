@@ -155,10 +155,10 @@ public class ImagesImportDialog {
         List<String> showingTags = new ArrayList<>();
 
         for (String tag : availableTotalTags) {
-            if (tag.equals(FILTER_FAVOURITE)) {
-                tag = TAG_FAVOURITE;
-            } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
+            if (tag.equals(FILTER_SUPER_FAVOURITE)) {
                 tag = TAG_SUPER_FAVOURITE;
+            } else if (tag.equals(FILTER_FAVOURITE)) {
+                tag = TAG_FAVOURITE;
                 ; // Not adding this tags, as they are non removable
             } else if (tag.equals(FILTER_DUPLICATED)) {
                 continue; // Not adding this tags, as they are non removable

@@ -594,7 +594,7 @@ public class GalleryUtils {
         btnCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showDatePicker(context, btnCalendar, date, swMonth.isChecked(), swYear.isChecked());
+                showDatePicker(context, btnCalendar, date, swMonth.isChecked(), swYear.isChecked(), swFilterByDate.isChecked());
             }
         });
         btnCalendar.setText(buildDateString(filterMonth, filterYear, dateFilter));
@@ -745,7 +745,7 @@ public class GalleryUtils {
         return stringBuilder.toString();
     }
 
-    public static void showDatePicker(Context context, Button btnCalendar, Date date, boolean month, boolean year) {
+    public static void showDatePicker(Context context, Button btnCalendar, Date date, boolean month, boolean year, boolean filterByDate) {
 
         List<Calendar> listDates = new ArrayList<>();
         Calendar yesterday = Calendar.getInstance();
@@ -755,10 +755,17 @@ public class GalleryUtils {
         calendarIndicator.initialize(context);
 
         MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
-        builder.setDayViewDecorator(calendarIndicator);
 
+        builder.setDayViewDecorator(calendarIndicator);
         builder.setTheme(R.style.MaterialCalendarTheme);
-        MaterialDatePicker<Long> materialDatePicker = builder.build();
+
+        Calendar initialCalendar = Calendar.getInstance();
+        if (filterByDate) {
+            initialCalendar.setTime(date);
+        }
+
+        MaterialDatePicker<Long> materialDatePicker = builder.setSelection(initialCalendar.getTimeInMillis()).build();
+
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar selectedCalendar = Calendar.getInstance();
             selectedCalendar.setTimeInMillis(selection);

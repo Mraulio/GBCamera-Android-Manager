@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="10dp"
+    android:paddingHorizontal="10dp"
     tools:context=".ui.gallery.GalleryFragment">
 
     <LinearLayout
@@ -19,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
             android:layout_marginEnd="8dp"
             android:autoSizeMaxTextSize="40sp"
             android:autoSizeMinTextSize="10sp"
@@ -31,10 +33,9 @@
         <GridView
             android:id="@+id/gridView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:horizontalSpacing="10dp"
             android:numColumns="3"
-            android:scrollbars="horizontal"
             android:stretchMode="columnWidth"
             android:verticalSpacing="10dp" />
     </LinearLayout>

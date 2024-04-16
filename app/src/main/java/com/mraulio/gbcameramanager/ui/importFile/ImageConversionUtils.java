@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_TRANSFORMED;
 import static com.mraulio.gbcameramanager.utils.Utils.hashPalettes;
 
 import android.graphics.Bitmap;
@@ -35,7 +36,7 @@ public class ImageConversionUtils {
                     LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                     metadata.put("Type", "Transformed");
                     gbcImage.setImageMetadata(metadata);
-                    gbcImage.getTags().add("__filter:transformed__");
+                    gbcImage.getTags().add(FILTER_TRANSFORMED);
                 }
             }
             return originalBitmap;
@@ -54,7 +55,7 @@ public class ImageConversionUtils {
                         LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                         metadata.put("Type", "Transformed");
                         gbcImage.setImageMetadata(metadata);
-                        gbcImage.getTags().add("__filter:transformed__");
+                        gbcImage.getTags().add(FILTER_TRANSFORMED);
                     }
                 }
                 return scaledBitmap;
@@ -95,7 +96,7 @@ public class ImageConversionUtils {
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                             metadata.put("Type", "Transformed");
                             gbcImage.setImageMetadata(metadata);
-                            gbcImage.getTags().add("__filter:transformed__");
+                            gbcImage.getTags().add(FILTER_TRANSFORMED);
                         }
                     }
 
@@ -139,7 +140,7 @@ public class ImageConversionUtils {
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                             metadata.put("Type", "Transformed");
                             gbcImage.setImageMetadata(metadata);
-                            gbcImage.getTags().add("__filter:transformed__");
+                            gbcImage.getTags().add(FILTER_TRANSFORMED);
                         }
                     }
 

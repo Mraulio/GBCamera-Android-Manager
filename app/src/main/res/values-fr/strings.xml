@@ -120,7 +120,7 @@
     <string name="select_minimum_toast">Sélectionner au moins deux images</string>
     <string name="unselect_all_toast">Dé-sélectionner tout avant application du filtre</string>
     <string name="delete_all_title">Effacer les images sélectionnées ?</string>
-    <string name="no_selected">Pas d\'image sélectionnée</string>
+    <string name="no_selected">Pas d\`image sélectionnée</string>
     <string name="json_backup_saved">JSON sauvegardé !</string>
     <string name="page_selector_dialog">Sélectionner page</string>
     <string name="hdr_exception">Toutes les images doivent être de taille identique</string>
@@ -134,14 +134,14 @@
     <string name="analyzing">Analyse en cours, veuillez patienter...</string>
     <string name="done_analyzing">Analyse terminée!</string>
 
-    <string name="check_magic">Vérifier la validité du fichier .sav lors de l\'importation/extraction</string>
+    <string name="check_magic">Vérifier la validité du fichier .sav lors de l\`importation/extraction</string>
     <string name="delete_photo_folder_dialog">Supprimer le dossier rom Photo?</string>
     <string name="add_as_frame">Ajouter comme bordure</string>
     <string name="rotation_button">Bouton Afficher la rotation</string>
     <string name="frame_name">Définir le nom du bordure</string>
-    <string name="cant_add_frame">Impossible d\'ajouter cette image en tant que bordure</string>
+    <string name="cant_add_frame">Impossible d\`ajouter cette image en tant que bordure</string>
     <string name="no_empty_frame_name">Le Id ne doit pas être vide</string>
-    <string name="no_spaces_frame_name">Le nom ne doit pas contenir d\'espaces</string>
+    <string name="no_spaces_frame_name">Le nom ne doit pas contenir d\`espaces</string>
     <string name="frame_name_exists">Ce nom de bordure existe déjà</string>
     <string name="no_valid_image_file">Fichier image non valide</string>
 
@@ -155,16 +155,16 @@
 
     <string name="collage">Collage</string>
 
-    <string name="collage_too_many_images">Trop d\'images sélectionnées. Le collage échouera.</string>
-    <string name="square_download">Exporter l\'image carrée</string>
+    <string name="collage_too_many_images">Trop d\`images sélectionnées. Le collage échouera.</string>
+    <string name="square_download">Exporter l\`image carrée</string>
 
     <string name="toast_frames_json">Bordures Json sauvegardés.</string>
-    <string name="import_valid_images">Veuillez sélectionner uniquement des formats d\'image valides (.jpg, .jpeg, .png, .bmp).</string>
+    <string name="import_valid_images">Veuillez sélectionner uniquement des formats d\`image valides (.jpg, .jpeg, .png, .bmp).</string>
     <string name="no_filtered_images">Aucune image filtrée disponible</string>
     <string name="tags_dialog_title">Filtrer les tags</string>
     <string name="tags_dialog_clear">Effacer</string>
     <string name="sort_by_date">Par date de création</string>
-    <string name="sort_by_import_date">Par date d\'importation</string>
+    <string name="sort_by_import_date">Par date d\`importation</string>
 
     <string name="sort_by_title">Par titre</string>
     <string name="sort_ascending">Croissant</string>
@@ -172,7 +172,7 @@
 
     <string name="rb_edit_tags">Tags</string>
     <string name="rb_misc">Divers</string>
-    <string name="btn_update_image">Mettre à jour l\'image</string>
+    <string name="btn_update_image">Mettre à jour l\`image</string>
     <string name="et_write_tag">Écrire un tag:\u0020</string>
 
     <string name="menu_filter">Filtrer par tag</string>
@@ -192,8 +192,8 @@
     <string name="toast_backup_db">Sauvegarde de la base de données terminée</string>
     <string name="toast_restore_db">Restauration de la base de données terminée</string>
     <string name="dialog_restore_db_title">Sélectionnez la base de données à restaurer</string>
-    <string name="dialog_confirm_restore_db">Restaurer une base de données réinitialisera tous les paramètres.\nIl est recommandé de sauvegarder la base de données et d\'exporter en Json.\nL'application sera réinitialisée.\nÊtes-vous sûr ? </string>
-    <string name="as_imported_frame">Tel qu\'importé</string>
+    <string name="dialog_confirm_restore_db">Restaurer une base de données réinitialisera tous les paramètres.\nIl est recommandé de sauvegarder la base de données et d\`exporter en Json.\nL`application sera réinitialisée.\nÊtes-vous sûr ? </string>
+    <string name="as_imported_frame">Tel qu\`importé</string>
     <string name="btn_export_current_framegroup">Exporter le groupe</string>
     <string name="btn_edit_current_framegroup">Renommer le groupe</string>
     <string name="btn_edit_delete_framegroup">Supprimer le groupe</string>
@@ -204,7 +204,7 @@
     <string name="cant_edit_base">Impossible de modifier un bordure de base</string>
     <string name="btn_edit_frame">Modifier le bordure</string>
     <string name="sp_new_frame_group">Nouveau groupe de bordures</string>
-    <string name="et_palette_id">*Définir l\'ID de la palette*</string>
+    <string name="et_palette_id">*Définir l\`ID de la palette*</string>
     <string name="et_frame_group_id">ID du groupe de bordures</string>
     <string name="btn_realod_anim">Recharger</string>
     <string name="toast_first_image">Ceci est la première image</string>
@@ -234,6 +234,5 @@
     <string name="year">Année</string>
     <string name="export_metadata">Exporter les métadonnées en PNG</string>
     <string name="load_paperizing">Paperizing...</string>
-
 
 </resources>

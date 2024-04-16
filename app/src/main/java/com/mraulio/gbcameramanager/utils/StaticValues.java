@@ -54,4 +54,16 @@ public class StaticValues {
         IMPORT_DATE,
         TITLE
     }
+
+    public static final String FILTER_FAVOURITE = "__filter:favourite__";
+    public static final String FILTER_SUPER_FAVOURITE = "__filter:superfav__";
+    public static final String FILTER_DUPLICATED = "__filter:duplicated__";
+    public static final String FILTER_TRANSFORMED = "__filter:transformed__";
+
+    public static final String TAG_FAVOURITE = "Favourite \u2764\ufe0f";
+    public static final String TAG_SUPER_FAVOURITE = "Superfav \u2B50\ufe0f";
+    public static final String TAG_DUPLICATED = "Duplicated \uD83D\uDC11";
+    public static final String TAG_TRANSFORMED = "Transformed \uD83D\uDD04";
+
+
 }

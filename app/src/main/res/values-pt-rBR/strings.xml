@@ -247,12 +247,12 @@
     <string name="load_cache">Carregando cache</string>
     <string name="load_saving_images">Salvando imagens</string>
 
-
     <string name="load_extracting_images">Extraindo imagens</string>
     <string name="menu_default">Tornar padrão</string>
     <string name="btn_add_new_palette">Adicionar nova paleta</string>
-    <string name="date_datepicker">Data</string>
     <string name="month">Mês</string>
     <string name="year">Ano</string>
+    <string name="export_metadata">Exportar metadados do PNG</string>
+    <string name="load_paperizing">Paperizing...</string>
 
 </resources>

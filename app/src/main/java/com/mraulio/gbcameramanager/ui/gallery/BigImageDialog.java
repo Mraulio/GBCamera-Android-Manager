@@ -2,6 +2,14 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_DUPLICATED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_TRANSFORMED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_DUPLICATED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_SUPER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_TRANSFORMED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
@@ -133,16 +141,19 @@ public class BigImageDialog {
         List<String> availableTotalTagsAutoComplete = new ArrayList<>();
 
         for (String tag : availableTotalTags) {
-            if (tag.equals("__filter:favourite__")) {
-                tag = "Favourite \u2764\ufe0f";
-            }else if (tag.equals("__filter:duplicated__")) {
+            if (tag.equals(FILTER_FAVOURITE)) {
+                tag = TAG_FAVOURITE;
+            } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
+                tag = TAG_SUPER_FAVOURITE;
+                ; // Not adding this tags, as they are non removable
+            } else if (tag.equals(FILTER_DUPLICATED)) {
                 continue; // Not adding this tags, as they are non removable
-            } else if (tag.equals("__filter:transformed__")) {
+            } else if (tag.equals(FILTER_TRANSFORMED)) {
                 continue;
             }
             availableTotalTagsAutoComplete.add(tag);
         }
-        availableTotalTagsSpinner.add("~ "+context.getString(R.string.tags_dialog_title)+" ~");
+        availableTotalTagsSpinner.add("~ " + context.getString(R.string.tags_dialog_title) + " ~");
         availableTotalTagsSpinner.addAll(availableTotalTagsAutoComplete);
 
         ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(context,
@@ -165,12 +176,12 @@ public class BigImageDialog {
         TextView tvCreationDate = dialog.findViewById(R.id.tvMetadata);
         StringBuilder stringBuilder = new StringBuilder();
         String loc;
-        if (dateLocale.equals("yyyy-MM-dd")){
+        if (dateLocale.equals("yyyy-MM-dd")) {
             loc = "dd/MM/yyyy";
-        }else {
+        } else {
             loc = "MM/dd/yyyy";
         }
-        SimpleDateFormat sdf = new SimpleDateFormat(loc+" HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat(loc + " HH:mm:ss");
 
         LinkedHashMap lhm = filteredGbcImages.get(globalImageIndex).getImageMetadata();
         stringBuilder.append(sdf.format(filteredGbcImages.get(globalImageIndex).getCreationDate()).toString() + "\n");
@@ -250,12 +261,14 @@ public class BigImageDialog {
                 String newTag = autoCAddTag.getText().toString().trim();
                 if (newTag.isEmpty())
                     return;
-                if (newTag.equals("Favourite \u2764\ufe0f")) {
-                    newTag = "__filter:favourite__";//Reverse the tag
-                }else if (newTag.equals("Duplicated \uD83D\uDC11")) {
-                    newTag = "__filter:duplicated__";
-                } else if (newTag.equals("Transformed \uD83D\uDD04")) {
-                    newTag = "__filter:transformed__";
+                if (newTag.equals(TAG_FAVOURITE)) {
+                    newTag = FILTER_FAVOURITE;//Reverse the tag
+                } else if (newTag.equals(TAG_SUPER_FAVOURITE)) {
+                    newTag = FILTER_SUPER_FAVOURITE;
+                } else if (newTag.equals(TAG_DUPLICATED)) {
+                    newTag = FILTER_DUPLICATED;
+                } else if (newTag.equals(TAG_TRANSFORMED)) {
+                    newTag = FILTER_TRANSFORMED;
                 }
                 if (!tempTags.contains(newTag)) {
                     //Generate dynamically new checkboxes
@@ -286,12 +299,14 @@ public class BigImageDialog {
                     return;
                 }
                 String selectedTag = adapter.getItem(position);
-                if (selectedTag.equals("Favourite \u2764\ufe0f")) {
-                    selectedTag = "__filter:favourite__";//Reverse the tag
-                }else if (selectedTag.equals("Duplicated \uD83D\uDC11")) {
-                    selectedTag = "__filter:duplicated__";
-                } else if (selectedTag.equals("Transformed \uD83D\uDD04")) {
-                    selectedTag = "__filter:transformed__";
+                if (selectedTag.equals(TAG_FAVOURITE)) {
+                    selectedTag = FILTER_FAVOURITE;//Reverse the tag
+                } else if (selectedTag.equals(TAG_SUPER_FAVOURITE)) {
+                    selectedTag = FILTER_SUPER_FAVOURITE;
+                } else if (selectedTag.equals(TAG_DUPLICATED)) {
+                    selectedTag = FILTER_DUPLICATED;
+                } else if (selectedTag.equals(TAG_TRANSFORMED)) {
+                    selectedTag = FILTER_TRANSFORMED;
                 }
                 if (!tempTags.contains(selectedTag)) {
                     //Generate dynamically new checkboxes
@@ -326,7 +341,7 @@ public class BigImageDialog {
                     gbcImageToUpdate.setName(newName[0]);
                 }
                 if (editingTags[0]) {
-                    if (tempTags.contains("__filter:favourite__")) {
+                    if (tempTags.contains(FILTER_FAVOURITE)) {
                         previousImageView.setBackgroundColor(context.getColor(R.color.favorite));
                     } else {
                         previousImageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
@@ -457,12 +472,19 @@ public class BigImageDialog {
         List<String> availableTotalTagsAutoComplete = new ArrayList<>();
         List<String> showingTags = new ArrayList<>(filteredGbcImages.get(selectedImages.get(0)).getTags());
         for (String tag : availableTotalTags) {
-            if (tag.equals("__filter:favourite__")) {
-                tag = "Favourite \u2764\ufe0f";
+            if (tag.equals(FILTER_FAVOURITE)) {
+                tag = TAG_FAVOURITE;
+            } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
+                tag = TAG_SUPER_FAVOURITE;
+                ; // Not adding this tags, as they are non removable
+            } else if (tag.equals(FILTER_DUPLICATED)) {
+                continue; // Not adding this tags, as they are non removable
+            } else if (tag.equals(FILTER_TRANSFORMED)) {
+                continue;
             }
             availableTotalTagsAutoComplete.add(tag);
         }
-        availableTotalTagsSpinner.add("~ "+context.getString(R.string.tags_dialog_title)+" ~");
+        availableTotalTagsSpinner.add("~ " + context.getString(R.string.tags_dialog_title) + " ~");
         availableTotalTagsSpinner.addAll(availableTotalTagsAutoComplete);
 
         ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(context,
@@ -503,8 +525,14 @@ public class BigImageDialog {
                 String newTag = autoCAddTag.getText().toString().trim();
                 if (newTag.isEmpty())
                     return;
-                if (newTag.equals("Favourite \u2764\ufe0f")) {
-                    newTag = "__filter:favourite__";//Reverse the tag
+                if (newTag.equals(TAG_FAVOURITE)) {
+                    newTag = FILTER_FAVOURITE;//Reverse the tag
+                } else if (newTag.equals(TAG_SUPER_FAVOURITE)) {
+                    newTag = FILTER_SUPER_FAVOURITE;
+                } else if (newTag.equals(FILTER_DUPLICATED)) {
+                    newTag = TAG_DUPLICATED;
+                } else if (newTag.equals(FILTER_TRANSFORMED)) {
+                    newTag = TAG_TRANSFORMED;
                 }
                 if (!tempTags.contains(newTag)) {
                     //Generate dynamically new checkboxes
@@ -537,12 +565,14 @@ public class BigImageDialog {
                     return;
                 }
                 String selectedTag = adapter.getItem(position);
-                if (selectedTag.equals("__filter:favourite__")) {
-                    selectedTag = "Favourite \u2764\ufe0f";
-                }else if (selectedTag.equals("__filter:duplicated__")) {
-                    selectedTag = "Duplicated \uD83D\uDC11";
-                } else if (selectedTag.equals("__filter:transformed__")) {
-                    selectedTag = "Transformed \uD83D\uDD04";
+                if (selectedTag.equals(FILTER_FAVOURITE)) {
+                    selectedTag = TAG_FAVOURITE;
+                }else if (selectedTag.equals(FILTER_SUPER_FAVOURITE)) {
+                    selectedTag = TAG_SUPER_FAVOURITE;
+                } else if (selectedTag.equals(FILTER_DUPLICATED)) {
+                    selectedTag = TAG_DUPLICATED;
+                } else if (selectedTag.equals(FILTER_TRANSFORMED)) {
+                    selectedTag = TAG_TRANSFORMED;
                 }
                 if (!showingTags.contains(selectedTag)) {
                     if (!tempTags.contains(selectedTag)) {
@@ -592,9 +622,11 @@ public class BigImageDialog {
                     }
                     if (editingTags[0]) {
                         saveImage = true;
-                        if (tempTags.contains("__filter:favourite__")) {
+                        if (tempTags.contains(FILTER_SUPER_FAVOURITE)) {
+                            previousImageView.setBackgroundColor(context.getColor(R.color.star_color));
+                        } else if (tempTags.contains(FILTER_FAVOURITE)) {
                             previousImageView.setBackgroundColor(context.getColor(R.color.favorite));
-                        } else {
+                        }else {
                             previousImageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
                         }
                         HashSet<String> tagsToSave = new HashSet<>();//So it doesn't follow the temptags if I select another
@@ -657,13 +689,15 @@ public class BigImageDialog {
         CheckBox tagCb = new CheckBox(context);
         String cbText;
         boolean removableTag = true;
-        if (tag.equals("__filter:favourite__")) {
-            cbText = "Favourite \u2764\ufe0f";
-        } else if (tag.equals("__filter:duplicated__")) {
-            cbText = "Duplicated \uD83D\uDC11";
+        if (tag.equals(FILTER_FAVOURITE)) {
+            cbText = TAG_FAVOURITE;
+        } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
+            cbText = TAG_SUPER_FAVOURITE;
+        }else if (tag.equals(FILTER_DUPLICATED)) {
+            cbText = TAG_DUPLICATED;
             removableTag = false;
-        } else if (tag.equals("__filter:transformed__")) {
-            cbText = "Transformed \uD83D\uDD04";
+        } else if (tag.equals(FILTER_TRANSFORMED)) {
+            cbText = TAG_TRANSFORMED;
             removableTag = false;
         } else cbText = tag;
 
@@ -715,13 +749,15 @@ public class BigImageDialog {
         String cbText;
         boolean removableTag = true;
 
-        if (tag.equals("__filter:favourite__")) {
-            cbText = "Favourite \u2764\ufe0f";
-        } else if (tag.equals("__filter:duplicated__")) {
-            cbText = "Duplicated \uD83D\uDC11 ";
+        if (tag.equals(FILTER_FAVOURITE)) {
+            cbText = TAG_FAVOURITE;
+        } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
+            cbText = TAG_SUPER_FAVOURITE;
+        }else if (tag.equals(FILTER_DUPLICATED)) {
+            cbText = TAG_DUPLICATED;
             removableTag = false;
-        } else if (tag.equals("__filter:transformed__")) {
-            cbText = "Transformed \uD83D\uDD04";
+        } else if (tag.equals(FILTER_TRANSFORMED)) {
+            cbText = TAG_TRANSFORMED;
             removableTag = false;
         } else cbText = tag;
 

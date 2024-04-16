@@ -169,4 +169,90 @@
     <string name="only_image_paper">Somente imagem</string>
     <string name="print_paper_btn">Imprimir</string>
     <string name="custom_paper_color">Cor personalizada:</string>
+
+
+    <!--NEW STRINGS-->
+
+    <string name="collage">Colagem</string>
+
+    <string name="collage_too_many_images">Muitas imagens selecionadas. A colagem irá falhar.</string>
+    <string name="square_download">Exportar imagem quadrada</string>
+
+    <string name="toast_frames_json">Json de molduras salvo.</string>
+    <string name="import_valid_images">Selecione apenas formatos válidos (.jpg, .jpeg, .png, .bmp).</string>
+    <string name="no_filtered_images">Sem imagens relacionadas</string>
+    <string name="tags_dialog_title">Filtrar etiquetas</string>
+    <string name="tags_dialog_clear">Limpar</string>
+    <string name="sort_by_date">Por data de criação</string>
+    <string name="sort_by_import_date">Por data de importação</string>
+
+    <string name="sort_by_title">Por nome</string>
+    <string name="sort_ascending">Crescente</string>
+    <string name="sort_descending">Decrescente</string>
+
+    <string name="rb_edit_tags">Etiquetas</string>
+    <string name="rb_misc">Outros</string>
+    <string name="btn_update_image">Atualizar imagem</string>
+    <string name="et_write_tag">Escrever tag:\u0020</string>
+
+    <string name="menu_filter">Filtrar por etiqueta</string>
+    <string name="menu_sort">Ordenar</string>
+
+    <string name="et_frame_group_name">Definir nome para grupo de moldura</string>
+    <string name="tv_frame_index">Índice da moldura:\u0020</string>
+
+    <string name="et_frame_index_error">O valor deve ser entre 1 e 99</string>
+    <string name="et_frame_id_error">Já existe uma moldura com esse ID</string>
+
+    <string name="et_frame_group_id_error">Somente minusculas, minimo de 2 letras</string>
+    <string name="sp_all_frame_groups">Todas molduras</string>
+    <string name="cb_use_mod_date">Usar data de modificação</string>
+    <string name="btn_backup_db">Cópia dos dados</string>
+    <string name="btn_restore_db">Restaurar dados</string>
+    <string name="toast_backup_db">Cópia dos dados feita com sucesso</string>
+    <string name="toast_restore_db">Dados restaurados com sucesso</string>
+    <string name="dialog_restore_db_title">Selecionar dados para restaurar</string>
+    <string name="dialog_confirm_restore_db">Restaurar os dados irá resetar as configurações.\nRecomenda-se fazer uma cópia e salvar os JSONs antes.\nO Aplicativo irá reiniciar.\nDeseja continuar? </string>
+    <string name="as_imported_frame">Como importado</string>
+    <string name="btn_export_current_framegroup">Exportar grupo</string>
+    <string name="btn_edit_current_framegroup">Renomear grupo</string>
+    <string name="btn_edit_delete_framegroup">Deletar grupo</string>
+    <string name="notification_download_complete">Download completo</string>
+    <string name="dialog_rename_frame_group_title">New frame group name</string>
+    <string name="dialog_edit_frame_title">Editando moldura:\u0020</string>
+
+    <string name="cant_edit_base">Não é possível alterar a moldura padrão</string>
+    <string name="btn_edit_frame">Editar moldura</string>
+    <string name="sp_new_frame_group">Novo grupo de moldura</string>
+    <string name="et_palette_id">*Definir ID da paleta*</string>
+    <string name="et_frame_group_id">ID do grupo de molduras</string>
+    <string name="btn_realod_anim">Atualizar</string>
+    <string name="toast_first_image">Essa é a primeira imagem</string>
+    <string name="toast_last_image">Essa é a última imagem</string>
+    <string name="action_duplicate">Duplicar</string>
+    <string name="sw_half_frame">Meia moldura</string>
+    <string name="tv_extra_padding">Espaçamento extra:\u0020</string>
+    <string name="delete_frame_group_dialog">Deletar grupo de molduras\u0020</string>
+    <string name="cant_delete_base_framegroup">Não é possível deletar o grupo de molduras padrão</string>
+    <string name="btn_transform_image">Transformar</string>
+    <string name="et_palette_id_error">Não é um ID válido de paleta. Somente letras minusculas e números (min 2)</string>
+    <string name="sp_date_format">Formato da data\u0020</string>
+
+    <string name="sb_rotation">Rotação</string>
+    <string name="sb_brightness">Brilho</string>
+    <string name="sb_contrast">Contraste</string>
+    <string name="sw_original_ratio">Proporção original</string>
+
+    <string name="load_saving_dup">Salvando duplicadas</string>
+    <string name="load_cache">Carregando cache</string>
+    <string name="load_saving_images">Salvando imagens</string>
+
+
+    <string name="load_extracting_images">Extraindo imagens</string>
+    <string name="menu_default">Tornar padrão</string>
+    <string name="btn_add_new_palette">Adicionar nova paleta</string>
+    <string name="date_datepicker">Data</string>
+    <string name="month">Mês</string>
+    <string name="year">Ano</string>
+
 </resources>

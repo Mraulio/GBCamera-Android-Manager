@@ -10,7 +10,7 @@ import android.graphics.Color;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
@@ -60,7 +60,7 @@ public class JsonReader {
                 JSONObject paletteObject = palettesArray.getJSONObject(0);
 
                 // Verify that the keys and values exist in the palette
-                if (paletteObject.has("shortName") && paletteObject.has("name") && paletteObject.has("palette") && paletteObject.has("origin")) {
+                if (paletteObject.has("shortName") && paletteObject.has("name") && paletteObject.has("palette")) {
                     JSONArray paletteArray = paletteObject.getJSONArray("palette");
 
                     if (paletteArray.length() != 4) {
@@ -154,7 +154,7 @@ public class JsonReader {
                         } else {
                             gbcImage.setFrameId(frameId.toLowerCase());
                             if (!Utils.hashFrames.containsKey(frameId)) {
-                                gbcImage.setFrameId(MainActivity.defaultFrameId);
+                                gbcImage.setFrameId(StaticValues.defaultFrameId);
                             }
                         }
                     }

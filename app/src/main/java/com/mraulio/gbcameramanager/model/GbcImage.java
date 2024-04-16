@@ -5,7 +5,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.mraulio.gbcameramanager.MainActivity;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -80,8 +80,8 @@ public class GbcImage implements Cloneable{
     }
 
     public GbcImage() {
-        this.paletteId = MainActivity.defaultPaletteId;
-        this.framePaletteId = MainActivity.defaultPaletteId;
+        this.paletteId = StaticValues.defaultPaletteId;
+        this.framePaletteId = StaticValues.defaultPaletteId;
         this.frameId = null;
         this.lockFrame = false;
         this.invertPalette = false;

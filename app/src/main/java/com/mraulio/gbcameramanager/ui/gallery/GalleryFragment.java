@@ -2,12 +2,12 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
-import static com.mraulio.gbcameramanager.MainActivity.exportSize;
-import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
-import static com.mraulio.gbcameramanager.MainActivity.filterByDate;
-import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
-import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.exportSize;
+import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
+import static com.mraulio.gbcameramanager.utils.StaticValues.filterByDate;
+import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
+import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.addPadding;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.applyBorderToIV;
@@ -82,6 +82,7 @@ import com.mraulio.gbcameramanager.utils.AnimatedGifEncoder;
 import com.mraulio.gbcameramanager.utils.DiskCache;
 import com.mraulio.gbcameramanager.utils.HorizontalNumberPicker;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.TouchImageView;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
@@ -100,7 +101,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -118,14 +118,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static UsbSerialPort port = null;
     public static GridView gridView;
     static LoadingDialog loadDialog;
-    static SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+    static SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
     static HashSet<String> selectedFilterTags = new HashSet<>();
     static HashSet<String> hiddenFilterTags = new HashSet<>();
     static List<GbcImage> filteredGbcImages = new ArrayList<>();
     static boolean updatingFromChangeImage = false;
     static List<Integer> selectedImages = new ArrayList<>();
     static StringBuilder sbTitle = new StringBuilder();
-    static int itemsPerPage = MainActivity.imagesPage;
+    static int itemsPerPage = StaticValues.imagesPage;
     static int startIndex = 0;
     static int endIndex = 0;
     static Activity galleryActivity;
@@ -153,10 +153,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         galleryActivity = getActivity();
-        if (selectionMode[0]) MainActivity.fab.show();
+        if (selectionMode[0]) StaticValues.fab.show();
 
 
-        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.GALLERY;
+        StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.GALLERY;
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;
         displayMetrics = new DisplayMetrics();
@@ -280,11 +280,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                if (!selectionMode[0]) MainActivity.fab.show();
+                if (!selectionMode[0]) StaticValues.fab.show();
 
                 //I have to do this here, on onCreateView there was a crash
-                if (MainActivity.fab != null && !MainActivity.fab.hasOnClickListeners()) {
-                    MainActivity.fab.setOnClickListener(new View.OnClickListener() {
+                if (StaticValues.fab != null && !StaticValues.fab.hasOnClickListeners()) {
+                    StaticValues.fab.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             hideSelectionOptions();
@@ -415,8 +415,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     Button btnPrint = collageView.findViewById(R.id.print_button_collage);
                     Button btnPaperizeCollage = collageView.findViewById(R.id.btn_paperize_collage);
 
-                    btnPrint.setVisibility(MainActivity.printingEnabled ? VISIBLE : GONE);
-                    btnPaperizeCollage.setVisibility(MainActivity.showPaperizeButton ? VISIBLE : GONE);
+                    btnPrint.setVisibility(StaticValues.printingEnabled ? VISIBLE : GONE);
+                    btnPaperizeCollage.setVisibility(StaticValues.showPaperizeButton ? VISIBLE : GONE);
 
 
                     Switch swCropCollage = collageView.findViewById(R.id.swCropCollage);
@@ -663,6 +663,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             loadDialog.showDialog();
+                            loadDialog.setLoadingDialogText("");
                             new DeleteImageAsyncTask(selectedImages, getActivity(), loadDialog).execute();
                         }
                     });
@@ -767,6 +768,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     });
                     builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     });
+                    loadDialog.setLoadingDialogText("");
                     loadDialog.showDialog();
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, new AsyncTaskCompleteListener<Result>() {
                         @Override
@@ -932,6 +934,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         asyncTask.execute();
                     });
 
+                    loadDialog.setLoadingDialogText("");
                     loadDialog.showDialog();
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, result -> {
                         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
@@ -1130,6 +1133,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             filteredGbcImages.clear();
             for (GbcImage gbcImageToFilter : Utils.gbcImagesList) {
                 boolean containsAllTags = true;
+
+                //Check the date filter
+                if (filterByDate) {
+                    containsAllTags = checkImageDateFilter(gbcImageToFilter);
+                }
+
                 for (String tag : selectedFilterTags) {
                     if (!gbcImageToFilter.getTags().contains(tag)) {
                         containsAllTags = false;
@@ -1143,17 +1152,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     }
                 }
 
-                //Check the date filter
-                if (filterByDate) {
-                    containsAllTags = checkImageDateFilter(gbcImageToFilter);
-                }
                 if (containsAllTags) {
                     filteredGbcImages.add(gbcImageToFilter);
                 }
             }
         }
         imagesForPage = new ArrayList<>();
-        itemsPerPage = MainActivity.imagesPage;
+        itemsPerPage = StaticValues.imagesPage;
         //In case the list of images is shorter than the pagination size
         if (filteredGbcImages.size() < itemsPerPage) {
             itemsPerPage = filteredGbcImages.size();
@@ -1247,7 +1252,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         selectedImages.clear();
         selectionMode[0] = false;
         gridView.setAdapter(customGridViewAdapterImage);
-        MainActivity.fab.hide();
+        StaticValues.fab.hide();
         updateTitleText();
         getActivity().invalidateOptionsMenu();
     }

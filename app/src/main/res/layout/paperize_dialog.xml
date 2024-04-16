@@ -149,6 +149,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textColor="@color/black"
                         android:text="@string/custom_paper_color" />
 
                     <LinearLayout
@@ -173,6 +174,7 @@
                         android:id="@+id/cbOnlyImagePaper"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textColor="@color/black"
                         android:layout_marginLeft="10dp"
                         android:text="@string/only_image_paper"></CheckBox>
                 </LinearLayout>

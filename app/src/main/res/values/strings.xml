@@ -245,12 +245,13 @@
     <string name="load_cache">Loading cache</string>
     <string name="load_saving_images">Saving images</string>
 
-
     <string name="load_extracting_images">Extracting images</string>
     <string name="menu_default">Make default</string>
     <string name="btn_add_new_palette">Add new palette</string>
-    <string name="date_datepicker">Date</string>
     <string name="month">Month</string>
     <string name="year">Year</string>
+    <string name="export_metadata">Export metadata on PNG</string>
+    <string name="load_paperizing">Paperizing...</string>
+
 
 </resources>

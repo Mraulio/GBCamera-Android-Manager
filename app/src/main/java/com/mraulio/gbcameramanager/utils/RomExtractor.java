@@ -7,7 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.Extractor;
 import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtractor;
@@ -101,13 +100,13 @@ public class RomExtractor {
                     totalImages++;
                 }
 
-                listActiveImages.add(new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1)));
-                listActiveBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1)));
-                lastSeenImage.add(extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1));
-                lastSeenBitmap.add(extractedImagesBitmaps.get(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1));
-                listDeletedImages.add(new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - MainActivity.deletedCount[saveBank], extractedImagesList.size())));
+                listActiveImages.add(new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - StaticValues.deletedCount[saveBank] - 1)));
+                listActiveBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - StaticValues.deletedCount[saveBank] - 1)));
+                lastSeenImage.add(extractedImagesList.get(extractedImagesList.size() - StaticValues.deletedCount[saveBank] - 1));
+                lastSeenBitmap.add(extractedImagesBitmaps.get(extractedImagesBitmaps.size() - StaticValues.deletedCount[saveBank] - 1));
+                listDeletedImages.add(new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - StaticValues.deletedCount[saveBank], extractedImagesList.size())));
 
-                listDeletedBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank], extractedImagesBitmaps.size())));
+                listDeletedBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - StaticValues.deletedCount[saveBank], extractedImagesBitmaps.size())));
 
                 Paint paint = new Paint();
                 paint.setColor(Color.RED);

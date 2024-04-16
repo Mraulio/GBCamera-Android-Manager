@@ -2,7 +2,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.mraulio.gbcameramanager.MainActivity.showEditMenuButton;
+import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.addPadding;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
@@ -52,13 +51,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.core.content.ContextCompat;
-
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
@@ -66,6 +62,7 @@ import com.mraulio.gbcameramanager.ui.frames.FramesFragment;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.ui.usbserial.PrintOverArduino;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.IOException;
@@ -168,6 +165,8 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             dialog.setContentView(R.layout.image_main_dialog);
             dialog.setCancelable(true);//So it closes when clicking outside or back button
             View dialogBackground = dialog.findViewById(android.R.id.content).getRootView();
+            LinearLayout mainLayout = dialog.findViewById(R.id.main_image_layout);
+            mainLayout.setOnClickListener(null);//So the fast image change doesn't happen when missclicking buttons inside the actual dialog
             imageView = dialog.findViewById(R.id.image_view);
             printButton = dialog.findViewById(R.id.print_button);
             btnPaperize = dialog.findViewById(R.id.btn_paperize_collage);
@@ -235,7 +234,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 }
             });
 
-            if (MainActivity.showPaperizeButton) {
+            if (StaticValues.showPaperizeButton) {
                 btnPaperize.setVisibility(VISIBLE);
             }
 
@@ -245,11 +244,11 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             int maxHeight = displayMetrics.heightPixels / 2;//To set the imageview max height as the 50% of the screen, for large images
             imageView.setMaxHeight(maxHeight);
 
-            if (MainActivity.printingEnabled) {
+            if (StaticValues.printingEnabled) {
                 printButton.setVisibility(VISIBLE);
             } else printButton.setVisibility(GONE);
 
-            if (MainActivity.showRotationButton) {
+            if (StaticValues.showRotationButton) {
                 rotateButton.setVisibility(VISIBLE);
             }
 
@@ -542,7 +541,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 public void onItemClick(AdapterView<?> parent, View view,
                                         int palettePosition, long id) {
                     //Action when clicking a palette inside the Dialog
-
                     //Set the new palette to the gbcImage image or frame
                     if (!keepFrame) {
                         gbcImage.setPaletteId(Utils.sortedPalettes.get(palettePosition).getPaletteId());
@@ -720,7 +718,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     imageView.setMaxHeight(maxHeight);
 
                     Button printButton = dialog.findViewById(R.id.print_button);
-                    if (MainActivity.printingEnabled) {
+                    if (StaticValues.printingEnabled) {
                         printButton.setVisibility(VISIBLE);
                     } else printButton.setVisibility(GONE);
 
@@ -789,7 +787,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     Button shareButton = dialog.findViewById(R.id.share_button);
                     Button saveButton = dialog.findViewById(R.id.save_button);
                     Button rotateButton = dialog.findViewById(R.id.btnRotate);
-                    if (MainActivity.showRotationButton) {
+                    if (StaticValues.showRotationButton) {
                         rotateButton.setVisibility(VISIBLE);
                     }
                     Button paletteFrameSelButton = dialog.findViewById(R.id.btnPaletteFrame);
@@ -872,7 +870,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
                     showPalettes = true;
                     Button btn_paperize = dialog.findViewById(R.id.btn_paperize_collage);
-                    if (MainActivity.showPaperizeButton) {
+                    if (StaticValues.showPaperizeButton) {
                         btn_paperize.setVisibility(VISIBLE);
                     }
                     btn_paperize.setVisibility(GONE);
@@ -1005,7 +1003,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                     }
                                     selectedImages.clear();
                                     showEditMenuButton = false;
-                                    MainActivity.fab.hide();
+                                    StaticValues.fab.hide();
                                     multiEdition = false;
                                     activity.invalidateOptionsMenu();
                                 }
@@ -1327,7 +1325,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             if (position == 0 && currentPage != 0) {
                 updatingFromChangeImage = true;
                 updateOutside = true;
-                position = MainActivity.imagesPage - 1;
+                position = StaticValues.imagesPage - 1;
                 isChanging = true;
                 prevPage();
             }

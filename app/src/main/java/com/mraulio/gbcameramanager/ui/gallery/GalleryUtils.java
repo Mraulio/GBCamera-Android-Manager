@@ -1,16 +1,16 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
-import static com.mraulio.gbcameramanager.MainActivity.SORT_MODE.*;
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
-import static com.mraulio.gbcameramanager.MainActivity.dateFilter;
-import static com.mraulio.gbcameramanager.MainActivity.db;
-import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
-import static com.mraulio.gbcameramanager.MainActivity.filterByDate;
-import static com.mraulio.gbcameramanager.MainActivity.filterMonth;
-import static com.mraulio.gbcameramanager.MainActivity.filterYear;
-import static com.mraulio.gbcameramanager.MainActivity.sortDescending;
-import static com.mraulio.gbcameramanager.MainActivity.sortMode;
-import static com.mraulio.gbcameramanager.MainActivity.sortModeEnum;
+import static com.mraulio.gbcameramanager.utils.StaticValues.SORT_MODE.*;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateFilter;
+import static com.mraulio.gbcameramanager.utils.StaticValues.db;
+import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
+import static com.mraulio.gbcameramanager.utils.StaticValues.filterByDate;
+import static com.mraulio.gbcameramanager.utils.StaticValues.filterMonth;
+import static com.mraulio.gbcameramanager.utils.StaticValues.filterYear;
+import static com.mraulio.gbcameramanager.utils.StaticValues.sortDescending;
+import static com.mraulio.gbcameramanager.utils.StaticValues.sortMode;
+import static com.mraulio.gbcameramanager.utils.StaticValues.sortModeEnum;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.diskCache;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
@@ -64,13 +64,13 @@ import androidx.core.content.FileProvider;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.gson.Gson;
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.UnicodeExifInterface;
 import com.mraulio.gbcameramanager.utils.Utils;
 
@@ -108,7 +108,7 @@ public class GalleryUtils {
         }
 
         String fileNameBase = "gbcImage_";
-        String extension = MainActivity.exportPng ? ".png" : ".txt";
+        String extension = StaticValues.exportPng ? ".png" : ".txt";
         for (int i = 0; i < gbcImages.size(); i++) {
             GbcImage gbcImage = gbcImages.get(i);
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
@@ -126,7 +126,7 @@ public class GalleryUtils {
             }
 
             fileName += extension;
-            if (MainActivity.exportPng) {
+            if (StaticValues.exportPng) {
                 file = new File(Utils.IMAGES_FOLDER, fileName);
 
                 if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
@@ -145,45 +145,47 @@ public class GalleryUtils {
                 }
 
                 try (FileOutputStream out = new FileOutputStream(file)) {
-                    Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
+                    Bitmap scaled = Bitmap.createScaledBitmap(image, image.getWidth() * StaticValues.exportSize, image.getHeight() * StaticValues.exportSize, false);
                     scaled.compress(Bitmap.CompressFormat.PNG, 100, out);
                     out.flush();
 
-                    //Create the metadata text
-                    StringBuilder stringBuilder = new StringBuilder();
-                    LinkedHashMap lhm = gbcImage.getImageMetadata();
-                    stringBuilder.append("Created in GBCamera Android Manager\n");
-                    stringBuilder.append("Palette: " + hashPalettes.get(gbcImage.getPaletteId()).getPaletteName() + " (" + gbcImage.getPaletteId() + ")\n");
-                    if (gbcImage.getFrameId() != null)
-                        stringBuilder.append("Frame: " + hashFrames.get(gbcImage.getFrameId()).getFrameName() + " (" + gbcImage.getFrameId() + ")\n");
-
-                    SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + " HH:mm:ss:SSS");
-                    stringBuilder.append("Creation date: " + sdf.format(gbcImage.getCreationDate()) + "\n");
-
-                    if (lhm != null) { //Last seen images don't have metadata
-                        for (Object key : lhm.keySet()) {
-                            if (key.equals("frameIndex")) continue;
-                            String metadata = metadataTexts.get(key);
-                            String value = (String) lhm.get(key);
-                            if (metadata == null) {
-                                metadata = (String) key;
-                            }
-                            stringBuilder.append(metadata).append(": ").append(value).append("\n");
-                            if (key.equals("isCopy")) stringBuilder.append("\n");
-                        }
-                    }
-
                     mediaScanner(file, context);
 
-                    String metadataComment = stringBuilder.toString();
+                    if (StaticValues.exportMetadata) {
+                        //Create the metadata text
+                        StringBuilder stringBuilder = new StringBuilder();
+                        LinkedHashMap lhm = gbcImage.getImageMetadata();
+                        stringBuilder.append("Created in GBCamera Android Manager\n");
+                        stringBuilder.append("Palette: " + hashPalettes.get(gbcImage.getPaletteId()).getPaletteName() + " (" + gbcImage.getPaletteId() + ")\n");
+                        if (gbcImage.getFrameId() != null)
+                            stringBuilder.append("Frame: " + hashFrames.get(gbcImage.getFrameId()).getFrameName() + " (" + gbcImage.getFrameId() + ")\n");
 
-                    try {
-                        UnicodeExifInterface unicodeExifInterface = new UnicodeExifInterface(file.getAbsolutePath());
-                        unicodeExifInterface.setAttribute(UnicodeExifInterface.TAG_USER_COMMENT, metadataComment);
+                        SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + " HH:mm:ss:SSS");
+                        stringBuilder.append("Creation date: " + sdf.format(gbcImage.getCreationDate()) + "\n");
 
-                        unicodeExifInterface.saveAttributes();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                        if (lhm != null) { //Last seen images don't have metadata
+                            for (Object key : lhm.keySet()) {
+                                if (key.equals("frameIndex")) continue;
+                                String metadata = metadataTexts.get(key);
+                                String value = (String) lhm.get(key);
+                                if (metadata == null) {
+                                    metadata = (String) key;
+                                }
+                                stringBuilder.append(metadata).append(": ").append(value).append("\n");
+                                if (key.equals("isCopy")) stringBuilder.append("\n");
+                            }
+                        }
+
+                        String metadataComment = stringBuilder.toString();
+
+                        try {
+                            UnicodeExifInterface unicodeExifInterface = new UnicodeExifInterface(file.getAbsolutePath());
+                            unicodeExifInterface.setAttribute(UnicodeExifInterface.TAG_USER_COMMENT, metadataComment);
+
+                            unicodeExifInterface.saveAttributes();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
 
                 } catch (IOException e) {
@@ -218,10 +220,10 @@ public class GalleryUtils {
             }
             showNotification(context, file);
         }
-        if (MainActivity.exportPng) {
-            toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved) + MainActivity.exportSize);
+        if (StaticValues.exportPng) {
+            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved) + StaticValues.exportSize);
         } else
-            toast(MainActivity.fab.getContext(), MainActivity.fab.getContext().getString(R.string.toast_saved_txt));
+            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved_txt));
     }
 
     public static Bitmap makeSquareImage(Bitmap image) {
@@ -293,7 +295,7 @@ public class GalleryUtils {
                 if (exportSquare) {
                     image = makeSquareImage(image);
                 }
-                image = Bitmap.createScaledBitmap(image, image.getWidth() * MainActivity.exportSize, image.getHeight() * MainActivity.exportSize, false);
+                image = Bitmap.createScaledBitmap(image, image.getWidth() * StaticValues.exportSize, image.getHeight() * StaticValues.exportSize, false);
                 File file = new File(context.getExternalCacheDir(), "shared_image_" + i + ".png");
                 fileOutputStream = new FileOutputStream(file);
                 image.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
@@ -407,7 +409,7 @@ public class GalleryUtils {
     }
 
     public static void sortImages(Context context, DisplayMetrics displayMetrics) {
-        SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+        SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
 
         LayoutInflater inflater = LayoutInflater.from(context);
         View dialogView = inflater.inflate(R.layout.sort_dialog, null);
@@ -448,7 +450,7 @@ public class GalleryUtils {
             public void onClick(View view) {
                 sortByDate(gbcImagesList, sortDescending);
                 sortMode = CREATION_DATE.name();
-                sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
+                sortModeEnum = StaticValues.SORT_MODE.valueOf(sortMode);
                 editor.putString("sort_by_date", CREATION_DATE.name());
                 editor.apply();
                 checkSorting(context);
@@ -461,7 +463,7 @@ public class GalleryUtils {
             public void onClick(View view) {
                 sortByTitle(gbcImagesList, sortDescending);
                 sortMode = IMPORT_DATE.name();
-                sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
+                sortModeEnum = StaticValues.SORT_MODE.valueOf(sortMode);
                 editor.putString("sort_by_date", IMPORT_DATE.name());
                 editor.apply();
                 checkSorting(context);
@@ -473,7 +475,7 @@ public class GalleryUtils {
             public void onClick(View view) {
                 sortByTitle(gbcImagesList, sortDescending);
                 sortMode = TITLE.name();
-                sortModeEnum = MainActivity.SORT_MODE.valueOf(sortMode);
+                sortModeEnum = StaticValues.SORT_MODE.valueOf(sortMode);
                 editor.putString("sort_by_date", TITLE.name());
                 editor.apply();
                 checkSorting(context);
@@ -550,13 +552,14 @@ public class GalleryUtils {
         swMonth.setChecked(filterMonth);
         swYear.setChecked(filterYear);
         swFilterByDate.setChecked(filterByDate);
+        Date date = new Date(dateFilter);
         swMonth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (swMonth.isChecked()) {
                     swYear.setChecked(false);
                 }
-                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), dateFilter));
+                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), date.getTime()));
 
             }
         });
@@ -566,12 +569,10 @@ public class GalleryUtils {
                 if (swYear.isChecked()) {
                     swMonth.setChecked(false);
                 }
-                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), dateFilter));
+                btnCalendar.setText(buildDateString(swMonth.isChecked(), swYear.isChecked(), date.getTime()));
 
             }
         });
-
-        Date date = new Date(dateFilter);
 
         btnCalendar.setText(buildDateString(filterMonth, filterYear, dateFilter));
 
@@ -593,7 +594,7 @@ public class GalleryUtils {
         btnCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showDatePicker(context, btnCalendar, date, swMonth.isChecked(), swYear.isChecked());
+                showDatePicker(context, btnCalendar, date, swMonth.isChecked(), swYear.isChecked(), swFilterByDate.isChecked());
             }
         });
         btnCalendar.setText(buildDateString(filterMonth, filterYear, dateFilter));
@@ -673,7 +674,6 @@ public class GalleryUtils {
         btnClear.setOnClickListener(v -> {
             selectedTags.clear();
             hiddenTags.clear();
-            btnCalendar.setText("");
             swFilterByDate.setChecked(false);
 
             for (CheckBox cb : checkBoxList) {
@@ -687,16 +687,15 @@ public class GalleryUtils {
         btnAccept.setOnClickListener(v -> {
             selectedFilterTags = selectedTags;
             Gson gson = new Gson();
-            MainActivity.selectedTags = gson.toJson(selectedTags);
+            StaticValues.selectedTags = gson.toJson(selectedTags);
             hiddenFilterTags = hiddenTags;
-            MainActivity.hiddenTags = gson.toJson(hiddenTags);
+            StaticValues.hiddenTags = gson.toJson(hiddenTags);
             filterByDate = swFilterByDate.isChecked();
             saveTagsSet(selectedTags, false);
             saveTagsSet(hiddenTags, true);
             dateFilter = date.getTime();
             filterMonth = swMonth.isChecked();
             filterYear = swYear.isChecked();
-            filterByDate = swFilterByDate.isChecked();
 
             editor.putInt("current_page", 0);
             editor.putBoolean("date_filter_month", filterMonth);
@@ -743,13 +742,29 @@ public class GalleryUtils {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(dateStartString);
 
-
         return stringBuilder.toString();
     }
 
-    public static void showDatePicker(Context context, Button btnCalendar, Date date, boolean month, boolean year) {
+    public static void showDatePicker(Context context, Button btnCalendar, Date date, boolean month, boolean year, boolean filterByDate) {
+
+        List<Calendar> listDates = new ArrayList<>();
+        Calendar yesterday = Calendar.getInstance();
+        listDates.add(yesterday);
+        List<Calendar> validDates = convertDatesToCalendars();
+        CalendarIndicator calendarIndicator = new CalendarIndicator(context, validDates);
+        calendarIndicator.initialize(context);
+
         MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
-        MaterialDatePicker<Long> materialDatePicker = builder.build();
+
+        builder.setDayViewDecorator(calendarIndicator);
+        builder.setTheme(R.style.MaterialCalendarTheme);
+
+        Calendar initialCalendar = Calendar.getInstance();
+        if (filterByDate) {
+            initialCalendar.setTime(date);
+        }
+
+        MaterialDatePicker<Long> materialDatePicker = builder.setSelection(initialCalendar.getTimeInMillis()).build();
 
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar selectedCalendar = Calendar.getInstance();
@@ -760,10 +775,19 @@ public class GalleryUtils {
 
         });
 
-        builder.setTitleText(context.getString(R.string.date_datepicker));
-
         AppCompatActivity appCompatActivity = (AppCompatActivity) context;
         materialDatePicker.show(appCompatActivity.getSupportFragmentManager(), "MATERIAL_DATE_PICKER_TAG");
+    }
+
+    public static List<Calendar> convertDatesToCalendars() {
+        List<Calendar> calendars = new ArrayList<>();
+
+        for (GbcImage gbcImage : gbcImagesList) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(gbcImage.getCreationDate());
+            calendars.add(calendar);
+        }
+        return calendars;
     }
 
     /**

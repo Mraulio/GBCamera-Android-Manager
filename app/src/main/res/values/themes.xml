@@ -16,6 +16,7 @@
         <item name="android:windowBackground">
             @color/background_light
         </item>
+
     </style>
 
     <style name="Theme.GBCameraManager.NoActionBar">

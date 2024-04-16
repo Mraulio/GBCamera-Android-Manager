@@ -1,6 +1,6 @@
 package com.mraulio.gbcameramanager.ui.usbserial;
 
-import static com.mraulio.gbcameramanager.MainActivity.magicCheck;
+import static com.mraulio.gbcameramanager.utils.StaticValues.magicCheck;
 
 import java.io.File;
 

@@ -4,9 +4,9 @@ import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 
 import android.os.AsyncTask;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.model.GbcPalette;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 
 public class SavePaletteAsyncTask extends AsyncTask<Void, Void, Void> {
     //To add the new palette as a parameter
@@ -20,7 +20,7 @@ public class SavePaletteAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-        PaletteDao paletteDao = MainActivity.db.paletteDao();
+        PaletteDao paletteDao = StaticValues.db.paletteDao();
         if (save) {
             paletteDao.insert(gbcPalette);
         } else {

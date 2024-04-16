@@ -1,8 +1,8 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
-import static com.mraulio.gbcameramanager.MainActivity.customColorPaper;
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
-import static com.mraulio.gbcameramanager.MainActivity.exportSquare;
+import static com.mraulio.gbcameramanager.utils.StaticValues.customColorPaper;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.crop;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadDialog;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.makeSquareImage;
@@ -29,8 +29,8 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.File;
@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class PaperUtils {
-    static SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+    static SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
 
     public static Bitmap paperize(Bitmap inputBitmap, int paperColor, boolean onlyImage, Context context) {
         int mul = 20;
@@ -316,7 +316,7 @@ public class PaperUtils {
                 btnSavePaper.setEnabled(true);
                 paperizedBitmaps.clear();
                 loadDialog.showDialog();
-                loadDialog.setLoadingDialogText("Paperizing...");
+                loadDialog.setLoadingDialogText(context.getString(R.string.load_paperizing));
 
                 new PaperizeAsyncTask(bitmapsToPaperize, paperColor[0], paperizedBitmaps, ivPaperized, cbOnlyImagePaper.isChecked(), context, loadDialog).execute();
             }

@@ -10,13 +10,13 @@ import android.graphics.Canvas;
 import android.os.Build;
 
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.gameboycameralib.constants.IndexedPalette;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.utils.FileMetaParser;
 import com.mraulio.gbcameramanager.utils.HomebrewRomsMetaParser;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.ByteArrayInputStream;
@@ -128,7 +128,7 @@ public class SaveImageExtractor implements Extractor {
                 //Get the frame id, according to the frame index coded in the bytes, if it exists in the app
                 LinkedHashMap metadata = gbcImage.getImageMetadata();
                 int frameNumber = 0;
-                String frameId = MainActivity.defaultFrameId;
+                String frameId = StaticValues.defaultFrameId;
                 if (metadata != null) {
                     Object frameNumberObj = gbcImage.getImageMetadata().get("frameIndex");
                     if (frameNumberObj != null) {
@@ -149,7 +149,7 @@ public class SaveImageExtractor implements Extractor {
                                 frameId = intId + String.format("%02d", frameNumber);
                             }
                             if (!hashFrames.containsKey(frameId)) {
-                                frameId = MainActivity.defaultFrameId;//If the group exists but the frame doesn't
+                                frameId = StaticValues.defaultFrameId;//If the group exists but the frame doesn't
                             }
                         }
                         break;
@@ -159,7 +159,7 @@ public class SaveImageExtractor implements Extractor {
                             frameId = intId + String.format("%02d", frameNumber);
                         }
                         if (!hashFrames.containsKey(frameId)) {
-                            frameId = MainActivity.defaultFrameId;//If the group exists but the frame doesn't
+                            frameId = StaticValues.defaultFrameId;//If the group exists but the frame doesn't
                         }
                         break;
                     case HK:
@@ -167,7 +167,7 @@ public class SaveImageExtractor implements Extractor {
 
                             frameId = hkId + String.format("%02d", frameNumber);
                             if (!hashFrames.containsKey(frameId)) {
-                                frameId = MainActivity.defaultFrameId;//If the group exists but the frame doesn't
+                                frameId = StaticValues.defaultFrameId;//If the group exists but the frame doesn't
                             }
                         }
                         break;
@@ -201,7 +201,7 @@ public class SaveImageExtractor implements Extractor {
 
         final int PHOTOS_LOCATION = 0x11B2;
         final int PHOTOS_READ_COUNT = 0x1E;
-        MainActivity.deletedCount[saveBank] = 0;
+        StaticValues.deletedCount[saveBank] = 0;
         byte[] photosPositions = new byte[PHOTOS_READ_COUNT];
         ByteArrayInputStream bais = new ByteArrayInputStream(rawData);
         bais.skip(PHOTOS_LOCATION);
@@ -286,7 +286,7 @@ public class SaveImageExtractor implements Extractor {
                             deletedGbcImage.setImageMetadata(getMetadata(imageMetadataBytes, thumbImage, saveTypeIntJpHk));
                             Bitmap deletedBitmap = gbcImageBitmap(deletedGbcImage, image, saveTypeIntJpHk);
                             deletedImagesGB.put(deletedGbcImage, deletedBitmap);
-                            MainActivity.deletedCount[saveBank]++;
+                            StaticValues.deletedCount[saveBank]++;
                         }
                     } else {//If not a deleted photo
                         //I get the index in the sorted array where the "real" index from the vector is stored

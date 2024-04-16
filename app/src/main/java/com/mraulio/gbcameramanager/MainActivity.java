@@ -6,6 +6,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,13 +17,14 @@ import android.graphics.Color;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
+import static android.os.Build.VERSION.SDK_INT;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
@@ -39,6 +41,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.UncaughtExceptionHandler;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.utils.StartCreation;
@@ -61,68 +64,18 @@ import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+
     private AppBarConfiguration mAppBarConfiguration;
-    boolean anyImage = true;
     private ActivityMainBinding binding;
+    Uri mUri;
+    NavController mNavController;
+    boolean mAnyImage = true;
+    boolean mOpenedFromUsb = false;
+
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
-    Uri uri;
-    NavController navController;
-
-    public enum CURRENT_FRAGMENT {
-        GALLERY,
-        PALETTES,
-        FRAMES,
-        IMPORT,
-        USB_SERIAL,
-        SAVE_MANAGER,
-        SETTINGS
-    }
-
-    public static boolean showEditMenuButton = false;
-    public static CURRENT_FRAGMENT currentFragment;
-
-    public static FloatingActionButton fab;
-
-    public static SharedPreferences sharedPreferences;
-    //Store in the shared preferences
-    public static boolean exportPng = true;
-    public static boolean printingEnabled = false;
-    public static boolean showPaperizeButton = false;
-    public static int exportSize = 4;
-    public static int imagesPage = 12;
-    public static String languageCode;
-    public static String defaultPaletteId;
-    public static String defaultFrameId;
-    public static boolean magicCheck;
-    public static boolean showRotationButton;
-    public static int customColorPaper;
-    public static int lastSeenGalleryImage = 0;
-    public static boolean exportSquare = false;
-
-
-    public enum SORT_MODE {
-        CREATION_DATE,
-        IMPORT_DATE,
-        TITLE
-    }
-
-    public static SORT_MODE sortModeEnum = SORT_MODE.CREATION_DATE;
-    public static String sortMode = "";
-    public static String dateLocale = "";
-
-    public static boolean filterMonth, filterYear , filterByDate;
-    public static long dateFilter;
-
-    public static boolean sortDescending = false;
-    public static String selectedTags = "";
-    public static String hiddenTags = "";
-    public static boolean openedFromFile = false;
-    boolean openedFromUsb = false;
     public static UsbManager manager;
-    public static int[] deletedCount = new int[7];
-
-    public static AppDatabase db;
+    public static boolean openedFromFile = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,49 +84,59 @@ public class MainActivity extends AppCompatActivity {
         //Unhandled Exception Manager
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
 
-        sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        StaticValues.sharedPreferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
 
-        exportSize = sharedPreferences.getInt("export_size", 4);
-        imagesPage = sharedPreferences.getInt("images_per_page", 12);
-        exportPng = sharedPreferences.getBoolean("export_as_png", true);
-        showPaperizeButton = sharedPreferences.getBoolean("show_paperize_button", false);
-        printingEnabled = sharedPreferences.getBoolean("print_enabled", false);
-        magicCheck = sharedPreferences.getBoolean("magic_check", true);
-        showRotationButton = sharedPreferences.getBoolean("rotation_button", true);
-        customColorPaper = sharedPreferences.getInt("custom_paper_color", Color.WHITE);
-        exportSquare = sharedPreferences.getBoolean("export_square", false);
-        sortMode = sharedPreferences.getString("sort_by_date", SORT_MODE.CREATION_DATE.name());
-        defaultPaletteId = sharedPreferences.getString("default_palette_id","bw");
-        defaultFrameId = sharedPreferences.getString("default_frame_id","gbcam01");
-        dateLocale = sharedPreferences.getString("date_locale", "yyyy-MM-dd");
+        StaticValues.exportSize = StaticValues.sharedPreferences.getInt("export_size", 4);
+        StaticValues.imagesPage = StaticValues.sharedPreferences.getInt("images_per_page", 12);
+        StaticValues.exportPng = StaticValues.sharedPreferences.getBoolean("export_as_png", true);
+        StaticValues.showPaperizeButton = StaticValues.sharedPreferences.getBoolean("show_paperize_button", false);
+        StaticValues.printingEnabled = StaticValues.sharedPreferences.getBoolean("print_enabled", false);
+        StaticValues.magicCheck = StaticValues.sharedPreferences.getBoolean("magic_check", true);
+        StaticValues.showRotationButton = StaticValues.sharedPreferences.getBoolean("rotation_button", true);
+        StaticValues.customColorPaper = StaticValues.sharedPreferences.getInt("custom_paper_color", Color.WHITE);
+        StaticValues.exportSquare = StaticValues.sharedPreferences.getBoolean("export_square", false);
+        StaticValues.sortMode = StaticValues.sharedPreferences.getString("sort_by_date", StaticValues.SORT_MODE.CREATION_DATE.name());
+        StaticValues.defaultPaletteId = StaticValues.sharedPreferences.getString("default_palette_id","bw");
+        StaticValues.defaultFrameId = StaticValues.sharedPreferences.getString("default_frame_id","gbcam01");
+        StaticValues.dateLocale = StaticValues.sharedPreferences.getString("date_locale", "yyyy-MM-dd");
+        StaticValues.exportMetadata = StaticValues.sharedPreferences.getBoolean("export_metadata", false);
 
-        filterMonth = sharedPreferences.getBoolean("date_filter_month", false);
-        filterYear = sharedPreferences.getBoolean("date_filter_year", false);
-        filterByDate = sharedPreferences.getBoolean("date_filter_by_date", false);
-        dateFilter = sharedPreferences.getLong("date_filter", System.currentTimeMillis());
+        StaticValues.filterMonth = StaticValues.sharedPreferences.getBoolean("date_filter_month", false);
+        StaticValues.filterYear = StaticValues.sharedPreferences.getBoolean("date_filter_year", false);
+        StaticValues.filterByDate = StaticValues.sharedPreferences.getBoolean("date_filter_by_date", false);
+        StaticValues.dateFilter = StaticValues.sharedPreferences.getLong("date_filter", System.currentTimeMillis());
 
-        if (sortMode != null) {
-            sortModeEnum = SORT_MODE.valueOf(sortMode);
-            sortModeEnum = SORT_MODE.valueOf(sortMode);
+        if (StaticValues.sortMode != null) {
+            StaticValues.sortModeEnum = StaticValues.SORT_MODE.valueOf(StaticValues.sortMode);
+            StaticValues.sortModeEnum = StaticValues.SORT_MODE.valueOf(StaticValues.sortMode);
         }
-        sortDescending = sharedPreferences.getBoolean("sort_descending", false);
-        selectedTags = sharedPreferences.getString("selected_tags", "");
-        hiddenTags = sharedPreferences.getString("hidden_tags", "");
+        StaticValues.sortDescending = StaticValues.sharedPreferences.getBoolean("sort_descending", false);
+        StaticValues.selectedTags = StaticValues.sharedPreferences.getString("selected_tags", "");
+        StaticValues.hiddenTags = StaticValues.sharedPreferences.getString("hidden_tags", "");
 
-        String previousVersion = sharedPreferences.getString("previous_version", "0");
-        GalleryFragment.currentPage = sharedPreferences.getInt("current_page", 0);
+        String previousVersion = StaticValues.sharedPreferences.getString("previous_version", "0");
+        GalleryFragment.currentPage = StaticValues.sharedPreferences.getInt("current_page", 0);
         //To get the locale on the first startup and set the def value
         Resources resources = getResources();
-        Configuration configuration = resources.getConfiguration();
         LocaleList locales = null;
         Locale currentLocale = null;
+
+        Configuration configuration = resources.getConfiguration();
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             locales = configuration.getLocales();
             currentLocale = locales.get(0);
         } else {
             //For SDK 23 or lower
             currentLocale = configuration.locale;
+        }
+
+        if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
+                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
+            StaticValues.languageCode = "en";
+        } else {
+            StaticValues.languageCode = currentLocale.getLanguage();
         }
 
         String currentVersion = BuildConfig.VERSION_NAME;
@@ -186,30 +149,23 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
 
-        if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
-                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
-            languageCode = "en";
-        } else {
-            languageCode = currentLocale.getLanguage();
-        }
-
-        languageCode = sharedPreferences.getString("language", languageCode);
-        Locale locale = new Locale(languageCode);
+        StaticValues.languageCode = StaticValues.sharedPreferences.getString("language", StaticValues.languageCode);
+        Locale locale = new Locale(StaticValues.languageCode);
         Locale.setDefault(locale);
 
         configuration.setLocale(locale);
         resources.updateConfiguration(configuration, resources.getDisplayMetrics());
 
-        db = Room.databaseBuilder(getApplicationContext(),
+        StaticValues.db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Database").build();
 
         // Obtain Intent information
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
-        uri = intent.getData();
-        if (uri == null){
-            uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);// For the SEND action
+        mUri = intent.getData();
+        if (mUri == null){
+            mUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);// For the SEND action
         }
 
         if (!doneLoading) {
@@ -254,9 +210,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        fab = binding.appBarMain.fab;
-        fab.hide();
+        mNavController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        StaticValues.fab = binding.appBarMain.fab;
+        StaticValues.fab.hide();
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -270,24 +226,29 @@ public class MainActivity extends AppCompatActivity {
             // IF the Intent contains the action ACTION_VIEW and the category CATEGORY_DEFAULT and
             openedFromFile = true;
         } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
-            openedFromUsb = true;
+            mOpenedFromUsb = true;
         }
 
-        openingFromIntent(navController);
+        openingFromIntent(mNavController);
 
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
-        navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
+        NavigationUI.setupActionBarWithNavController(this, mNavController, mAppBarConfiguration);
+        NavigationUI.setupWithNavController(navigationView, mNavController);
+        mNavController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
             @Override
             public void onDestinationChanged(@NonNull NavController navController, @NonNull NavDestination navDestination, @Nullable Bundle bundle) {
                 invalidateOptionsMenu();
             }
 
         });
-        /**
-         * I ask for storage permissions
-         */
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+        requestPermissions();
+
+        Utils.makeDirs();//If permissions granted, create the folders(Keep this for the updated versions with already permissions, to create the frame json folder)
+        createNotificationChannel(getBaseContext());
+    }
+
+    private void requestPermissions(){
+        if ( SDK_INT <= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
             // Ask for permission
@@ -295,28 +256,33 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         }
-        Utils.makeDirs();//If permissions granted, create the folders(Keep this for the updated versions with already permissions, to create the frame json folder)
-        createNotificationChannel(getBaseContext());
+        if (SDK_INT == Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            // Ask for permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    1);
+        }
     }
-
     private void openingFromIntent(NavController navController) {
 
         if (openedFromFile) {
             Bundle bundle = new Bundle();
-            bundle.putString("fileUri", uri.toString());
+            bundle.putString("fileUri", mUri.toString());
             navController.navigate(R.id.nav_import, bundle);
-        } else if (openedFromUsb) {
+        } else if (mOpenedFromUsb) {
             navController.navigate(R.id.nav_usbserial);
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        switch (currentFragment) {
+        switch (StaticValues.currentFragment) {
             case GALLERY:
                 menu.clear(); // Cleans the current menu
                 getMenuInflater().inflate(R.menu.gallery_menu, menu); // Inflates the menu
-                if (showEditMenuButton) {
+                if (StaticValues.showEditMenuButton) {
                     menu.getItem(0).setVisible(true);
                 }
                 break;
@@ -328,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
             case IMPORT:
             case FRAMES:
                 menu.clear(); // Cleans the current menu
-                fab.hide();
+                StaticValues.fab.hide();
                 menu.close();
                 break;
         }
@@ -340,9 +306,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            PaletteDao paletteDao = db.paletteDao();
-            FrameDao frameDao = db.frameDao();
-            ImageDao imageDao = db.imageDao();
+            PaletteDao paletteDao = StaticValues.db.paletteDao();
+            FrameDao frameDao = StaticValues.db.frameDao();
+            ImageDao imageDao = StaticValues.db.imageDao();
 
             List<GbcPalette> palettes = paletteDao.getAll();
             List<GbcFrame> frames = frameDao.getAll();
@@ -406,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
                 //I need to add them to the gbcImagesList(GbcImage)
                 Utils.gbcImagesList.addAll(imagesFromDao);
                 GbcImage.numImages += Utils.gbcImagesList.size();
-            } else anyImage = false;
+            } else mAnyImage = false;
             return null;
         }
 

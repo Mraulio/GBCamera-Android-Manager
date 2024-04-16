@@ -1,8 +1,7 @@
 package com.mraulio.gbcameramanager.ui.usbserial;
 
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
-import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkSorting;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.deleteFolderRecursive;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.saveTypeNames;
@@ -19,7 +18,6 @@ import android.graphics.Paint;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -41,7 +39,6 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +49,7 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
 import com.mraulio.gbcameramanager.ui.importFile.ImagesImportDialog;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.ui.importFile.HexToTileData;
@@ -129,7 +127,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_usb_serial, container, false);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.USB_SERIAL;
+        StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.USB_SERIAL;
 
         gridView = view.findViewById(R.id.gridView);
         gridView.setNumColumns(2);//To see the images bigger in case there is corruption extracting with gbxcart
@@ -414,7 +412,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
 
     private void printOverArduinoMode() {
         try {
-            MainActivity.printingEnabled = true;
+            StaticValues.printingEnabled = true;
             gbxMode = false;
             ape = false;
             tvMode.setVisibility(View.VISIBLE);
@@ -488,13 +486,13 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                     extractedImagesList.add(gbcImage);
                 }
 
-                listActiveImages.add(new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1)));
-                listActiveBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1)));
-                lastSeenImage.add(extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1));
-                lastSeenBitmap.add(extractedImagesBitmaps.get(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1));
-                listDeletedImages.add(new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - MainActivity.deletedCount[saveBank], extractedImagesList.size())));
+                listActiveImages.add(new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - StaticValues.deletedCount[saveBank] - 1)));
+                listActiveBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - StaticValues.deletedCount[saveBank] - 1)));
+                lastSeenImage.add(extractedImagesList.get(extractedImagesList.size() - StaticValues.deletedCount[saveBank] - 1));
+                lastSeenBitmap.add(extractedImagesBitmaps.get(extractedImagesBitmaps.size() - StaticValues.deletedCount[saveBank] - 1));
+                listDeletedImages.add(new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - StaticValues.deletedCount[saveBank], extractedImagesList.size())));
 
-                listDeletedBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank], extractedImagesBitmaps.size())));
+                listDeletedBitmaps.add(new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - StaticValues.deletedCount[saveBank], extractedImagesBitmaps.size())));
 
                 Paint paint = new Paint();
                 paint.setColor(Color.RED);

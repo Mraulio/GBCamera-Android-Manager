@@ -2,12 +2,11 @@ package com.mraulio.gbcameramanager.ui.importFile;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -33,10 +32,8 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.model.GbcImage;
-import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
-import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

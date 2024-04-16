@@ -169,4 +169,90 @@
     <string name="only_image_paper">Nur Bild</string>
     <string name="print_paper_btn">Drucken</string>
     <string name="custom_paper_color">Benutzerdefinierte Papierfarbe:</string>
+
+
+    <string name="collage">Collage</string>
+
+    <string name="collage_too_many_images">Zu viele Bilder selektiert, um eine Collage zu erstellen.</string>
+    <string name="square_download">Quadratisches Bild exportieren</string>
+
+    <string name="toast_frames_json">JSON für Rahmen gespeichert</string>
+    <string name="import_valid_images">Bitte nur gültige Bildformate auswählen (.jpg, .jpeg, .png, .bmp).</string>
+    <string name="no_filtered_images">Kein gefilterten Bilder verfügbar</string>
+    <string name="tags_dialog_title">Tags/Datum filtern</string>
+    <string name="tags_dialog_clear">Zurücksetzen</string>
+    <string name="sort_by_date">Nach Erstelldatum</string>
+    <string name="sort_by_import_date">Nach Importdatum</string>
+
+    <string name="sort_by_title">Nach Titel</string>
+    <string name="sort_ascending">Aufsteigend</string>
+    <string name="sort_descending">Absteigend</string>
+
+    <string name="rb_edit_tags">Tags</string>
+    <string name="rb_misc">Versch.</string>
+    <string name="btn_update_image">Bild aktualisieren</string>
+    <string name="et_write_tag">Tag erstellen:\u0020</string>
+
+    <string name="menu_filter">Nach Tag</string>
+    <string name="menu_sort">Sortierung</string>
+
+    <string name="et_frame_group_name">Grupennamen für Rahmen setzen</string>
+    <string name="tv_frame_index">Rahmen-Index:\u0020</string>
+
+    <string name="et_frame_index_error">Wert muss zwischen 1 und 99 liegen</string>
+    <string name="et_frame_id_error">Rahmen-ID existiert bereits</string>
+
+    <string name="et_frame_group_id_error">Nur Kleinbuchstaben, min. 2</string>
+    <string name="sp_all_frame_groups">Alle Rahmen</string>
+    <string name="cb_use_mod_date">Nutze Bearbeitungs-Datum</string>
+    <string name="btn_backup_db">Datenbank sichern</string>
+    <string name="btn_restore_db">Datenbank wiederherstellen</string>
+    <string name="toast_backup_db">Sicherung der Datenbank abgeschlossen</string>
+    <string name="toast_restore_db">Wiederherstellung der Datenbank abgeschlossen</string>
+    <string name="dialog_restore_db_title">Wiederherzustellende DB wählen</string>
+    <string name="dialog_confirm_restore_db">Dies setzt alle Einstellungen zurück.\nVorher sollte eine DB-Sicherung und ein JSON-Export erstellt werden.\nDie App wird zurückgesetzt.\nBist Du sicher? </string>
+    <string name="as_imported_frame">Wie importiert</string>
+    <string name="btn_export_current_framegroup">Gruppe exportieren</string>
+    <string name="btn_edit_current_framegroup">Gruppe umbenennen</string>
+    <string name="btn_edit_delete_framegroup">Gruppe löschen</string>
+    <string name="notification_download_complete">Download fertig</string>
+    <string name="dialog_rename_frame_group_title">Rahmengruppe umbenennen</string>
+    <string name="dialog_edit_frame_title">Rahmen bearbeiten:\u0020</string>
+
+    <string name="cant_edit_base">Basis-Rahmen kann nicht bearbeitet werden</string>
+    <string name="btn_edit_frame">Rahmen bearbeiten</string>
+    <string name="sp_new_frame_group">Neue Rahmengruppe</string>
+    <string name="et_palette_id">*Paletten-ID setzen*</string>
+    <string name="et_frame_group_id">Rahmengruppen-ID</string>
+    <string name="btn_realod_anim">aktualisieren</string>
+    <string name="toast_first_image">Dies ist das erste Bild</string>
+    <string name="toast_last_image">Dies ist das letzte Bild</string>
+    <string name="action_duplicate">Duplizieren</string>
+    <string name="sw_half_frame">Halber Rahmen</string>
+    <string name="tv_extra_padding">Außenabstand:\u0020</string>
+    <string name="delete_frame_group_dialog">Rahmengruppe löschen\u0020</string>
+    <string name="cant_delete_base_framegroup">Basis-Rahmen kann nicht gelöscht werden</string>
+    <string name="btn_transform_image">Transformieren</string>
+    <string name="et_palette_id_error">Keine gültige Paletten-ID. Nur Kleinbuchstaben und Ziffern, min. 2.</string>
+    <string name="sp_date_format">Datumsformat\u0020</string>
+
+    <string name="sb_rotation">Rotation</string>
+    <string name="sb_brightness">Helligkeit</string>
+    <string name="sb_contrast">Kontrast</string>
+    <string name="sw_original_ratio">Original Seitenverältnis</string>
+
+    <string name="load_saving_dup">Speichere Duplikate</string>
+    <string name="load_cache">Lade Cache</string>
+    <string name="load_saving_images">Speichere Bilder</string>
+
+
+    <string name="load_extracting_images">Extrahiere Bilder</string>
+    <string name="menu_default">Als Standard</string>
+    <string name="btn_add_new_palette">Neue Palette</string>
+    <string name="month">Monat</string>
+    <string name="year">Jahr</string>
+    <string name="export_metadata">EXIF-Metadaten im PNG speichern</string>
+
+    <string name="load_paperizing">Paperizing...</string>
+
 </resources>

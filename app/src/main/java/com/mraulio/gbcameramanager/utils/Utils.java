@@ -1,12 +1,11 @@
 package com.mraulio.gbcameramanager.utils;
 
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
-import static com.mraulio.gbcameramanager.MainActivity.hiddenTags;
-import static com.mraulio.gbcameramanager.MainActivity.selectedTags;
-import static com.mraulio.gbcameramanager.MainActivity.sharedPreferences;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.hiddenTags;
+import static com.mraulio.gbcameramanager.utils.StaticValues.selectedTags;
+import static com.mraulio.gbcameramanager.utils.StaticValues.sharedPreferences;
 import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -19,8 +18,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -36,18 +33,15 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.FileProvider;
-import androidx.room.RoomOpenHelper;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.Codec;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcFrame;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.GbcPalette;
-import com.mraulio.gbcameramanager.ui.importFile.ImportFragment;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -298,7 +292,7 @@ public class Utils {
     public static void backupDatabase(Context context) {
         try {
             //Get the database version first.
-            int databaseVersion = MainActivity.db.getOpenHelper().getReadableDatabase().getVersion();
+            int databaseVersion = StaticValues.db.getOpenHelper().getReadableDatabase().getVersion();
 
             SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
             Date date = new Date();
@@ -344,7 +338,7 @@ public class Utils {
     public static void showDbBackups(Context context, Activity activity) {
 
         //Show only the database backups with version equal to actual version
-        int databaseVersion = MainActivity.db.getOpenHelper().getReadableDatabase().getVersion();
+        int databaseVersion = StaticValues.db.getOpenHelper().getReadableDatabase().getVersion();
 
         File directory = new File(DB_BACKUP_FOLDER.toURI());
 

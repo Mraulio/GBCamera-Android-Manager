@@ -1,7 +1,7 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
-import static com.mraulio.gbcameramanager.MainActivity.lastSeenGalleryImage;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcPalettesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
@@ -15,7 +15,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -45,8 +44,8 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.ui.gallery.UpdateImageAsyncTask;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
-import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.gameboycameralib.codecs.ImageCodec;
 import com.mraulio.gbcameramanager.model.GbcPalette;
@@ -71,7 +70,8 @@ public class PalettesFragment extends Fragment {
     CustomGridViewAdapterPalette paletteAdapter;
     GridView gridViewPalettes;
     ImageView iv1, iv2, iv3, iv4;
-    int lastPicked = Color.rgb(155, 188, 15);
+    int lastPickedColor = Color.rgb(155, 188, 15);
+    int favHelper = 0;
     EditText et1, et2, et3, et4;
     String placeholderString = "";
     String newPaletteId = "";
@@ -84,7 +84,7 @@ public class PalettesFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_palettes, container, false);
         MainActivity.pressBack = false;
-        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.PALETTES;
+        StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.PALETTES;
 
         Button btnAdd = view.findViewById(R.id.btnAdd);
         Button btnExportPaletteJson = view.findViewById(R.id.btnExportPaletteJson);
@@ -122,7 +122,7 @@ public class PalettesFragment extends Fragment {
                     clickCount = 0;
                     // Stop timer and make double tap action
                     handler.removeCallbacks(runnable);
-                    if (lastPicked == position) {
+                    if (favHelper == position) {
                         GbcPalette pal = Utils.gbcPalettesList.get(palettePos);
                         pal.setFavorite(pal.isFavorite() ? false : true);
                         paletteAdapter.notifyDataSetChanged();
@@ -130,7 +130,7 @@ public class PalettesFragment extends Fragment {
                         sortPalettes();
                     }
                 }
-                lastPicked = position;
+                favHelper = position;
             }
         });
 
@@ -157,10 +157,10 @@ public class PalettesFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             new SavePaletteAsyncTask(Utils.gbcPalettesList.get(position), false).execute();
-                            if (Utils.gbcPalettesList.get(position).getPaletteId().equals(MainActivity.defaultPaletteId)) {
-                                SharedPreferences.Editor editor = MainActivity.sharedPreferences.edit();
+                            if (Utils.gbcPalettesList.get(position).getPaletteId().equals(StaticValues.defaultPaletteId)) {
+                                SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
                                 editor.putString("default_palette_id", "bw");
-                                MainActivity.defaultPaletteId = "bw";
+                                StaticValues.defaultPaletteId = "bw";
                                 editor.apply();
                             }
                             String paletteToDelete = Utils.gbcPalettesList.get(position).getPaletteId();
@@ -241,11 +241,16 @@ public class PalettesFragment extends Fragment {
 
             JSONArray paletteArr = new JSONArray();
             for (int color : palette.getPaletteColorsInt()) {
-                String hexColor = "#" + Integer.toHexString(color).substring(2);
+                String hexColor;
+                if (color == 0){//For total transparency color
+                    hexColor = "#000000";
+                }else{
+                    hexColor = "#" + Integer.toHexString(color).substring(2);
+                }
+
                 paletteArr.put(hexColor);
             }
             paletteObj.put("palette", paletteArr);
-            paletteObj.put("origin", "GbCamera Android Manager");
             palettesArr.put(paletteObj);
         }
         stateObj.put("palettes", palettesArr);
@@ -498,7 +503,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPicked)
+                        .initialColor(lastPickedColor)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
                         .showAlphaSlider(false)
@@ -518,7 +523,7 @@ public class PalettesFragment extends Fragment {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                lastPicked = selectedColor;
+                                lastPickedColor = selectedColor;
                                 et1.setText("#" + Integer.toHexString(palette[0]).substring(2).toUpperCase());
                             }
                         })
@@ -538,7 +543,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPicked)
+                        .initialColor(lastPickedColor)
                         .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
@@ -558,7 +563,7 @@ public class PalettesFragment extends Fragment {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                lastPicked = selectedColor;
+                                lastPickedColor = selectedColor;
                                 et2.setText("#" + Integer.toHexString(palette[1]).substring(2).toUpperCase());
 
                             }
@@ -580,7 +585,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPicked)
+                        .initialColor(lastPickedColor)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
                         .showAlphaSlider(false)
@@ -600,7 +605,7 @@ public class PalettesFragment extends Fragment {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                lastPicked = selectedColor;
+                                lastPickedColor = selectedColor;
                                 et3.setText("#" + Integer.toHexString(palette[2]).substring(2).toUpperCase());
 
                             }
@@ -622,7 +627,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPicked)
+                        .initialColor(lastPickedColor)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
                         .showAlphaSlider(false)
@@ -642,7 +647,7 @@ public class PalettesFragment extends Fragment {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                lastPicked = selectedColor;
+                                lastPickedColor = selectedColor;
                                 et4.setText("#" + Integer.toHexString(palette[3]).substring(2).toUpperCase());
 
                             }

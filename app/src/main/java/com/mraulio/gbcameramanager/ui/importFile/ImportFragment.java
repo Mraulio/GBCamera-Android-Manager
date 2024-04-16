@@ -10,12 +10,12 @@ import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsRea
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.hashPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.saveTypeNames;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -24,7 +24,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,9 +35,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
@@ -49,7 +45,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -60,13 +55,12 @@ import android.widget.TextView;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
-import com.mraulio.gbcameramanager.ui.importFile.newpalette.GridAdapter;
-import com.mraulio.gbcameramanager.ui.importFile.newpalette.SimpleItemTouchHelperCallback;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
 import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.RomExtractor;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 import com.mraulio.gbcameramanager.db.PaletteDao;
 import com.mraulio.gbcameramanager.R;
@@ -89,6 +83,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -221,7 +216,7 @@ public class ImportFragment extends Fragment {
         btnAddImages = view.findViewById(R.id.btnAddImages);
         btnAddImages.setVisibility(View.GONE);
         MainActivity.pressBack = false;
-        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.IMPORT;
+        StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.IMPORT;
 
         tvFileName = view.findViewById(R.id.tvFileName);
         gridViewImport = view.findViewById(R.id.gridViewImport);
@@ -377,7 +372,6 @@ public class ImportFragment extends Fragment {
                                     if (anyImageHasTransparency) {
                                         tvFileName.setText((getString(R.string.invalid_transparent_image)));
                                     } else {
-
                                         for (int i = 0; i < finalListImages.size(); i++) {
                                             GbcImage gbcImage = finalListImages.get(i);
                                             boolean alreadyAdded = false;
@@ -412,13 +406,14 @@ public class ImportFragment extends Fragment {
                                     }
 
                                 } else if (cbAddFrame.isChecked()) {
-                                    //Make the frame bw
-                                    Bitmap bwBitmap = paletteChanger("bw", finalListImages.get(0).getImageBytes(), false);
-                                    if (bwBitmap.getHeight() != 144 && bwBitmap.getHeight() != 224) {
+                                    //Check the frame size and colors
+                                    boolean isBw = checkImageColors(importedBitmap);
+
+                                    if (!isBw || importedBitmap.getHeight() != 144 && importedBitmap.getHeight() != 224) {
                                         Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
                                     } else {
-                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(bwBitmap, getContext(), null, false);
+                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(importedBitmap, getContext(), null, false);
                                         frameImportDialogClass.frameImportDialog();
                                     }
                                 }
@@ -442,6 +437,35 @@ public class ImportFragment extends Fragment {
         return view;
     }
 
+    public boolean checkImageColors(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int pixel = bitmap.getPixel(x, y);
+
+                if (!isValidColor(pixel)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isValidColor(int color) {
+        //Add the transparent color as a valid for frames
+        int[] validColors = Arrays.copyOf(hashPalettes.get("bw").getPaletteColorsInt(), 5);
+        validColors[4] = Color.TRANSPARENT;
+        for (int validColor : validColors) {
+            if (validColor == color) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void extractFile() {
         //I clear the lists in case I choose several files without leaving
         importedImagesList.clear();
@@ -460,13 +484,13 @@ public class ImportFragment extends Fragment {
             case SAV: {
                 isGoodSave = extractSavImages();
                 if (isGoodSave) {
-                    listActiveImages.add(new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - MainActivity.deletedCount[0] - 1)));
-                    listActiveBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1)));
-                    lastSeenImage.add(importedImagesList.get(importedImagesList.size() - MainActivity.deletedCount[0] - 1));
-                    lastSeenBitmap.add(importedImagesBitmaps.get(importedImagesBitmaps.size() - MainActivity.deletedCount[0] - 1));
-                    listDeletedImages.add(new ArrayList<>(importedImagesList.subList(importedImagesList.size() - MainActivity.deletedCount[0], importedImagesList.size())));
+                    listActiveImages.add(new ArrayList<>(importedImagesList.subList(0, importedImagesList.size() - StaticValues.deletedCount[0] - 1)));
+                    listActiveBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(0, importedImagesBitmaps.size() - StaticValues.deletedCount[0] - 1)));
+                    lastSeenImage.add(importedImagesList.get(importedImagesList.size() - StaticValues.deletedCount[0] - 1));
+                    lastSeenBitmap.add(importedImagesBitmaps.get(importedImagesBitmaps.size() - StaticValues.deletedCount[0] - 1));
+                    listDeletedImages.add(new ArrayList<>(importedImagesList.subList(importedImagesList.size() - StaticValues.deletedCount[0], importedImagesList.size())));
 
-                    listDeletedBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - MainActivity.deletedCount[0], importedImagesBitmaps.size())));
+                    listDeletedBitmaps.add(new ArrayList<>(importedImagesBitmaps.subList(importedImagesBitmaps.size() - StaticValues.deletedCount[0], importedImagesBitmaps.size())));
                     listDeletedBitmapsRedStroke = new ArrayList<>();
                     listDeletedBitmapsRedStroke.add(new ArrayList<>());
 
@@ -675,7 +699,7 @@ public class ImportFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            PaletteDao paletteDao = MainActivity.db.paletteDao();
+            PaletteDao paletteDao = StaticValues.db.paletteDao();
             for (GbcPalette gbcPalette : gbcPalettesList) {
                 paletteDao.insert(gbcPalette);
             }
@@ -700,7 +724,7 @@ public class ImportFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            FrameDao frameDao = MainActivity.db.frameDao();
+            FrameDao frameDao = StaticValues.db.frameDao();
             for (GbcFrame gbcFrame : gbcFramesList) {
                 frameDao.insert(gbcFrame);
             }

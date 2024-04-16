@@ -1,6 +1,6 @@
 package com.mraulio.gbcameramanager.ui.savemanager;
 
-import static com.mraulio.gbcameramanager.MainActivity.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
@@ -28,7 +28,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
 
-import com.mraulio.gbcameramanager.MainActivity;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.ImageDao;
 import com.mraulio.gbcameramanager.db.ImageDataDao;
@@ -39,6 +38,7 @@ import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
+import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.io.File;
@@ -100,7 +100,7 @@ public class SaveManagerFragment extends Fragment {
         btnAdd = view.findViewById(R.id.btnAdd);
         cbModDate = view.findViewById(R.id.sw_mod_date);
         loadingDialog = new LoadingDialog(getContext(), getContext().getString(R.string.load_extracting_images));
-        MainActivity.currentFragment = MainActivity.CURRENT_FRAGMENT.SAVE_MANAGER;
+        StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.SAVE_MANAGER;
 
         spSaveType = view.findViewById(R.id.sp_save_type_manager);
         List saveTypes = new ArrayList();
@@ -211,8 +211,8 @@ public class SaveManagerFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            ImageDao imageDao = MainActivity.db.imageDao();
-            ImageDataDao imageDataDao = MainActivity.db.imageDataDao();
+            ImageDao imageDao = StaticValues.db.imageDao();
+            ImageDataDao imageDataDao = StaticValues.db.imageDataDao();
             //Need to insert first the gbcImage because of the Foreign Key
             try {
                 int dateIndex = 0;
@@ -342,13 +342,13 @@ public class SaveManagerFragment extends Fragment {
                         extractedImagesList.add(gbcImage);
                     }
 
-                    listActiveImages = new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1));
-                    listActiveBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1));
-                    lastSeenImage = extractedImagesList.get(extractedImagesList.size() - MainActivity.deletedCount[saveBank] - 1);
-                    lastSeenBitmap = extractedImagesBitmaps.get(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank] - 1);
-                    listDeletedImages = new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - MainActivity.deletedCount[saveBank], extractedImagesList.size()));
+                    listActiveImages = new ArrayList<>(extractedImagesList.subList(0, extractedImagesList.size() - StaticValues.deletedCount[saveBank] - 1));
+                    listActiveBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(0, extractedImagesBitmaps.size() - StaticValues.deletedCount[saveBank] - 1));
+                    lastSeenImage = extractedImagesList.get(extractedImagesList.size() - StaticValues.deletedCount[saveBank] - 1);
+                    lastSeenBitmap = extractedImagesBitmaps.get(extractedImagesBitmaps.size() - StaticValues.deletedCount[saveBank] - 1);
+                    listDeletedImages = new ArrayList<>(extractedImagesList.subList(extractedImagesList.size() - StaticValues.deletedCount[saveBank], extractedImagesList.size()));
 
-                    listDeletedBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - MainActivity.deletedCount[saveBank], extractedImagesBitmaps.size()));
+                    listDeletedBitmaps = new ArrayList<>(extractedImagesBitmaps.subList(extractedImagesBitmaps.size() - StaticValues.deletedCount[saveBank], extractedImagesBitmaps.size()));
                     listDeletedBitmapsRedStroke = new ArrayList<>();
                     Paint paint = new Paint();
                     paint.setColor(Color.RED);

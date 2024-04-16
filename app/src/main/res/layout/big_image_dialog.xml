@@ -151,9 +151,7 @@
                 android:layout_marginHorizontal="20dp"
                 android:orientation="vertical"></LinearLayout>
 
-
         </LinearLayout>
-
 
         <LinearLayout
             android:id="@+id/miscLayout"

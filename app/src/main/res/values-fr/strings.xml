@@ -153,4 +153,87 @@
     <string name="custom_paper_color">Couleur personnalisée:</string>
 
 
+    <string name="collage">Collage</string>
+
+    <string name="collage_too_many_images">Trop d\'images sélectionnées. Le collage échouera.</string>
+    <string name="square_download">Exporter l\'image carrée</string>
+
+    <string name="toast_frames_json">Bordures Json sauvegardés.</string>
+    <string name="import_valid_images">Veuillez sélectionner uniquement des formats d\'image valides (.jpg, .jpeg, .png, .bmp).</string>
+    <string name="no_filtered_images">Aucune image filtrée disponible</string>
+    <string name="tags_dialog_title">Filtrer les tags</string>
+    <string name="tags_dialog_clear">Effacer</string>
+    <string name="sort_by_date">Par date de création</string>
+    <string name="sort_by_import_date">Par date d\'importation</string>
+
+    <string name="sort_by_title">Par titre</string>
+    <string name="sort_ascending">Croissant</string>
+    <string name="sort_descending">Décroissant</string>
+
+    <string name="rb_edit_tags">Tags</string>
+    <string name="rb_misc">Divers</string>
+    <string name="btn_update_image">Mettre à jour l\'image</string>
+    <string name="et_write_tag">Écrire un tag:\u0020</string>
+
+    <string name="menu_filter">Filtrer par tag</string>
+    <string name="menu_sort">Trier</string>
+
+    <string name="et_frame_group_name">Définir le nom du groupe de bordures</string>
+    <string name="tv_frame_index">Index du bordure:\u0020</string>
+
+    <string name="et_frame_index_error">La valeur doit être comprise entre 1 et 99</string>
+    <string name="et_frame_id_error">ID de bordure déjà existant</string>
+
+    <string name="et_frame_group_id_error">Seuls les minuscules sont autorisés, minimum 2 caractères</string>
+    <string name="sp_all_frame_groups">Tous les bordures</string>
+    <string name="cb_use_mod_date">Utiliser la date de modification</string>
+    <string name="btn_backup_db">Sauvegarder la base de données</string>
+    <string name="btn_restore_db">Restaurer la base de données</string>
+    <string name="toast_backup_db">Sauvegarde de la base de données terminée</string>
+    <string name="toast_restore_db">Restauration de la base de données terminée</string>
+    <string name="dialog_restore_db_title">Sélectionnez la base de données à restaurer</string>
+    <string name="dialog_confirm_restore_db">Restaurer une base de données réinitialisera tous les paramètres.\nIl est recommandé de sauvegarder la base de données et d\'exporter en Json.\nL'application sera réinitialisée.\nÊtes-vous sûr ? </string>
+    <string name="as_imported_frame">Tel qu\'importé</string>
+    <string name="btn_export_current_framegroup">Exporter le groupe</string>
+    <string name="btn_edit_current_framegroup">Renommer le groupe</string>
+    <string name="btn_edit_delete_framegroup">Supprimer le groupe</string>
+    <string name="notification_download_complete">Téléchargement terminé</string>
+    <string name="dialog_rename_frame_group_title">Nouveau nom du groupe de bordures</string>
+    <string name="dialog_edit_frame_title">Modification du bordure:\u0020</string>
+
+    <string name="cant_edit_base">Impossible de modifier un bordure de base</string>
+    <string name="btn_edit_frame">Modifier le bordure</string>
+    <string name="sp_new_frame_group">Nouveau groupe de bordures</string>
+    <string name="et_palette_id">*Définir l\'ID de la palette*</string>
+    <string name="et_frame_group_id">ID du groupe de bordures</string>
+    <string name="btn_realod_anim">Recharger</string>
+    <string name="toast_first_image">Ceci est la première image</string>
+    <string name="toast_last_image">Ceci est la dernière image</string>
+    <string name="action_duplicate">Dupliquer</string>
+    <string name="sw_half_frame">Demi-bordure</string>
+    <string name="tv_extra_padding">Marge supplémentaire:\u0020</string>
+    <string name="delete_frame_group_dialog">Supprimer le groupe de bordures\u0020</string>
+    <string name="cant_delete_base_framegroup">Impossible de supprimer un groupe de bordures de base</string>
+    <string name="btn_transform_image">Transformer</string>
+    <string name="et_palette_id_error">ID de palette non valide. Uniquement des caractères minuscules et des chiffres, minimum 2.</string>
+    <string name="sp_date_format">Format de date\u0020</string>
+
+    <string name="sb_rotation">Rotation</string>
+    <string name="sb_brightness">Luminosité</string>
+    <string name="sb_contrast">Contraste</string>
+    <string name="sw_original_ratio">Ratio original</string>
+
+    <string name="load_saving_dup">Sauvegarde des doublons</string>
+    <string name="load_cache">Chargement du cache</string>
+    <string name="load_saving_images">Sauvegarde des images</string>
+
+    <string name="load_extracting_images">Extraction des images</string>
+    <string name="menu_default">Définir par défaut</string>
+    <string name="btn_add_new_palette">Ajouter une nouvelle palette</string>
+    <string name="month">Mois</string>
+    <string name="year">Année</string>
+    <string name="export_metadata">Exporter les métadonnées en PNG</string>
+    <string name="load_paperizing">Paperizing...</string>
+
+
 </resources>

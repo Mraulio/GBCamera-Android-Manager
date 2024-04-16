@@ -151,4 +151,6 @@
     <string name="only_image_paper">Image seulement</string>
     <string name="print_paper_btn">Imprimer</string>
     <string name="custom_paper_color">Couleur personnalisée:</string>
+
+
 </resources>

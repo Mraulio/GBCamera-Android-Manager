@@ -316,7 +316,7 @@ public class PaperUtils {
                 btnSavePaper.setEnabled(true);
                 paperizedBitmaps.clear();
                 loadDialog.showDialog();
-                loadDialog.setLoadingDialogText("Paperizing...");
+                loadDialog.setLoadingDialogText(context.getString(R.string.load_paperizing));
 
                 new PaperizeAsyncTask(bitmapsToPaperize, paperColor[0], paperizedBitmaps, ivPaperized, cbOnlyImagePaper.isChecked(), context, loadDialog).execute();
             }

@@ -253,4 +253,7 @@
     <string name="month">Mes</string>
     <string name="year">Año</string>
     <string name="export_metadata">Exportar metadata en PNG</string>
+
+    <string name="load_paperizing">Paperizing...</string>
+
 </resources>

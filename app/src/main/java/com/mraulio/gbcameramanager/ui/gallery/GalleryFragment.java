@@ -663,6 +663,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             loadDialog.showDialog();
+                            loadDialog.setLoadingDialogText("");
                             new DeleteImageAsyncTask(selectedImages, getActivity(), loadDialog).execute();
                         }
                     });
@@ -767,6 +768,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     });
                     builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     });
+                    loadDialog.setLoadingDialogText("");
                     loadDialog.showDialog();
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, new AsyncTaskCompleteListener<Result>() {
                         @Override
@@ -932,6 +934,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         asyncTask.execute();
                     });
 
+                    loadDialog.setLoadingDialogText("");
                     loadDialog.showDialog();
                     LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, result -> {
                         AnimatedGifEncoder encoder = new AnimatedGifEncoder();

@@ -41,6 +41,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
+import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.UncaughtExceptionHandler;
 import com.mraulio.gbcameramanager.utils.Utils;
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     NavController mNavController;
     boolean mAnyImage = true;
     boolean mOpenedFromUsb = false;
-
+    LoadingDialog mLoadDialog;
     public static boolean pressBack = true;
     public static boolean doneLoading = false;
     public static UsbManager manager;
@@ -168,9 +169,7 @@ public class MainActivity extends AppCompatActivity {
             mUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);// For the SEND action
         }
 
-        if (!doneLoading) {
-            new ReadDataAsyncTask().execute();
-        }
+
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -229,7 +228,11 @@ public class MainActivity extends AppCompatActivity {
             mOpenedFromUsb = true;
         }
 
-
+        if (!doneLoading) {
+            mLoadDialog = new LoadingDialog(this, null);
+            mLoadDialog.showDialog();
+            new ReadDataAsyncTask().execute();
+        }
         NavigationUI.setupActionBarWithNavController(this, mNavController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, mNavController);
         mNavController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
@@ -299,6 +302,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onPrepareOptionsMenu(menu);
     }
+
 
     private class ReadDataAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -379,13 +383,14 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
-
             openingFromIntent(mNavController);
             gf.updateFromMain(MainActivity.this);
+            if (mLoadDialog != null && mLoadDialog.isShowing()){
+                mLoadDialog.dismissDialog();
+            }
 
         }
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

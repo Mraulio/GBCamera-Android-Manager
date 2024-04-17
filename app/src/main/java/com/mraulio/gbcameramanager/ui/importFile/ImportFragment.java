@@ -406,14 +406,13 @@ public class ImportFragment extends Fragment {
                                     }
 
                                 } else if (cbAddFrame.isChecked()) {
-                                    //Check the frame size and colors
-                                    boolean isBw = checkImageColors(importedBitmap);
-
-                                    if (!isBw || importedBitmap.getHeight() != 144 && importedBitmap.getHeight() != 224) {
+                                    //Make the frame bw
+                                    Bitmap bwBitmap = paletteChanger("bw",finalListImages.get(0).getImageBytes(),false);
+                                    if (bwBitmap.getHeight() != 144 && bwBitmap.getHeight() != 224) {
                                         Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
                                     } else {
-                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(importedBitmap, getContext(), null, false);
+                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(bwBitmap, getContext(), null, false);
                                         frameImportDialogClass.frameImportDialog();
                                     }
                                 }
@@ -435,35 +434,6 @@ public class ImportFragment extends Fragment {
 
         // Inflate the layout for this fragment
         return view;
-    }
-
-    public boolean checkImageColors(Bitmap bitmap) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                int pixel = bitmap.getPixel(x, y);
-
-                if (!isValidColor(pixel)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private boolean isValidColor(int color) {
-        //Add the transparent color as a valid for frames
-        int[] validColors = Arrays.copyOf(hashPalettes.get("bw").getPaletteColorsInt(), 5);
-        validColors[4] = Color.TRANSPARENT;
-        for (int validColor : validColors) {
-            if (validColor == color) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void extractFile() {

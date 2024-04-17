@@ -52,7 +52,10 @@
                         android:id="@+id/sw_orientation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Horizontal"></Switch>
+                        android:autoSizeMaxTextSize="30sp"
+                        android:autoSizeMinTextSize="2sp"
+                        android:autoSizeTextType="uniform"
+                        android:text="@string/horizontal"></Switch>
 
                     <Switch
                         android:id="@+id/swCropCollage"
@@ -60,6 +63,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
                         android:layout_marginBottom="20dp"
+                        android:autoSizeMaxTextSize="30sp"
+                        android:autoSizeMinTextSize="2sp"
+                        android:autoSizeTextType="uniform"
                         android:text="@string/cb_crop"></Switch>
 
                     <Switch
@@ -68,6 +74,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
                         android:layout_marginBottom="20dp"
+                        android:autoSizeMaxTextSize="30sp"
+                        android:autoSizeMinTextSize="2sp"
+                        android:autoSizeTextType="uniform"
+                        android:maxLines="1"
                         android:text="@string/sw_half_frame"></Switch>
 
                 </LinearLayout>
@@ -85,6 +95,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="5dp"
                         android:layout_weight="2"
+                        android:autoSizeMaxTextSize="30sp"
+                        android:autoSizeMinTextSize="2sp"
+                        android:autoSizeTextType="uniform"
+                        android:maxLines="1"
                         android:text="@string/tv_extra_padding">
 
                     </TextView>
@@ -144,7 +158,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="10dp"
                         android:autoSizeMaxTextSize="30sp"
-                        android:autoSizeMinTextSize="3sp"
+                        android:autoSizeMinTextSize="2sp"
                         android:autoSizeTextType="uniform"
                         android:maxLines="1"
                         android:text="@string/paperize_button"
@@ -157,10 +171,13 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginHorizontal="3dp"
+                        android:autoSizeMaxTextSize="30sp"
+                        android:autoSizeMinTextSize="2sp"
+                        android:autoSizeTextType="uniform"
                         android:drawableTint="@color/white"
                         android:gravity="center_horizontal"
+                        android:maxLines="1"
                         android:visibility="gone"
-
                         app:icon="@drawable/ic_print"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp" />
@@ -170,6 +187,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="10dp"
+                        android:autoSizeMaxTextSize="30sp"
+                        android:autoSizeMinTextSize="2sp"
+                        android:maxLines="1"
+                        android:autoSizeTextType="uniform"
                         android:text="@string/btn_realod_anim"></Button>
                 </LinearLayout>
 
@@ -186,6 +207,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="20dp"
+                        android:autoSizeMaxTextSize="30sp"
+                        android:autoSizeMinTextSize="2sp"
+                        android:autoSizeTextType="uniform"
+                        android:maxLines="1"
                         android:text="@string/cancel"></Button>
 
                     <Button
@@ -193,7 +218,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="20dp"
+                        android:autoSizeMaxTextSize="30sp"
+                        android:autoSizeMinTextSize="2sp"
+                        android:autoSizeTextType="uniform"
                         android:backgroundTint="@color/save_color"
+                        android:maxLines="1"
                         android:text="@string/btn_save"></Button>
 
                 </LinearLayout>

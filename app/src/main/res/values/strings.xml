@@ -252,6 +252,7 @@
     <string name="year">Year</string>
     <string name="export_metadata">Export metadata on PNG</string>
     <string name="load_paperizing">Paperizing...</string>
+    <string name="horizontal">Horizontal</string>
 
 
 </resources>

@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectionMode;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_DUPLICATED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
@@ -377,7 +378,7 @@ public class BigImageDialog {
     }
 
     //To show the "big" Image dialog when doing a simple tap on the image
-    public void showBigImageDialogMultipleImages(List<Integer> selectedImages, ImageView previousImageView, boolean[] selectionMode, Dialog previousDialog) {
+    public void showBigImageDialogMultipleImages(List<Integer> selectedImages, ImageView previousImageView,  Dialog previousDialog) {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.big_image_dialog);
 

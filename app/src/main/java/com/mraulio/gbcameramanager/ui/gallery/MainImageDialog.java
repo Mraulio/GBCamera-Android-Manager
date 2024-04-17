@@ -102,7 +102,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     public static boolean isChanging = false;
     UsbManager manager;
     GridView gridView;
-    boolean multiEdition;
     List<Integer> selectedImages;
     CustomGridViewAdapterImage customGridViewAdapterImage;
     private int imageViewMiniIndex = 0;
@@ -122,11 +121,10 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     static Spinner spFrameGroupsImage;
     static GbcImage gbcImage;
 
-    public MainImageDialog(boolean multiEdition, GridView gridView, boolean keepFrame, int lastPage, int position,
+    public MainImageDialog (GridView gridView, boolean keepFrame, int lastPage, int position,
                            List<GbcImage> filteredGbcImages, int lastSeenGalleryImage, Context context, DisplayMetrics displayMetrics,
                            boolean showPalettes, Activity activity, UsbSerialPort port, SerialInputOutputManager usbIoManager,
                            TextView tvResponseBytes, UsbDeviceConnection connection, TextView tv, UsbManager manager, List<Integer> selectedImages, CustomGridViewAdapterImage customGridViewAdapterImage) {
-        this.multiEdition = multiEdition;
         this.gridView = gridView;
         this.keepFrame = keepFrame;
         this.lastPage = lastPage;
@@ -148,7 +146,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     }
 
     public void showImageDialog() {
-        if (!multiEdition) {
+        if (!selectionMode[0]) {
             keepFrame = false;
             //Obtain selected image
             isChanging = false;
@@ -967,10 +965,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                             public void run() {
                                 //Single tap action
                                 BigImageDialog bigImageDialog = new BigImageDialog(filteredGbcImages, context, activity);
-                                boolean[] selectionMode = new boolean[1];
-                                selectionMode[0] = multiEdition;
-                                bigImageDialog.showBigImageDialogMultipleImages(selectedImages, imageView, selectionMode, dialog);
-
+                                bigImageDialog.showBigImageDialogMultipleImages(selectedImages, imageView, dialog);
                                 clickCount = 0;
                             }
                         };
@@ -1020,14 +1015,13 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                 if (!selectedFilterTags.isEmpty()) {
                                     dialog.dismiss();
                                 }
-                                if (multiEdition && !selectedFilterTags.isEmpty()) {
+                                if (selectionMode[0] && !selectedFilterTags.isEmpty()) {
                                     for (int i = indexesToRemove.size(); i > 0; i--) {
                                         filteredGbcImages.remove(indexesToRemove.get(i - 1));
                                     }
                                     selectedImages.clear();
                                     showEditMenuButton = false;
                                     StaticValues.fab.hide();
-                                    multiEdition = false;
                                     selectionMode[0] = false;
                                     activity.invalidateOptionsMenu();
                                 }

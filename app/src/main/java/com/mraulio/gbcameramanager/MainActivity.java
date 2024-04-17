@@ -229,7 +229,6 @@ public class MainActivity extends AppCompatActivity {
             mOpenedFromUsb = true;
         }
 
-        openingFromIntent(mNavController);
 
         NavigationUI.setupActionBarWithNavController(this, mNavController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, mNavController);
@@ -380,12 +379,10 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             GalleryFragment gf = new GalleryFragment();
             doneLoading = true;
-//            for (GbcImage gbcImage: gbcImagesList){
-//                Bitmap image = GalleryFragment.diskCache.get(gbcImage.getHashCode());
-//                Utils.imageBitmapCache.put(gbcImage.getHashCode(), image);
-//            }
 
+            openingFromIntent(mNavController);
             gf.updateFromMain(MainActivity.this);
+
         }
     }
 

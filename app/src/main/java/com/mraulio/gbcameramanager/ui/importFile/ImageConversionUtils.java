@@ -400,7 +400,7 @@ public class ImageConversionUtils {
             for (int x = 0; x < width; x++) {
                 int pixelColor = bitmap.getPixel(x, y);
                 //Checking with the "bw" palette
-                if (!containsColor(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), pixelColor) && Color.alpha(pixelColor) != 0) {
+                if (!containsColor(hashPalettes.get("bw").getPaletteColorsInt(), pixelColor) && Color.alpha(pixelColor) != 0) {
                     hasAllColors = false;
                     break;
                 }

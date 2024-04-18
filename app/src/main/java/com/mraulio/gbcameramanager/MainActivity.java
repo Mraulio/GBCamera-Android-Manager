@@ -1,5 +1,7 @@
 package com.mraulio.gbcameramanager;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.hideSelectionOptions;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectionMode;
 import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
@@ -7,6 +9,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -286,6 +289,17 @@ public class MainActivity extends AppCompatActivity {
                 getMenuInflater().inflate(R.menu.gallery_menu, menu); // Inflates the menu
                 if (StaticValues.showEditMenuButton) {
                     menu.getItem(0).setVisible(true);
+                }
+                if (selectionMode[0]) StaticValues.fab.show();
+
+                if (StaticValues.fab != null && !StaticValues.fab.hasOnClickListeners()) {
+                    Activity activity = this;
+                    StaticValues.fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            hideSelectionOptions(activity);
+                        }
+                    });
                 }
                 break;
 

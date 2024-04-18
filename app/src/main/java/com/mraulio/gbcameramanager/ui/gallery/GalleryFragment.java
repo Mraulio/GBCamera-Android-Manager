@@ -144,7 +144,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     DisplayMetrics displayMetrics;
     public static DiskCache diskCache;
 
-    static boolean[] selectionMode = {false};
+    public static boolean[] selectionMode = {false};
     static boolean alreadyMultiSelect = false;
     static AlertDialog deleteDialog;
 
@@ -154,7 +154,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         galleryActivity = getActivity();
-        if (selectionMode[0]) StaticValues.fab.show();
 
 
         StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.GALLERY;
@@ -166,6 +165,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         gridView = view.findViewById(R.id.gridView);
         loadDialog = new LoadingDialog(getContext(), null);
         setHasOptionsMenu(true);
+
         diskCache = new DiskCache(getContext());
 
         Button btnPrevPage = view.findViewById(R.id.btnPrevPage);
@@ -260,7 +260,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         selectedImages.add(globalImageIndex);
                     }
                     if (selectedImages.size() == 0) {
-                        hideSelectionOptions();
+                        hideSelectionOptions(getActivity());
                     } else {
                         updateTitleText();
                         if (selectedImages.size() > 1) {
@@ -282,15 +282,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                 if (!selectionMode[0]) StaticValues.fab.show();
 
-                //I have to do this here, on onCreateView there was a crash
-                if (StaticValues.fab != null && !StaticValues.fab.hasOnClickListeners()) {
-                    StaticValues.fab.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            hideSelectionOptions();
-                        }
-                    });
-                }
                 int globalImageIndex;
                 if (currentPage != lastPage) {
                     globalImageIndex = position + (currentPage * itemsPerPage);
@@ -1114,9 +1105,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             hiddenFilterTags = getHiddenTags();
             updateGridView();
             updateTitleText();
-
             tv_page.setText((currentPage + 1) + " / " + (lastPage + 1));
-
         } else {
             tv.setText(tv.getContext().getString(R.string.no_images));
         }
@@ -1124,6 +1113,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     //Method to update the gallery gridview
     public static void updateGridView() {
+        System.out.println(" No FROM FROM MAIN");
+
         //Bitmap list to store current page bitmaps
         filteredGbcImages = new ArrayList<>();
 
@@ -1193,7 +1184,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 tv_page.setText("");
                 gridView.setAdapter(null);
             }
-            if (itemsPerPage * currentPage >= filteredGbcImages.size()){
+            if (itemsPerPage * currentPage >= filteredGbcImages.size()) {
                 prevPage();
             }
 
@@ -1231,14 +1222,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
         usbIoManager = new SerialInputOutputManager(port, this);
     }
 
-    private void hideSelectionOptions() {
+    public static void hideSelectionOptions(Activity activity) {
         showEditMenuButton = false;
         selectedImages.clear();
         selectionMode[0] = false;
         gridView.setAdapter(customGridViewAdapterImage);
         StaticValues.fab.hide();
         updateTitleText();
-        getActivity().invalidateOptionsMenu();
+        activity.invalidateOptionsMenu();
     }
 
     @Override

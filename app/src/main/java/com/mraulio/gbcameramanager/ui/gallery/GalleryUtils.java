@@ -51,6 +51,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StrikethroughSpan;
@@ -71,6 +72,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.common.base.Function;
+import com.google.common.collect.Ordering;
 import com.google.gson.Gson;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.db.ImageDao;
@@ -894,27 +897,35 @@ public class GalleryUtils {
         hiddenTagsTV.setText(string);
     }
 
-    @SuppressLint("NewApi")
     public static void sortByDate(List<GbcImage> gbcImagesList, boolean descending) {
-        Comparator<GbcImage> comparator = Comparator.comparing(GbcImage::getCreationDate);
-        if (descending) {
-            comparator = comparator.reversed();
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) { //If it's android api 23
+            Ordering<GbcImage> ordering = Ordering.natural().onResultOf(new Function<GbcImage, Comparable>() {
+                @Override
+                public Comparable apply(GbcImage input) {
+                    return input.getCreationDate();
+                }
+            });
+            if (descending) {
+                ordering = ordering.reverse();
+            }
+            Collections.sort(gbcImagesList, ordering);
+        } else {
+            Comparator<GbcImage> comparator = Comparator.comparing(GbcImage::getCreationDate);
+            if (descending) {
+                comparator = comparator.reversed();
+            }
+            Collections.sort(gbcImagesList, comparator);
         }
-        Collections.sort(gbcImagesList, comparator);
     }
 
-    @SuppressLint("NewApi")
     public static void sortByTitle(List<GbcImage> gbcImagesList, boolean descending) {
-        Comparator<GbcImage> comparator = new Comparator<GbcImage>() {
-            @Override
-            public int compare(GbcImage image1, GbcImage image2) {
-                int titleComparison = image1.getName().compareTo(image2.getName());
-                // If names are the same, compare by date
-                if (titleComparison == 0) {
-                    return image1.getCreationDate().compareTo(image2.getCreationDate());
-                }
-                return titleComparison;
+        Comparator<GbcImage> comparator = (image1, image2) -> {
+            int titleComparison = image1.getName().compareTo(image2.getName());
+            // If names are the same, compare by date
+            if (titleComparison == 0) {
+                return image1.getCreationDate().compareTo(image2.getCreationDate());
             }
+            return titleComparison;
         };
 
         if (descending) {

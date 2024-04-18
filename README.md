@@ -26,7 +26,7 @@ I usually share test releases in the [Game Boy Camera Club Discord](http://gameb
 * Creating backups.
 
 ## Usage
-There is a [Wiki](https://github.com/Mraulio/GBCamera-Android-Manager/wiki/Gallery) where you can learn how to use the app. **Ro be updated for the latest v0.5 release**
+There is a [Wiki](https://github.com/Mraulio/GBCamera-Android-Manager/wiki/Gallery) where you can learn how to use the app. **To be updated for the latest v0.5 release**
 
 ## Building 
 Clone this repo, prepare [Android Studio](https://developer.android.com/studio) and open the project. You can test the app in the emulator or build it (you need the adequate Android SDK) and get the apk file. You may need to modify _AppDatabase.java_ file and delete the _autoMigrations_ annotation.

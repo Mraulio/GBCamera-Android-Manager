@@ -377,7 +377,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     public void run() {
                         //Single tap action
                         BigImageDialog bigImageDialog = new BigImageDialog(filteredGbcImages, context, activity);
-                        bigImageDialog.showBigImageDialogSingleImage(globalImageIndex[0], imageView);
+                        bigImageDialog.showBigImageDialogSingleImage(globalImageIndex[0], imageView, dialog);
                         clickCount = 0;
                     }
                 };

@@ -2,7 +2,9 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.hiddenFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectionMode;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkFilterPass;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_DUPLICATED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
@@ -12,6 +14,7 @@ import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_SUPER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_TRANSFORMED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.hiddenTags;
 import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectedFilterTags;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updateGridView;
@@ -76,7 +79,7 @@ public class BigImageDialog {
     }
 
     //To show the "big" Image dialog when doing a simple tap on the image
-    public void showBigImageDialogSingleImage(int globalImageIndex, ImageView previousImageView) {
+    public void showBigImageDialogSingleImage(int globalImageIndex, ImageView previousImageView, Dialog previousDialog) {
         Bitmap bitmap = Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex).getHashCode());
         bitmap = rotateBitmap(bitmap, filteredGbcImages.get(globalImageIndex));
         final Dialog dialog = new Dialog(context);
@@ -338,6 +341,7 @@ public class BigImageDialog {
             @Override
             public void onClick(View view) {
                 GbcImage gbcImageToUpdate = filteredGbcImages.get(globalImageIndex);
+                HashSet<String> tagsToSave = null;
                 if (editingName[0]) {
                     gbcImageToUpdate.setName(newName[0]);
                 }
@@ -347,7 +351,7 @@ public class BigImageDialog {
                     } else {
                         previousImageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
                     }
-                    HashSet<String> tagsToSave = new HashSet<>(tempTags);//So it doesn't follow the temptags if I select another
+                    tagsToSave = new HashSet<>(tempTags);//So it doesn't follow the temptags if I select another
                     gbcImageToUpdate.setTags(tagsToSave);
                 }
 
@@ -357,6 +361,13 @@ public class BigImageDialog {
 
                 tagsLayout.setBackgroundColor(context.getColor(R.color.white));
                 etImageName.setBackgroundColor(context.getColor(R.color.white));
+
+                if (!checkFilterPass(gbcImageToUpdate)) { // If image is being removed from the filtered images, dismiss the dialogs
+                    if (previousDialog != null && previousDialog.isShowing()) {
+                        dialog.dismiss();
+                        previousDialog.dismiss();
+                    }
+                }
 
                 checkSorting(context);
                 updateGridView();
@@ -378,7 +389,7 @@ public class BigImageDialog {
     }
 
     //To show the "big" Image dialog when doing a simple tap on the image
-    public void showBigImageDialogMultipleImages(List<Integer> selectedImages, ImageView previousImageView,  Dialog previousDialog) {
+    public void showBigImageDialogMultipleImages(List<Integer> selectedImages, ImageView previousImageView, Dialog previousDialog) {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.big_image_dialog);
 
@@ -557,7 +568,7 @@ public class BigImageDialog {
                 String selectedTag = adapter.getItem(position);
                 if (selectedTag.equals(FILTER_FAVOURITE)) {
                     selectedTag = TAG_FAVOURITE;
-                }else if (selectedTag.equals(FILTER_SUPER_FAVOURITE)) {
+                } else if (selectedTag.equals(FILTER_SUPER_FAVOURITE)) {
                     selectedTag = TAG_SUPER_FAVOURITE;
                 } else if (selectedTag.equals(FILTER_DUPLICATED)) {
                     selectedTag = TAG_DUPLICATED;
@@ -594,9 +605,10 @@ public class BigImageDialog {
                 int numDigits = String.valueOf(maxIndex).length();
 
                 String formatString = "%0" + numDigits + "d";
+                HashSet<String> tagsToSave = null;//So it doesn't follow the temptags if I select another
                 for (Integer imageIndex : selectedImages) {
                     String formattedIndex = String.format(formatString, nameIndex);
-
+                    tagsToSave = new HashSet<>();
                     boolean saveImage = false;
                     GbcImage gbcImageToUpdate = filteredGbcImages.get(imageIndex);
                     if (editingName[0]) {
@@ -610,10 +622,9 @@ public class BigImageDialog {
                             previousImageView.setBackgroundColor(context.getColor(R.color.star_color));
                         } else if (tempTags.contains(FILTER_FAVOURITE)) {
                             previousImageView.setBackgroundColor(context.getColor(R.color.favorite));
-                        }else {
+                        } else {
                             previousImageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
                         }
-                        HashSet<String> tagsToSave = new HashSet<>();//So it doesn't follow the temptags if I select another
                         tagsToSave.addAll(gbcImageToUpdate.getTags());//Add all previous tags from the image
                         tagsToSave.addAll(tempTags);//Add all the new tags
                         for (String st : removedTags) {
@@ -636,13 +647,15 @@ public class BigImageDialog {
 
                 //If one of the tags removed from the image is in the tags filtered, clear selected images, hide fab, hide dialog...
 
-                if (checkIfTagsHide(selectedFilterTags, removedTags)) {
+                if (checkIfTagsHide(removedTags, tagsToSave)) {
                     selectedImages.clear();
                     showEditMenuButton = false;
                     StaticValues.fab.hide();
                     selectionMode[0] = false;
                     activity.invalidateOptionsMenu();
-                    previousDialog.dismiss();
+                    if (previousDialog != null && previousDialog.isShowing()) {
+                        previousDialog.dismiss();
+                    }
                 }
 
                 updateGridView();
@@ -677,7 +690,7 @@ public class BigImageDialog {
             cbText = TAG_FAVOURITE;
         } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
             cbText = TAG_SUPER_FAVOURITE;
-        }else if (tag.equals(FILTER_DUPLICATED)) {
+        } else if (tag.equals(FILTER_DUPLICATED)) {
             cbText = TAG_DUPLICATED;
             removableTag = false;
         } else if (tag.equals(FILTER_TRANSFORMED)) {
@@ -737,7 +750,7 @@ public class BigImageDialog {
             cbText = TAG_FAVOURITE;
         } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
             cbText = TAG_SUPER_FAVOURITE;
-        }else if (tag.equals(FILTER_DUPLICATED)) {
+        } else if (tag.equals(FILTER_DUPLICATED)) {
             cbText = TAG_DUPLICATED;
             removableTag = false;
         } else if (tag.equals(FILTER_TRANSFORMED)) {
@@ -775,13 +788,17 @@ public class BigImageDialog {
         tagsLayout.addView(tagCb);
     }
 
-    private boolean checkIfTagsHide(HashSet<String> filteredTags, HashSet<String> removedTags) {
-        boolean hideBool = false;
-        for (String tag : filteredTags) {
-            if (removedTags.contains(tag))
+    private boolean checkIfTagsHide(HashSet<String> removedTags, HashSet<String> tagsToSave) {
+        for (String tag : removedTags) {
+            if (selectedFilterTags.contains(tag))
                 return true;
         }
-        return hideBool;
+        //If I'm adding a new tag that's included in the hidden tags
+        for (String tag : tagsToSave) {
+            if (hiddenFilterTags.contains(tag))
+                return true;
+        }
+        return false;
     }
 
 }

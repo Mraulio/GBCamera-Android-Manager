@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkFilterPass;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.StaticValues.exportSize;
 import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
@@ -1130,32 +1131,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             filteredGbcImages = Utils.gbcImagesList;
         } else {
             filteredGbcImages.clear();
+
             for (GbcImage gbcImageToFilter : Utils.gbcImagesList) {
-                boolean containsAllTags = true;
-
-                //Check the date filter
-                if (filterByDate) {
-                    containsAllTags = checkImageDateFilter(gbcImageToFilter);
-                }
-
-                for (String tag : selectedFilterTags) {
-                    if (!gbcImageToFilter.getTags().contains(tag)) {
-                        containsAllTags = false;
-                        break; //Doesn't keep checking the rest of the tags
-                    }
-                }
-                for (String tag : hiddenFilterTags) {
-                    if (gbcImageToFilter.getTags().contains(tag)) {
-                        containsAllTags = false;
-                        break; //Doesn't keep checking the rest of the tags
-                    }
-                }
-
-                if (containsAllTags) {
+                if (checkFilterPass(gbcImageToFilter)) {
                     filteredGbcImages.add(gbcImageToFilter);
                 }
             }
         }
+
         imagesForPage = new ArrayList<>();
         itemsPerPage = StaticValues.imagesPage;
         //In case the list of images is shorter than the pagination size
@@ -1166,7 +1149,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             if (filteredGbcImages.size() > 0)//In case all images are deleted
             {
                 lastPage = (filteredGbcImages.size() - 1) / itemsPerPage;
-
                 //In case the last page is not complete
                 if (currentPage == lastPage && (filteredGbcImages.size() % itemsPerPage) != 0) {
                     itemsPerPage = filteredGbcImages.size() % itemsPerPage;
@@ -1211,6 +1193,10 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 tv_page.setText("");
                 gridView.setAdapter(null);
             }
+            if (itemsPerPage * currentPage >= filteredGbcImages.size()){
+                prevPage();
+            }
+
         } catch (Exception e) {
             //In case there is an exception, recover the app by going to first page
             e.printStackTrace();
@@ -1218,7 +1204,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             editor.putInt("current_page", currentPage);
             editor.apply();
             updateGridView();
-
         }
     }
 

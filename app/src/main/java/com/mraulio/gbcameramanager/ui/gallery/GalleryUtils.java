@@ -661,7 +661,7 @@ public class GalleryUtils {
                         selectedTag = FILTER_FAVOURITE;//Reverse the tag
                     } else if (selectedTag.equals(TAG_SUPER_FAVOURITE)) {
                         selectedTag = FILTER_SUPER_FAVOURITE;
-                    }else if (selectedTag.equals(TAG_DUPLICATED)) {
+                    } else if (selectedTag.equals(TAG_DUPLICATED)) {
                         selectedTag = FILTER_DUPLICATED;
                     } else if (selectedTag.equals(TAG_TRANSFORMED)) {
                         selectedTag = FILTER_TRANSFORMED;
@@ -1045,4 +1045,23 @@ public class GalleryUtils {
         return image;
     }
 
+    public static boolean checkFilterPass(GbcImage gbcImage) {
+        HashSet<String> imageTags = gbcImage.getTags();
+        //Check the date filter
+        if (filterByDate) {
+            if (!checkImageDateFilter(gbcImage)) return false;
+        }
+
+        for (String tag : selectedFilterTags) {
+            if (!imageTags.contains(tag)) {
+                return false;
+            }
+        }
+        for (String tag : hiddenFilterTags) {
+            if (imageTags.contains(tag)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

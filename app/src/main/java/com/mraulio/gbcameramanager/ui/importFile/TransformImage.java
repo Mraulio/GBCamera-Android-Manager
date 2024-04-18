@@ -8,6 +8,7 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.dit
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.resizeImage;
 import static com.mraulio.gbcameramanager.ui.importFile.ImportFragment.finalListBitmaps;
 import static com.mraulio.gbcameramanager.ui.importFile.ImportFragment.finalListImages;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_TRANSFORMED;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -201,7 +202,7 @@ public class TransformImage {
                     LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                     metadata.put("Type", "Transformed");
                     gbcImage.setImageMetadata(metadata);
-                    gbcImage.getTags().add("__filter:transformed__");
+                    gbcImage.getTags().add(FILTER_TRANSFORMED);
                     Adapter adapter = new CustomGridViewAdapterImage(context, R.layout.row_items, finalListImages, finalListBitmaps, true, true, false, null);
                     gridViewImport.setAdapter((ListAdapter) adapter);
 

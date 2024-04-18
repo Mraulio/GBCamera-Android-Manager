@@ -78,6 +78,7 @@
             android:id="@+id/sw_mod_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="true"
             android:text="@string/cb_use_mod_date"></Switch>
     </LinearLayout>
 

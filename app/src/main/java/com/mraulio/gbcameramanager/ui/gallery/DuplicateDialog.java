@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_DUPLICATED;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.imageBitmapCache;
 
@@ -153,7 +154,7 @@ public class DuplicateDialog {
                     duplicatedImage.setHashCode(duplicatedHash);
 
                     HashSet tags = new HashSet(duplicatedImage.getTags());
-                    tags.add("__filter:duplicated__");
+                    tags.add(FILTER_DUPLICATED);
                     duplicatedImage.setTags(tags);
                     duplicatedImages.add(duplicatedImage);
                     Bitmap originalBitmap = imageBitmapCache.get(gbcImage.getHashCode());

@@ -18,9 +18,8 @@
             android:autoSizeMaxTextSize="30sp"
             android:autoSizeMinTextSize="5sp"
             android:autoSizeTextType="uniform"
-            android:background="@color/white"
             android:drawableEnd="@drawable/ic_edit"
-            android:singleLine="true"
+            android:textColor="@color/black"
             android:textSize="20dp"></EditText>
 
         <com.mraulio.gbcameramanager.utils.TouchImageView
@@ -98,7 +97,7 @@
                     android:autoSizeMaxTextSize="20sp"
                     android:autoSizeMinTextSize="3sp"
                     android:autoSizeTextType="uniform"
-                    android:singleLine="true"
+                    android:maxLines="1"
                     android:text="@string/et_write_tag" />
 
                 <AutoCompleteTextView
@@ -121,6 +120,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:layout_marginLeft="3dp"
                     android:text="OK"></Button>
 
             </LinearLayout>

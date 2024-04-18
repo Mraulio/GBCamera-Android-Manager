@@ -37,6 +37,7 @@ import com.mraulio.gbcameramanager.gameboycameralib.saveExtractor.SaveImageExtra
 import com.mraulio.gbcameramanager.model.GbcImage;
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
+import com.mraulio.gbcameramanager.ui.gallery.GalleryFragment;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
@@ -61,7 +62,7 @@ public class SaveManagerFragment extends Fragment {
     private List<String> fileList;
     private String saveName;
     private Button btnDelete, btnAdd;
-    Switch cbModDate;
+    Switch swModDate;
     static Utils.SAVE_TYPE_INT_JP_HK saveTypeIntJpHk;
 
     Spinner spSaveType;
@@ -98,7 +99,7 @@ public class SaveManagerFragment extends Fragment {
         gridviewSaves = view.findViewById(R.id.gridViewSaves);
         btnDelete = view.findViewById(R.id.btnDelete);
         btnAdd = view.findViewById(R.id.btnAdd);
-        cbModDate = view.findViewById(R.id.sw_mod_date);
+        swModDate = view.findViewById(R.id.sw_mod_date);
         loadingDialog = new LoadingDialog(getContext(), getContext().getString(R.string.load_extracting_images));
         StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.SAVE_MANAGER;
 
@@ -145,7 +146,7 @@ public class SaveManagerFragment extends Fragment {
                 }
                 SimpleDateFormat dateFormat = new SimpleDateFormat(loc+" HH-mm-ss", Locale.getDefault());
                 String dateString = dateFormat.format(lastModDate);
-                cbModDate.setText(getString(R.string.cb_use_mod_date) + ": " + dateString);
+                swModDate.setText(getString(R.string.cb_use_mod_date) + ": " + dateString);
                 new loadDataTask().execute();
             }
         });
@@ -161,7 +162,7 @@ public class SaveManagerFragment extends Fragment {
             public void onClick(View v) {
 
                 List<GbcImage> newGbcImages = new ArrayList<>();
-                List<ImageData> newImageDatas = new ArrayList<>();
+//                List<ImageData> newImageDatas = new ArrayList<>();
                 for (int i = 0; i < extractedImagesList.size(); i++) {
                     GbcImage gbcImage = extractedImagesList.get(i);
                     boolean alreadyAdded = false;
@@ -173,21 +174,13 @@ public class SaveManagerFragment extends Fragment {
                         }
                     }
                     if (!alreadyAdded) {
-                        GbcImage.numImages++;
-                        numImagesAdded++;
-                        ImageData imageData = new ImageData();
-                        imageData.setImageId(gbcImage.getHashCode());
-                        imageData.setData(gbcImage.getImageBytes());
-                        newImageDatas.add(imageData);
-                        Utils.gbcImagesList.add(gbcImage);
 
                         newGbcImages.add(gbcImage);
                         Utils.imageBitmapCache.put(gbcImage.getHashCode(), extractedImagesBitmaps.get(i));
                     }
                 }
                 if (newGbcImages.size() > 0) {
-                    new SaveImageAsyncTask(newGbcImages, newImageDatas).execute();
-                    retrieveTags(gbcImagesList);
+                    new SaveImageAsyncTask(newGbcImages).execute();
                 } else {
                     Utils.toast(getContext(), getString(R.string.no_new_images));
                 }
@@ -198,48 +191,50 @@ public class SaveManagerFragment extends Fragment {
         return view;
     }
 
-    //Refactor this, already in Import and USB Serial Fragment!!
     private class SaveImageAsyncTask extends AsyncTask<Void, Void, Void> {
         List<GbcImage> gbcImagesList;
-        List<ImageData> imageDataList;
 
-        public SaveImageAsyncTask(List<GbcImage> gbcImagesList, List<ImageData> imageDataList) {
+        public SaveImageAsyncTask(List<GbcImage> gbcImagesList) {
             this.gbcImagesList = gbcImagesList;
-            this.imageDataList = imageDataList;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
+            List<GbcImage> newGbcImages = new ArrayList<>();
+            List<ImageData> newImageDatas = new ArrayList<>();
+            int dateIndex = 0;
+            for (int i = 0; i < gbcImagesList.size(); i++) {
+                GbcImage gbcImage = gbcImagesList.get(i);
+                if (swModDate.isChecked()) {
+                    long lastModifiedTime = selectedFile.lastModified() + dateIndex++;
+                    lastModDate = new Date(lastModifiedTime);
+                    gbcImage.setCreationDate(lastModDate);
+                }
+                ImageData imageData = new ImageData();
+                imageData.setImageId(gbcImage.getHashCode());
+                imageData.setData(gbcImage.getImageBytes());
+                newImageDatas.add(imageData);
+                Utils.gbcImagesList.add(gbcImage);
+                newGbcImages.add(gbcImage);
+                GbcImage.numImages++;
+                numImagesAdded++;
+                GalleryFragment.diskCache.put(gbcImage.getHashCode(), Utils.imageBitmapCache.get(gbcImage.getHashCode()));
+            }
 
             ImageDao imageDao = StaticValues.db.imageDao();
             ImageDataDao imageDataDao = StaticValues.db.imageDataDao();
+
             //Need to insert first the gbcImage because of the Foreign Key
-            try {
-                int dateIndex = 0;
-                for (GbcImage gbcImage : gbcImagesList) {
-                    if (cbModDate.isChecked()) {
-                        long lastModifiedTime = selectedFile.lastModified() + dateIndex++;
-                        lastModDate = new Date(lastModifiedTime);
-                        gbcImage.setCreationDate(lastModDate);
-                    }
-                    imageDao.insert(gbcImage);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                for (ImageData imageData : imageDataList) {
-                    imageDataDao.insert(imageData);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            imageDao.insertManyImages(newGbcImages);
+            imageDataDao.insertManyDatas(newImageDatas);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            retrieveTags(gbcImagesList);
             Utils.toast(getContext(), getString(R.string.images_added) + numImagesAdded);
+            numImagesAdded = 0;
         }
     }
 
@@ -251,7 +246,7 @@ public class SaveManagerFragment extends Fragment {
             List<File> fileListWithDate = Arrays.asList(files);
             Collections.sort(fileListWithDate, new Comparator<File>() {
                 public int compare(File f1, File f2) {
-                    return Long.compare(f2.lastModified(), f1.lastModified()); // Ordenar por fecha de modificación en orden inverso
+                    return Long.compare(f2.lastModified(), f1.lastModified());
                 }
             });
 

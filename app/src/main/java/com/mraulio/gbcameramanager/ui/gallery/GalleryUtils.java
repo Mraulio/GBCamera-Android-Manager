@@ -1,6 +1,14 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_DUPLICATED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_TRANSFORMED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.SORT_MODE.*;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_DUPLICATED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_SUPER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_TRANSFORMED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateFilter;
 import static com.mraulio.gbcameramanager.utils.StaticValues.db;
@@ -604,7 +612,16 @@ public class GalleryUtils {
         HashSet<String> hiddenTags = new HashSet<>(hiddenFilterTags);
 
         LinkedHashSet newTagsSetWithTopFavorite = new LinkedHashSet();
-        newTagsSetWithTopFavorite.add("__filter:favourite__"); //adding it in case it doesn't exist, so it appears at the top with the comparator
+        if (hashTags.contains(FILTER_SUPER_FAVOURITE)) {
+            newTagsSetWithTopFavorite.add(FILTER_SUPER_FAVOURITE);
+        }
+        newTagsSetWithTopFavorite.add(FILTER_FAVOURITE); //adding it in case it doesn't exist, so it appears at the top with the comparator
+        if (hashTags.contains(FILTER_DUPLICATED)) {
+            newTagsSetWithTopFavorite.add(FILTER_DUPLICATED);
+        }
+        if (hashTags.contains(FILTER_TRANSFORMED)) {
+            newTagsSetWithTopFavorite.add(FILTER_TRANSFORMED);
+        }
         newTagsSetWithTopFavorite.addAll(hashTags);
         Iterator<String> tagIterator = newTagsSetWithTopFavorite.iterator();
 
@@ -622,12 +639,14 @@ public class GalleryUtils {
                 checkBox.setButtonDrawable(drawableHidden);
             }
 
-            if (item.equals("__filter:favourite__")) {
-                item = "Favourite \u2764\ufe0f";//The heart emoticon
-            } else if (item.equals("__filter:duplicated__")) {
-                item = "Duplicated \uD83D\uDC11";
-            } else if (item.equals("__filter:transformed__")) {
-                item = "Transformed \uD83D\uDD04";
+            if (item.equals(FILTER_FAVOURITE)) {
+                item = TAG_FAVOURITE;//The heart emoticon
+            } else if (item.equals(FILTER_SUPER_FAVOURITE)) {
+                item = TAG_SUPER_FAVOURITE;
+            } else if (item.equals(FILTER_DUPLICATED)) {
+                item = TAG_DUPLICATED;
+            } else if (item.equals(FILTER_TRANSFORMED)) {
+                item = TAG_TRANSFORMED;
             }
 
             checkBox.setCompoundDrawablePadding(10);
@@ -638,12 +657,14 @@ public class GalleryUtils {
                 public void onClick(View v) {
                     String selectedTag = ((Button) v).getText().toString();
 
-                    if (selectedTag.equals("Favourite \u2764\ufe0f")) {
-                        selectedTag = "__filter:favourite__";//Reverse the tag
-                    } else if (selectedTag.equals("Duplicated \uD83D\uDC11")) {
-                        selectedTag = "__filter:duplicated__";
-                    } else if (selectedTag.equals("Transformed \uD83D\uDD04")) {
-                        selectedTag = "__filter:transformed__";
+                    if (selectedTag.equals(TAG_FAVOURITE)) {
+                        selectedTag = FILTER_FAVOURITE;//Reverse the tag
+                    } else if (selectedTag.equals(TAG_SUPER_FAVOURITE)) {
+                        selectedTag = FILTER_SUPER_FAVOURITE;
+                    } else if (selectedTag.equals(TAG_DUPLICATED)) {
+                        selectedTag = FILTER_DUPLICATED;
+                    } else if (selectedTag.equals(TAG_TRANSFORMED)) {
+                        selectedTag = FILTER_TRANSFORMED;
                     }
 
                     if (selectedTags.contains(selectedTag)) {
@@ -833,25 +854,28 @@ public class GalleryUtils {
     public static void updateSelectedTagsText(TextView selectedTagsTv, TextView hiddenTagsTV, HashSet<String> selectedTags, HashSet<String> notShowingTags) {
         StringBuilder selectedTagsBuilder = new StringBuilder();
         for (String tag : selectedTags) {
-            if (tag.equals("__filter:favourite__")) {
-                tag = "Favourite \u2764\ufe0f";
-            } else if (tag.equals("__filter:duplicated__")) {
-                tag = "Duplicated \uD83D\uDC11";
-            } else if (tag.equals("__filter:transformed__")) {
-                tag = "Transformed \uD83D\uDD04";
+            if (tag.equals(FILTER_FAVOURITE)) {
+                tag = TAG_FAVOURITE;
+            } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
+                tag = TAG_SUPER_FAVOURITE;
+            } else if (tag.equals(FILTER_DUPLICATED)) {
+                tag = TAG_DUPLICATED;
+            } else if (tag.equals(FILTER_TRANSFORMED)) {
+                tag = TAG_TRANSFORMED;
             }
             selectedTagsBuilder.append(tag).append(", ");
         }
 
         StringBuilder notShowingTagsSB = new StringBuilder();
         for (String tag : notShowingTags) {
-            if (tag.equals("__filter:favourite__")) {
-                tag = "Favourite \u2764\ufe0f";
-            }
-            if (tag.equals("__filter:duplicated__")) {
-                tag = "Duplicated \uD83D\uDC11";
-            } else if (tag.equals("__filter:transformed__")) {
-                tag = "Transformed \uD83D\uDD04";
+            if (tag.equals(FILTER_FAVOURITE)) {
+                tag = TAG_FAVOURITE;
+            } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
+                tag = TAG_SUPER_FAVOURITE;
+            } else if (tag.equals(FILTER_DUPLICATED)) {
+                tag = TAG_DUPLICATED;
+            } else if (tag.equals(FILTER_TRANSFORMED)) {
+                tag = TAG_TRANSFORMED;
             }
             notShowingTagsSB.append(tag).append(", ");
         }
@@ -1021,4 +1045,23 @@ public class GalleryUtils {
         return image;
     }
 
+    public static boolean checkFilterPass(GbcImage gbcImage) {
+        HashSet<String> imageTags = gbcImage.getTags();
+        //Check the date filter
+        if (filterByDate) {
+            if (!checkImageDateFilter(gbcImage)) return false;
+        }
+
+        for (String tag : selectedFilterTags) {
+            if (!imageTags.contains(tag)) {
+                return false;
+            }
+        }
+        for (String tag : hiddenFilterTags) {
+            if (imageTags.contains(tag)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

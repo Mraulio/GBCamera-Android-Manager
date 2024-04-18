@@ -2,6 +2,14 @@ package com.mraulio.gbcameramanager.ui.importFile;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_DUPLICATED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_TRANSFORMED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_DUPLICATED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_SUPER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_TRANSFORMED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
@@ -146,14 +154,20 @@ public class ImagesImportDialog {
         List<String> availableTotalTagsAutoComplete = new ArrayList<>();
         List<String> showingTags = new ArrayList<>();
 
-        for (
-                String tag : availableTotalTags) {
-            if (tag.equals("__filter:favourite__")) {
-                tag = "Favourite \u2764\ufe0f";
+        for (String tag : availableTotalTags) {
+            if (tag.equals(FILTER_SUPER_FAVOURITE)) {
+                tag = TAG_SUPER_FAVOURITE;
+            } else if (tag.equals(FILTER_FAVOURITE)) {
+                tag = TAG_FAVOURITE;
+                ; // Not adding this tags, as they are non removable
+            } else if (tag.equals(FILTER_DUPLICATED)) {
+                continue; // Not adding this tags, as they are non removable
+            } else if (tag.equals(FILTER_TRANSFORMED)) {
+                continue;
             }
             availableTotalTagsAutoComplete.add(tag);
         }
-        availableTotalTagsSpinner.add("~ "+context.getString(R.string.tags_dialog_title)+" ~");
+        availableTotalTagsSpinner.add("~ " + context.getString(R.string.tags_dialog_title) + " ~");
         availableTotalTagsSpinner.addAll(availableTotalTagsAutoComplete);
 
         ArrayAdapter<String> adapterAutoComplete = new ArrayAdapter<>(context,
@@ -191,8 +205,14 @@ public class ImagesImportDialog {
                 String newTag = autoCAddTag.getText().toString().trim();
                 if (newTag.isEmpty())
                     return;
-                if (newTag.equals("Favourite \u2764\ufe0f")) {
-                    newTag = "__filter:favourite__";//Reverse the tag
+                if (newTag.equals(TAG_FAVOURITE)) {
+                    newTag = FILTER_FAVOURITE;//Reverse the tag
+                } else if (newTag.equals(TAG_SUPER_FAVOURITE)) {
+                    newTag = FILTER_SUPER_FAVOURITE;
+                } else if (newTag.equals(TAG_DUPLICATED)) {
+                    newTag = FILTER_DUPLICATED;
+                } else if (newTag.equals(TAG_TRANSFORMED)) {
+                    newTag = FILTER_TRANSFORMED;
                 }
                 if (!tempTags.contains(newTag)) {
                     //Generate dynamically new checkboxes
@@ -218,8 +238,14 @@ public class ImagesImportDialog {
                     return;
                 }
                 String selectedTag = adapter.getItem(position);
-                if (selectedTag.equals("Favourite \u2764\ufe0f")) {
-                    selectedTag = "__filter:favourite__";//Reverse the tag
+                if (selectedTag.equals(TAG_FAVOURITE)) {
+                    selectedTag = FILTER_FAVOURITE;//Reverse the tag
+                } else if (selectedTag.equals(TAG_SUPER_FAVOURITE)) {
+                    selectedTag = FILTER_SUPER_FAVOURITE;
+                } else if (selectedTag.equals(TAG_DUPLICATED)) {
+                    selectedTag = FILTER_DUPLICATED;
+                } else if (selectedTag.equals(TAG_TRANSFORMED)) {
+                    selectedTag = FILTER_TRANSFORMED;
                 }
                 if (!showingTags.contains(selectedTag)) {
                     if (!tempTags.contains(selectedTag)) {
@@ -294,8 +320,14 @@ public class ImagesImportDialog {
     private void createTagsCheckBox(String tag, LinearLayout tagsLayout, List<String> tempTags) {
         CheckBox tagCb = new CheckBox(context);
         String cbText;
-        if (tag.equals("__filter:favourite__")) {
-            cbText = "Favourite \u2764\ufe0f";
+        if (tag.equals(FILTER_FAVOURITE)) {
+            cbText = TAG_FAVOURITE;
+        } else if (tag.equals(FILTER_SUPER_FAVOURITE)) {
+            cbText = TAG_SUPER_FAVOURITE;
+        }else if (tag.equals(FILTER_DUPLICATED)) {
+            cbText = TAG_DUPLICATED;
+        } else if (tag.equals(FILTER_TRANSFORMED)) {
+            cbText = TAG_TRANSFORMED;
         } else cbText = tag;
 
         tagCb.setText(cbText);

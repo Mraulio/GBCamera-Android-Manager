@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.importFile;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_TRANSFORMED;
 import static com.mraulio.gbcameramanager.utils.Utils.hashPalettes;
 
 import android.graphics.Bitmap;
@@ -35,7 +36,7 @@ public class ImageConversionUtils {
                     LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                     metadata.put("Type", "Transformed");
                     gbcImage.setImageMetadata(metadata);
-                    gbcImage.getTags().add("__filter:transformed__");
+                    gbcImage.getTags().add(FILTER_TRANSFORMED);
                 }
             }
             return originalBitmap;
@@ -54,7 +55,7 @@ public class ImageConversionUtils {
                         LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                         metadata.put("Type", "Transformed");
                         gbcImage.setImageMetadata(metadata);
-                        gbcImage.getTags().add("__filter:transformed__");
+                        gbcImage.getTags().add(FILTER_TRANSFORMED);
                     }
                 }
                 return scaledBitmap;
@@ -95,7 +96,7 @@ public class ImageConversionUtils {
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                             metadata.put("Type", "Transformed");
                             gbcImage.setImageMetadata(metadata);
-                            gbcImage.getTags().add("__filter:transformed__");
+                            gbcImage.getTags().add(FILTER_TRANSFORMED);
                         }
                     }
 
@@ -139,7 +140,7 @@ public class ImageConversionUtils {
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                             metadata.put("Type", "Transformed");
                             gbcImage.setImageMetadata(metadata);
-                            gbcImage.getTags().add("__filter:transformed__");
+                            gbcImage.getTags().add(FILTER_TRANSFORMED);
                         }
                     }
 
@@ -399,7 +400,7 @@ public class ImageConversionUtils {
             for (int x = 0; x < width; x++) {
                 int pixelColor = bitmap.getPixel(x, y);
                 //Checking with the "bw" palette
-                if (!containsColor(Utils.gbcPalettesList.get(0).getPaletteColorsInt(), pixelColor) && Color.alpha(pixelColor) != 0) {
+                if (!containsColor(hashPalettes.get("bw").getPaletteColorsInt(), pixelColor) && Color.alpha(pixelColor) != 0) {
                     hasAllColors = false;
                     break;
                 }

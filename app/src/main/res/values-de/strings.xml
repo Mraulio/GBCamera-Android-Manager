@@ -18,9 +18,9 @@
 
     <!--Custom_dialog, Gallery Fragment strings-->
     <string name="btn_show_palettes">Paletten anzeigen</string>
-    <string name="btn_show_frames">Frames anzeigen</string>
-    <string name="cb_keep_frame">Framefarbe beibehalten</string>
-    <string name="cb_crop">Beschneiden</string>
+    <string name="btn_show_frames">Rahmen anzeigen</string>
+    <string name="cb_keep_frame">Rahmenfarbe beibehalten</string>
+    <string name="cb_crop">Ohne\nRahmen</string>
 
     <string name="toast_printing">Drucke, bitte warten...</string>
     <string name="toast_saved">Gespeichert x</string>
@@ -39,25 +39,25 @@
     <string name="language">Sprache (benötigt Neustart):\u0020</string>
 
     <!--Frames fragment strings-->
-    <string name="cant_delete_base">Kann Basisframe nicht löschen</string>
-    <string name="delete_frame_dialog">Frame löschen\u0020</string>
+    <string name="cant_delete_base">Kann Basis-Rahmen nicht löschen</string>
+    <string name="delete_frame_dialog">Rahmen löschen\u0020</string>
     <string name="sure_dialog">Sicher?</string>
     <string name="delete">LÖSCHEN</string>
     <string name="cancel">Abbrechen</string>
-    <string name="frames_total">Anzahl Frames:\u0020</string>
+    <string name="frames_total">Anzahl Rahmen:\u0020</string>
 
     <!--Palettes fragment strings-->
     <string name="btn_add_palette">Neue Palette</string>
     <string name="btn_export_json">JSON exportieren</string>
     <string name="long_press_delete_palette">Halten zum löschen</string>
-    <string name="cant_delete_base_palette">Kann Basispalette nicht löschen</string>
+    <string name="cant_delete_base_palette">Kann Basis-Palette nicht löschen</string>
     <string name="toast_palettes_json">Paletten gespeichert.</string>
     <string name="set_palette_name">*Palettenname setzen*</string>
-    <string name="sure_dialog_palette">Sicher?\nVor dem Fortsetzen ist ein JSON export empfohlen.</string>
+    <string name="sure_dialog_palette">Sicher?\nVor dem Fortsetzen wird ein JSON-Export empfohlen.</string>
     <string name="delete_dialog_palette">Palette löschen\u0020</string>
     <string name="choose_color">Farbe wählen</string>
     <string name="selected_color">Gewählte Farbe: #</string>
-    <string name="toast_palettes_error">2 Paletten dürfen nicht den selben Id haben.</string>
+    <string name="toast_palettes_error">2 Paletten dürfen nicht dieselbe ID haben.</string>
     <string name="palette_added">Palette hinzugefügt</string>
 
     <string name="btn_save">Speichern</string>
@@ -70,18 +70,18 @@
     <string name="btn_extract_file">Datei extrahieren</string>
     <string name="btn_add_images">Bilder hinzufügen</string>
     <string name="btn_add_palettes">Paletten hinzufügen</string>
-    <string name="btn_add_frames">Frames hinzugügen</string>
+    <string name="btn_add_frames">Rahmen hinzufügen</string>
     <string name="no_valid_list">Keine gültige Liste</string>
     <string name="images_available">\u0020Bilder verfügbar.</string>
     <string name="no_new_palettes">Keine neuen Paletten hinzugefügt.</string>
-    <string name="no_new_frames">Keine neuen Frames hinzugefügt.</string>
+    <string name="no_new_frames">Keine neuen Rahmen hinzugefügt.</string>
     <string name="no_new_images">Keine neuen Bilder hinzugefügt.</string>
     <string name="images_added">Bilder hinzugefügt:\u0020</string>
     <string name="done_adding_images">\u0020Bilder hinzugefügt!</string>
     <string name="palettes_added">Paletten hinzugefügt.</string>
     <string name="done_adding_palettes">Alle Paletten hinzugefügt!</string>
-    <string name="frames_added">Frames hinzugefügt.</string>
-    <string name="done_adding_frames">Alle Frames hinzugefügt!</string>
+    <string name="frames_added">Rahmen hinzugefügt.</string>
+    <string name="done_adding_frames">Alle Rahmen hinzugefügt!</string>
     <string name="no_valid_file">Keine gültige Datei.</string>
     <string name="cb_last_seen">Zuletzt gesehen.</string>
     <string name="cb_deleted_images">Gelöschte Bilder.</string>
@@ -96,7 +96,7 @@
     <string name="btn_print_image">Bilder drucken</string>
     <string name="btn_delete_sav">SAV löschen</string>
     <string name="tv_sleep_time">Wartezeit:\u0020</string>
-    <string name="error_print_image">"Fehler beim drucken</string>
+    <string name="error_print_image">"Fehler beim Drucken</string>
     <string name="delete_sav_dialog">SAV löschen?</string>
     <string name="sure_delete_sav">Wirklich löschen?: \u0020</string>
     <string name="toast_sav_deleted">SAV gelöscht.</string>
@@ -142,7 +142,7 @@
     <string name="json_backup_saved">JSON Backup gespeichert!</string>
     <string name="page_selector_dialog">Seite wählen</string>
     <string name="hdr_exception">Alle Bilder müssen dieselbe Größe haben.</string>
-    <string name="save_location_hint">PNGs, HDRs und Animationen werden nach \n\u0020 Pictures/GBCamera Manager gespeichert\nAndere Dateien werden nach Download/GBCamera Manager gespeichert.</string>
+    <string name="save_location_hint">PNGs, HDRs und Animationen werden unter \n\u0020 Pictures/GBCamera Manager gespeichert\nAndere Dateien werden unter Download/GBCamera Manager gespeichert.</string>
 
     <string name="done_dumping_ram">RAM WURDE AUSGELESEN! Schau in den Ordner Download/GBCamera Manager/Save dumps</string>
     <string name="done_dumping_photo">ROM WURDE AUSGELESEN! Schau in den Ordner Download/GBCamera Manager/PHOTO Rom Dumps</string>
@@ -154,13 +154,13 @@
 
     <string name="check_magic">Beim Import/Extrahieren auf gültige .sav Datei prüfen</string>
     <string name="delete_photo_folder_dialog">Photo-ROM-Ordner löschen?</string>
-    <string name="add_as_frame">Als Frame hinzufügen</string>
+    <string name="add_as_frame">Als Rahmen hinzufügen</string>
     <string name="rotation_button">Zeige Button "Rotation".</string>
-    <string name="frame_name">Frame-Namen festlegen</string>
-    <string name="cant_add_frame">Dieses Bild kann nicht als Frame hinzugefügt werden</string>
-    <string name="no_empty_frame_name">Der Id darf nicht leer sein</string>
+    <string name="frame_name">Rahmen-Namen festlegen</string>
+    <string name="cant_add_frame">Dieses Bild kann nicht als Rahmen hinzugefügt werden</string>
+    <string name="no_empty_frame_name">Die ID darf nicht leer sein</string>
     <string name="no_spaces_frame_name">Der Name darf keine Leerzeichen enthalten</string>
-    <string name="frame_name_exists">Dieser Framename existiert bereits</string>
+    <string name="frame_name_exists">Dieser Rahmen-Name existiert bereits</string>
     <string name="no_valid_image_file">Keine gültige Bilddatei</string>
 
     <string name="invalid_transparent_image">Das Bild ist transparent und kann nicht hinzugefügt werden</string>
@@ -178,7 +178,7 @@
 
     <string name="toast_frames_json">JSON für Rahmen gespeichert</string>
     <string name="import_valid_images">Bitte nur gültige Bildformate auswählen (.jpg, .jpeg, .png, .bmp).</string>
-    <string name="no_filtered_images">Kein gefilterten Bilder verfügbar</string>
+    <string name="no_filtered_images">Keine gefilterten Bilder verfügbar</string>
     <string name="tags_dialog_title">Tags/Datum filtern</string>
     <string name="tags_dialog_clear">Zurücksetzen</string>
     <string name="sort_by_date">Nach Erstelldatum</string>
@@ -228,7 +228,7 @@
     <string name="toast_first_image">Dies ist das erste Bild</string>
     <string name="toast_last_image">Dies ist das letzte Bild</string>
     <string name="action_duplicate">Duplizieren</string>
-    <string name="sw_half_frame">Halber Rahmen</string>
+    <string name="sw_half_frame">Halber\nRahmen</string>
     <string name="tv_extra_padding">Außenabstand:\u0020</string>
     <string name="delete_frame_group_dialog">Rahmengruppe löschen\u0020</string>
     <string name="cant_delete_base_framegroup">Basis-Rahmen kann nicht gelöscht werden</string>
@@ -254,5 +254,6 @@
     <string name="export_metadata">EXIF-Metadaten im PNG speichern</string>
 
     <string name="load_paperizing">Paperizing...</string>
+    <string name="horizontal">Horizontal</string>
 
 </resources>

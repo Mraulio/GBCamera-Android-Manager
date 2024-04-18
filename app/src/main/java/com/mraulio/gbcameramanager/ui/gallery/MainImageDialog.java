@@ -2,6 +2,9 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectionMode;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
 import static com.mraulio.gbcameramanager.ui.gallery.CollageMaker.addPadding;
@@ -99,7 +102,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     public static boolean isChanging = false;
     UsbManager manager;
     GridView gridView;
-    boolean multiEdition;
     List<Integer> selectedImages;
     CustomGridViewAdapterImage customGridViewAdapterImage;
     private int imageViewMiniIndex = 0;
@@ -118,11 +120,11 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     static CheckBox cbInvert;
     static Spinner spFrameGroupsImage;
     static GbcImage gbcImage;
-    public MainImageDialog(boolean multiEdition, GridView gridView, boolean keepFrame, int lastPage, int position,
+
+    public MainImageDialog (GridView gridView, boolean keepFrame, int lastPage, int position,
                            List<GbcImage> filteredGbcImages, int lastSeenGalleryImage, Context context, DisplayMetrics displayMetrics,
                            boolean showPalettes, Activity activity, UsbSerialPort port, SerialInputOutputManager usbIoManager,
                            TextView tvResponseBytes, UsbDeviceConnection connection, TextView tv, UsbManager manager, List<Integer> selectedImages, CustomGridViewAdapterImage customGridViewAdapterImage) {
-        this.multiEdition = multiEdition;
         this.gridView = gridView;
         this.keepFrame = keepFrame;
         this.lastPage = lastPage;
@@ -144,7 +146,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     }
 
     public void showImageDialog() {
-        if (!multiEdition) {
+        if (!selectionMode[0]) {
             keepFrame = false;
             //Obtain selected image
             isChanging = false;
@@ -253,7 +255,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             }
 
             showPalettes = true;
-            if (gbcImage.getTags().contains("__filter:favourite__")) {
+            if (gbcImage.getTags().contains(FILTER_SUPER_FAVOURITE)) {
+                imageView.setBackgroundColor(context.getColor(R.color.star_color));
+            } else if (gbcImage.getTags().contains(FILTER_FAVOURITE)) {
                 imageView.setBackgroundColor(context.getColor(R.color.favorite));
             }
             if (gbcImage.isLockFrame()) {
@@ -265,6 +269,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             } else if (keepFrame && gbcImage.isInvertFramePalette()) {
                 cbInvert.setChecked(true);
             }
+
             cbInvert.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -372,7 +377,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     public void run() {
                         //Single tap action
                         BigImageDialog bigImageDialog = new BigImageDialog(filteredGbcImages, context, activity);
-                        bigImageDialog.showBigImageDialogSingleImage(globalImageIndex[0], imageView);
+                        bigImageDialog.showBigImageDialogSingleImage(globalImageIndex[0], imageView, dialog);
                         clickCount = 0;
                     }
                 };
@@ -387,11 +392,15 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
                         // Stop timer and make double tap action
                         handler.removeCallbacks(runnable);
-                        if (gbcImage.getTags().contains("__filter:favourite__")) {
+                        //If image is regular favorite, add the Superfav tag. If it's superfav, remove superfav and favorite
+                        if (gbcImage.getTags().contains(FILTER_SUPER_FAVOURITE)) {
                             HashSet<String> tags = gbcImage.getTags();
                             for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
-                                String nombre = iter.next();
-                                if (nombre.equals("__filter:favourite__")) {
+                                String tag = iter.next();
+                                if (tag.equals(FILTER_FAVOURITE)) {
+                                    iter.remove();
+                                }
+                                if (tag.equals(FILTER_SUPER_FAVOURITE)) {
                                     iter.remove();
                                 }
                                 gbcImage.setTags(tags);
@@ -400,12 +409,15 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                 imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
 
                             }
+                        } else if (gbcImage.getTags().contains(FILTER_FAVOURITE) && !gbcImage.getTags().contains(FILTER_SUPER_FAVOURITE)) {
+                            gbcImage.addTag(FILTER_SUPER_FAVOURITE);
+                            imageView.setBackgroundColor(context.getColor(R.color.star_color));
                         } else {
-                            gbcImage.addTag("__filter:favourite__");
+                            gbcImage.addTag(FILTER_FAVOURITE);
                             imageView.setBackgroundColor(context.getColor(R.color.favorite));
                         }
-                        retrieveTags(gbcImagesList);
 
+                        retrieveTags(gbcImagesList);
                         clickCount = 0;
                         //To save the image with the favorite tag to the database
                         new UpdateImageAsyncTask(gbcImage).execute();
@@ -893,8 +905,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                             updateGridView();
                         }
                     });
-                    if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains("__filter:favourite__")) {
-
+                    if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains(FILTER_SUPER_FAVOURITE)) {
+                        imageView.setBackgroundColor(context.getColor(R.color.star_color));
+                    } else if (filteredGbcImages.get(globalImageIndex[0]).getTags().contains(FILTER_FAVOURITE)) {
                         imageView.setBackgroundColor(context.getColor(R.color.favorite));
                     }
                     if (filteredGbcImages.get(globalImageIndex[0]).isLockFrame()) {
@@ -952,10 +965,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                             public void run() {
                                 //Single tap action
                                 BigImageDialog bigImageDialog = new BigImageDialog(filteredGbcImages, context, activity);
-                                boolean[] selectionMode = new boolean[1];
-                                selectionMode[0] = multiEdition;
-                                bigImageDialog.showBigImageDialogMultipleImages(selectedImages, imageView, selectionMode, dialog);
-
+                                bigImageDialog.showBigImageDialogMultipleImages(selectedImages, imageView, dialog);
                                 clickCount = 0;
                             }
                         };
@@ -971,13 +981,18 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                 // Stop timer and make double tap action
                                 handler.removeCallbacks(runnable);
                                 //Get the favorite status of the first selected image
-                                boolean isFav = filteredGbcImages.get(globalImageIndex[0]).getTags().contains("__filter:favourite__");
+                                boolean isFav = filteredGbcImages.get(globalImageIndex[0]).getTags().contains(FILTER_FAVOURITE);
+                                boolean isSuperFav = filteredGbcImages.get(globalImageIndex[0]).getTags().contains(FILTER_SUPER_FAVOURITE);
+
                                 for (int i : selectedImages) {
-                                    if (isFav) {
+                                    if (isSuperFav) {
                                         HashSet<String> tags = filteredGbcImages.get(i).getTags();
                                         for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
                                             String tag = iter.next();
-                                            if (tag.equals("__filter:favourite__")) {
+                                            if (tag.equals(FILTER_FAVOURITE)) {
+                                                iter.remove();
+                                            }
+                                            if (tag.equals(FILTER_SUPER_FAVOURITE)) {
                                                 iter.remove();
                                             }
                                             filteredGbcImages.get(i).setTags(tags);
@@ -985,8 +1000,11 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                             indexesToRemove.add(i);
                                         }
 
+                                    } else if (isFav && !isSuperFav) {
+                                        filteredGbcImages.get(i).addTag(FILTER_SUPER_FAVOURITE);
+                                        imageView.setBackgroundColor(context.getColor(R.color.star_color));
                                     } else {
-                                        filteredGbcImages.get(i).addTag("__filter:favourite__");
+                                        filteredGbcImages.get(i).addTag(FILTER_FAVOURITE);
                                         imageView.setBackgroundColor(context.getColor(R.color.favorite));
 
                                     }
@@ -997,14 +1015,14 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                                 if (!selectedFilterTags.isEmpty()) {
                                     dialog.dismiss();
                                 }
-                                if (multiEdition && !selectedFilterTags.isEmpty()) {
+                                if (selectionMode[0] && !selectedFilterTags.isEmpty()) {
                                     for (int i = indexesToRemove.size(); i > 0; i--) {
                                         filteredGbcImages.remove(indexesToRemove.get(i - 1));
                                     }
                                     selectedImages.clear();
                                     showEditMenuButton = false;
                                     StaticValues.fab.hide();
-                                    multiEdition = false;
+                                    selectionMode[0] = false;
                                     activity.invalidateOptionsMenu();
                                 }
 
@@ -1230,7 +1248,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         imageView.setImageBitmap(Bitmap.createScaledBitmap(selectedImage[0],
                 selectedImage[0].getWidth() * 6, selectedImage[0].getHeight() * 6, false));
 
-        if (gbcImage.getTags().contains("__filter:favourite__")) {
+        if (gbcImage.getTags().contains(FILTER_SUPER_FAVOURITE)) {
+            imageView.setBackgroundColor(context.getColor(R.color.star_color));
+        } else if (gbcImage.getTags().contains(FILTER_FAVOURITE)) {
             imageView.setBackgroundColor(context.getColor(R.color.favorite));
         } else {
             imageView.setBackgroundColor(context.getColor(R.color.imageview_bg));
@@ -1377,7 +1397,9 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
             imageViewMini.setPadding(5, 5, 5, 5);
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
             imageViewMini.setImageBitmap(rotateBitmap(image, gbcImage));
-            if (gbcImage.getTags().contains("__filter:favourite__")) {
+            if (gbcImage.getTags().contains(FILTER_SUPER_FAVOURITE)) {
+                imageViewMini.setBackgroundColor(context.getColor(R.color.star_color));
+            } else if (gbcImage.getTags().contains(FILTER_FAVOURITE)) {
                 imageViewMini.setBackgroundColor(context.getColor(R.color.favorite));
             }
             if (i == imageViewMiniIndex) {
@@ -1400,22 +1422,26 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     imageViewMiniIndex = imageViewId;
                     imageView.setImageBitmap(Bitmap.createScaledBitmap(image, image.getWidth() * 6, image.getHeight() * 6, false));
                     globalImageIndex[0] = selectedImages.get(imageViewId);
-                    boolean isFav = gbcImage.getTags().contains("__filter:favourite__");
+                    boolean isFav = gbcImage.getTags().contains(FILTER_FAVOURITE);
+                    boolean isSuperFav = gbcImage.getTags().contains(FILTER_SUPER_FAVOURITE);
 
                     for (int i = 0; i < selectedImages.size(); i++) {
                         GbcImage gbcImage = filteredGbcImages.get(selectedImages.get(i));
-                        if (gbcImage.getTags().contains("__filter:favourite__")) {
-                            imageViewList.get(i).setBackgroundColor(context.getColor(R.color.favorite));
-                        } else {
-                            imageViewList.get(i).setBackgroundColor(context.getColor(R.color.white));
-
-                        }
 
                         if (i == imageViewMiniIndex) {
                             imageViewList.get(i).setBackgroundColor(context.getColor(R.color.teal_700));
+                        } else if (gbcImage.getTags().contains(FILTER_SUPER_FAVOURITE)) {
+                            imageViewList.get(i).setBackgroundColor(context.getColor(R.color.star_color));
+                        } else if (gbcImage.getTags().contains(FILTER_FAVOURITE)) {
+                            imageViewList.get(i).setBackgroundColor(context.getColor(R.color.favorite));
+                        } else {
+                            imageViewList.get(i).setBackgroundColor(context.getColor(R.color.white));
                         }
                     }
-                    if (isFav) {
+                    if (isSuperFav) {
+                        imageView.setBackgroundColor(context.getColor(R.color.star_color));
+
+                    } else if (isFav) {
                         imageView.setBackgroundColor(context.getColor(R.color.favorite));
 
                     } else {

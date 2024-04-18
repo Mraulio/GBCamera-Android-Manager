@@ -448,16 +448,12 @@ public class BigImageDialog {
 
                 if (!originalName.equals(placeholderString.trim().toLowerCase(Locale.ROOT))) {
                     etImageName.setBackgroundColor(context.getColor(R.color.update_image_color));
+                    etImageName.setTextColor(context.getColor(R.color.black));
                     editingName[0] = true;
                     newName[0] = new String(placeholderString);
                 }
-//                else {
-//                    etImageName.setBackgroundColor(Color.parseColor("#FFFFFF"));
-//                    editingName[0] = false;
-//                }
-//                if (editingTags[0] || editingName[0]) {
+
                 btnUpdateImage.setEnabled(true);
-//                } else btnUpdateImage.setEnabled(false);
             }
 
             @Override
@@ -540,17 +536,10 @@ public class BigImageDialog {
                     createTagCheckBoxMultipleImages(newTag, tagsLayout, tempTags, editingTags, btnUpdateImage, true);
 
                     tempTags.add(newTag);
-//                    editingTags[0] = compareTags(originalTags[0], tempTags);
-//                    if (editingTags[0]) {
-//                    tagsLayout.setBackgroundColor(context.getColor(R.color.update_image_color));
-//                    } else {
-//                        tagsLayout.setBackgroundColor(context.getColor(R.color.white));
-//                    }
-//                    if (editingTags[0] || editingName[0]) {
+
                     editingTags[0] = true;
 
                     btnUpdateImage.setEnabled(true);
-//                    } else btnUpdateImage.setEnabled(false);
                 }
             }
         });
@@ -580,17 +569,11 @@ public class BigImageDialog {
                         //Generate dynamically new checkboxes
                         createTagCheckBoxMultipleImages(adapter.getItem(position), tagsLayout, tempTags, editingTags, btnUpdateImage, true);
                         tempTags.add(selectedTag);
-//                    editingTags[0] = compareTags(originalTags[0], tempTags);
-//                    if (editingTags[0]) {
-//                        tagsLayout.setBackgroundColor(context.getColor(R.color.update_image_color));
-//                    } else {
-//                        tagsLayout.setBackgroundColor(context.getColor(R.color.white));
+
                     }
                 }
-//                    if (editingTags[0] || editingName[0]) {
                 editingTags[0] = true;
                 btnUpdateImage.setEnabled(true);
-//                    } else btnUpdateImage.setEnabled(false);
 //                }
             }
 

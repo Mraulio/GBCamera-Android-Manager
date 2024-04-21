@@ -317,16 +317,17 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                         }
                     }
                     if (!alreadyAdded) {
-
                         newGbcImages.add(gbcImage);
-                        listNewBitmaps.add(extractedImagesBitmaps.get(i));
+                        listNewBitmaps.add(finalListBitmaps.get(i));
                         checkDuplicatedImport.add(gbcImage.getHashCode());
                     }
                 }
+
                 if (newGbcImages.size() > 0) {
-//                    Uri uri = Uri.fromFile(latestFile);
-                    DocumentFile documentFile = DocumentFile.fromFile(latestFile);
-                    toast(getContext(), documentFile.getName());
+                    DocumentFile documentFile = null;
+                    if (latestFile != null){
+                        documentFile = DocumentFile.fromFile(latestFile);
+                    }
                     ImagesImportDialog imagesImportDialog = new ImagesImportDialog(newGbcImages, listNewBitmaps, documentFile, getContext(), getActivity(), tv, numImagesAdded);
                     imagesImportDialog.createImagesImportDialog();
                 } else {
@@ -335,6 +336,7 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
                 }
             } catch (Exception e) {
                 tv.setText("Error en btn add\n" + e.toString());
+                e.printStackTrace();
             }
         });
 
@@ -749,7 +751,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
         }
         //I create the new directory if it doesn't exists
         try (FileOutputStream outputStream = new FileOutputStream(file); OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);) {
-
 
             outputStreamWriter.write(texto);
             Toast toast = Toast.makeText(getContext(), getString(R.string.saved_to_file), Toast.LENGTH_SHORT);

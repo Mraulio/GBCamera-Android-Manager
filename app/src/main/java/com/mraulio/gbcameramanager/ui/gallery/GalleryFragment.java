@@ -1113,7 +1113,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
     //Method to update the gallery gridview
     public static void updateGridView() {
-        System.out.println(" No FROM FROM MAIN");
 
         //Bitmap list to store current page bitmaps
         filteredGbcImages = new ArrayList<>();

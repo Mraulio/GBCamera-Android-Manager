@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.settings;
 
 import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
 import static com.mraulio.gbcameramanager.utils.Utils.backupDatabase;
+import static com.mraulio.gbcameramanager.utils.Utils.restartApplication;
 import static com.mraulio.gbcameramanager.utils.Utils.showDbBackups;
 
 import android.content.SharedPreferences;
@@ -339,14 +340,9 @@ public class SettingsFragment extends Fragment {
     }
 
     private void changeLanguage(String languageCode) {
-        Locale locale = new Locale(languageCode);
-        Locale.setDefault(locale);
-        Configuration configuration = new Configuration();
-        configuration.locale = locale;
-        Resources resources = getResources();
-        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
         editor.putString("language", languageCode);
-        editor.apply();
+        editor.commit();
+        restartApplication(getContext());
     }
 
 

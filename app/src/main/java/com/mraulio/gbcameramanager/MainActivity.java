@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
-                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
+                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt") && !currentLocale.getLanguage().equals("ca")) {
             StaticValues.languageCode = "en";
         } else {
             StaticValues.languageCode = currentLocale.getLanguage();

@@ -242,6 +242,7 @@ public class SettingsFragment extends Fragment {
         langs.add("de");
         langs.add("fr");
         langs.add("pt");//Need to change this for the Brazilian Region. Works for now as it's the only Portuguse
+        langs.add("ca");
 
         List<String> languages = new ArrayList<>();
         languages.add("English (default)");
@@ -249,6 +250,7 @@ public class SettingsFragment extends Fragment {
         languages.add("Deutsch");
         languages.add("Français");
         languages.add("Português Brasileiro");
+        languages.add("Català");
 
         ArrayAdapter<String> adapterLanguage = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, languages);

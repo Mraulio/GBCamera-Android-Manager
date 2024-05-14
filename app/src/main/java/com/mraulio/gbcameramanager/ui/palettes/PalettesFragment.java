@@ -78,6 +78,7 @@ public class PalettesFragment extends Fragment {
     String newPaletteName = "";
     int[] palette;
     final String PALETTE_ID_REGEX = "^[a-z0-9]{2,}$";
+    boolean newPalette = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -107,6 +108,7 @@ public class PalettesFragment extends Fragment {
                     palette = Utils.gbcPalettesList.get(palettePos).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
                     newPaletteId = Utils.gbcPalettesList.get(palettePos).getPaletteId();
                     newPaletteName = Utils.gbcPalettesList.get(palettePos).getPaletteName();
+                    newPalette = false;
                     paletteDialog(palette, newPaletteId, newPaletteName);
                 }
             };
@@ -209,6 +211,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 palette = Utils.gbcPalettesList.get(0).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
+                newPalette = true;
                 paletteDialog(palette, "", "");
             }
         });
@@ -242,9 +245,9 @@ public class PalettesFragment extends Fragment {
             JSONArray paletteArr = new JSONArray();
             for (int color : palette.getPaletteColorsInt()) {
                 String hexColor;
-                if (color == 0){//For total transparency color
+                if (color == 0) {//For total transparency color
                     hexColor = "#000000";
-                }else{
+                } else {
                     hexColor = "#" + Integer.toHexString(color).substring(2);
                 }
 
@@ -271,11 +274,13 @@ public class PalettesFragment extends Fragment {
 
     private void paletteDialog(int[] palette, String paletteId, String paletteName) {
         final Dialog dialog = new Dialog(getContext());
+        dialog.setCancelable(false);
         dialog.setContentView(R.layout.palette_creator);
         final boolean[] validId = {false};
 
         ImageView ivPalette = dialog.findViewById(R.id.ivPalette);
         Button btnSavePalette = dialog.findViewById(R.id.btnSavePalette);
+        Button btnCancelPalette = dialog.findViewById(R.id.btnCancelPalette);
         btnSavePalette.setEnabled(false);
 
         EditText etPaletteId = dialog.findViewById(R.id.etPaletteId);
@@ -503,8 +508,8 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPickedColor)
-                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                        .initialColor(newPalette ? lastPickedColor : palette[0])
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
@@ -543,7 +548,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPickedColor)
+                        .initialColor(newPalette ? lastPickedColor : palette[1])
                         .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
@@ -585,8 +590,8 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPickedColor)
-                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                        .initialColor(newPalette ? lastPickedColor : palette[2])
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
@@ -627,8 +632,8 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPickedColor)
-                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                        .initialColor(newPalette ? lastPickedColor : palette[3])
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
@@ -661,7 +666,12 @@ public class PalettesFragment extends Fragment {
                         .show();
             }
         });
-
+        btnCancelPalette.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
         btnSavePalette.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

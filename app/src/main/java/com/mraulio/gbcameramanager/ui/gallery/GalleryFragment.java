@@ -293,6 +293,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     Collections.sort(selectedImages);
 
                     int firstImage = selectedImages.get(0);
+                    int lastImage = selectedImages.get(selectedImages.size()-1);
                     selectedImages.clear();
                     selectedImages.add(globalImageIndex);
                     if (firstImage < globalImageIndex) {
@@ -304,12 +305,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                         selectedImages.add(globalImageIndex);
                     } else if (firstImage > globalImageIndex) {
-                        for (int i = firstImage; i > globalImageIndex; i--) {
+                        for (int i = lastImage; i > globalImageIndex; i--) {
                             if (!selectedImages.contains(i)) {
                                 selectedImages.add(i);
                             }
                         }
                     }
+
                     alreadyMultiSelect = true;
                     if (selectedImages.size() > 1) {
                         showEditMenuButton = true;

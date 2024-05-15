@@ -126,7 +126,6 @@ public class UsbSerialFragment extends Fragment implements SerialInputOutputMana
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_usb_serial, container, false);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.USB_SERIAL;
 
         gridView = view.findViewById(R.id.gridView);

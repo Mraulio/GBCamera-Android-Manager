@@ -16,12 +16,10 @@ import android.os.Build;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment;
 import com.mraulio.gbcameramanager.utils.Utils;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -240,11 +238,11 @@ public class GBxCartCommands {
 
             String folderName = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"HH-mm-ss");
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "HH-mm-ss");
                 folderName = "PhotoFullRom_" + dtf.format(now);
                 fileName += dtf.format(now) + "-full.gbc";
             } else {
-                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
                 folderName = "PhotoFullRom_" + sdf.format(nowDate);
                 fileName += sdf.format(nowDate) + "-full.gbc";
             }
@@ -395,10 +393,10 @@ public class GBxCartCommands {
             String fileName = "gbCamera_";
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale+"_HH-mm-ss");
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
                 fileName += dtf.format(now) + ".sav";
             } else {
-                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
                 fileName += sdf.format(nowDate) + ".sav";
             }
 
@@ -491,6 +489,7 @@ public class GBxCartCommands {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             if (!magicIsReal(fileBytes)) {
                 tv.append(context.getString(R.string.no_valid_file));
                 return;

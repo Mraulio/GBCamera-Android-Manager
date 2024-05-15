@@ -7,6 +7,8 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.res
 import static com.mraulio.gbcameramanager.ui.importFile.newpalette.NewPaletteDialog.paletteViewer;
 import static com.mraulio.gbcameramanager.ui.importFile.newpalette.NewPaletteDialog.showNewPaletteDialog;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
+import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
+import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
@@ -16,6 +18,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -24,6 +27,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -54,6 +58,7 @@ import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
+import com.mraulio.gbcameramanager.ui.gallery.MainImageDialog;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
@@ -220,6 +225,23 @@ public class ImportFragment extends Fragment {
 
         tvFileName = view.findViewById(R.id.tvFileName);
         gridViewImport = view.findViewById(R.id.gridViewImport);
+
+        //Showing the image big
+        gridViewImport.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Bitmap image = Bitmap.createScaledBitmap(finalListBitmaps.get(position), finalListBitmaps.get(position).getWidth() * 6, finalListBitmaps.get(position).getHeight() * 6, false);
+                ImageView imageView = new ImageView(getContext());
+                imageView.setImageBitmap(image);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setView(imageView);
+
+                AlertDialog dialog = builder.create();
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                dialog.show();
+            }
+        });
 
         btnSelectFile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -407,7 +429,7 @@ public class ImportFragment extends Fragment {
 
                                 } else if (cbAddFrame.isChecked()) {
                                     //Make the frame bw
-                                    Bitmap bwBitmap = paletteChanger("bw",finalListImages.get(0).getImageBytes(),false);
+                                    Bitmap bwBitmap = paletteChanger("bw", finalListImages.get(0).getImageBytes(), false);
                                     if (bwBitmap.getHeight() != 144 && bwBitmap.getHeight() != 224) {
                                         Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
@@ -1064,7 +1086,7 @@ public class ImportFragment extends Fragment {
         LinkedHashSet<Integer> colorSet = new LinkedHashSet<>();
         for (int pixel : pixels) {
             colorSet.add(pixel);
-            if (colorSet.size() > 4){
+            if (colorSet.size() > 4) {
                 return null;
             }
         }

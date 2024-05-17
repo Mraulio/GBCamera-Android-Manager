@@ -172,20 +172,29 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
+                android:weightSum="2"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/btnExportDB"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="2dp"
+                    android:autoSizeMaxTextSize="30sp"
+                    android:autoSizeMinTextSize="5sp"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/btn_backup_db"></Button>
 
                 <Button
                     android:id="@+id/btnRestoreDB"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"                    android:layout_height="wrap_content"
                     android:layout_marginHorizontal="2dp"
+                    android:autoSizeMaxTextSize="30sp"
+                    android:autoSizeMinTextSize="5sp"
+                    android:autoSizeTextType="uniform"
                     android:text="@string/btn_restore_db"></Button>
 
             </LinearLayout>

@@ -228,7 +228,7 @@
     <string name="toast_first_image">Dies ist das erste Bild</string>
     <string name="toast_last_image">Dies ist das letzte Bild</string>
     <string name="action_duplicate">Duplizieren</string>
-    <string name="sw_half_frame">Halber\nRahmen</string>
+    <string name="sw_half_frame">Halber Rahmen</string>
     <string name="tv_extra_padding">Außenabstand:\u0020</string>
     <string name="delete_frame_group_dialog">Rahmengruppe löschen\u0020</string>
     <string name="cant_delete_base_framegroup">Basis-Rahmen kann nicht gelöscht werden</string>

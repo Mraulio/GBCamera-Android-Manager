@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectionMode;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
+import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.gbxcart.GBxCartConstants.BAUDRATE;
@@ -89,7 +90,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     private static int lastPage;
     private static int position;
     private static List<GbcImage> filteredGbcImages;
-    private static int lastSeenGalleryImage;
     private static Context context;
     private DisplayMetrics displayMetrics;
     private static boolean showPalettes;
@@ -122,7 +122,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     static GbcImage gbcImage;
 
     public MainImageDialog (GridView gridView, boolean keepFrame, int lastPage, int position,
-                           List<GbcImage> filteredGbcImages, int lastSeenGalleryImage, Context context, DisplayMetrics displayMetrics,
+                           List<GbcImage> filteredGbcImages,  Context context, DisplayMetrics displayMetrics,
                            boolean showPalettes, Activity activity, UsbSerialPort port, SerialInputOutputManager usbIoManager,
                            TextView tvResponseBytes, UsbDeviceConnection connection, TextView tv, UsbManager manager, List<Integer> selectedImages, CustomGridViewAdapterImage customGridViewAdapterImage) {
         this.gridView = gridView;
@@ -130,7 +130,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         this.lastPage = lastPage;
         this.position = position;
         this.filteredGbcImages = filteredGbcImages;
-        this.lastSeenGalleryImage = lastSeenGalleryImage;
         this.context = context;
         this.displayMetrics = displayMetrics;
         this.showPalettes = showPalettes;

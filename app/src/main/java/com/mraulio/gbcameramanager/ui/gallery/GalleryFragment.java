@@ -243,7 +243,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (!selectionMode[0]) {
                     MainImageDialog mainImageDialog = new MainImageDialog(gridView, keepFrame, lastPage, position,
-                            filteredGbcImages, lastSeenGalleryImage, getContext(), displayMetrics, showPalettes, getActivity(),
+                            filteredGbcImages, getContext(), displayMetrics, showPalettes, getActivity(),
                             port, usbIoManager, tvResponseBytes, connection, tv, manager, null, null);
                     mainImageDialog.showImageDialog();
                 } else {
@@ -357,7 +357,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             case R.id.action_multi_edit:
                 if (selectionMode[0] && selectedImages.size() > 1) {
                     MainImageDialog mainImageDialog = new MainImageDialog(gridView, keepFrame, lastPage, 0,
-                            filteredGbcImages, lastSeenGalleryImage, getContext(), displayMetrics, showPalettes, getActivity(),
+                            filteredGbcImages, getContext(), displayMetrics, showPalettes, getActivity(),
                             port, usbIoManager, tvResponseBytes, connection, tv, manager, selectedImages, customGridViewAdapterImage);
                     mainImageDialog.showImageDialog();
                 } else Utils.toast(getContext(), getString(R.string.select_minimum_toast));

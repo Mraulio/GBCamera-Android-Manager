@@ -255,5 +255,6 @@
 
     <string name="load_paperizing">Paperizing...</string>
     <string name="horizontal">Horizontal</string>
+    <string name="always_default_frame">Standard Rahmen immer benutzen</string>
 
 </resources>

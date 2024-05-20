@@ -256,5 +256,6 @@
 
     <string name="load_paperizing">Paperizing...</string>
     <string name="horizontal">Horizontal</string>
+    <string name="always_default_frame">Usar siempre marco por defecto</string>
 
 </resources>

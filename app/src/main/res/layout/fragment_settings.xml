@@ -115,6 +115,12 @@
             </LinearLayout>
 
             <CheckBox
+                android:id="@+id/cb_always_default_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:text="@string/always_default_frame" />
+            <CheckBox
                 android:id="@+id/cbPrint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -52,6 +52,7 @@ public class SettingsFragment extends Fragment {
         CheckBox cbMagicCheck = view.findViewById(R.id.cbMagic);
         CheckBox cbExportMetadata = view.findViewById(R.id.cb_export_metadata);
         CheckBox cbRotation = view.findViewById(R.id.cbRotation);
+        CheckBox cbAlwaysDefaultFrame = view.findViewById(R.id.cb_always_default_frame);
         CheckBox cbSquare = view.findViewById(R.id.cbSquare);
         Button btnExportDB = view.findViewById(R.id.btnExportDB);
         Button btnRestoreDB = view.findViewById(R.id.btnRestoreDB);
@@ -325,6 +326,22 @@ public class SettingsFragment extends Fragment {
                 editor.apply();
             }
         });
+
+        cbAlwaysDefaultFrame.setChecked(StaticValues.alwaysDefaultFrame);
+        cbAlwaysDefaultFrame.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("always_default_frame", true);
+                    StaticValues.alwaysDefaultFrame = true;
+                } else {
+                    editor.putBoolean("always_default_frame", false);
+                    StaticValues.alwaysDefaultFrame = false;
+                }
+                editor.apply();
+            }
+        });
+
 
         btnExportDB.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.gameboycameralib.saveExtractor;
 
 import static com.mraulio.gbcameramanager.gameboycameralib.constants.SaveImageConstants.*;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
+import static com.mraulio.gbcameramanager.utils.StaticValues.alwaysDefaultFrame;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 
@@ -135,42 +136,46 @@ public class SaveImageExtractor implements Extractor {
                         frameNumber = Integer.parseInt((String) frameNumberObj) + 1; //+1 Because the Ids begin with 1 and not 0
                     }
                 }
-                String jpId = "jp";
-                String intId = "int";
-                String hkId = "hk";
-                switch (saveTypeIntJpHk) {
-                    case JP:
-                        if (frameGroupsNames.containsKey(jpId)) {
-                            //Use the 4 different jp frames, 01, 02, 07 and 09
-                            //Rest of the frames are from the int group, if it exists
-                            if (frameNumber == 1 || frameNumber == 2 || frameNumber == 7 || frameNumber == 9) {
-                                frameId = jpId + String.format("%02d", frameNumber);
-                            } else {
+
+                if (!alwaysDefaultFrame) {
+                    String jpId = "jp";
+                    String intId = "int";
+                    String hkId = "hk";
+
+                    switch (saveTypeIntJpHk) {
+                        case JP:
+                            if (frameGroupsNames.containsKey(jpId)) {
+                                //Use the 4 different jp frames, 01, 02, 07 and 09
+                                //Rest of the frames are from the int group, if it exists
+                                if (frameNumber == 1 || frameNumber == 2 || frameNumber == 7 || frameNumber == 9) {
+                                    frameId = jpId + String.format("%02d", frameNumber);
+                                } else {
+                                    frameId = intId + String.format("%02d", frameNumber);
+                                }
+                                if (!hashFrames.containsKey(frameId)) {
+                                    frameId = StaticValues.defaultFrameId;//If the group exists but the frame doesn't
+                                }
+                            }
+                            break;
+                        case INT:
+                            //Use the int frame group
+                            if (frameGroupsNames.containsKey(intId)) {
                                 frameId = intId + String.format("%02d", frameNumber);
                             }
                             if (!hashFrames.containsKey(frameId)) {
                                 frameId = StaticValues.defaultFrameId;//If the group exists but the frame doesn't
                             }
-                        }
-                        break;
-                    case INT:
-                        //Use the int frame group
-                        if (frameGroupsNames.containsKey(intId)) {
-                            frameId = intId + String.format("%02d", frameNumber);
-                        }
-                        if (!hashFrames.containsKey(frameId)) {
-                            frameId = StaticValues.defaultFrameId;//If the group exists but the frame doesn't
-                        }
-                        break;
-                    case HK:
-                        if (frameGroupsNames.containsKey(hkId)) {
+                            break;
+                        case HK:
+                            if (frameGroupsNames.containsKey(hkId)) {
 
-                            frameId = hkId + String.format("%02d", frameNumber);
-                            if (!hashFrames.containsKey(frameId)) {
-                                frameId = StaticValues.defaultFrameId;//If the group exists but the frame doesn't
+                                frameId = hkId + String.format("%02d", frameNumber);
+                                if (!hashFrames.containsKey(frameId)) {
+                                    frameId = StaticValues.defaultFrameId;//If the group exists but the frame doesn't
+                                }
                             }
-                        }
-                        break;
+                            break;
+                    }
                 }
                 gbcImage.setFrameId(frameId);
                 GbcFrame gbcFrame = hashFrames.get(frameId);
@@ -180,7 +185,7 @@ public class SaveImageExtractor implements Extractor {
                 canvas.drawBitmap(image, 16, gbcFrame.isWildFrame() ? 40 : 16, null);
                 image = framed;
                 imageBytes = Utils.encodeImage(image, "bw");
-                image = paletteChanger(gbcImage.getPaletteId(),imageBytes,gbcImage.isInvertPalette());
+                image = paletteChanger(gbcImage.getPaletteId(), imageBytes, gbcImage.isInvertPalette());
             }
             gbcImage.setImageBytes(imageBytes);
             return image;

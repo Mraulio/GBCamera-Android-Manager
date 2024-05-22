@@ -168,9 +168,6 @@
     <string name="print_paper_btn">Print</string>
     <string name="custom_paper_color">Custom Paper color:</string>
 
-
-    <!--NEW STRINGS-->
-
     <string name="collage">Collage</string>
 
     <string name="collage_too_many_images">Too many images selected. Collage will fail.</string>
@@ -253,6 +250,8 @@
     <string name="export_metadata">Export metadata on PNG</string>
     <string name="load_paperizing">Paperizing...</string>
     <string name="horizontal">Horizontal</string>
+
+    <string name="always_default_frame">Always use default frame</string>
 
 
 </resources>

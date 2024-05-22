@@ -256,5 +256,6 @@
 
     <string name="load_paperizing">Paperitzant...</string>
     <string name="horizontal">Horitzontal</string>
+    <string name="always_default_frame">Utilitzeu sempre el marc predeterminat</string>
 
 </resources>

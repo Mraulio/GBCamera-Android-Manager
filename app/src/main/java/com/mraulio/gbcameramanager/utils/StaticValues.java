@@ -38,6 +38,7 @@ public class StaticValues {
     public static int[] deletedCount = new int[7];
     public static boolean showEditMenuButton = false;
     public static boolean exportMetadata = false;
+    public static boolean alwaysDefaultFrame = false;
 
     public enum CURRENT_FRAGMENT {
         GALLERY,

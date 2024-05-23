@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         StaticValues.defaultFrameId = StaticValues.sharedPreferences.getString("default_frame_id","gbcam01");
         StaticValues.dateLocale = StaticValues.sharedPreferences.getString("date_locale", "yyyy-MM-dd");
         StaticValues.exportMetadata = StaticValues.sharedPreferences.getBoolean("export_metadata", false);
+        StaticValues.alwaysDefaultFrame = StaticValues.sharedPreferences.getBoolean("always_default_frame", false);
 
         StaticValues.filterMonth = StaticValues.sharedPreferences.getBoolean("date_filter_month", false);
         StaticValues.filterYear = StaticValues.sharedPreferences.getBoolean("date_filter_year", false);
@@ -137,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (!currentLocale.getLanguage().equals("es") && !currentLocale.getLanguage().equals("en")
-                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt")) {
+                && !currentLocale.getLanguage().equals("fr") && !currentLocale.getLanguage().equals("de") && !currentLocale.getLanguage().equals("pt") && !currentLocale.getLanguage().equals("ca")) {
             StaticValues.languageCode = "en";
         } else {
             StaticValues.languageCode = currentLocale.getLanguage();

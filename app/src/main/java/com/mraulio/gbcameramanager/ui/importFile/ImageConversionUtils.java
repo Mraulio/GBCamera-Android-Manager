@@ -227,18 +227,21 @@ public class ImageConversionUtils {
     }
 
     private static Bitmap from4toBw(Bitmap bitmap) {
-        int height = bitmap.getHeight();
-        int width = bitmap.getWidth();
+        Bitmap b = bitmap.copy(bitmap.getConfig(),true);
+        int height = b.getHeight();
+        int width = b.getWidth();
+
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int pixel = bitmap.getPixel(x, y);
+                int pixel = b.getPixel(x, y);
                 int grayValue = (int) (Color.red(pixel) * 0.299 + Color.green(pixel) * 0.587 + Color.blue(pixel) * 0.114);
 
                 int closestColor = findClosestColor(grayValue, hashPalettes.get("bw").getPaletteColorsInt());
-                bitmap.setPixel(x, y, closestColor);
+
+                b.setPixel(x, y, closestColor);
             }
         }
-        return bitmap;
+        return b;
     }
 
     public static Bitmap convertToGrayScale(Bitmap bitmap) {

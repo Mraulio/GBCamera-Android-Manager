@@ -3,8 +3,11 @@ package com.mraulio.gbcameramanager.ui.palettes;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
+import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcPalettesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.imageBitmapCache;
+import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 
@@ -22,6 +25,7 @@ import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -32,6 +36,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -78,6 +83,7 @@ public class PalettesFragment extends Fragment {
     String newPaletteName = "";
     int[] palette;
     final String PALETTE_ID_REGEX = "^[a-z0-9]{2,}$";
+    boolean newPalette = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -107,6 +113,7 @@ public class PalettesFragment extends Fragment {
                     palette = Utils.gbcPalettesList.get(palettePos).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
                     newPaletteId = Utils.gbcPalettesList.get(palettePos).getPaletteId();
                     newPaletteName = Utils.gbcPalettesList.get(palettePos).getPaletteName();
+                    newPalette = false;
                     paletteDialog(palette, newPaletteId, newPaletteName);
                 }
             };
@@ -209,6 +216,7 @@ public class PalettesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 palette = Utils.gbcPalettesList.get(0).getPaletteColorsInt().clone();//Clone so it doesn't overwrite base palette colors.
+                newPalette = true;
                 paletteDialog(palette, "", "");
             }
         });
@@ -242,9 +250,9 @@ public class PalettesFragment extends Fragment {
             JSONArray paletteArr = new JSONArray();
             for (int color : palette.getPaletteColorsInt()) {
                 String hexColor;
-                if (color == 0){//For total transparency color
+                if (color == 0) {//For total transparency color
                     hexColor = "#000000";
-                }else{
+                } else {
                     hexColor = "#" + Integer.toHexString(color).substring(2);
                 }
 
@@ -271,11 +279,13 @@ public class PalettesFragment extends Fragment {
 
     private void paletteDialog(int[] palette, String paletteId, String paletteName) {
         final Dialog dialog = new Dialog(getContext());
+        dialog.setCancelable(false);
         dialog.setContentView(R.layout.palette_creator);
         final boolean[] validId = {false};
 
         ImageView ivPalette = dialog.findViewById(R.id.ivPalette);
         Button btnSavePalette = dialog.findViewById(R.id.btnSavePalette);
+        Button btnCancelPalette = dialog.findViewById(R.id.btnCancelPalette);
         btnSavePalette.setEnabled(false);
 
         EditText etPaletteId = dialog.findViewById(R.id.etPaletteId);
@@ -289,6 +299,56 @@ public class PalettesFragment extends Fragment {
         et2.setImeOptions(EditorInfo.IME_ACTION_DONE);
         et3.setImeOptions(EditorInfo.IME_ACTION_DONE);
         et4.setImeOptions(EditorInfo.IME_ACTION_DONE);
+
+        View dialogBackground = dialog.findViewById(android.R.id.content).getRootView();
+        ScrollView mainLayout = dialog.findViewById(R.id.palette_creator_layout);
+        mainLayout.setOnClickListener(null);//So the fast image change doesn't happen when missclicking buttons inside the actual dialog
+
+        dialogBackground.setOnTouchListener(new View.OnTouchListener() {
+            float downY = 0;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                final int SWIPE_THRESHOLD = 200;
+                float x = event.getX();
+                float upY = 0;
+                int screenWidth = getContext().getResources().getDisplayMetrics().widthPixels;
+
+                int leftHalf = screenWidth / 2;
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        downY = event.getY();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        upY = event.getY();
+                        if (upY > (downY + SWIPE_THRESHOLD)) {
+                            //Swipe down
+                            try {
+                                changePalettePreview(true, ivPalette, palette);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else if (upY < (downY - SWIPE_THRESHOLD)) {
+                            //Swipe up
+                            try {
+                                changePalettePreview(false, ivPalette, palette);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {//a click
+                            try {
+                                changePalettePreview(!(x > leftHalf), ivPalette, palette);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        break;
+                }
+                return true;
+            }
+        });
 
         etPaletteId.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -503,8 +563,8 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPickedColor)
-                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                        .initialColor(newPalette ? lastPickedColor : palette[0])
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
@@ -543,7 +603,7 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPickedColor)
+                        .initialColor(newPalette ? lastPickedColor : palette[1])
                         .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
@@ -585,8 +645,8 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPickedColor)
-                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                        .initialColor(newPalette ? lastPickedColor : palette[2])
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
@@ -627,8 +687,8 @@ public class PalettesFragment extends Fragment {
                 ColorPickerDialogBuilder
                         .with(getContext())
                         .setTitle(getString(R.string.choose_color))
-                        .initialColor(lastPickedColor)
-                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                        .initialColor(newPalette ? lastPickedColor : palette[3])
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
                         .showAlphaSlider(false)
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
@@ -661,7 +721,12 @@ public class PalettesFragment extends Fragment {
                         .show();
             }
         });
-
+        btnCancelPalette.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
         btnSavePalette.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -707,21 +772,54 @@ public class PalettesFragment extends Fragment {
         dialog.show();
     }
 
+    private void changePalettePreview(boolean prevImage, ImageView ivPalette, int[] palette) throws IOException {
+        int holderInt = new Integer(lastSeenGalleryImage);
+        if (prevImage) {
+            if (lastSeenGalleryImage == 0) {
+                lastSeenGalleryImage = gbcImagesList.size() - 1; //Goes to the last image on the gallery
+            } else {
+                lastSeenGalleryImage--;
+            }
+
+        } else {
+            if (lastSeenGalleryImage >= gbcImagesList.size() - 1) {
+                lastSeenGalleryImage = 0; //Goes to the last image on the gallery
+            } else {
+                lastSeenGalleryImage++;
+            }
+        }
+
+        Bitmap image = imageBitmapCache.get(gbcImagesList.get(lastSeenGalleryImage).getHashCode());
+        //If image is not in the hashmap, check the cache. If it's not in the cache do nothing
+        if (image == null) {
+            image = GalleryFragment.diskCache.get(gbcImagesList.get(lastSeenGalleryImage).getHashCode());
+        }
+        if (image != null) {
+            ivPalette.setImageBitmap(paletteMaker(palette));
+        } else {
+            lastSeenGalleryImage = holderInt;
+        }
+    }
+
     private Bitmap paletteMaker(int[] palette) throws IOException {
-        ImageCodec imageCodec = new ImageCodec(160, 144);//imageBytes.length/40 to get the height of the image
         Bitmap bitmap;
         Bitmap upscaledBitmap;
         byte[] imageBytes;
-        if (Utils.gbcImagesList.size() == 0 || (Utils.gbcImagesList.get(0).getImageBytes().length / 40 != 144)) {//If there are no images, or they are not 144 height
+        if (Utils.gbcImagesList.size() == 0) {//If there are no images, or they are not 144 height
             imageBytes = Utils.encodeImage(hashFrames.get("gbcam03").getFrameBitmap(), "bw");
+            ImageCodec imageCodec = new ImageCodec(160, 144);//imageBytes.length/40 to get the height of the image
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes, false);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Utils.framesList.get(0).getFrameBitmap().getWidth() * 6, Utils.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {
             GbcImage gbcImage = Utils.gbcImagesList.get(lastSeenGalleryImage);
             bitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
             imageBytes = Utils.encodeImage(bitmap, "bw");
+            ImageCodec imageCodec = new ImageCodec(160, bitmap.getHeight());//imageBytes.length/40 to get the height of the image
+
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes, false);
-            upscaledBitmap = Bitmap.createScaledBitmap(bitmap, 160 * 6, 144 * 6, false);
+
+            bitmap = rotateBitmap(bitmap, gbcImage);
+            upscaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 4, bitmap.getHeight() * 4, false);
         }
 
         return upscaledBitmap;

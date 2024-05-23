@@ -3,10 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:id="@+id/palette_creator_layout"
     android:padding="10dp">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
@@ -33,7 +34,7 @@
 
         <ImageView
             android:id="@+id/ivPalette"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginVertical="10dp"
@@ -148,10 +149,24 @@
                 android:background="@color/purple_700"></ImageView>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnSavePalette"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_save"></Button>
+            android:gravity="center"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btnCancelPalette"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="5dp"
+                android:layout_height="wrap_content"
+                android:text="@string/cancel"></Button>
+            <Button
+                android:id="@+id/btnSavePalette"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_save"></Button>
+
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

@@ -1,0 +1,261 @@
+<!-- Traducció: rubenlosud @rubenlosud -->
+<resources>
+    <string name="app_name">GBCamera Manager</string>
+    <string name="navigation_drawer_open">Obrir calaix de navegació</string>
+    <string name="navigation_drawer_close">Tancar calaix de navegació</string>
+    <string name="nav_header_title">GBCamera Manager</string>
+    <string name="nav_header_subtitle">Github</string>
+    <string name="nav_header_wiki">Wiki</string>
+    <string name="nav_header_desc">Capçalera de navegació</string>
+    <string name="action_settings">Paràmetres</string>
+
+    <string name="menu_gallery">Galeria</string>
+    <string name="menu_palettes">Paletes</string>
+    <string name="menu_frames">Marcs</string>
+    <string name="menu_import">Importar</string>
+    <string name="menu_usbserial">USB Sèrie</string>
+    <string name="menu_settings">Paràmetres</string>
+
+    <!--Custom_dialog, Gallery Fragment strings-->
+    <string name="btn_show_palettes">Mostra paletes</string>
+    <string name="btn_show_frames">Mostra marcs</string>
+    <string name="cb_keep_frame">Mantenir color de marc</string>
+    <string name="cb_crop">Retallar</string>
+
+    <string name="toast_printing">Imprimint, si us plau, esperi...</string>
+    <string name="toast_saved">DESAT x</string>
+    <string name="toast_saved_txt">Desat com TXT</string>
+
+    <string name="loading">Carregant...</string>
+    <string name="total_images">Imatges totals:\u0020</string>
+    <string name="no_images">No hi ha imatges a la galeria. Aneu a la pestanya Importar</string>
+
+    <!--Settings fragment xml strings-->
+    <string name="export_txt">Exportar com TXT.</string>
+    <string name="export_png">Exportar com PNG.</string>
+    <string name="png_size">Mida PNG:\u0020</string>
+    <string name="images_page">Seleccionar imatges per pàgina:\u0020</string>
+    <string name="language">Llengua (necessita reiniciar):\u0020</string>
+
+    <!--Frames fragment strings-->
+    <string name="cant_delete_base">No es pot suprimir un marc base.</string>
+    <string name="delete_frame_dialog">Suprimir marco\u0020</string>
+    <string name="sure_dialog">Esteu segur</string>
+    <string name="delete">SUPRIMIR</string>
+    <string name="cancel">Cancel·lar</string>
+    <string name="frames_total">Marcs totals:\u0020</string>
+
+    <!--Palettes fragment strings-->
+    <string name="btn_add_palette">Afegir paleta</string>
+    <string name="btn_export_json">Exportar Json</string>
+    <string name="long_press_delete_palette">Manteniu premut per suprimir</string>
+    <string name="cant_delete_base_palette">No es pot suprimir una paleta base.</string>
+    <string name="toast_palettes_json">Json de paletes desat.</string>
+    <string name="set_palette_name">*Nom de paleta*</string>
+    <string name="sure_dialog_palette">Esteu segur? Es recomana exportar a Json abans de continuar.</string>
+    <string name="delete_dialog_palette">Suprimir paleta\u0020</string>
+    <string name="choose_color">Tria color</string>
+    <string name="selected_color">Color seleccionat: #</string>
+    <string name="toast_palettes_error">2 paletes no pueden tenir el mateix Id.</string>
+    <string name="palette_added">Paleta afegida.</string>
+
+    <string name="btn_save">Desar</string>
+    <string name="btn_decode">Descodificar</string>
+
+
+    <!--Import fragment xml strings-->
+    <string name="btn_select_file">Selecciona fitxer</string>
+    <string name="tv_select_file">Selecciona un fitxer per importar</string>
+    <string name="btn_extract_file">Extraure fitxer</string>
+    <string name="btn_add_images">Afegir imatges</string>
+    <string name="btn_add_palettes">Afegir paletes</string>
+    <string name="btn_add_frames">Afegir marcs</string>
+    <string name="no_valid_list">No es una llista vàlida</string>
+    <string name="images_available">\u0020imatges disponibles.</string>
+    <string name="no_new_palettes">Cap paleta nova afegida.</string>
+    <string name="no_new_frames">Cap marc nou afegit.</string>
+    <string name="no_new_images">Cap imatge nova afegida.</string>
+    <string name="images_added">Imatges afegides:\u0020</string>
+    <string name="done_adding_images">\u0020imatges afegides!</string>
+    <string name="palettes_added">Paletes afegides.</string>
+    <string name="done_adding_palettes">Finalitzat afegir paletes!</string>
+    <string name="frames_added">Marcs afegits.</string>
+    <string name="done_adding_frames">Finalitzat afegir marcs!</string>
+    <string name="no_valid_file">No és un fitxer vàlid.</string>
+    <string name="cb_last_seen">Vist per últim cop.</string>
+    <string name="cb_deleted_images">Imatges suprimides.</string>
+
+    <!--Usb serial fragment xml strings-->
+    <string name="rb_print">Imprimir a l\'Arduino - GBP</string>
+    <string name="btn_read_rom_name">Llegir nom de ROM</string>
+    <string name="btn_read_ram">Llegir i desar Ram</string>
+    <string name="btn_dump_photo">Bolcar PHOTO! ROM completa</string>
+    <string name="btn_view_rom_images">Veure imatges ROM</string>
+    <string name="btn_print_banner">Imprimir TEST banner</string>
+    <string name="btn_print_image">Imprimir imatge</string>
+    <string name="btn_delete_sav">Suprimir SAV</string>
+    <string name="tv_sleep_time">Triar temps d\'espera:\u0020</string>
+    <string name="error_print_image">Error en IMPRIMIR IMATGE</string>
+    <string name="delete_sav_dialog">Suprimir sav?</string>
+    <string name="sure_delete_sav">Esteu segur que voleu suprimir\u0020</string>
+    <string name="toast_sav_deleted">SAV suprimit.</string>
+    <string name="toast_couldnt_delete_sav">No s\'ha pogut suprimir SAV.</string>
+    <string name="deleted_sav">Suprimit\u0020</string>
+    <string name="tv_connected">//Connectat\n</string>
+    <string name="error_arduino">Error en l\'Arduino\n.</string>
+    <string name="arduino_mode">MODE Arduino Printer Emulator</string>
+    <string name="print_mode">MODE IMPRIMIR</string>
+    <string name="gbxcart_mode">MODE GBxCart</string>
+    <string name="images_list">\nImatges a la llista:\u0020</string>
+    <string name="no_good_dump">\nNO ÉS UN BON BOLCAT DE SAV.</string>
+    <string name="sav_parts">\nParts del sav:\u0020</string>
+    <string name="rom_name">\nEl nom de la ROM És:\u0020</string>
+    <string name="dumping_rom_wait">\Bolcant 1MB ROM, si us plau, espereu uns 45 segons...</string>
+    <string name="dumping_ram_wait">\nBolcant RAM, si us plau, espereu...\n...</string>
+    <string name="last_sav_name">\nEl nom de l\'últim fitxer SAV és:\u0020</string>
+    <string name="size">Mida:\u0020</string>
+    <string name="error_file">Error creant fitxer:\u0020</string>
+    <string name="saved_to_file">Desat a fitxer</string>
+
+    <string name="delete_dialog_gallery">Suprimir imatge\u0020</string>
+
+    <string name="menu_savmanager">Gestor de Desats</string>
+    <string name="file_name">Nom del fitxer:\u0020</string>
+    <string name="paperize_settings">Mostra botó Paperitzar</string>
+    <string name="paperize_button">Paperitzar</string>
+    <string name="saved_paperized_toast">Desat en paper!</string>
+    <string name="showPrint">Mostra botó Imprimir.</string>
+    <string name="permissions_toast">Permisos concedits.</string>
+    <string name="no_favorites">No hi ha preferits</string>
+    <string name="edit_selected_item">Editar seleccionades</string>
+    <string name="filter_favorites_item">Filtrar preferits</string>
+    <string name="remove_filter_item">Treure filtre</string>
+    <string name="average_item">Mitjana</string>
+    <string name="animate_item">Animar</string>
+    <string name="json_backup_item">Còpia de seguretat JSON</string>
+    <string name="dialog_close_button">Tancar</string>
+    <string name="select_minimum_toast">Selecciona almenys 2 imatges</string>
+    <string name="unselect_all_toast">Deselecciona tot abans de filtrar</string>
+    <string name="delete_all_title">Suprimir imatges seleccionades?</string>
+    <string name="no_selected">No hi ha imatges seleccionades</string>
+    <string name="json_backup_saved">Desada còpia de seguretat JSON!</string>
+    <string name="page_selector_dialog">Selecciona pàgina</string>
+    <string name="hdr_exception">Totes les imatges han de tenir la mateixa mida.</string>
+    <string name="save_location_hint">PNGs, HDRs i GIFs es desen a \n\u0020 Pictures/GBCamera Manager.\n Altres fitxers es desen a Download/GBCamera Manager.</string>
+    <string name="done_dumping_ram">Bolcat de RAM finalitzat!\u0020 Comprova la carpeta Download/GBCamera Manager/Save dumps</string>
+    <string name="done_dumping_photo">Bolcat de ROM PHOTO finalitzat!\u0020 Comprova la carpeta Download/GBCamera Manager/PHOTO Rom Dumps</string>
+    <string name="filtered_images">Imatges filtrades:\u0020</string>
+    <string name="selected_images">Seleccionades:\u0020</string>
+
+    <string name="analyzing">Analitzant, si us plau, espera...</string>
+    <string name="done_analyzing">Anàlisi finalitzat!</string>
+
+    <string name="check_magic">Comprovar .sav vàlid al importar / extreure</string>
+    <string name="delete_photo_folder_dialog">Suprimir directori de rom Photo?</string>
+    <string name="add_as_frame">Afegir com a marc</string>
+    <string name="rotation_button">Mostra botó Girar</string>
+    <string name="frame_name">Establir nom del marc</string>
+    <string name="cant_add_frame">No es pot afegir aquesta imatge com a marc</string>
+    <string name="no_empty_frame_name">L\'Id no pot estar buit</string>
+    <string name="no_spaces_frame_name">El nom no pot portar espais</string>
+    <string name="frame_name_exists">Aquest nom de marc ja existeix</string>
+    <string name="no_valid_image_file">No es un arxiu d\'imatge vàlid</string>
+
+    <string name="invalid_transparent_image">La imatge conté transparència i no es pot afegir</string>
+    <string name="delete_folder">Suprimir carpeta</string>
+    <string name="images">imatges.</string>
+    <string name="only_image_paper">Només imatge</string>
+    <string name="print_paper_btn">Imprimir</string>
+    <string name="custom_paper_color">Paper de color personalitzat:</string>
+
+
+
+    <!--NEW STRINGS-->
+
+    <string name="collage">Collage</string>
+
+    <string name="collage_too_many_images">Nombre màxim d\'imatges sel·leccionades. El collage fallarà.</string>
+    <string name="square_download">Exportar imatge quadrada</string>
+
+    <string name="toast_frames_json">Json de marcs desat</string>
+    <string name="import_valid_images">Si us plau, seleccioneu només formats d\'imatge vàlids (.jpg, .jpeg, .png, .bmp).</string>
+    <string name="no_filtered_images">No hi ha imatges filtrades disponibles</string>
+    <string name="tags_dialog_title">Filtrar etiquetes</string>
+    <string name="tags_dialog_clear">Netejar</string>
+    <string name="sort_by_date">Per data de creació</string>
+    <string name="sort_by_import_date">Per data d\'importació</string>
+
+    <string name="sort_by_title">Per títol</string>
+    <string name="sort_ascending">Ascendent</string>
+    <string name="sort_descending">Descendent</string>
+
+    <string name="rb_edit_tags">Etiquetes</string>
+    <string name="rb_misc">Misc.</string>
+    <string name="btn_update_image">Actualitzar imatge</string>
+    <string name="et_write_tag">Escriure etiqueta:\u0020</string>
+
+    <string name="menu_filter">Filtrar per etiquetes</string>
+    <string name="menu_sort">Ordenar</string>
+
+    <string name="et_frame_group_name">Nom de grupo</string>
+    <string name="tv_frame_index">Índex de marc:\u0020</string>
+
+    <string name="et_frame_index_error">El valor ha d\'estar entre 1 i 99</string>
+    <string name="et_frame_id_error">L\'Id de marc ja existeix</string>
+
+    <string name="et_frame_group_id_error">Només es permeten minúscules, mínim 2 caràcters</string>
+    <string name="sp_all_frame_groups">Tots els marcs</string>
+    <string name="cb_use_mod_date">Utilitzar data de modificació</string>
+    <string name="btn_backup_db">Copia de dades</string>
+    <string name="btn_restore_db">Restaurar dades</string>
+    <string name="toast_backup_db">Feta la copia de seguretat de la base de dades</string>
+    <string name="toast_restore_db">Base de dades restaurada</string>
+    <string name="dialog_restore_db_title">Selecciona base de dades a restaurar</string>
+    <string name="dialog_confirm_restore_db">Restaurar una base de dades esborrarà tots els paràmetres.\nEs recomana fer una còpia de la base de dades i exports de Json.\nLa aplicació es reiniciarà.\nEsteu segur?</string>
+    <string name="as_imported_frame">Importada com és</string>
+    <string name="btn_export_current_framegroup">Exportar Grup</string>
+    <string name="btn_edit_current_framegroup">Renombrar Grup</string>
+    <string name="btn_edit_delete_framegroup">Suprimir Grup</string>
+    <string name="notification_download_complete">Descàrrega finalitzada</string>
+    <string name="dialog_rename_frame_group_title">Nou nom de grup de marcs</string>
+    <string name="dialog_edit_frame_title">Editant marc:\u0020</string>
+
+    <string name="cant_edit_base">No es pot editar un marc base</string>
+    <string name="btn_edit_frame">Editar marc</string>
+    <string name="sp_new_frame_group">Nou grup de marcs</string>
+    <string name="et_palette_id">*Id de Paleta*</string>
+    <string name="et_frame_group_id">Id de grup de marcs</string>
+
+    <string name="btn_realod_anim">Recarrega</string>
+    <string name="toast_first_image">Aquesta és la primera imatge</string>
+    <string name="toast_last_image">Aquesta és la última imatge</string>
+    <string name="action_duplicate">Duplicar</string>
+    <string name="sw_half_frame">Mig marc</string>
+    <string name="tv_extra_padding">Padding extra:\u0020</string>
+    <string name="delete_frame_group_dialog">Suprimir grup de marcs\u0020</string>
+    <string name="cant_delete_base_framegroup">No es pot suprimir un grup de marcs base</string>
+    <string name="btn_transform_image">Transformar</string>
+    <string name="et_palette_id_error">No és un Id de paleta vàlid. Només minúscules i números, 2 mínim.</string>
+    <string name="sp_date_format">Format de data\u0020</string>
+
+    <string name="sb_rotation">Rotació</string>
+    <string name="sb_brightness">Brillantor</string>
+    <string name="sb_contrast">Contrast</string>
+    <string name="sw_original_ratio">Proporció original</string>
+
+    <string name="load_saving_dup">Desant duplicades</string>
+    <string name="load_cache">Carregant memòria cau</string>
+    <string name="load_saving_images">Desant imatges</string>
+
+    <string name="load_extracting_images">Extraient imatges</string>
+    <string name="menu_default">Per defecte</string>
+    <string name="btn_add_new_palette">Afegir paleta</string>
+    <string name="month">Mes</string>
+    <string name="year">Any</string>
+    <string name="export_metadata">Exportar metadata a PNG</string>
+
+    <string name="load_paperizing">Paperitzant...</string>
+    <string name="horizontal">Horitzontal</string>
+    <string name="always_default_frame">Utilitzeu sempre el marc predeterminat</string>
+
+</resources>

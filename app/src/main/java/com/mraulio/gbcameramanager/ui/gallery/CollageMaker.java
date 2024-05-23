@@ -24,22 +24,34 @@ public class CollageMaker {
             }
         }
 
+        boolean verticalImage = false;
+
+        //Check if the images are rotated
+        if (height == 160 && (width == 144) || width == 224) {
+            verticalImage = true;
+        }
+
         int totalImages = bitmaps.size();
         if (totalImages == 0) {
             return null;
         }
 
-
         if (crop) {
-            int cropX = 16;
-            int cropY = (height == 224) ? 40 : 16;
+            int cropX;
+            int cropY;
+            if (!verticalImage) {
+                cropX = 16;
+                cropY = (height == 224) ? 40 : 16;
+            } else {
+                cropX = (height == 224) ? 40 : 16;
+                cropY = 16;
+            }
             List<Bitmap> croppedBitmaps = new ArrayList<>();
             for (Bitmap bt : bitmaps) {
-                Bitmap croppedBitmap = Bitmap.createBitmap(bt, cropX, cropY, 128, 112);
+                Bitmap croppedBitmap = Bitmap.createBitmap(bt, cropX, cropY, verticalImage ? 112 : 128, verticalImage ? 128 : 112);
                 croppedBitmaps.add(croppedBitmap);
             }
             bitmaps = croppedBitmaps;
-
         }
 
         int rows = 0;
@@ -52,7 +64,6 @@ public class CollageMaker {
             rows = value;
             columns = Math.max(1, (int) Math.ceil((double) totalImages / rows));
         }
-
 
         int collageWidth = bitmaps.get(0).getWidth() * columns;
         int collageHeight = bitmaps.get(0).getHeight() * rows;
@@ -78,14 +89,14 @@ public class CollageMaker {
                     int horizontalOffset = 0;
                     if (halfFrame && !crop && col != 0) {
                         horizontalOffset = -8 * (col - 1);
-                        bitmap = Bitmap.createBitmap(bitmap, 8, 0, 152, 144);//Crop 50% of the left frame
+                        bitmap = Bitmap.createBitmap(bitmap, 8, 0, verticalImage ? 136 : 152, verticalImage ? 160 : 144);//Crop 50% of the left frame
                     }
 
                     // Calculate vertical offset
                     int verticalOffset = 0;
                     if (halfFrame && !crop && row != 0) {
                         verticalOffset = -8 * (row - 1);
-                        bitmap = Bitmap.createBitmap(bitmap, 0, 8, bitmap.getWidth(), 136);//Crop 50% of the top frame
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 8, bitmap.getWidth(), verticalImage ? 152 : 136);//Crop 50% of the top frame
                     }
                     Matrix matrix = new Matrix();
                     matrix.setTranslate((col * bitmap.getWidth()) + horizontalOffset, (row * bitmap.getHeight()) + verticalOffset);

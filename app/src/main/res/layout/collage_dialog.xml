@@ -46,23 +46,27 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="3">
 
                     <Switch
                         android:id="@+id/sw_orientation"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:autoSizeMaxTextSize="30sp"
-                        android:autoSizeMinTextSize="2sp"
+                        android:autoSizeMinTextSize="1sp"
                         android:autoSizeTextType="uniform"
+                        android:maxLines="1"
                         android:text="@string/horizontal"></Switch>
 
                     <Switch
                         android:id="@+id/swCropCollage"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
                         android:layout_marginBottom="20dp"
+                        android:layout_weight="1"
                         android:autoSizeMaxTextSize="30sp"
                         android:autoSizeMinTextSize="2sp"
                         android:autoSizeTextType="uniform"
@@ -70,14 +74,14 @@
 
                     <Switch
                         android:id="@+id/sw_half_frame"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
                         android:layout_marginBottom="20dp"
+                        android:layout_weight="1"
                         android:autoSizeMaxTextSize="30sp"
                         android:autoSizeMinTextSize="2sp"
                         android:autoSizeTextType="uniform"
-                        android:maxLines="1"
                         android:text="@string/sw_half_frame"></Switch>
 
                 </LinearLayout>
@@ -189,8 +193,8 @@
                         android:layout_marginHorizontal="10dp"
                         android:autoSizeMaxTextSize="30sp"
                         android:autoSizeMinTextSize="2sp"
-                        android:maxLines="1"
                         android:autoSizeTextType="uniform"
+                        android:maxLines="1"
                         android:text="@string/btn_realod_anim"></Button>
                 </LinearLayout>
 

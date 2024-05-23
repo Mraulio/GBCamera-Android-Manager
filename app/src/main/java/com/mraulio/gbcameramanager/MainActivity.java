@@ -234,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!doneLoading) {
             mLoadDialog = new LoadingDialog(this, null);
+            mLoadDialog.setLoadingDialogText(getString(R.string.loading));
             mLoadDialog.showDialog();
             new ReadDataAsyncTask().execute();
         }

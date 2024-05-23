@@ -3,10 +3,16 @@ package com.mraulio.gbcameramanager.ui.importFile;
 import static com.mraulio.gbcameramanager.MainActivity.openedFromFile;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
 
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.from4toBw;
+import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.has4Colors;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.resizeImage;
 import static com.mraulio.gbcameramanager.ui.importFile.newpalette.NewPaletteDialog.paletteViewer;
 import static com.mraulio.gbcameramanager.ui.importFile.newpalette.NewPaletteDialog.showNewPaletteDialog;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
+import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_TRANSFORMED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
@@ -428,13 +434,22 @@ public class ImportFragment extends Fragment {
                                     }
 
                                 } else if (cbAddFrame.isChecked()) {
-                                    //Make the frame bw
-                                    Bitmap bwBitmap = paletteChanger("bw", finalListImages.get(0).getImageBytes(), false);
-                                    if (bwBitmap.getHeight() != 144 && bwBitmap.getHeight() != 224) {
+
+                                    if (importedBitmap.getHeight() != 144 && importedBitmap.getHeight() != 224) {
                                         Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
                                     } else {
-                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(bwBitmap, getContext(), null, false);
+                                        //Make the frame bw
+                                        if (!checkPaletteColors(importedBitmap)){
+                                            if (has4Colors(importedBitmap)){
+                                                importedBitmap = from4toBw(importedBitmap);
+                                            }else{
+                                                importedBitmap = convertToGrayScale(importedBitmap);
+                                                importedBitmap = ditherImage(importedBitmap);
+
+                                            }
+                                        }
+                                        FrameImportDialogClass frameImportDialogClass = new FrameImportDialogClass(importedBitmap, getContext(), null, false);
                                         frameImportDialogClass.frameImportDialog();
                                     }
                                 }

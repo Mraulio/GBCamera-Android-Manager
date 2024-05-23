@@ -205,7 +205,7 @@ public class ImageConversionUtils {
 //        return newImage;
 //    }
 
-    private static boolean has4Colors(Bitmap bitmap) {
+    static boolean has4Colors(Bitmap bitmap) {
 
         Set<Integer> uniqueColors = new HashSet<>();
 
@@ -226,7 +226,7 @@ public class ImageConversionUtils {
         } else return false;
     }
 
-    private static Bitmap from4toBw(Bitmap bitmap) {
+    public static Bitmap from4toBw(Bitmap bitmap) {
         Bitmap b = bitmap.copy(bitmap.getConfig(),true);
         int height = b.getHeight();
         int width = b.getWidth();

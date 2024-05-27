@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -171,6 +173,29 @@ public class JsonReader {
                         gbcImage.setInvertFramePalette((Boolean) imageJson.get("invertFramePalette"));
                     else gbcImage.setInvertFramePalette(false);
 
+                    if (imageJson.has("meta")) {
+                        JSONObject metaObj = imageJson.getJSONObject("meta");
+                        Iterator<String> keys = metaObj.keys();
+                        LinkedHashMap metaHashmap = new LinkedHashMap();
+                        while (keys.hasNext()) {
+                            String key = keys.next();
+                            Object value = metaObj.get(key);
+                            if (key.equals("isCopy") || key.equals("cpuFast")) {
+                                try {
+                                    metaHashmap.put(key, (boolean) value);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            else {
+                                metaHashmap.put(key, (String) value);
+                            }
+                        }
+                        gbcImage.setImageMetadata(metaHashmap);
+                    }
+
+                    gbcImage.setInvertFramePalette((Boolean) imageJson.get("invertFramePalette"));
+
                     //To set the Date
                     String dateFormat = "yyyy-MM-dd HH:mm:ss:SSS";
                     SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
@@ -202,7 +227,7 @@ public class JsonReader {
                 paletteObj = palettesArr.getJSONObject(i);
                 String paletteId = paletteObj.getString("shortName");
                 String paletteName = paletteObj.getString("name");
-                if (paletteObj.has("favorite")){
+                if (paletteObj.has("favorite")) {
                     boolean isFavorite = paletteObj.getBoolean("favorite");
                     gbcPalette.setFavorite(isFavorite);
                 }

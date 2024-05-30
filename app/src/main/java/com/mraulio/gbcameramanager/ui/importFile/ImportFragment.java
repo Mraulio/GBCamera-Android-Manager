@@ -1101,14 +1101,18 @@ public class ImportFragment extends Fragment {
         LinkedHashSet<Integer> colorSet = new LinkedHashSet<>();
         for (int pixel : pixels) {
             colorSet.add(pixel);
-            if (colorSet.size() > 4) {
+            if (colorSet.size() > 8) {
                 return null;
             }
         }
+        if (colorSet.size() < 4) {
+            return null;
+        }
 
-        int[] sortedColorsIntArray = new int[4];
+        int[] sortedColorsIntArray = new int[colorSet.size()];
 
-        if (colorSet.size() == 4) {
+        if (colorSet.size() <9) {
+
             List<Integer> sortedColors = new ArrayList<>(colorSet);
             Collections.sort(sortedColors, new Comparator<Integer>() {
                 @Override

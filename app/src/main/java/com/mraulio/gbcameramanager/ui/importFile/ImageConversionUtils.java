@@ -14,8 +14,11 @@ import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class ImageConversionUtils {
@@ -226,21 +229,43 @@ public class ImageConversionUtils {
         } else return false;
     }
 
+    /**
+     * Maps the 4 colors of the bitmap comparing the grey value to the colors in the BW palette
+     * @param bitmap Bitmap to get the 4 colors
+     * @return
+     */
     public static Bitmap from4toBw(Bitmap bitmap) {
-        Bitmap b = bitmap.copy(bitmap.getConfig(),true);
+        Bitmap b = bitmap.copy(bitmap.getConfig(), true);
         int height = b.getHeight();
         int width = b.getWidth();
+
+        Set<Integer> uniqueColorsSet = new HashSet<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                uniqueColorsSet.add(b.getPixel(x, y));
+            }
+        }
+        Integer[] uniqueColors = uniqueColorsSet.toArray(new Integer[0]);
+
+        Arrays.sort(uniqueColors, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer color1, Integer color2) {
+                return Integer.compare(calculateGrayValue(color2), calculateGrayValue(color1));
+            }
+        });
+        Map<Integer, Integer> colorMap = new HashMap<>();
+
+        for (int i = 0; i < 4; i++) {
+            colorMap.put(uniqueColors[i], hashPalettes.get("bw").getPaletteColorsInt()[i]);
+        }
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int pixel = b.getPixel(x, y);
-                int grayValue = (int) (Color.red(pixel) * 0.299 + Color.green(pixel) * 0.587 + Color.blue(pixel) * 0.114);
-
-                int closestColor = findClosestColor(grayValue, hashPalettes.get("bw").getPaletteColorsInt());
-
-                b.setPixel(x, y, closestColor);
+                b.setPixel(x, y, colorMap.get(pixel));
             }
         }
+
         return b;
     }
 
@@ -259,21 +284,6 @@ public class ImageConversionUtils {
 
 
         return grayScaleBitmap;
-    }
-
-    private static int findClosestColor(int grayValue, int[] paletteColors) {
-        int closestColor = paletteColors[0];
-        int minDifference = Math.abs(grayValue - calculateGrayValue(paletteColors[0]));
-
-        for (int color : paletteColors) {
-            int difference = Math.abs(grayValue - calculateGrayValue(color));
-            if (difference < minDifference) {
-                minDifference = difference;
-                closestColor = color;
-            }
-        }
-
-        return closestColor;
     }
 
     private static int calculateGrayValue(int color) {

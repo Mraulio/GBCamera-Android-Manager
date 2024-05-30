@@ -801,7 +801,7 @@ public class PalettesFragment extends Fragment {
         }
     }
 
-    private Bitmap paletteMaker(int[] palette) throws IOException {
+    public static Bitmap paletteMaker(int[] palette) throws IOException {
         Bitmap bitmap;
         Bitmap upscaledBitmap;
         byte[] imageBytes;

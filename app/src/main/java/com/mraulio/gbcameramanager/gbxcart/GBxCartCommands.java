@@ -17,10 +17,12 @@ import android.os.SystemClock;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.mraulio.gbcameramanager.R;
 import com.mraulio.gbcameramanager.ui.usbserial.UsbSerialFragment;
 import com.mraulio.gbcameramanager.utils.Utils;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -126,7 +128,7 @@ public class GBxCartCommands {
         try {
             port.write(byteArray, TIMEOUT);
         } catch (Exception e) {
-//            Toast.makeText(context, "ErrorsetFwVariable" + e.toString(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
         }
     }
 
@@ -152,7 +154,7 @@ public class GBxCartCommands {
                 port.write(commandByte, TIMEOUT);
             }
         } catch (Exception e) {
-//            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
         }
         return buffer;
     }
@@ -167,7 +169,7 @@ public class GBxCartCommands {
             receivedData = (Arrays.copyOf(readLength, len));
 
         } catch (Exception e) {
-//            Toast.makeText(context, "Error en PowerOn\n" + e.toString(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
         }
         return new String(receivedData);
     }
@@ -183,7 +185,7 @@ public class GBxCartCommands {
         try {
             port.write(buffer, TIMEOUT);
         } catch (Exception e) {
-//            Toast.makeText(context, "Error en Cart_write\n" + e.toString(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
         }
     }
 
@@ -208,7 +210,7 @@ public class GBxCartCommands {
             port.write(commandByte, TIMEOUT);
 
         } catch (Exception e) {
-//            Toast.makeText(context, "Error en cartReadRom\n" + e.toString(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
         }
     }
 
@@ -257,8 +259,8 @@ public class GBxCartCommands {
                     throw new IllegalStateException("Couldn't create dir: " + UsbSerialFragment.photoFolder);
                 }
             } catch (Exception e) {
-//                Toast toast = Toast.makeText(context, "Error making directory: " + e.toString(), Toast.LENGTH_SHORT);
-//                toast.show();
+                e.printStackTrace();
+
             }
             File file = new File(UsbSerialFragment.photoFolder, fileName);
             // create the new file inside the directory
@@ -267,8 +269,8 @@ public class GBxCartCommands {
                     throw new IllegalStateException("Couldn't create file: " + file);
                 }
             } catch (Exception e) {
-//                Toast toast = Toast.makeText(context, "Error making file: " + e.toString(), Toast.LENGTH_SHORT);
-//                toast.show();
+                e.printStackTrace();
+
             }
             try {
                 fos = new FileOutputStream(file);
@@ -378,6 +380,7 @@ public class GBxCartCommands {
         private Context context;
         private TextView tv;
         private UsbSerialPort port;
+        int bufferSize;
         File latestFile;
 
         public ReadRamAsyncTask(UsbSerialPort port, Context context, TextView tv, File latestFile) {
@@ -386,6 +389,7 @@ public class GBxCartCommands {
             this.tv = tv;
             this.latestFile = latestFile;
         }
+
         /**
          * Checks if the length has been read the specified number of times
          *
@@ -409,6 +413,8 @@ public class GBxCartCommands {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            bufferSize = port.getReadEndpoint().getMaxPacketSize();
+
             LocalDateTime now = null;
             Date nowDate = new Date();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -446,7 +452,7 @@ public class GBxCartCommands {
                     // Set SRAM bank
                     Cart_write(0x4000, i, port, context);
                     // Read 8 KiB of SRAM
-                    for (int j = 0; j < 128; j++) {
+                    for (int j = 0; j < 256; j++) {
 
                         byte[] readLength;
                         int len;
@@ -456,36 +462,35 @@ public class GBxCartCommands {
                         Map<String, Integer> readLengths = new HashMap<>();
                         String lengthKey;
                         int tryCount = 0;
-
                         // retry reading the length multiple times to make sure it's the same
-                        do {
-                            readLength = new byte[64];
-                            CartRead_RAM(j * 64, 64, port, context);
-                            SystemClock.sleep(10); // seems to help with the read length being wrong
-                            len = port.read(readLength, TIMEOUT);
+//                        do {
+                        readLength = new byte[32];
+                        CartRead_RAM(j * 32, 32, port, context);
+//                            SystemClock.sleep(10); // seems to help with the read length being wrong
+                        len = port.read(readLength, 32, TIMEOUT);
 
-                            // Calculate key of the read length
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                lengthKey = Base64.getEncoder().encodeToString(readLength);
-                            } else {
-                                lengthKey = "";
-                            }
+//                            // Calculate key of the read length
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                lengthKey = Base64.getEncoder().encodeToString(readLength);
+//                            } else {
+//                                lengthKey = "";
+//                            }
 
-                            // Add the length to the map if it does not exist or increment the value
-                            if (readLengths.containsKey(lengthKey)) {
-                                // Increment the value
-                                readLengths.put(lengthKey, readLengths.get(lengthKey) + 1);
-                            } else {
-                                // Add the length to the map
-                                readLengths.put(lengthKey, 1);
-                            }
+//                            // Add the length to the map if it does not exist or increment the value
+//                            if (readLengths.containsKey(lengthKey)) {
+//                                // Increment the value
+//                                readLengths.put(lengthKey, readLengths.get(lengthKey) + 1);
+//                            } else {
+//                                // Add the length to the map
+//                                readLengths.put(lengthKey, 1);
+//                            }
 
-                            // Failsafe: Try max of 10 times to avoid looping forever...
-                            tryCount++;
-                            if (tryCount > 10) {
-                                break;
-                            }
-                        } while (!hasBeenReadTimes(lengthKey, readLengths, 5));
+                        // Failsafe: Try max of 10 times to avoid looping forever...
+//                            tryCount++;
+//                            if (tryCount > 10) {
+//                                break;
+//                            }
+//                        } while (!hasBeenReadTimes(lengthKey, readLengths, 5));
 
                         try {
                             outputStream.write(Arrays.copyOf(readLength, len));
@@ -493,8 +498,8 @@ public class GBxCartCommands {
                         } catch (IOException e) {
                         }
 
-                        int totalIterations = 16 * 128;
-                        int currentIteration = i * 128 + j + 1;
+                        int totalIterations = 16 * 256;
+                        int currentIteration = i * 256 + j + 1;
                         int progress = currentIteration * 100 / totalIterations;
 
                         publishProgress(progress);
@@ -503,7 +508,7 @@ public class GBxCartCommands {
                 bos.write(outputStream.toByteArray());
                 bos.close();
             } catch (Exception e) {
-                Utils.toast(context, "Error en READRAM\n" + e.toString());
+                e.printStackTrace();
             }
             return null;
         }
@@ -520,6 +525,7 @@ public class GBxCartCommands {
             super.onPostExecute(aVoid);
 
             tv.append("\n" + tv.getContext().getString(R.string.done_dumping_ram));
+            tv.append("\nBUFFER SIZE: " + bufferSize + "\n");
             powerOff(port, context);
 
             //To get the extracted file, as the latest one in the directory

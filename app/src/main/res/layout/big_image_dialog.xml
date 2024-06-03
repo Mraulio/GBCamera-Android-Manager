@@ -27,7 +27,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-
         <HorizontalScrollView
             android:id="@+id/hSVMultipleImages"
             android:layout_width="match_parent"

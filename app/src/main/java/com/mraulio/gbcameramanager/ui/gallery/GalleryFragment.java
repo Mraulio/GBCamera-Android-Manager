@@ -705,7 +705,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             crop = false;
                         }
                     });
-                    builder.setTitle("HDR!");
+                    builder.setTitle("HDR");
 
                     imageView.setPadding(10, 10, 10, 10);
                     List<Integer> indexesToLoad = new ArrayList<>();
@@ -1057,6 +1057,26 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                     });
                     asyncTask.execute();
+                } else
+                    Utils.toast(getContext(), getString(R.string.no_selected));
+                return true;
+            case R.id.action_rgb:
+                if (!selectedImages.isEmpty()) {
+                    if (selectedImages.size() != 3 && selectedImages.size() != 4) {
+                        Utils.toast(getContext(), "Select 3/4 images");
+                    } else {
+                        List<Bitmap> bitmapList = new ArrayList<>();
+
+                        for (int i : selectedImages) {
+                            Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(), true);
+                            bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
+                            bitmapList.add(bitmap);
+                        }
+                        RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList);
+
+                        rgbUtils.showRgbDialog();
+
+                    }
                 } else
                     Utils.toast(getContext(), getString(R.string.no_selected));
                 return true;

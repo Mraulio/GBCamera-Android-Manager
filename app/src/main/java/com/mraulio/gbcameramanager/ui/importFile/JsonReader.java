@@ -186,15 +186,15 @@ public class JsonReader {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                            }
-                            else {
+                            } else {
                                 metaHashmap.put(key, (String) value);
                             }
                         }
                         gbcImage.setImageMetadata(metaHashmap);
                     }
-
-                    gbcImage.setInvertFramePalette((Boolean) imageJson.get("invertFramePalette"));
+                    if (imageJson.has("invertFramePalette")) {
+                        gbcImage.setInvertFramePalette((Boolean) imageJson.get("invertFramePalette"));
+                    }
 
                     //To set the Date
                     String dateFormat = "yyyy-MM-dd HH:mm:ss:SSS";

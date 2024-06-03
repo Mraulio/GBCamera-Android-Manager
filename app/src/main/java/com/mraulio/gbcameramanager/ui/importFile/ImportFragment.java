@@ -12,13 +12,9 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.res
 import static com.mraulio.gbcameramanager.ui.importFile.newpalette.NewPaletteDialog.paletteViewer;
 import static com.mraulio.gbcameramanager.ui.importFile.newpalette.NewPaletteDialog.showNewPaletteDialog;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
-import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_TRANSFORMED;
-import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
-import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
-import static com.mraulio.gbcameramanager.utils.Utils.hashPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.saveTypeNames;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 

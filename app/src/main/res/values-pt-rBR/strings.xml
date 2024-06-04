@@ -23,7 +23,7 @@
     <string name="cb_crop">Cortar</string>
 
     <string name="toast_printing">Imprimindo, aguarde...</string>
-    <string name="toast_saved">Salvo x</string>
+    <string name="toast_saved">Salvo\\u0020</string>
     <string name="toast_saved_txt">Salvo como TXT</string>
 
     <string name="loading">Carregando...</string>
@@ -256,5 +256,7 @@
     <string name="load_paperizing">Paperizing...</string>
     <string name="horizontal">Horizontal</string>
     <string name="always_default_frame">Sempre use o moldura padrão</string>
+    <string name="add_neutral_rgb">Adicionar neutro</string>
+    <string name="select_rgb">Selecione 3/4 imagens</string>
 
 </resources>

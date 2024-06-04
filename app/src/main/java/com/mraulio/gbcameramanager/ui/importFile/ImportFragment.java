@@ -12,13 +12,9 @@ import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.res
 import static com.mraulio.gbcameramanager.ui.importFile.newpalette.NewPaletteDialog.paletteViewer;
 import static com.mraulio.gbcameramanager.ui.importFile.newpalette.NewPaletteDialog.showNewPaletteDialog;
 import static com.mraulio.gbcameramanager.ui.usbserial.UsbSerialUtils.magicIsReal;
-import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_TRANSFORMED;
-import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
-import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupsNames;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
-import static com.mraulio.gbcameramanager.utils.Utils.hashPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.saveTypeNames;
 import static com.mraulio.gbcameramanager.utils.Utils.transparencyHashSet;
 
@@ -1101,14 +1097,18 @@ public class ImportFragment extends Fragment {
         LinkedHashSet<Integer> colorSet = new LinkedHashSet<>();
         for (int pixel : pixels) {
             colorSet.add(pixel);
-            if (colorSet.size() > 4) {
+            if (colorSet.size() > 8) {
                 return null;
             }
         }
+        if (colorSet.size() < 4) {
+            return null;
+        }
 
-        int[] sortedColorsIntArray = new int[4];
+        int[] sortedColorsIntArray = new int[colorSet.size()];
 
-        if (colorSet.size() == 4) {
+        if (colorSet.size() <9) {
+
             List<Integer> sortedColors = new ArrayList<>(colorSet);
             Collections.sort(sortedColors, new Comparator<Integer>() {
                 @Override

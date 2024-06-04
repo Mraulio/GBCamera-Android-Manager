@@ -103,6 +103,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -291,7 +292,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     Collections.sort(selectedImages);
 
                     int firstImage = selectedImages.get(0);
-                    int lastImage = selectedImages.get(selectedImages.size()-1);
+                    int lastImage = selectedImages.get(selectedImages.size() - 1);
                     selectedImages.clear();
                     selectedImages.add(globalImageIndex);
                     if (firstImage < globalImageIndex) {
@@ -704,7 +705,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             crop = false;
                         }
                     });
-                    builder.setTitle("HDR!");
+                    builder.setTitle("HDR");
 
                     imageView.setPadding(10, 10, 10, 10);
                     List<Integer> indexesToLoad = new ArrayList<>();
@@ -831,7 +832,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         public void onStopTrackingTouch(SeekBar seekBar) {
                         }
                     });
-
 
                     builder.setPositiveButton(getString(R.string.btn_save), new DialogInterface.OnClickListener() {
                         @Override
@@ -994,6 +994,27 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 imageObject.put("invertPalette", gbcImage.isInvertPalette());
                                 imageObject.put("lockFrame", gbcImage.isLockFrame());
                                 imageObject.put("rotation", gbcImage.getRotation());
+                                JSONObject metaObject = new JSONObject();
+                                LinkedHashMap lhm = gbcImage.getImageMetadata();
+
+                                if (lhm != null) { //Last seen images don't have metadata
+                                    for (Object key : lhm.keySet()) {
+                                        if (key.equals("frameIndex")) continue;
+                                        String value = (String) lhm.get(key);
+                                        if (key.equals("isCopy") || key.equals("cpuFast")) {
+                                            try {
+                                                boolean booleanParam = Boolean.parseBoolean(value);
+                                                metaObject.put((String) key, booleanParam);
+
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        } else {
+                                            metaObject.put((String) key, value);
+                                        }
+                                    }
+                                }
+                                imageObject.put("meta", metaObject);
                                 imagesArray.put(imageObject);
                             }
                             stateObject.put("images", imagesArray);
@@ -1035,6 +1056,36 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
 
                     });
                     asyncTask.execute();
+                } else
+                    Utils.toast(getContext(), getString(R.string.no_selected));
+                return true;
+            case R.id.action_rgb:
+                if (!selectedImages.isEmpty()) {
+                    if (selectedImages.size() != 3 && selectedImages.size() != 4) {
+                        Utils.toast(getContext(), getString(R.string.select_rgb));
+                    } else {
+                        List<Bitmap> bitmapList = new ArrayList<>();
+
+                        for (int i : selectedImages) {
+                            Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(), true);
+                            bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
+                            bitmapList.add(bitmap);
+                        }
+                        int width = bitmapList.get(0).getWidth();
+                        int height = bitmapList.get(0).getHeight();
+                        boolean sameSize = true;
+                        for (Bitmap bitmap : bitmapList) {
+                            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
+                                sameSize = false;
+                            }
+                        }
+                        if (sameSize) {
+                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList);
+                            rgbUtils.showRgbDialog();
+                        } else {
+                            Utils.toast(getContext(), getString(R.string.hdr_exception));
+                        }
+                    }
                 } else
                     Utils.toast(getContext(), getString(R.string.no_selected));
                 return true;

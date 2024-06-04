@@ -231,7 +231,7 @@ public class GalleryUtils {
             showNotification(context, file);
         }
         if (StaticValues.exportPng) {
-            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved) + StaticValues.exportSize);
+            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved)+"x" + StaticValues.exportSize);
         } else
             toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved_txt));
     }

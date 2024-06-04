@@ -194,7 +194,7 @@ public class BigImageDialog {
             for (Object key : lhm.keySet()) {
                 if (key.equals("frameIndex")) continue;
                 String metadata = metadataTexts.get(key);
-                String value = (String) lhm.get(key);
+                String value =String.valueOf(lhm.get(key));
                 if (metadata == null) {
                     metadata = (String) key;
                 }

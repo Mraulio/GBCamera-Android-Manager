@@ -1,5 +1,7 @@
 package com.mraulio.gbcameramanager.ui.importFile.newpalette;
 
+import static com.mraulio.gbcameramanager.ui.palettes.PalettesFragment.paletteMaker;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,6 +17,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -28,13 +31,14 @@ import com.mraulio.gbcameramanager.ui.palettes.SavePaletteAsyncTask;
 import com.mraulio.gbcameramanager.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class NewPaletteDialog {
 
     public static void showNewPaletteDialog(Context context, int[] newPaletteColors) {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_new_palette_import, null);
-
+        ImageView ivPalette = dialogView.findViewById(R.id.iv_palette_creator);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setView(dialogView);
         RecyclerView recyclerView = dialogView.findViewById(R.id.rv_palettes);
@@ -45,6 +49,12 @@ public class NewPaletteDialog {
         boolean validId[] = new boolean[1];
         final String PALETTE_ID_REGEX = "^[a-z0-9]{2,}$";
         int[] changedOrderColors = newPaletteColors;
+
+        try {
+            ivPalette.setImageBitmap(paletteMaker(newPaletteColors.length > 4 ? Arrays.copyOfRange(newPaletteColors, 0, 4) : newPaletteColors));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         etPaletteId.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -131,7 +141,7 @@ public class NewPaletteDialog {
         }
 
         final Bitmap[] paletteBitmap = {paletteViewer(newPaletteColors)};
-        recyclerView.setLayoutManager(new GridLayoutManager(context, 4));
+        recyclerView.setLayoutManager(new GridLayoutManager(context, newPaletteColors.length));
         GridAdapter gridAdapter = new GridAdapter(colors[0]);
         recyclerView.setAdapter(gridAdapter);
 
@@ -147,6 +157,11 @@ public class NewPaletteDialog {
                     changedOrderColors[i] = colors[0].get(i);
                 }
                 paletteBitmap[0] = paletteViewer(changedOrderColors);
+                try {
+                    ivPalette.setImageBitmap(paletteMaker(changedOrderColors.length > 4 ? Arrays.copyOfRange(changedOrderColors, 0, 4) : changedOrderColors));
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -191,7 +206,7 @@ public class NewPaletteDialog {
     public static Bitmap paletteViewer(int[] paletteColors) {
 
         int widthHeight = 100;
-        int sectionWidth = widthHeight / 4;
+        int sectionWidth = widthHeight / paletteColors.length;
 
         Bitmap bitmap = Bitmap.createBitmap(widthHeight, widthHeight / 2, Bitmap.Config.ARGB_8888);
 

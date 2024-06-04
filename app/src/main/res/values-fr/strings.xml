@@ -19,7 +19,7 @@
     <string name="cb_keep_frame">Garder les couleurs de la bordure</string>
     <string name="cb_crop">Rogner</string>
     <string name="toast_printing">Impression en cours...</string>
-    <string name="toast_saved">Sauvegardé x</string>
+    <string name="toast_saved">Sauvegardé\\u0020</string>
     <string name="toast_saved_txt">Sauvegarder au format TXT</string>
     <string name="loading">Chargement...</string>
     <string name="total_images">Total des images:\u0020</string>
@@ -236,5 +236,7 @@
     <string name="load_paperizing">Paperizing...</string>
     <string name="horizontal">Horizontal</string>
     <string name="always_default_frame">Utilisez le bordure par défaut</string>
+    <string name="add_neutral_rgb">Ajouter neutre</string>
+    <string name="select_rgb">Sélectionnez 3/4 images</string>
 
 </resources>

@@ -23,7 +23,7 @@
     <string name="cb_crop">Ohne\nRahmen</string>
 
     <string name="toast_printing">Drucke, bitte warten...</string>
-    <string name="toast_saved">Gespeichert\\u0020</string>
+    <string name="toast_saved">Gespeichert</string>
     <string name="toast_saved_txt">TXT gespeichert</string>
 
     <string name="loading">Lade...</string>

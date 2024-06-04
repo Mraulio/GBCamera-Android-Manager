@@ -167,7 +167,7 @@ public class RgbUtils {
                         bitmap = makeSquareImage(bitmap);
                     }
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                    Toast toast = Toast.makeText(context, context.getString(R.string.toast_saved)+"RGB", Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(context, context.getString(R.string.toast_saved)+" RGB", Toast.LENGTH_LONG);
                     toast.show();
                     mediaScanner(file, context);
                     showNotification(context, file);

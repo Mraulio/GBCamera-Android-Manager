@@ -23,7 +23,7 @@
     <string name="cb_crop">Retallar</string>
 
     <string name="toast_printing">Imprimint, si us plau, esperi...</string>
-    <string name="toast_saved">DESAT\\u0020</string>
+    <string name="toast_saved">DESAT</string>
     <string name="toast_saved_txt">Desat com TXT</string>
 
     <string name="loading">Carregant...</string>

@@ -572,7 +572,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     bitmap = makeSquareImage(bitmap);
                                 }
                                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + getString(R.string.collage), Toast.LENGTH_LONG);
+                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) +" "+ getString(R.string.collage), Toast.LENGTH_LONG);
                                 toast.show();
                                 mediaScanner(file, getContext());
                                 showNotification(getContext(), file);
@@ -749,7 +749,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                         try (FileOutputStream out = new FileOutputStream(file)) {
                             averaged[0].compress(Bitmap.CompressFormat.PNG, 100, out);
-                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + "HDR!", Toast.LENGTH_LONG);
+                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + " HDR!", Toast.LENGTH_LONG);
                             toast.show();
                             mediaScanner(file, getContext());
                             showNotification(getContext(), file);
@@ -856,7 +856,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 out.write(bos.toByteArray());
                                 mediaScanner(gifFile, getContext());
                                 showNotification(getContext(), gifFile);
-                                Utils.toast(getContext(), getString(R.string.toast_saved) + "GIF!");
+                                Utils.toast(getContext(), getString(R.string.toast_saved) + " GIF!");
 
                             } catch (IOException e) {
                                 e.printStackTrace();

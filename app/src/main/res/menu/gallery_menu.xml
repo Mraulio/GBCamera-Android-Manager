@@ -29,6 +29,11 @@
         android:title="@string/average_item"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_rgb"
+        android:orderInCategory="100"
+        android:title="RGB"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_gif"
         android:orderInCategory="100"
         android:title="@string/animate_item"
@@ -47,11 +52,6 @@
         android:id="@+id/action_duplicate"
         android:orderInCategory="100"
         android:title="@string/action_duplicate"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_rgb"
-        android:orderInCategory="100"
-        android:title="RGB"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_delete"

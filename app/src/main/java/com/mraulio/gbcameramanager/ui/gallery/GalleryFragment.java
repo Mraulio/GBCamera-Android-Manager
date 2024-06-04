@@ -833,7 +833,6 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         }
                     });
 
-
                     builder.setPositiveButton(getString(R.string.btn_save), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -1063,7 +1062,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             case R.id.action_rgb:
                 if (!selectedImages.isEmpty()) {
                     if (selectedImages.size() != 3 && selectedImages.size() != 4) {
-                        Utils.toast(getContext(), "Select 3/4 images");
+                        Utils.toast(getContext(), getString(R.string.select_rgb));
                     } else {
                         List<Bitmap> bitmapList = new ArrayList<>();
 
@@ -1072,10 +1071,20 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
                             bitmapList.add(bitmap);
                         }
-                        RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList);
-
-                        rgbUtils.showRgbDialog();
-
+                        int width = bitmapList.get(0).getWidth();
+                        int height = bitmapList.get(0).getHeight();
+                        boolean sameSize = true;
+                        for (Bitmap bitmap : bitmapList) {
+                            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
+                                sameSize = false;
+                            }
+                        }
+                        if (sameSize) {
+                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList);
+                            rgbUtils.showRgbDialog();
+                        } else {
+                            Utils.toast(getContext(), getString(R.string.hdr_exception));
+                        }
                     }
                 } else
                     Utils.toast(getContext(), getString(R.string.no_selected));

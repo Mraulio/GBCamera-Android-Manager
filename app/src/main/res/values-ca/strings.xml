@@ -23,7 +23,7 @@
     <string name="cb_crop">Retallar</string>
 
     <string name="toast_printing">Imprimint, si us plau, esperi...</string>
-    <string name="toast_saved">DESAT x</string>
+    <string name="toast_saved">DESAT\\u0020</string>
     <string name="toast_saved_txt">Desat com TXT</string>
 
     <string name="loading">Carregant...</string>
@@ -257,5 +257,7 @@
     <string name="load_paperizing">Paperitzant...</string>
     <string name="horizontal">Horitzontal</string>
     <string name="always_default_frame">Utilitzeu sempre el marc predeterminat</string>
+    <string name="add_neutral_rgb">Afegeix neutre</string>
+    <string name="select_rgb">Selecciona 3/4 imatges</string>
 
 </resources>

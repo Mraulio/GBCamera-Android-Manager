@@ -23,7 +23,7 @@
     <string name="cb_crop">Ohne\nRahmen</string>
 
     <string name="toast_printing">Drucke, bitte warten...</string>
-    <string name="toast_saved">Gespeichert x</string>
+    <string name="toast_saved">Gespeichert\\u0020</string>
     <string name="toast_saved_txt">TXT gespeichert</string>
 
     <string name="loading">Lade...</string>
@@ -256,5 +256,7 @@
     <string name="load_paperizing">Paperizing...</string>
     <string name="horizontal">Horizontal</string>
     <string name="always_default_frame">Standard Rahmen immer benutzen</string>
+    <string name="add_neutral_rgb">Neutral hinzufügen</string>
+    <string name="select_rgb">Wählen Sie 3/4 Bilder aus</string>
 
 </resources>

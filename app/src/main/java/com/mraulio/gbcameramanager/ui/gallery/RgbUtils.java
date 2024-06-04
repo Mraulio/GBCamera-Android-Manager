@@ -41,7 +41,8 @@ public class RgbUtils {
 
     List<Bitmap> rgbnBitmaps;
     Context context;
-    boolean addNeutral = true;
+    boolean crop, addNeutral = true;
+
     Bitmap rgbImage;
 
     public RgbUtils(Context context, List<Bitmap> rgbnBitmaps) {
@@ -61,6 +62,8 @@ public class RgbUtils {
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel_rgb);
         Button btnSave = dialogView.findViewById(R.id.btn_save_rgb);
         Switch swNeutral = dialogView.findViewById(R.id.sw_neutral);
+        Switch swCrop = dialogView.findViewById(R.id.sw_crop_rgb);
+
         if (rgbnBitmaps.size() != 4) {
             swNeutral.setVisibility(View.GONE);
         }
@@ -74,6 +77,19 @@ public class RgbUtils {
                 rgbImageView.setImageBitmap(Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
             }
         });
+
+        if (rgbnBitmaps.get(0).getHeight() != 144 && rgbnBitmaps.get(0).getHeight() != 224) {
+            swCrop.setVisibility(View.GONE);
+        } else {
+            swCrop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    crop = swCrop.isChecked();
+                    rgbImage = combineImages(rgbnBitmaps);
+                    rgbImageView.setImageBitmap(Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
+                }
+            });
+        }
 
         RecyclerView recyclerView = dialogView.findViewById(R.id.rv_RGB);
         recyclerView.setLayoutManager(new GridLayoutManager(context, rgbnBitmaps.size()));
@@ -151,7 +167,7 @@ public class RgbUtils {
                         bitmap = makeSquareImage(bitmap);
                     }
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                    Toast toast = Toast.makeText(context, context.getString(R.string.toast_saved), Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(context, context.getString(R.string.toast_saved)+"RGB", Toast.LENGTH_LONG);
                     toast.show();
                     mediaScanner(file, context);
                     showNotification(context, file);
@@ -223,8 +239,18 @@ public class RgbUtils {
             }
         } catch (IllegalArgumentException e) {
             Utils.toast(context, context.getString(R.string.hdr_exception));
-
         }
+
+        if (crop) {
+            if (height == 144) {
+                combined = Bitmap.createBitmap(combined, 16, 16, 128, 112);
+            }
+            //For the wild frames
+            else if (height == 224) {
+                combined = Bitmap.createBitmap(combined, 16, 40, 128, 112);
+            }
+        }
+
         return combined;
     }
 

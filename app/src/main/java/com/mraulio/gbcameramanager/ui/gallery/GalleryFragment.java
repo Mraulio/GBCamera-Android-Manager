@@ -134,6 +134,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static TextView tvResponseBytes;
     static boolean crop = false;
     boolean showPalettes = true;
+    static boolean showInfo = false;
     static TextView tv_page;
     boolean keepFrame = false;
     public static CustomGridViewAdapterImage customGridViewAdapterImage;
@@ -572,7 +573,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     bitmap = makeSquareImage(bitmap);
                                 }
                                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) +" "+ getString(R.string.collage), Toast.LENGTH_LONG);
+                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + " " + getString(R.string.collage), Toast.LENGTH_LONG);
                                 toast.show();
                                 mediaScanner(file, getContext());
                                 showNotification(getContext(), file);
@@ -673,7 +674,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             for (int i : selectedImages) {
                                 deleteBitmapList.add(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
                             }
-                            deleteImageGridView.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, deleteGbcImage, deleteBitmapList, false, false, false, null));
+                            deleteImageGridView.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, deleteGbcImage, deleteBitmapList, false, showInfo, false, null));
                             builder.setView(deleteImageGridView);
                             deleteDialog = builder.create();
                             deleteDialog.show();
@@ -1089,6 +1090,17 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 } else
                     Utils.toast(getContext(), getString(R.string.no_selected));
                 return true;
+            case R.id.action_toggle_info:
+                if (showInfo) {
+                    showInfo = false;
+                    updateGridView();
+                    item.setIcon(R.drawable.ic_visibility_on);
+                } else {
+                    showInfo = true;
+                    updateGridView();
+                    item.setIcon(R.drawable.ic_visibility_off);
+                }
+                return true;
             default:
                 break;
         }
@@ -1215,7 +1227,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     for (GbcImage gbcImage : filteredGbcImages.subList(startIndex, endIndex)) {
                         bitmapList.add(imageBitmapCache.get(gbcImage.getHashCode()));
                     }
-                    customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, filteredGbcImages.subList(startIndex, endIndex), bitmapList, false, false, true, selectedImages);
+                    customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, filteredGbcImages.subList(startIndex, endIndex), bitmapList, false, showInfo, true, selectedImages);
 
                     if (updatingFromChangeImage) {
                         MainImageDialog.fastImageChange();

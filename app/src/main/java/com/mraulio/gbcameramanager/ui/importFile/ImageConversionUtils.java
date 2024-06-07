@@ -31,9 +31,9 @@ public class ImageConversionUtils {
             boolean hasAllColors = checkPaletteColors(originalBitmap);
             if (!hasAllColors) {
                 //Check if it only has 4 colors. If it does, convert them to bw palette. Else convert to gray scale and dither
-                if (has4Colors(originalBitmap)){
+                if (has4Colors(originalBitmap)) {
                     originalBitmap = from4toBw(originalBitmap);
-                }else{
+                } else {
                     originalBitmap = convertToGrayScale(originalBitmap);
                     originalBitmap = ditherImage(originalBitmap);
                     LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
@@ -50,9 +50,9 @@ public class ImageConversionUtils {
                 boolean hasAllColors = checkPaletteColors(scaledBitmap);
                 if (!hasAllColors) {
                     //Check if it only has 4 colors. If it does, convert them to bw palette. Else convert to gray scale and dither
-                    if (has4Colors(scaledBitmap)){
+                    if (has4Colors(scaledBitmap)) {
                         scaledBitmap = from4toBw(scaledBitmap);
-                    }else{
+                    } else {
                         scaledBitmap = convertToGrayScale(scaledBitmap);
                         scaledBitmap = ditherImage(scaledBitmap);
                         LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
@@ -85,15 +85,13 @@ public class ImageConversionUtils {
 
                 if (isNonFramed) {
                     //Adding a frame to the image so it's 160x144
-//                    if (hasJoeyJrPalette(framelessBitmap)) {
-//                        framelessBitmap = convertJoeyPalette(framelessBitmap);
-//                    }
+
                     boolean hasAllColors = checkPaletteColors(framelessBitmap);
                     if (!hasAllColors) {
                         //Check if it only has 4 colors. If it does, convert them to bw palette. Else convert to gray scale and dither
-                        if (has4Colors(framelessBitmap)){
+                        if (has4Colors(framelessBitmap)) {
                             framelessBitmap = from4toBw(framelessBitmap);
-                        }else{
+                        } else {
                             framelessBitmap = convertToGrayScale(framelessBitmap);
                             framelessBitmap = ditherImage(framelessBitmap);
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
@@ -135,9 +133,9 @@ public class ImageConversionUtils {
 
                     if (!hasAllColors) {
                         //Check if it only has 4 colors. If it does, convert them to bw palette. Else convert to gray scale and dither
-                        if (has4Colors(scaledBitmap)){
+                        if (has4Colors(scaledBitmap)) {
                             scaledBitmap = from4toBw(scaledBitmap);
-                        }else{
+                        } else {
                             scaledBitmap = convertToGrayScale(scaledBitmap);
                             scaledBitmap = ditherImage(scaledBitmap);
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
@@ -152,61 +150,6 @@ public class ImageConversionUtils {
             }
         }
     }
-
-//    /**
-//     * Method to check if an image was  JoeyJr imported image
-//     *
-//     * @param image Image to be checked
-//     * @return
-//     */
-//    private static boolean hasJoeyJrPalette(Bitmap image) {
-//        //
-//        Set<String> originalColors = new HashSet<>(Arrays.asList("#000000", "#808080", "#C0C0C0", "#FFFFFF"));
-//        for (int y = 0; y < image.getHeight(); y++) {
-//            for (int x = 0; x < image.getWidth(); x++) {
-//                int pixelColor = image.getPixel(x, y);
-//                String hexColor = String.format("#%06X", (0xFFFFFF & pixelColor));
-//                if (!originalColors.contains(hexColor)) {
-//                    return false;  // Not a JoeyJr image
-//                }
-//            }
-//        }
-//        return true;  // Image has JoeyJr palette
-//    }
-//
-//    /**
-//     * Transform JoeyJr image into a valid palette image
-//     *
-//     * @param image
-//     * @return
-//     */
-//    public static Bitmap convertJoeyPalette(Bitmap image) {
-//
-//        Bitmap newImage = Bitmap.createBitmap(image.getWidth(), image.getHeight(), image.getConfig());
-//
-//        for (int y = 0; y < image.getHeight(); y++) {
-//            for (int x = 0; x < image.getWidth(); x++) {
-//                int pixelColor = image.getPixel(x, y);
-//
-//                // Convert to hex
-//                String hexColor = String.format("#%06X", (0xFFFFFF & pixelColor));
-//
-//                String newHexColor;
-//                if ("#808080".equals(hexColor)) {
-//                    newHexColor = "#555555";
-//                } else if ("#C0C0C0".equals(hexColor)) {
-//                    newHexColor = "#AAAAAA";
-//                } else {
-//                    newHexColor = hexColor;
-//                }
-//
-//                int newColor = Color.parseColor(newHexColor);
-//                newImage.setPixel(x, y, newColor);
-//            }
-//        }
-//
-//        return newImage;
-//    }
 
     static boolean has4Colors(Bitmap bitmap) {
 
@@ -224,13 +167,14 @@ public class ImageConversionUtils {
                 }
             }
         }
-        if (uniqueColors.size() == 4) {
+        if (uniqueColors.size() <= 4) {
             return true;
         } else return false;
     }
 
     /**
      * Maps the 4 colors of the bitmap comparing the grey value to the colors in the BW palette
+     *
      * @param bitmap Bitmap to get the 4 colors
      * @return
      */
@@ -255,8 +199,14 @@ public class ImageConversionUtils {
         });
         Map<Integer, Integer> colorMap = new HashMap<>();
 
-        for (int i = 0; i < 4; i++) {
-            colorMap.put(uniqueColors[i], hashPalettes.get("bw").getPaletteColorsInt()[i]);
+        if (uniqueColors.length == 4) {
+            for (int i = 0; i < uniqueColors.length; i++) {
+                colorMap.put(uniqueColors[i], hashPalettes.get("bw").getPaletteColorsInt()[i]);
+            }
+        } else if (uniqueColors.length < 4) {
+            for (int i = 0; i < uniqueColors.length; i++) {
+                colorMap.put(uniqueColors[i], findClosestColor(hashPalettes.get("bw").getPaletteColorsInt(), calculateGrayValue(uniqueColors[i])));
+            }
         }
 
         for (int y = 0; y < height; y++) {
@@ -267,6 +217,19 @@ public class ImageConversionUtils {
         }
 
         return b;
+    }
+    private static int findClosestColor(int[] defaultColors, int givenGray) {
+        int closestColor = defaultColors[0];
+        int minDifference = Math.abs(calculateGrayValue(defaultColors[0]) - givenGray);
+
+        for (int i = 1; i < defaultColors.length; i++) {
+            int difference = Math.abs(calculateGrayValue(defaultColors[i]) - givenGray);
+            if (difference < minDifference) {
+                minDifference = difference;
+                closestColor = defaultColors[i];
+            }
+        }
+        return closestColor;
     }
 
     public static Bitmap convertToGrayScale(Bitmap bitmap) {

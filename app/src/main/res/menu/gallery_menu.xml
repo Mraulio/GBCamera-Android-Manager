@@ -3,17 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
     <item
-        android:id="@+id/action_toggle_info"
-        android:orderInCategory="100"
-        android:icon="@drawable/ic_visibility_on"
-        android:title="@string/action_toggle_info"
-        app:showAsAction="always" />
-    <item
         android:id="@+id/action_multi_edit"
         android:orderInCategory="100"
         android:icon="@drawable/ic_edit"
         android:title="@string/edit_selected_item"
         android:visible="false"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_toggle_info"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_visibility_on"
+        android:title="@string/action_toggle_info"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_filter_tags"

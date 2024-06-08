@@ -726,30 +726,31 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                             DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
 
-                            file = new File(Utils.IMAGES_FOLDER, "HDR" + dtf.format(now) + ".png");
+                            file = new File(Utils.IMAGES_FOLDER, "HDR_" + dtf.format(now) + ".png");
                         } else {
                             SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
-                            file = new File(Utils.IMAGES_FOLDER, "HDR" + sdf.format(nowDate) + ".png");
+                            file = new File(Utils.IMAGES_FOLDER, "HDR_" + sdf.format(nowDate) + ".png");
 
                         }
                         //Regular image
-                        if (averaged[0].getHeight() == 144 * 6 && averaged[0].getWidth() == 160 * 6 && crop) {
-                            averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 128 * 6, 112 * 6);
+                        if (averaged[0].getHeight() == 144 && averaged[0].getWidth() == 160 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16, 16, 128, 112);
                         }
                         //Rotated image
-                        else if (averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 144 * 6 && crop) {
-                            averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 112 * 6, 128 * 6);
+                        else if (averaged[0].getHeight() == 160 && averaged[0].getWidth() == 144 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16, 16, 112, 128);
                         }
                         //Regular Wild frame
-                        else if (averaged[0].getHeight() == 224 * 6 && averaged[0].getWidth() == 160 * 6 && crop) {
-                            averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 40 * 6, 128 * 6, 112 * 6);
+                        else if (averaged[0].getHeight() == 224 && averaged[0].getWidth() == 160 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16, 40, 128, 112);
                         }
                         //Rotated Wild frame
-                        else if (averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 224 * 6 && crop) {
-                            averaged[0] = Bitmap.createBitmap(averaged[0], 40 * 6, 16 * 6, 112 * 6, 128 * 6);
+                        else if (averaged[0].getHeight() == 160 && averaged[0].getWidth() == 224 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 40, 16, 112, 128);
                         }
                         try (FileOutputStream out = new FileOutputStream(file)) {
-                            averaged[0].compress(Bitmap.CompressFormat.PNG, 100, out);
+                            Bitmap savedAveraged = Bitmap.createScaledBitmap(averaged[0], averaged[0].getWidth() * exportSize, averaged[0].getHeight() * exportSize, false);
+                            savedAveraged.compress(Bitmap.CompressFormat.PNG, 100, out);
                             Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + " HDR!", Toast.LENGTH_LONG);
                             toast.show();
                             mediaScanner(file, getContext());
@@ -776,8 +777,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                             try {
                                 Bitmap bitmap = averageImages(listBitmaps);
-                                averaged[0] = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false);
-                                imageView.setImageBitmap(averaged[0]);
+                                averaged[0] = bitmap;
+                                imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
 
                                 AlertDialog dialog = builder.create();
                                 dialog.show();
@@ -1081,8 +1082,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                         }
                         if (sameSize) {
-                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList);
-                            rgbUtils.showRgbDialog();
+                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList, false);
+                            rgbUtils.showRgbDialog(null);
                         } else {
                             Utils.toast(getContext(), getString(R.string.hdr_exception));
                         }

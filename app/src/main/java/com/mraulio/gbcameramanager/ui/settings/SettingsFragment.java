@@ -1,13 +1,12 @@
 package com.mraulio.gbcameramanager.ui.settings;
 
+import static com.mraulio.gbcameramanager.MainActivity.updateNavigationView;
 import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
 import static com.mraulio.gbcameramanager.utils.Utils.backupDatabase;
 import static com.mraulio.gbcameramanager.utils.Utils.restartApplication;
 import static com.mraulio.gbcameramanager.utils.Utils.showDbBackups;
 
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,8 +28,6 @@ import com.mraulio.gbcameramanager.utils.StaticValues;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
 
 public class SettingsFragment extends Fragment {
     SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
@@ -54,6 +51,7 @@ public class SettingsFragment extends Fragment {
         CheckBox cbRotation = view.findViewById(R.id.cbRotation);
         CheckBox cbAlwaysDefaultFrame = view.findViewById(R.id.cb_always_default_frame);
         CheckBox cbSquare = view.findViewById(R.id.cbSquare);
+        CheckBox cbShowExtraGallery = view.findViewById(R.id.cb_extra_gallery);
         Button btnExportDB = view.findViewById(R.id.btnExportDB);
         Button btnRestoreDB = view.findViewById(R.id.btnRestoreDB);
 
@@ -137,6 +135,22 @@ public class SettingsFragment extends Fragment {
                     editor.putBoolean("magic_check", false);
                 }
                 editor.apply();
+            }
+        });
+
+        cbShowExtraGallery.setChecked(StaticValues.showExtraGallery);
+        cbShowExtraGallery.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    editor.putBoolean("show_extra_gallery", true);
+                    StaticValues.showExtraGallery = true;
+                } else {
+                    editor.putBoolean("show_extra_gallery", false);
+                    StaticValues.showExtraGallery = false;
+                }
+                editor.apply();
+                updateNavigationView(R.id.nav_extra_gallery, StaticValues.showExtraGallery);
             }
         });
 
@@ -355,6 +369,7 @@ public class SettingsFragment extends Fragment {
                 showDbBackups(getContext(), getActivity());
             }
         });
+
         return view;
     }
 

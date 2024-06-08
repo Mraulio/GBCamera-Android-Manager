@@ -13,6 +13,7 @@
     <string name="menu_frames">Frames</string>
     <string name="menu_import">Import</string>
     <string name="menu_usbserial">USB Serial</string>
+    <string name="menu_extra_gallery">Extra gallery</string>
 
     <string name="menu_settings">Settings</string>
 
@@ -257,6 +258,7 @@
     <string name="select_rgb">Select 3/4 images</string>
 
     <string name="action_toggle_info">Toggle info</string>
+    <string name="settings_show_extra_gallery">Show extra gallery</string>
 
 
 </resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_average_extra"
+        android:orderInCategory="100"
+        android:title="@string/average_item"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_rgb_extra"
+        android:orderInCategory="100"
+        android:title="RGB"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_gif_extra"
+        android:orderInCategory="100"
+        android:title="@string/animate_item"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_collage_extra"
+        android:orderInCategory="100"
+        android:title="@string/collage"
+        app:showAsAction="never" />
+</menu>

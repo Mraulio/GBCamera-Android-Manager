@@ -11,6 +11,11 @@
         android:label="@string/menu_gallery"
         tools:layout="@layout/fragment_gallery" />
     <fragment
+        android:id="@+id/nav_extra_gallery"
+        android:name="com.mraulio.gbcameramanager.ui.extraGallery.ExtraGalleryFragment"
+        android:label="@string/menu_extra_gallery"
+        tools:layout="@layout/fragment_gallery" />
+    <fragment
         android:id="@+id/nav_palettes"
         android:name="com.mraulio.gbcameramanager.ui.palettes.PalettesFragment"
         android:label="@string/menu_palettes"

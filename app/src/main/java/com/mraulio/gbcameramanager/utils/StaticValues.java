@@ -39,9 +39,11 @@ public class StaticValues {
     public static boolean showEditMenuButton = false;
     public static boolean exportMetadata = false;
     public static boolean alwaysDefaultFrame = false;
+    public static boolean showExtraGallery = false;
 
     public enum CURRENT_FRAGMENT {
         GALLERY,
+        EXTRA_GALLERY,
         PALETTES,
         FRAMES,
         IMPORT,

@@ -9,6 +9,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -41,17 +42,23 @@ public class RgbUtils {
 
     List<Bitmap> rgbnBitmaps;
     Context context;
-    boolean crop, addNeutral = true;
+    boolean crop, extraGallery, addNeutral = true;
 
     Bitmap rgbImage;
+    private OnDialogDismissListener onDialogDismissListener;
 
-    public RgbUtils(Context context, List<Bitmap> rgbnBitmaps) {
+    public interface OnDialogDismissListener {
+        void onDialogDismiss();
+    }
+
+    public RgbUtils(Context context, List<Bitmap> rgbnBitmaps, boolean extraGallery) {
         this.context = context;
         this.rgbnBitmaps = rgbnBitmaps;
+        this.extraGallery = extraGallery;
     }
 
 
-    public void showRgbDialog() {
+    public void showRgbDialog(OnDialogDismissListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("RGB");
 
@@ -152,22 +159,24 @@ public class RgbUtils {
                     now = LocalDateTime.now();
                 }
                 File file;
+                String prefix = "RGB_";
+                prefix += extraGallery ? "extra_" : "";
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
 
-                    file = new File(Utils.IMAGES_FOLDER, "RGB_" + dtf.format(now) + ".png");
+                    file = new File(Utils.IMAGES_FOLDER, prefix + dtf.format(now) + ".png");
                 } else {
                     SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
-                    file = new File(Utils.IMAGES_FOLDER, "RGB_" + sdf.format(nowDate) + ".png");
+                    file = new File(Utils.IMAGES_FOLDER, prefix + sdf.format(nowDate) + ".png");
                 }
                 try (FileOutputStream out = new FileOutputStream(file)) {
-                    Bitmap bitmap = Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * exportSize, rgbImage.getHeight() * exportSize, false);
+                    Bitmap bitmap = Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * (extraGallery ? 1 : exportSize), rgbImage.getHeight() * (extraGallery ? 1 : exportSize), false);
                     //Make square if checked in settings
                     if (exportSquare) {
                         bitmap = makeSquareImage(bitmap);
                     }
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                    Toast toast = Toast.makeText(context, context.getString(R.string.toast_saved)+" RGB", Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(context, context.getString(R.string.toast_saved) + " RGB", Toast.LENGTH_LONG);
                     toast.show();
                     mediaScanner(file, context);
                     showNotification(context, file);
@@ -177,6 +186,15 @@ public class RgbUtils {
             }
         });
 
+        if (listener != null) {
+            // Set the dismiss listener
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    listener.onDialogDismiss();
+                }
+            });
+        }
     }
 
     private void updateImageViewBackground(GridAdapterRGB.ViewHolder viewHolder, int position) {

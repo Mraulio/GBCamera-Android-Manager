@@ -146,6 +146,16 @@
                 android:text="@string/rotation_button" />
 
             <CheckBox
+                android:id="@+id/cb_extra_gallery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:autoSizeMaxTextSize="40sp"
+                android:autoSizeMinTextSize="10sp"
+                android:autoSizeTextType="uniform"
+                android:maxLines="1"
+                android:text="@string/settings_show_extra_gallery" />
+            <CheckBox
                 android:id="@+id/cbMagic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -810,6 +810,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     TextView tv_animation = dialogView.findViewById(R.id.tv_animation);
                     Button reload_anim = dialogView.findViewById(R.id.btnReload);
                     Switch swLoop = dialogView.findViewById(R.id.swLoop);
+                    Switch swBounce = dialogView.findViewById(R.id.swBounce);
                     Switch swSort = dialogView.findViewById(R.id.swSort);
                     Switch swCrop = dialogView.findViewById(R.id.swCrop);
 
@@ -891,7 +892,16 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 encoder.start(bos);
                                 List<Bitmap> bitmapList = new ArrayList<>();
 
-                                listInUse[0] = swSort.isChecked() ? sortedList : selectedImages;
+                                listInUse[0] = swSort.isChecked() ? new ArrayList<>(sortedList) : new ArrayList<>(selectedImages);
+
+                                //For the bounce effect
+                                if (swBounce.isChecked()){
+                                    List<Integer> reverseFrames = new ArrayList<>( );
+                                    for (int i = listInUse[0].size() - 2; i > 0; i--) {
+                                        reverseFrames.add(listInUse[0].get(i));
+                                    }
+                                    listInUse[0].addAll(reverseFrames);
+                                }
 
                                 for (int i : listInUse[0]) {
                                     Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(), true);
@@ -941,7 +951,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
                             bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * exportSize, bitmap.getHeight() * exportSize, false));
                         }
-
+                        //For the bounce effect
+                        if (swBounce.isChecked()){
+                            List<Bitmap> reverseFrames = new ArrayList<>(bitmapList);
+                            for (int i = bitmapList.size() - 2; i > 0; i--) {
+                                reverseFrames.add(bitmapList.get(i).copy(bitmapList.get(i).getConfig(), false));
+                            }
+                            bitmapList.addAll(reverseFrames);
+                        }
                         for (Bitmap bitmap : bitmapList) {
                             encoder.addFrame(bitmap);
                         }

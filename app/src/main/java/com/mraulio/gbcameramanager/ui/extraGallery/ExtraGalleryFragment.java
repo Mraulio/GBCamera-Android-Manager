@@ -3,11 +3,8 @@ package com.mraulio.gbcameramanager.ui.extraGallery;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
-import static com.mraulio.gbcameramanager.utils.StaticValues.exportSize;
 import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.utils.Utils.IMAGES_FOLDER;
-import static com.mraulio.gbcameramanager.utils.Utils.imageBitmapCache;
-import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
 
 import android.app.Activity;
@@ -16,6 +13,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -40,24 +38,31 @@ import com.mraulio.gbcameramanager.ui.gallery.RgbUtils;
 import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogDismissListener{
+import pl.droidsonroids.gif.GifDrawable;
+
+public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogDismissListener {
     public static ExtraGalleryFragment egf;
     List<File> fileList;
     private RecyclerView recyclerView;
-    Switch swHdr, swRgb, swCollage;
+    Switch swHdr, swRgb, swGif, swCollage;
     public static boolean selectionModeExtra = false;
     public static HashSet<Integer> selectedFilesIndex = new HashSet<>();
 
@@ -76,6 +81,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
 
         swHdr = view.findViewById(R.id.sw_hdr);
         swRgb = view.findViewById(R.id.sw_rgb);
+        swGif = view.findViewById(R.id.sw_gif);
         swCollage = view.findViewById(R.id.sw_collage);
 
         fileList = loadFilesFromDirectory(IMAGES_FOLDER);
@@ -108,7 +114,37 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                         builder.setView(dialogView);
 
                         ImageView imageView = dialogView.findViewById(R.id.imageView);
-                        imageView.setImageBitmap(getBitmapFromFile(fileList.get(position)));
+
+                        if (isGif(fileList.get(position))) {
+                            try {
+                                InputStream inputStream = new FileInputStream(fileList.get(position));
+
+                                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+                                byte[] buffer = new byte[1024];
+                                int length;
+                                while ((length = inputStream.read(buffer)) != -1) {
+                                    outputStream.write(buffer, 0, length);
+                                }
+                                byte[] byteArray = outputStream.toByteArray();
+
+                                inputStream.close();
+                                outputStream.close();
+
+                                GifDrawable gifDrawable = new GifDrawable(byteArray);
+
+                                imageView.setImageDrawable(gifDrawable);
+
+                                inputStream.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            imageView.setImageBitmap(getBitmapFromFile(fileList.get(position)));
+
+                        }
 
                         Button btnClose = dialogView.findViewById(R.id.btn_close_extra);
                         Button btnShare = dialogView.findViewById(R.id.btn_share_extra);
@@ -129,13 +165,24 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                                 ArrayList<Uri> imageUris = new ArrayList<>();
 
                                 File file = fileList.get(position);
-                                Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
-                                imageUris.add(uri);
-                                Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-                                intent.setType("image/png");
-                                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
-                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                getContext().startActivity(Intent.createChooser(intent, "Share"));
+                                if (isGif(file)) {
+                                    Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
+
+                                    Intent intent = new Intent(Intent.ACTION_SEND);
+                                    intent.setType("image/gif"); // Tipo MIME para GIFs
+                                    intent.putExtra(Intent.EXTRA_STREAM, uri); // Pasar la URI del GIF directamente
+                                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    getContext().startActivity(Intent.createChooser(intent, "Share"));
+
+                                } else {
+                                    Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
+                                    imageUris.add(uri);
+                                    Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                                    intent.setType("image/png");
+                                    intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
+                                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    getContext().startActivity(Intent.createChooser(intent, "Share"));
+                                }
                             }
                         });
 
@@ -158,7 +205,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                     }
                 } else {
                     int firstImage = Collections.min(selectedFilesIndex);
-                    int lastImage =  Collections.max(selectedFilesIndex);
+                    int lastImage = Collections.max(selectedFilesIndex);
 
                     selectedFilesIndex.clear();
                     selectedFilesIndex.add(position);
@@ -223,7 +270,9 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
         swRgb.setOnClickListener(v ->
                 hideSelectionOptionsExtra(getActivity())
         );
-
+        swGif.setOnClickListener(v ->
+                hideSelectionOptionsExtra(getActivity())
+        );
         swCollage.setOnClickListener(v -> hideSelectionOptionsExtra(getActivity())
         );
     }
@@ -232,10 +281,9 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
         List<File> fileList = new ArrayList<>();
 
         File[] files = directory.listFiles();
-
         if (files != null) {
             for (File file : files) {
-                if (file.isFile() && file.getName().toLowerCase().endsWith(".png")) {
+                if (file.isFile() && (file.getName().toLowerCase().endsWith(".png") || file.getName().toLowerCase().endsWith(".gif"))) {
                     boolean addFile = false;
                     if (swHdr.isChecked() && file.getName().startsWith("HDR")) {
                         addFile = true;
@@ -243,12 +291,21 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                         addFile = true;
                     } else if (swCollage.isChecked() && file.getName().startsWith("Collage_")) {
                         addFile = true;
+                    } else if (swGif.isChecked() && file.getName().startsWith("GIF_")) {
+                        addFile = true;
                     }
                     if (addFile) {
                         fileList.add(file);
                     }
                 }
             }
+
+            Collections.sort(fileList, new Comparator<File>() {
+                @Override
+                public int compare(File f1, File f2) {
+                    return Long.compare(f2.lastModified(), f1.lastModified());
+                }
+            });
         }
         return fileList;
     }
@@ -300,11 +357,38 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             File file = fileList.get(position);
+            if (isGif(file)) {
+                try {
+                    InputStream inputStream = new FileInputStream(file);
 
-            Bitmap bitmap = getBitmapFromFile(file);
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-            if (bitmap != null) {
-                holder.imageView.setImageBitmap(bitmap);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                    byte[] byteArray = outputStream.toByteArray();
+
+                    inputStream.close();
+                    outputStream.close();
+
+                    GifDrawable gifDrawable = new GifDrawable(byteArray);
+
+                    holder.imageView.setImageDrawable(gifDrawable);
+
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Bitmap bitmap = getBitmapFromFile(file);
+
+                if (bitmap != null) {
+                    holder.imageView.setImageBitmap(bitmap);
+                }
             }
 
             if (selectionModeExtra && selectedFilesIndexes != null && !selectedFilesIndexes.isEmpty()) {
@@ -317,6 +401,10 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
         public int getItemCount() {
             return fileList.size();
         }
+    }
+
+    private boolean isGif(File file) {
+        return file.getName().toLowerCase().endsWith(".gif");
     }
 
     @Override

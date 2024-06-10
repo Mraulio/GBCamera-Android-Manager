@@ -134,7 +134,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static TextView tvResponseBytes;
     static boolean crop = false;
     boolean showPalettes = true;
-    static boolean showInfo = false;
+    public static boolean showInfo = false;
     static TextView tv_page;
     boolean keepFrame = false;
     public static CustomGridViewAdapterImage customGridViewAdapterImage;
@@ -895,8 +895,8 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 listInUse[0] = swSort.isChecked() ? new ArrayList<>(sortedList) : new ArrayList<>(selectedImages);
 
                                 //For the bounce effect
-                                if (swBounce.isChecked()){
-                                    List<Integer> reverseFrames = new ArrayList<>( );
+                                if (swBounce.isChecked()) {
+                                    List<Integer> reverseFrames = new ArrayList<>();
                                     for (int i = listInUse[0].size() - 2; i > 0; i--) {
                                         reverseFrames.add(listInUse[0].get(i));
                                     }
@@ -952,7 +952,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * exportSize, bitmap.getHeight() * exportSize, false));
                         }
                         //For the bounce effect
-                        if (swBounce.isChecked()){
+                        if (swBounce.isChecked()) {
                             List<Bitmap> reverseFrames = new ArrayList<>(bitmapList);
                             for (int i = bitmapList.size() - 2; i > 0; i--) {
                                 reverseFrames.add(bitmapList.get(i).copy(bitmapList.get(i).getConfig(), false));
@@ -1111,13 +1111,12 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
             case R.id.action_toggle_info:
                 if (showInfo) {
                     showInfo = false;
-                    updateGridView();
-                    item.setIcon(R.drawable.ic_visibility_on);
                 } else {
                     showInfo = true;
-                    updateGridView();
-                    item.setIcon(R.drawable.ic_visibility_off);
                 }
+                updateGridView();
+                getActivity().invalidateOptionsMenu();
+
                 return true;
             default:
                 break;

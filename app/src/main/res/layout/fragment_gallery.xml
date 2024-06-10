@@ -41,7 +41,7 @@
 
 
     <LinearLayout
-        android:id="@+id/layourButtons"
+        android:id="@+id/ly_nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

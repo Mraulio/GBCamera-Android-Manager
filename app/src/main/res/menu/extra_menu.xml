@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_toggle_info"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_visibility_on"
+        android:title="@string/action_toggle_info"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_average_extra"
         android:orderInCategory="100"
         android:title="@string/average_item"

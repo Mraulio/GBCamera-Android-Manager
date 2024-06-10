@@ -27,13 +27,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:layout_below="@+id/imageView"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tvName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/imageView"
                 android:layout_centerHorizontal="true"
                 android:singleLine="true"
                 android:ellipsize="marquee"
@@ -43,7 +43,6 @@
                 android:id="@+id/tv_tags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/imageView"
                 android:layout_centerHorizontal="true"
                 android:singleLine="true"
                 android:ellipsize="marquee"
@@ -53,7 +52,6 @@
                 android:id="@+id/tv_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/imageView"
                 android:layout_centerHorizontal="true"
                 android:singleLine="true"
                 android:ellipsize="marquee"

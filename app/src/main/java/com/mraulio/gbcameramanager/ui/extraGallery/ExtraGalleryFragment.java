@@ -1,11 +1,14 @@
 package com.mraulio.gbcameramanager.ui.extraGallery;
 
+import static android.view.View.GONE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
+import static com.mraulio.gbcameramanager.utils.StaticValues.imagesPage;
 import static com.mraulio.gbcameramanager.utils.StaticValues.showEditMenuButton;
 import static com.mraulio.gbcameramanager.utils.Utils.IMAGES_FOLDER;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,7 +16,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -30,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mraulio.gbcameramanager.R;
@@ -38,7 +41,6 @@ import com.mraulio.gbcameramanager.ui.gallery.RgbUtils;
 import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.Utils;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,13 +60,19 @@ import java.util.Locale;
 
 import pl.droidsonroids.gif.GifDrawable;
 
-public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogDismissListener {
+public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSaved {
     public static ExtraGalleryFragment egf;
     List<File> fileList;
     private RecyclerView recyclerView;
     Switch swHdr, swRgb, swGif, swCollage;
+    Button btnFirstPage, btnLastPage, btnPrevPage, btnNextPage;
+    TextView tvPage;
+    public static boolean showInfoExtra;
+
     public static boolean selectionModeExtra = false;
     public static HashSet<Integer> selectedFilesIndex = new HashSet<>();
+    private int page = 0, lastPage, globalImageIndex;
+    private int itemsPage = imagesPage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,6 +86,12 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
         StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.EXTRA_GALLERY;
         setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.fragment_extra_gallery, container, false);
+
+        btnFirstPage = view.findViewById(R.id.btnFirstPage);
+        btnLastPage = view.findViewById(R.id.btnLastPage);
+        btnPrevPage = view.findViewById(R.id.btnPrevPage);
+        btnNextPage = view.findViewById(R.id.btnNextPage);
+        tvPage = view.findViewById(R.id.tv_page);
 
         swHdr = view.findViewById(R.id.sw_hdr);
         swRgb = view.findViewById(R.id.sw_rgb);
@@ -94,11 +108,16 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
             public void onItemClick(View view, int position) {
 
                 if (selectionModeExtra) {
-
-                    if (selectedFilesIndex.contains(position)) {
-                        selectedFilesIndex.remove(position);
+                    if (page != lastPage) {
+                        globalImageIndex = position + (page * itemsPage);
                     } else {
-                        selectedFilesIndex.add(position);
+                        globalImageIndex = fileList.size() - (itemsPage - position);
+                    }
+
+                    if (selectedFilesIndex.contains(globalImageIndex)) {
+                        selectedFilesIndex.remove(globalImageIndex);
+                    } else {
+                        selectedFilesIndex.add(globalImageIndex);
                     }
                     if (selectedFilesIndex.size() == 0) {
                         hideSelectionOptionsExtra(getActivity());
@@ -198,10 +217,17 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                 if (!selectionModeExtra) {
                     selectionModeExtra = true;
                     StaticValues.fab.show();
-                    if (selectedFilesIndex.contains(position)) {
-                        selectedFilesIndex.remove(position);
+
+                    if (page != lastPage) {
+                        globalImageIndex = position + (page * itemsPage);
                     } else {
-                        selectedFilesIndex.add(position);
+                        globalImageIndex = fileList.size() - (itemsPage - position);
+                    }
+
+                    if (selectedFilesIndex.contains(globalImageIndex)) {
+                        selectedFilesIndex.remove(globalImageIndex);
+                    } else {
+                        selectedFilesIndex.add(globalImageIndex);
                     }
                 } else {
                     int firstImage = Collections.min(selectedFilesIndex);
@@ -243,7 +269,53 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
 
         setupSwitchListeners();
 
+        btnNextPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nextPage();
+            }
+        });
+        btnPrevPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                prevPage();
+            }
+        });
+
+        btnFirstPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (page > 0) {
+                    page = 0;
+                    loadAndDisplayImages();
+                }
+            }
+        });
+
+        btnLastPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (page < lastPage) {
+                    page = lastPage;
+                    loadAndDisplayImages();
+                }
+            }
+        });
         return view;
+    }
+
+    public void prevPage() {
+        if (page > 0) {
+            page--;
+            loadAndDisplayImages();
+        }
+    }
+
+    public void nextPage() {
+        if (page < lastPage) {
+            page++;
+            loadAndDisplayImages();
+        }
     }
 
     public void hideSelectionOptionsExtra(Activity activity) {
@@ -255,26 +327,46 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
         activity.invalidateOptionsMenu();
     }
 
-    private void loadAndDisplayImages() {
+    public void loadAndDisplayImages() {
         fileList = loadFilesFromDirectory(IMAGES_FOLDER);
+        itemsPage = StaticValues.imagesPage;
+        lastPage = (fileList.size() - 1) / itemsPage;
+        tvPage.setText((page + 1) + " / " + (lastPage + 1));
+        int startIndex, endIndex;
 
-        ImageAdapter imageAdapter = new ImageAdapter(fileList, selectedFilesIndex, selectionModeExtra);
+        //In case the last page is not complete
+        if (page == lastPage && (fileList.size() % itemsPage) != 0) {
+            itemsPage = fileList.size() % itemsPage;
+            startIndex = fileList.size() - itemsPage;
+            endIndex = fileList.size();
+
+        } else {
+            startIndex = page * itemsPage;
+            endIndex = Math.min(startIndex + itemsPage, fileList.size());
+        }
+        List<File> fileListPage = fileList.subList(startIndex, endIndex);
+
+        ImageAdapter imageAdapter = new ImageAdapter(fileListPage, fileList, selectedFilesIndex, selectionModeExtra);
         recyclerView.setAdapter(imageAdapter);
     }
 
     private void setupSwitchListeners() {
-        swHdr.setOnClickListener(v ->
-                hideSelectionOptionsExtra(getActivity())
-        );
-
-        swRgb.setOnClickListener(v ->
-                hideSelectionOptionsExtra(getActivity())
-        );
-        swGif.setOnClickListener(v ->
-                hideSelectionOptionsExtra(getActivity())
-        );
-        swCollage.setOnClickListener(v -> hideSelectionOptionsExtra(getActivity())
-        );
+        swHdr.setOnClickListener(v -> {
+            page = 0;
+            hideSelectionOptionsExtra(getActivity());
+        });
+        swRgb.setOnClickListener(v -> {
+            page = 0;
+            hideSelectionOptionsExtra(getActivity());
+        });
+        swGif.setOnClickListener(v -> {
+            page = 0;
+            hideSelectionOptionsExtra(getActivity());
+        });
+        swCollage.setOnClickListener(v -> {
+            page = 0;
+            hideSelectionOptionsExtra(getActivity());
+        });
     }
 
     private List<File> loadFilesFromDirectory(File directory) {
@@ -321,28 +413,33 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
     }
 
     @Override
-    public void onDialogDismiss() {
-        loadAndDisplayImages();
+    public void onButtonRgbSaved() {
+        hideSelectionOptionsExtra(getActivity());
     }
 
     private class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
 
-        private List<File> fileList;
+        private List<File> fileListPage;
+        private List<File> fileListTotal;
         private HashSet<Integer> selectedFilesIndexes;
         private boolean selectionModeExtra;
 
-        public ImageAdapter(List<File> fileList, HashSet<Integer> selectedFilesIndexes, boolean selectionModeExtra) {
-            this.fileList = fileList;
+        public ImageAdapter(List<File> fileListPage, List<File> fileListTotal, HashSet<Integer> selectedFilesIndexes, boolean selectionModeExtra) {
+            this.fileListPage = fileListPage;
+            this.fileListTotal = fileListTotal;
             this.selectedFilesIndexes = selectedFilesIndexes;
             this.selectionModeExtra = selectionModeExtra;
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             public ImageView imageView;
+            public TextView tvImageType, tvImageSize;
 
             public ViewHolder(View view) {
                 super(view);
                 imageView = view.findViewById(R.id.imageView);
+                tvImageType = view.findViewById(R.id.tv_image_type);
+                tvImageSize = view.findViewById(R.id.tv_image_size);
             }
         }
 
@@ -356,11 +453,13 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            File file = fileList.get(position);
+            View itemView = holder.itemView;
+            File file = fileListPage.get(position);
+            int width = 0;
+            int height = 0;
             if (isGif(file)) {
                 try {
                     InputStream inputStream = new FileInputStream(file);
-
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
                     byte[] buffer = new byte[1024];
@@ -374,7 +473,10 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                     outputStream.close();
 
                     GifDrawable gifDrawable = new GifDrawable(byteArray);
-
+                    if (showInfoExtra) {
+                        height = gifDrawable.getIntrinsicHeight();
+                        width = gifDrawable.getIntrinsicWidth();
+                    }
                     holder.imageView.setImageDrawable(gifDrawable);
 
                     inputStream.close();
@@ -385,22 +487,58 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                 }
             } else {
                 Bitmap bitmap = getBitmapFromFile(file);
-
                 if (bitmap != null) {
                     holder.imageView.setImageBitmap(bitmap);
+                    if (showInfoExtra) {
+                        height = bitmap.getHeight();
+                        width = bitmap.getWidth();
+                    }
                 }
             }
 
             if (selectionModeExtra && selectedFilesIndexes != null && !selectedFilesIndexes.isEmpty()) {
-                holder.imageView.setBackgroundColor(selectedFilesIndexes.contains(position) ? getContext().getColor(R.color.teal_700) : Color.TRANSPARENT);
+                boolean shouldCheck = false;
+                int actualIndex;
+                if (page != lastPage) {
+                    actualIndex = position + (page * itemsPage);
+                } else {
+                    actualIndex = fileListTotal.size() - (itemsPage - position);
+                }
+                if (selectedFilesIndexes.contains(actualIndex)) {
+                    shouldCheck = true;
+                }
+                if (showInfoExtra) {
+                    itemView.setBackground(getResources().getDrawable(R.drawable.border_layout));
+                }
+                itemView.setBackgroundColor(shouldCheck ? getContext().getColor(R.color.teal_700) : Color.TRANSPARENT);
+            }
 
+            if (showInfoExtra) {
+
+                String type = "";
+                if (file.getName().startsWith("HDR")) {
+                    type = "HDR";
+                } else if (file.getName().startsWith("GIF")) {
+                    type = "GIF";
+                } else if (file.getName().startsWith("RGB")) {
+                    type = "RGB";
+                } else if (file.getName().startsWith("Collage")) {
+                    type = "Collage";
+                }
+
+                holder.tvImageType.setText(type);
+                holder.tvImageSize.setText(width + "x" + height);
+            } else {
+                holder.tvImageType.setVisibility(GONE);
+                holder.tvImageSize.setVisibility(GONE);
             }
         }
 
         @Override
         public int getItemCount() {
-            return fileList.size();
+            return fileListPage.size();
         }
+
     }
 
     private boolean isGif(File file) {
@@ -469,7 +607,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                                     toast.show();
                                     mediaScanner(file, getContext());
                                     showNotification(getContext(), file);
-                                    loadAndDisplayImages();
+                                    hideSelectionOptionsExtra(getActivity());
                                     dialog.dismiss();
                                 } catch (IOException e) {
                                     e.printStackTrace();
@@ -481,8 +619,6 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                     } catch (IllegalArgumentException e) {
                         Utils.toast(getContext(), getString(R.string.hdr_exception));
                     }
-
-
                 } else
                     Utils.toast(getContext(), getString(R.string.no_selected));
                 return true;
@@ -522,10 +658,19 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnDialogD
                     Utils.toast(getContext(), getString(R.string.no_selected));
                 return true;
             case R.id.action_gif_extra:
-
+                toast(getContext(), "Nothing yet");
                 return true;
             case R.id.action_collage_extra:
-
+                toast(getContext(), "Nothing yet");
+                return true;
+            case R.id.action_toggle_info:
+                if (showInfoExtra) {
+                    showInfoExtra = false;
+                } else {
+                    showInfoExtra = true;
+                }
+                loadAndDisplayImages();
+                getActivity().invalidateOptionsMenu();
                 return true;
             default:
                 break;

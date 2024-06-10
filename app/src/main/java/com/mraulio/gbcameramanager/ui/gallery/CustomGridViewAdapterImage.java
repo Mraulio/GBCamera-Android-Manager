@@ -68,7 +68,6 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
             holder.txtTitle.setSelected(true);
             holder.txtTags = (TextView) row.findViewById(R.id.tv_tags);
             holder.txtTags.setSelected(true);
-            holder.txtTitle = (TextView) row.findViewById(R.id.tvName);
             holder.txtDate = (TextView) row.findViewById(R.id.tv_date);
             holder.txtDate.setSelected(true);
             holder.imageItem = (ImageView) row.findViewById(R.id.imageView);
@@ -109,7 +108,7 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
             }
         }
         if (showInfo) {
-            holder.txtTitle.setTextColor(dup ? context.getResources().getColor(R.color.duplicated) : Color.BLACK);
+            holder.txtTitle.setTextColor(dup ? context.getResources().getColor(R.color.duplicated) : holder.txtTitle.getTextColors().getDefaultColor());
             holder.txtTitle.setText(name);
 
             StringBuilder sb = new StringBuilder();

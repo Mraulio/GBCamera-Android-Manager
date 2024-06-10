@@ -45,10 +45,11 @@ public class RgbUtils {
     boolean crop, extraGallery, addNeutral = true;
 
     Bitmap rgbImage;
-    private OnDialogDismissListener onDialogDismissListener;
 
-    public interface OnDialogDismissListener {
-        void onDialogDismiss();
+    private OnRgbSaved onRgbSaved;
+
+    public interface OnRgbSaved {
+        void onButtonRgbSaved();
     }
 
     public RgbUtils(Context context, List<Bitmap> rgbnBitmaps, boolean extraGallery) {
@@ -58,7 +59,7 @@ public class RgbUtils {
     }
 
 
-    public void showRgbDialog(OnDialogDismissListener listener) {
+    public void showRgbDialog(OnRgbSaved listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("RGB");
 
@@ -180,21 +181,18 @@ public class RgbUtils {
                     toast.show();
                     mediaScanner(file, context);
                     showNotification(context, file);
+
+                    if (listener != null) {
+                        if (listener != null) {
+                            listener.onButtonRgbSaved();
+                        }
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         });
 
-        if (listener != null) {
-            // Set the dismiss listener
-            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialogInterface) {
-                    listener.onDialogDismiss();
-                }
-            });
-        }
     }
 
     private void updateImageViewBackground(GridAdapterRGB.ViewHolder viewHolder, int position) {

@@ -10,9 +10,10 @@
 
     <LinearLayout
         android:id="@+id/buttonsLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:gravity="center"
         android:layout_marginBottom="10dp"
         android:orientation="horizontal">
 
@@ -33,6 +34,7 @@
             android:text="RGB">
 
         </Switch>
+
         <Switch
             android:id="@+id/sw_gif"
             android:layout_width="wrap_content"
@@ -41,6 +43,7 @@
             android:text="GIF">
 
         </Switch>
+
         <Switch
             android:id="@+id/sw_collage"
             android:layout_width="wrap_content"
@@ -57,8 +60,67 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/buttonsLayout"
+        android:layout_above="@id/ly_nav_buttons"
         android:clipToPadding="false"
         android:padding="4dp"
         android:scrollbars="vertical" />
+
+    <LinearLayout
+        android:id="@+id/ly_nav_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <Button
+            android:id="@+id/btnFirstPage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
+            android:drawableRight="@drawable/ic_double_arrow"
+            android:drawableTint="@color/white"
+            android:rotation="180" />
+
+        <Button
+            android:id="@+id/btnPrevPage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
+            android:drawableRight="@drawable/ic_arrow"
+            android:drawableTint="@color/white"
+            android:rotation="180" />
+
+        <TextView
+            android:id="@+id/tv_page"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="X / X"></TextView>
+
+        <Button
+            android:id="@+id/btnNextPage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
+            android:drawableRight="@drawable/ic_arrow"
+            android:drawableTint="@color/white" />
+
+        <Button
+            android:id="@+id/btnLastPage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
+            android:drawableRight="@drawable/ic_double_arrow"
+            android:drawableTint="@color/white" />
+    </LinearLayout>
 
 </RelativeLayout>

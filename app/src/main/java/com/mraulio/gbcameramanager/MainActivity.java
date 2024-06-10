@@ -2,8 +2,10 @@ package com.mraulio.gbcameramanager;
 
 import static com.mraulio.gbcameramanager.ui.extraGallery.ExtraGalleryFragment.egf;
 import static com.mraulio.gbcameramanager.ui.extraGallery.ExtraGalleryFragment.selectionModeExtra;
+import static com.mraulio.gbcameramanager.ui.extraGallery.ExtraGalleryFragment.showInfoExtra;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.hideSelectionOptions;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectionMode;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.showInfo;
 import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
@@ -300,7 +302,11 @@ public class MainActivity extends AppCompatActivity {
                     menu.getItem(0).setVisible(true);
                 }
                 if (selectionMode[0]) StaticValues.fab.show();
-
+                if (showInfo) {
+                    menu.getItem(1).setIcon(R.drawable.ic_visibility_off);
+                } else {
+                    menu.getItem(1).setIcon(R.drawable.ic_visibility_on);
+                }
                 if (StaticValues.fab != null) {
                     Activity activity = this;
                     StaticValues.fab.setOnClickListener(new View.OnClickListener() {
@@ -321,7 +327,11 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     StaticValues.fab.hide();
                 }
-
+                if (showInfoExtra) {
+                    menu.getItem(0).setIcon(R.drawable.ic_visibility_off);
+                } else {
+                    menu.getItem(0).setIcon(R.drawable.ic_visibility_on);
+                }
                 if (StaticValues.fab != null) {
                     Activity activity = this;
                     StaticValues.fab.setOnClickListener(new View.OnClickListener() {

@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class ImageConversionUtils {
 
-    public static Bitmap resizeImage(Bitmap originalBitmap, GbcImage gbcImage) {
+    public static Bitmap resizeImage(Bitmap originalBitmap, GbcImage gbcImage, boolean dither) {
 
         int originalWidth = originalBitmap.getWidth();
         int originalHeight = originalBitmap.getHeight();
@@ -35,7 +35,7 @@ public class ImageConversionUtils {
                     originalBitmap = from4toBw(originalBitmap);
                 } else {
                     originalBitmap = convertToGrayScale(originalBitmap);
-                    originalBitmap = ditherImage(originalBitmap);
+                    originalBitmap = ditherImage(originalBitmap, dither);
                     LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                     metadata.put("Type", "Transformed");
                     gbcImage.setImageMetadata(metadata);
@@ -54,7 +54,7 @@ public class ImageConversionUtils {
                         scaledBitmap = from4toBw(scaledBitmap);
                     } else {
                         scaledBitmap = convertToGrayScale(scaledBitmap);
-                        scaledBitmap = ditherImage(scaledBitmap);
+                        scaledBitmap = ditherImage(scaledBitmap, dither);
                         LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                         metadata.put("Type", "Transformed");
                         gbcImage.setImageMetadata(metadata);
@@ -93,7 +93,7 @@ public class ImageConversionUtils {
                             framelessBitmap = from4toBw(framelessBitmap);
                         } else {
                             framelessBitmap = convertToGrayScale(framelessBitmap);
-                            framelessBitmap = ditherImage(framelessBitmap);
+                            framelessBitmap = ditherImage(framelessBitmap, dither);
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                             metadata.put("Type", "Transformed");
                             gbcImage.setImageMetadata(metadata);
@@ -137,7 +137,7 @@ public class ImageConversionUtils {
                             scaledBitmap = from4toBw(scaledBitmap);
                         } else {
                             scaledBitmap = convertToGrayScale(scaledBitmap);
-                            scaledBitmap = ditherImage(scaledBitmap);
+                            scaledBitmap = ditherImage(scaledBitmap, dither);
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                             metadata.put("Type", "Transformed");
                             gbcImage.setImageMetadata(metadata);
@@ -218,6 +218,7 @@ public class ImageConversionUtils {
 
         return b;
     }
+
     private static int findClosestColor(int[] defaultColors, int givenGray) {
         int closestColor = defaultColors[0];
         int minDifference = Math.abs(calculateGrayValue(defaultColors[0]) - givenGray);
@@ -257,7 +258,7 @@ public class ImageConversionUtils {
      * Dithering the image to the bw palette using Bayer Matrix, and enhancing the edges.
      * https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface/blob/5584b0dacc92ee1b9cae5abe3e51ee02d9aa4cbd/Octave_Interface/image_rectifier.m#L32C1-L69C6
      */
-    public static Bitmap ditherImage(Bitmap originalBitmap) {
+    public static Bitmap ditherImage(Bitmap originalBitmap, boolean applyDithering) {
         int[] Dithering_patterns = {
                 0x2A, 0x5E, 0x9B, 0x51, 0x8B, 0xCA, 0x33, 0x69, 0xA6, 0x5A, 0x97, 0xD6, 0x44, 0x7C, 0xBA,
                 0x37, 0x6D, 0xAA, 0x4D, 0x87, 0xC6, 0x40, 0x78, 0xB6, 0x30, 0x65, 0xA2, 0x57, 0x93, 0xD2,
@@ -305,25 +306,41 @@ public class ImageConversionUtils {
                 }
             }
         }
+
         for (int y = 0; y < bitmapHeight; y++) {
             for (int x = 0; x < bitmapWidth; x++) {
                 int pixel = Color.red(originalBitmap.getPixel(x, y)); // Get the grayscale value
 
                 int pixel_out;
-                if (pixel < Bayer_matDG_B_2D[y][x]) {
-                    pixel_out = 0;
-                } else if (pixel < Bayer_matLG_DG_2D[y][x]) {
-                    pixel_out = 85;
-                } else if (pixel < Bayer_matW_LG_2D[y][x]) {
-                    pixel_out = 170;
+                if (applyDithering) {
+                    if (pixel < Bayer_matDG_B_2D[y][x]) {
+                        pixel_out = 0;
+                    } else if (pixel < Bayer_matLG_DG_2D[y][x]) {
+                        pixel_out = 85;
+                    } else if (pixel < Bayer_matW_LG_2D[y][x]) {
+                        pixel_out = 170;
+                    } else {
+                        pixel_out = 255;
+                    }
                 } else {
-                    pixel_out = 255;
+                    // No dithering applied, use simple thresholding
+                    if (pixel < 64) {
+                        pixel_out = 0;
+                    } else if (pixel < 128) {
+                        pixel_out = 85;
+                    } else if (pixel < 192) {
+                        pixel_out = 170;
+                    } else {
+                        pixel_out = 255;
+                    }
                 }
+
                 originalBitmap.setPixel(x, y, Color.rgb(pixel_out, pixel_out, pixel_out));
             }
         }
         return originalBitmap;
     }
+
 
     public static Bitmap enhanceEdges(Bitmap a) {
         int width = a.getWidth();

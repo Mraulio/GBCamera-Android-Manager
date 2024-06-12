@@ -15,6 +15,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
@@ -85,7 +86,9 @@ public class CustomGridViewAdapterImage extends ArrayAdapter<GbcImage> {
             for (int i : selectedImages) {
                 hashToCheck.add(GalleryFragment.filteredGbcImages.get(i).getHashCode());
             }
-            row.setBackgroundColor(hashToCheck.contains(hash) ? context.getColor(R.color.teal_700) : Color.WHITE);
+            int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            boolean att = nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+            row.setBackgroundColor(hashToCheck.contains(hash) ? context.getColor(R.color.teal_700) : att ? context.getColor(R.color.background_dark) : Color.WHITE);
         }
 
         Boolean fav = data.get(position).getTags().contains(FILTER_FAVOURITE);

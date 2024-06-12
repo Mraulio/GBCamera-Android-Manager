@@ -301,7 +301,11 @@ public class MainActivity extends AppCompatActivity {
                 if (StaticValues.showEditMenuButton) {
                     menu.getItem(0).setVisible(true);
                 }
-                if (selectionMode[0]) StaticValues.fab.show();
+                if (selectionMode[0]) {
+                    StaticValues.fab.show();
+                } else {
+                    StaticValues.fab.hide();
+                }
                 if (showInfo) {
                     menu.getItem(1).setIcon(R.drawable.ic_visibility_off);
                 } else {

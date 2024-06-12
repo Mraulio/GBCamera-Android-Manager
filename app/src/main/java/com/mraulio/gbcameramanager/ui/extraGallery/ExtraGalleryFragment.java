@@ -12,10 +12,12 @@ import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -106,13 +108,12 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
         recyclerView.addOnItemTouchListener(new RecyclerViewItemClickListener(getContext(), recyclerView, new RecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-
+                if (page != lastPage) {
+                    globalImageIndex = position + (page * itemsPage);
+                } else {
+                    globalImageIndex = fileList.size() - (itemsPage - position);
+                }
                 if (selectionModeExtra) {
-                    if (page != lastPage) {
-                        globalImageIndex = position + (page * itemsPage);
-                    } else {
-                        globalImageIndex = fileList.size() - (itemsPage - position);
-                    }
 
                     if (selectedFilesIndex.contains(globalImageIndex)) {
                         selectedFilesIndex.remove(globalImageIndex);
@@ -134,9 +135,9 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
 
                         ImageView imageView = dialogView.findViewById(R.id.imageView);
 
-                        if (isGif(fileList.get(position))) {
+                        if (isGif(fileList.get(globalImageIndex))) {
                             try {
-                                InputStream inputStream = new FileInputStream(fileList.get(position));
+                                InputStream inputStream = new FileInputStream(fileList.get(globalImageIndex));
 
                                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -161,13 +162,15 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                                 e.printStackTrace();
                             }
                         } else {
-                            imageView.setImageBitmap(getBitmapFromFile(fileList.get(position)));
+                            imageView.setImageBitmap(getBitmapFromFile(fileList.get(globalImageIndex)));
 
                         }
 
                         Button btnClose = dialogView.findViewById(R.id.btn_close_extra);
                         Button btnShare = dialogView.findViewById(R.id.btn_share_extra);
+                        Button btnDelete = dialogView.findViewById(R.id.btn_delete_extra);
                         btnShare.setVisibility(View.VISIBLE);
+                        btnDelete.setVisibility(View.VISIBLE);
 
                         AlertDialog dialog = builder.create();
 
@@ -183,13 +186,13 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                             public void onClick(View v) {
                                 ArrayList<Uri> imageUris = new ArrayList<>();
 
-                                File file = fileList.get(position);
+                                File file = fileList.get(globalImageIndex);
                                 if (isGif(file)) {
                                     Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
 
                                     Intent intent = new Intent(Intent.ACTION_SEND);
-                                    intent.setType("image/gif"); // Tipo MIME para GIFs
-                                    intent.putExtra(Intent.EXTRA_STREAM, uri); // Pasar la URI del GIF directamente
+                                    intent.setType("image/gif");
+                                    intent.putExtra(Intent.EXTRA_STREAM, uri);
                                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                     getContext().startActivity(Intent.createChooser(intent, "Share"));
 
@@ -205,6 +208,41 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                             }
                         });
 
+                        btnDelete.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                File file = fileList.get(globalImageIndex);
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+                                builder.setTitle(getString(R.string.sure_delete_sav) + " " + file.getName())
+                                        .setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface deleteDialog, int id) {
+
+                                                if (file.delete()) {
+                                                    toast(getContext(), getString(R.string.deleted_sav) + file.getName());
+                                                } else {
+                                                    toast(getContext(), getString(R.string.toast_couldnt_delete_sav));
+                                                }
+
+                                                deleteDialog.dismiss();
+                                                dialog.dismiss();
+                                                hideSelectionOptionsExtra(getActivity());
+                                            }
+                                        })
+
+                                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface deleteDialog, int id) {
+                                                deleteDialog.dismiss();
+                                            }
+                                        });
+
+                                AlertDialog alertDialog = builder.create();
+                                alertDialog.show();
+
+                            }
+                        });
+
                         dialog.show();
                     }
                 }
@@ -213,16 +251,14 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
         }, new RecyclerViewItemClickListener.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(View view, int position) {
-
+                if (page != lastPage) {
+                    globalImageIndex = position + (page * itemsPage);
+                } else {
+                    globalImageIndex = fileList.size() - (itemsPage - position);
+                }
                 if (!selectionModeExtra) {
                     selectionModeExtra = true;
                     StaticValues.fab.show();
-
-                    if (page != lastPage) {
-                        globalImageIndex = position + (page * itemsPage);
-                    } else {
-                        globalImageIndex = fileList.size() - (itemsPage - position);
-                    }
 
                     if (selectedFilesIndex.contains(globalImageIndex)) {
                         selectedFilesIndex.remove(globalImageIndex);
@@ -234,18 +270,18 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                     int lastImage = Collections.max(selectedFilesIndex);
 
                     selectedFilesIndex.clear();
-                    selectedFilesIndex.add(position);
+                    selectedFilesIndex.add(globalImageIndex);
 
-                    if (firstImage < position) {
+                    if (firstImage < globalImageIndex) {
                         selectedFilesIndex.clear();
-                        for (int i = firstImage; i < position; i++) {
+                        for (int i = firstImage; i < globalImageIndex; i++) {
                             if (!selectedFilesIndex.contains(i)) {
                                 selectedFilesIndex.add(i);
                             }
                         }
-                        selectedFilesIndex.add(position);
-                    } else if (firstImage > position) {
-                        for (int i = lastImage; i > position; i--) {
+                        selectedFilesIndex.add(globalImageIndex);
+                    } else if (firstImage > globalImageIndex) {
+                        for (int i = lastImage; i > globalImageIndex; i--) {
                             if (!selectedFilesIndex.contains(i)) {
                                 selectedFilesIndex.add(i);
                             }
@@ -496,8 +532,8 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                 }
             }
 
+            boolean shouldCheck = false;
             if (selectionModeExtra && selectedFilesIndexes != null && !selectedFilesIndexes.isEmpty()) {
-                boolean shouldCheck = false;
                 int actualIndex;
                 if (page != lastPage) {
                     actualIndex = position + (page * itemsPage);
@@ -507,14 +543,15 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                 if (selectedFilesIndexes.contains(actualIndex)) {
                     shouldCheck = true;
                 }
-                if (showInfoExtra) {
-                    itemView.setBackground(getResources().getDrawable(R.drawable.border_layout));
+                if (!showInfoExtra) {
+                    itemView.setBackgroundColor(shouldCheck ? getContext().getColor(R.color.teal_700) : Color.TRANSPARENT);
                 }
-                itemView.setBackgroundColor(shouldCheck ? getContext().getColor(R.color.teal_700) : Color.TRANSPARENT);
             }
 
             if (showInfoExtra) {
-
+                GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.border_layout);
+                drawable.setColor(shouldCheck ? getResources().getColor(R.color.teal_700) : Color.TRANSPARENT);
+                itemView.setBackground(drawable);
                 String type = "";
                 if (file.getName().startsWith("HDR")) {
                     type = "HDR";
@@ -657,12 +694,12 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                 } else
                     Utils.toast(getContext(), getString(R.string.no_selected));
                 return true;
-            case R.id.action_gif_extra:
-                toast(getContext(), "Nothing yet");
-                return true;
-            case R.id.action_collage_extra:
-                toast(getContext(), "Nothing yet");
-                return true;
+//            case R.id.action_gif_extra:
+//                toast(getContext(), "Nothing yet");
+//                return true;
+//            case R.id.action_collage_extra:
+//                toast(getContext(), "Nothing yet");
+//                return true;
             case R.id.action_toggle_info:
                 if (showInfoExtra) {
                     showInfoExtra = false;

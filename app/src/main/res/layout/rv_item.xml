@@ -9,8 +9,12 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:padding="5dp"
+        android:layout_height="wrap_content"
+        android:maxHeight="150dp"
+        android:minHeight="100dp"
+        android:adjustViewBounds="true"
+        android:gravity="center"
+        android:padding="2dp"
         android:scaleType="fitCenter" />
 
     <LinearLayout

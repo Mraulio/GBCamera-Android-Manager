@@ -231,7 +231,7 @@ public class GalleryUtils {
             showNotification(context, file);
         }
         if (StaticValues.exportPng) {
-            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved)+" x" + StaticValues.exportSize);
+            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved) + " x" + StaticValues.exportSize);
         } else
             toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved_txt));
     }
@@ -1064,4 +1064,61 @@ public class GalleryUtils {
         }
         return true;
     }
+
+    public static Bitmap fusionBitmap(List<Bitmap> bitmaps, int mode) {
+        int width = bitmaps.get(0).getWidth();
+        int height = bitmaps.get(0).getHeight();
+
+        for (Bitmap bitmap : bitmaps) {
+            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
+                throw new IllegalArgumentException("All images must have the same dimemsions.");
+            }
+        }
+        Bitmap mergedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        if (mode == 0) {
+            //Fuse alternating pixels
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if ((x + y) % 2 == 0) {
+                        mergedBitmap.setPixel(x, y, bitmaps.get(0).getPixel(x, y));
+                    } else {
+                        mergedBitmap.setPixel(x, y, bitmaps.get(1).getPixel(x, y));
+                    }
+                }
+            }
+        } else if (mode == 1) {
+            // Fuse alternating rows
+            for (int y = 0; y < height; y++) {
+                if (y % 2 == 0) {
+                    for (int x = 0; x < width; x++) {
+                        int pixel = bitmaps.get(0).getPixel(x, y);
+                        mergedBitmap.setPixel(x, y, pixel);
+                    }
+                } else {
+                    for (int x = 0; x < width; x++) {
+                        int pixel = bitmaps.get(1).getPixel(x, y);
+                        mergedBitmap.setPixel(x, y, pixel);
+                    }
+                }
+            }
+        } else if (mode == 2) {
+            // Fuse alternating columns
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    int pixel;
+                    if (x % 2 == 0) {
+                        pixel = bitmaps.get(0).getPixel(x, y);
+                    } else {
+                        pixel = bitmaps.get(1).getPixel(x, y);
+                    }
+                    mergedBitmap.setPixel(x, y, pixel);
+                }
+            }
+        }
+
+        return mergedBitmap;
+    }
+
+
 }

@@ -82,7 +82,7 @@ public class RgbUtils {
             public void onClick(View v) {
                 addNeutral = swNeutral.isChecked();
                 rgbImage = combineImages(rgbnBitmaps);
-                rgbImageView.setImageBitmap(Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
+                rgbImageView.setImageBitmap(extraGallery ? rgbImage : Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
             }
         });
 
@@ -94,7 +94,7 @@ public class RgbUtils {
                 public void onClick(View v) {
                     crop = swCrop.isChecked();
                     rgbImage = combineImages(rgbnBitmaps);
-                    rgbImageView.setImageBitmap(Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
+                    rgbImageView.setImageBitmap(extraGallery ? rgbImage : Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
                 }
             });
         }
@@ -132,13 +132,12 @@ public class RgbUtils {
                 }
                 rgbnBitmaps = newRgbBitmapList;
                 rgbImage = combineImages(rgbnBitmaps);
-                rgbImageView.setImageBitmap(Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
+                rgbImageView.setImageBitmap(extraGallery ? rgbImage : Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
             }
         });
 
         rgbImage = combineImages(rgbnBitmaps);
-
-        rgbImageView.setImageBitmap(Bitmap.createScaledBitmap(rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
+        rgbImageView.setImageBitmap(extraGallery ? rgbImage : Bitmap.createScaledBitmap( rgbImage, rgbImage.getWidth() * 4, rgbImage.getHeight() * 4, false));
 
         AlertDialog dialog = builder.create();
 

@@ -3,6 +3,8 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkFilterPass;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.fusionBitmap;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.StaticValues.exportSize;
 import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
@@ -60,6 +62,7 @@ import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -96,6 +99,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -1117,6 +1122,190 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 updateGridView();
                 getActivity().invalidateOptionsMenu();
 
+                return true;
+            case R.id.action_fun:
+                if (selectionMode[0]) {
+                    if (selectedImages.size() != 2) {
+                        Utils.toast(getContext(), "Select 2 images");
+                    } else {
+                        List<Integer> indexesToLoad = new ArrayList<>();
+                        for (int i : selectedImages) {
+                            String hashCode = filteredGbcImages.get(i).getHashCode();
+                            if (imageBitmapCache.get(hashCode) == null) {
+                                indexesToLoad.add(i);
+                            }
+                        }
+
+                        LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, result -> {
+                            List<Bitmap> bitmapList = new ArrayList<>();
+
+                            for (int i : selectedImages) {
+                                Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(), true);
+                                bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
+                                bitmapList.add(bitmap);
+                            }
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            builder.setTitle("Fusion");
+
+                            LayoutInflater inflater = LayoutInflater.from(getContext());
+                            View dialogView = inflater.inflate(R.layout.dialog_fun, null);
+
+                            builder.setView(dialogView);
+
+                            Button btnSave = dialogView.findViewById(R.id.btn_save_fun);
+                            Button btnCancel = dialogView.findViewById(R.id.btn_cancel_fun);
+                            RadioButton rb1x1 = dialogView.findViewById(R.id.rb_1x1);
+                            RadioButton rbHoriz = dialogView.findViewById(R.id.rb_horiz);
+                            RadioButton rbVert = dialogView.findViewById(R.id.rb_vert);
+                            Switch swAddGallery = dialogView.findViewById(R.id.sw_add_gallery);
+
+                            final int[] mode = {0};
+                            final Bitmap[] mergedBitmap = new Bitmap[1];
+
+                            try {
+                                mergedBitmap[0] = fusionBitmap(bitmapList, 0);
+                            } catch (IllegalArgumentException iae) {
+                                Utils.toast(getContext(), getString(R.string.hdr_exception));
+                                iae.printStackTrace();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            ImageView ivFun = dialogView.findViewById(R.id.iv_fun);
+
+                            rb1x1.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    mode[0] = 0;
+                                    mergedBitmap[0] = fusionBitmap(bitmapList, mode[0]);
+                                    ivFun.setImageBitmap(Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * 4, mergedBitmap[0].getHeight() * 4, false));
+
+                                }
+                            });
+                            rbHoriz.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    mode[0] = 1;
+                                    mergedBitmap[0] = fusionBitmap(bitmapList, mode[0]);
+                                    ivFun.setImageBitmap(Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * 4, mergedBitmap[0].getHeight() * 4, false));
+
+                                }
+                            });
+                            rbVert.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    mode[0] = 2;
+                                    mergedBitmap[0] = fusionBitmap(bitmapList, mode[0]);
+                                    ivFun.setImageBitmap(Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * 4, mergedBitmap[0].getHeight() * 4, false));
+
+                                }
+                            });
+                            AlertDialog dialog = builder.create();
+
+                            ivFun.setImageBitmap(Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * 4, mergedBitmap[0].getHeight() * 4, false));
+
+                            btnCancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            GbcImage gbcImage = new GbcImage();
+                            final Bitmap[] fusedImage = {null};
+
+                            btnSave.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                    if (swAddGallery.isChecked()) {
+                                        // Need to change all images to B&W and redo the collage first for the encoding to work
+                                        List<Bitmap> bwBitmapsFun = new ArrayList<>();
+                                        for (int i : selectedImages) {
+                                            GbcImage gbcImage = filteredGbcImages.get(i);
+                                            //Need to change the palette to bw so the encodeImage method works
+                                            Bitmap image;
+                                            try {
+                                                image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+                                            } catch (IOException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                            image = rotateBitmap(image, gbcImage);
+                                            bwBitmapsFun.add(image);
+                                        }
+
+                                        fusedImage[0] = fusionBitmap(bwBitmapsFun, mode[0]);
+                                        byte[] imageBytes;
+
+                                        try {
+                                            if (fusedImage[0].getWidth() != 160 && fusedImage[0].getHeight() == 160) {
+                                                Matrix matrix = new Matrix();
+                                                matrix.postRotate(270);
+                                                fusedImage[0] = Bitmap.createBitmap(fusedImage[0], 0, 0, fusedImage[0].getWidth(), fusedImage[0].getHeight(), matrix, false);
+                                                gbcImage.setRotation(1);
+                                            }
+                                            imageBytes = Utils.encodeImage(fusedImage[0], "bw");
+                                            gbcImage.setImageBytes(imageBytes);
+                                            fusedImage[0] = paletteChanger(gbcImage.getPaletteId(), imageBytes, gbcImage.isInvertPalette());
+                                            byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
+                                            String hashHex = Utils.bytesToHex(hash);
+                                            gbcImage.setHashCode(hashHex);
+                                            gbcImage.setName("Fused");
+
+                                        } catch (IOException e) {
+                                            throw new RuntimeException(e);
+                                        } catch (NoSuchAlgorithmException e) {
+                                            throw new RuntimeException(e);
+                                        }
+
+                                        HashSet tags = new HashSet();
+                                        tags.add("Fusion");
+                                        gbcImage.setTags(tags);
+                                        List<GbcImage> gbcImages = new ArrayList<>();
+                                        List<Bitmap> bitmaps = new ArrayList<>();
+                                        bitmaps.add(fusedImage[0]);
+                                        gbcImages.add(gbcImage);
+                                        new SaveImageAsyncTask(gbcImages, bitmaps, getContext(), null, 0, customGridViewAdapterImage, loadDialog).execute();
+                                    }
+
+                                    LocalDateTime now = null;
+                                    Date nowDate = new Date();
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                        now = LocalDateTime.now();
+                                    }
+                                    File file = null;
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
+
+                                        file = new File(Utils.IMAGES_FOLDER, "Fusion_" + dtf.format(now) + ".png");
+                                    } else {
+                                        SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
+                                        file = new File(Utils.IMAGES_FOLDER, "Fusion_" + sdf.format(nowDate) + ".png");
+                                    }
+                                    try (FileOutputStream out = new FileOutputStream(file)) {
+                                        Bitmap bitmap = Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * exportSize, mergedBitmap[0].getHeight() * exportSize, false);
+                                        //Make square if checked in settings
+                                        if (exportSquare) {
+                                            bitmap = makeSquareImage(bitmap);
+                                        }
+                                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                                        Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + " Fusion", Toast.LENGTH_LONG);
+                                        toast.show();
+                                        mediaScanner(file, getContext());
+                                        showNotification(getContext(), file);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+
+
+                            dialog.show();
+                        });
+                        asyncTask.execute();
+                    }
+                } else
+                    Utils.toast(getContext(), getString(R.string.no_selected));
                 return true;
             default:
                 break;

@@ -1,6 +1,7 @@
 package com.mraulio.gbcameramanager.ui.extraGallery;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.averageImages;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.mediaScanner;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
@@ -27,12 +28,15 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,17 +60,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import pl.droidsonroids.gif.GifDrawable;
 
 public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSaved {
+    HashMap<File, Bitmap> loadedFilesBitmap = new HashMap<>();
     public static ExtraGalleryFragment egf;
     List<File> fileList;
     private RecyclerView recyclerView;
-    Switch swHdr, swRgb, swGif, swCollage;
+    Switch swHdr, swRgb, swGif, swCollage, swFusion, swPaper;
     Button btnFirstPage, btnLastPage, btnPrevPage, btnNextPage;
     TextView tvPage;
     public static boolean showInfoExtra;
@@ -75,6 +83,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
     public static HashSet<Integer> selectedFilesIndex = new HashSet<>();
     private int page = 0, lastPage, globalImageIndex;
     private int itemsPage = imagesPage;
+    ImageAdapter imageAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,6 +108,8 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
         swRgb = view.findViewById(R.id.sw_rgb);
         swGif = view.findViewById(R.id.sw_gif);
         swCollage = view.findViewById(R.id.sw_collage);
+        swFusion = view.findViewById(R.id.sw_fusion);
+        swPaper = view.findViewById(R.id.sw_paper);
 
         fileList = loadFilesFromDirectory(IMAGES_FOLDER);
 
@@ -123,8 +134,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                     if (selectedFilesIndex.size() == 0) {
                         hideSelectionOptionsExtra(getActivity());
                     }
-                    loadAndDisplayImages();
-
+                    imageAdapter.notifyDataSetChanged();
                 } else {
                     if (position != RecyclerView.NO_POSITION) {
 
@@ -163,14 +173,13 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                             }
                         } else {
                             imageView.setImageBitmap(getBitmapFromFile(fileList.get(globalImageIndex)));
-
                         }
 
                         Button btnClose = dialogView.findViewById(R.id.btn_close_extra);
                         Button btnShare = dialogView.findViewById(R.id.btn_share_extra);
                         Button btnDelete = dialogView.findViewById(R.id.btn_delete_extra);
-                        btnShare.setVisibility(View.VISIBLE);
-                        btnDelete.setVisibility(View.VISIBLE);
+                        btnShare.setVisibility(VISIBLE);
+                        btnDelete.setVisibility(VISIBLE);
 
                         AlertDialog dialog = builder.create();
 
@@ -289,7 +298,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                     }
                 }
 
-                loadAndDisplayImages();
+                imageAdapter.notifyDataSetChanged();
 
                 if (selectedFilesIndex.size() == 0) {
                     hideSelectionOptionsExtra(getActivity());
@@ -382,7 +391,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
         }
         List<File> fileListPage = fileList.subList(startIndex, endIndex);
 
-        ImageAdapter imageAdapter = new ImageAdapter(fileListPage, fileList, selectedFilesIndex, selectionModeExtra);
+        imageAdapter = new ImageAdapter(fileListPage, fileList, selectedFilesIndex);
         recyclerView.setAdapter(imageAdapter);
     }
 
@@ -403,6 +412,14 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
             page = 0;
             hideSelectionOptionsExtra(getActivity());
         });
+        swFusion.setOnClickListener(v -> {
+            page = 0;
+            hideSelectionOptionsExtra(getActivity());
+        });
+        swPaper.setOnClickListener(v -> {
+            page = 0;
+            hideSelectionOptionsExtra(getActivity());
+        });
     }
 
     private List<File> loadFilesFromDirectory(File directory) {
@@ -420,6 +437,10 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                     } else if (swCollage.isChecked() && file.getName().startsWith("Collage_")) {
                         addFile = true;
                     } else if (swGif.isChecked() && file.getName().startsWith("GIF_")) {
+                        addFile = true;
+                    } else if (swFusion.isChecked() && file.getName().startsWith("Fusion_")) {
+                        addFile = true;
+                    } else if (swPaper.isChecked() && file.getName().startsWith("paperized_")) {
                         addFile = true;
                     }
                     if (addFile) {
@@ -458,24 +479,24 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
         private List<File> fileListPage;
         private List<File> fileListTotal;
         private HashSet<Integer> selectedFilesIndexes;
-        private boolean selectionModeExtra;
 
-        public ImageAdapter(List<File> fileListPage, List<File> fileListTotal, HashSet<Integer> selectedFilesIndexes, boolean selectionModeExtra) {
+        public ImageAdapter(List<File> fileListPage, List<File> fileListTotal, HashSet<Integer> selectedFilesIndexes) {
             this.fileListPage = fileListPage;
             this.fileListTotal = fileListTotal;
             this.selectedFilesIndexes = selectedFilesIndexes;
-            this.selectionModeExtra = selectionModeExtra;
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             public ImageView imageView;
             public TextView tvImageType, tvImageSize;
+            public ProgressBar progressBar;
 
             public ViewHolder(View view) {
                 super(view);
                 imageView = view.findViewById(R.id.imageView);
                 tvImageType = view.findViewById(R.id.tv_image_type);
                 tvImageSize = view.findViewById(R.id.tv_image_size);
+                progressBar = view.findViewById(R.id.progressBar);
             }
         }
 
@@ -489,10 +510,14 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            bindView(holder, position);
+        }
+
+        private void bindView(ViewHolder holder, int position) {
             View itemView = holder.itemView;
             File file = fileListPage.get(position);
-            int width = 0;
-            int height = 0;
+            final int[] width = {0};
+            final int[] height = {0};
             if (isGif(file)) {
                 try {
                     InputStream inputStream = new FileInputStream(file);
@@ -510,10 +535,13 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
 
                     GifDrawable gifDrawable = new GifDrawable(byteArray);
                     if (showInfoExtra) {
-                        height = gifDrawable.getIntrinsicHeight();
-                        width = gifDrawable.getIntrinsicWidth();
+                        height[0] = gifDrawable.getIntrinsicHeight();
+                        width[0] = gifDrawable.getIntrinsicWidth();
                     }
+                    showInfo(showInfoExtra, file, itemView, width[0], height[0], holder.tvImageType, holder.tvImageSize, selectedFilesIndexes, position, fileListTotal);
                     holder.imageView.setImageDrawable(gifDrawable);
+                    holder.progressBar.setVisibility(GONE);
+                    holder.imageView.setVisibility(VISIBLE);
 
                     inputStream.close();
                 } catch (IOException e) {
@@ -522,52 +550,45 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                     e.printStackTrace();
                 }
             } else {
-                Bitmap bitmap = getBitmapFromFile(file);
-                if (bitmap != null) {
-                    holder.imageView.setImageBitmap(bitmap);
-                    if (showInfoExtra) {
-                        height = bitmap.getHeight();
-                        width = bitmap.getWidth();
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                Handler handler = new Handler(Looper.getMainLooper());
+
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        final Bitmap[] bitmap = new Bitmap[1];
+                        if (loadedFilesBitmap.containsKey(file) && loadedFilesBitmap.get(file) != null) {
+                            bitmap[0] = loadedFilesBitmap.get(file);
+                            if (showInfoExtra) {
+                                height[0] = isPaper(file) ? bitmap[0].getHeight() * 10 : bitmap[0].getHeight(); //For the paper images may not be exact, as the scaled size is casted to int
+                                width[0] = isPaper(file) ? bitmap[0].getWidth() * 10 : bitmap[0].getWidth();
+                            }
+                        } else {
+                            bitmap[0] = getBitmapFromFile(file);
+                            if (bitmap[0] != null) {
+                                if (showInfoExtra) {
+                                    height[0] = bitmap[0].getHeight();
+                                    width[0] = bitmap[0].getWidth();
+                                }
+                                if (isPaper(file)) {
+                                    bitmap[0] = Bitmap.createScaledBitmap(bitmap[0], (int) (bitmap[0].getWidth() * 0.1), (int) (bitmap[0].getHeight() * 0.1), false);
+                                }
+                                loadedFilesBitmap.put(file, bitmap[0]);
+                            }
+                        }
+
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                showInfo(showInfoExtra, file, itemView, width[0], height[0], holder.tvImageType, holder.tvImageSize, selectedFilesIndexes, position, fileListTotal);
+                                holder.imageView.setImageBitmap(bitmap[0]);
+                                holder.progressBar.setVisibility(GONE);
+                                holder.imageView.setVisibility(VISIBLE);
+                            }
+                        });
                     }
-                }
-            }
+                });
 
-            boolean shouldCheck = false;
-            if (selectionModeExtra && selectedFilesIndexes != null && !selectedFilesIndexes.isEmpty()) {
-                int actualIndex;
-                if (page != lastPage) {
-                    actualIndex = position + (page * itemsPage);
-                } else {
-                    actualIndex = fileListTotal.size() - (itemsPage - position);
-                }
-                if (selectedFilesIndexes.contains(actualIndex)) {
-                    shouldCheck = true;
-                }
-                if (!showInfoExtra) {
-                    itemView.setBackgroundColor(shouldCheck ? getContext().getColor(R.color.teal_700) : Color.TRANSPARENT);
-                }
-            }
-
-            if (showInfoExtra) {
-                GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.border_layout);
-                drawable.setColor(shouldCheck ? getResources().getColor(R.color.teal_700) : Color.TRANSPARENT);
-                itemView.setBackground(drawable);
-                String type = "";
-                if (file.getName().startsWith("HDR")) {
-                    type = "HDR";
-                } else if (file.getName().startsWith("GIF")) {
-                    type = "GIF";
-                } else if (file.getName().startsWith("RGB")) {
-                    type = "RGB";
-                } else if (file.getName().startsWith("Collage")) {
-                    type = "Collage";
-                }
-
-                holder.tvImageType.setText(type);
-                holder.tvImageSize.setText(width + "x" + height);
-            } else {
-                holder.tvImageType.setVisibility(GONE);
-                holder.tvImageSize.setVisibility(GONE);
             }
         }
 
@@ -578,8 +599,61 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
 
     }
 
+
+    private void showInfo(boolean showInfoExtra, File file, View itemView, int width, int height, TextView tvImageType, TextView tvImageSize,
+                          HashSet<Integer> selectedFilesIndexes, int position, List<File> fileListTotal) {
+        boolean shouldCheck = false;
+
+        if (selectionModeExtra && selectedFilesIndexes != null && !selectedFilesIndexes.isEmpty()) {
+            int actualIndex;
+            if (page != lastPage) {
+                actualIndex = position + (page * itemsPage);
+            } else {
+                actualIndex = fileListTotal.size() - (itemsPage - position);
+            }
+            if (selectedFilesIndexes.contains(actualIndex)) {
+                shouldCheck = true;
+            }
+            if (!showInfoExtra) {
+                itemView.setBackgroundColor(shouldCheck ? getContext().getColor(R.color.teal_700) : Color.TRANSPARENT);
+            }
+        }
+
+        if (showInfoExtra) {
+            GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.border_layout);
+            drawable.setColor(shouldCheck ? getResources().getColor(R.color.teal_700) : Color.TRANSPARENT);
+            itemView.setBackground(drawable);
+
+            String type = "";
+            String fileName = file.getName();
+            if (fileName.startsWith("HDR")) {
+                type = "HDR";
+            } else if (fileName.startsWith("GIF")) {
+                type = "GIF";
+            } else if (fileName.startsWith("RGB")) {
+                type = "RGB";
+            } else if (fileName.startsWith("Collage")) {
+                type = "Collage";
+            } else if (fileName.startsWith("Fusion")) {
+                type = "Fusion";
+            } else if (fileName.startsWith("paperized")) {
+                type = "Paper";
+            }
+
+            tvImageType.setText(type);
+            tvImageSize.setText(width + "x" + height);
+        } else {
+            tvImageType.setVisibility(View.GONE);
+            tvImageSize.setVisibility(View.GONE);
+        }
+    }
+
     private boolean isGif(File file) {
         return file.getName().toLowerCase().endsWith(".gif");
+    }
+
+    private boolean isPaper(File file) {
+        return file.getName().startsWith("paperized");
     }
 
     @Override
@@ -609,7 +683,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
 
                         Button btnClose = dialogView.findViewById(R.id.btn_close_extra);
                         Button btnSave = dialogView.findViewById(R.id.btn_save_extra);
-                        btnSave.setVisibility(View.VISIBLE);
+                        btnSave.setVisibility(VISIBLE);
 
                         AlertDialog dialog = builder.create();
 

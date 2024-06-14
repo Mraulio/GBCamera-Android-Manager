@@ -13,54 +13,84 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:gravity="center"
         android:layout_marginBottom="10dp"
-        android:orientation="horizontal">
+        android:gravity="center"
+        android:orientation="vertical">
 
-        <Switch
-            android:id="@+id/sw_hdr"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="HDR">
+            android:gravity="center"
+            android:orientation="horizontal">
 
-        </Switch>
+            <Switch
+                android:id="@+id/sw_hdr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="HDR">
 
-        <Switch
-            android:id="@+id/sw_rgb"
-            android:layout_width="wrap_content"
+            </Switch>
+
+            <Switch
+                android:id="@+id/sw_rgb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="RGB">
+
+            </Switch>
+
+            <Switch
+                android:id="@+id/sw_gif"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="GIF">
+
+            </Switch>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="RGB">
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-        </Switch>
+            <Switch
+                android:id="@+id/sw_collage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/collage"></Switch>
+            <Switch
+                android:id="@+id/sw_paper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Paper"></Switch>
+            <Switch
+                android:id="@+id/sw_fusion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Fusion">
 
-        <Switch
-            android:id="@+id/sw_gif"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="GIF">
+            </Switch>
+        </LinearLayout>
 
-        </Switch>
-
-        <Switch
-            android:id="@+id/sw_collage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/collage">
-
-        </Switch>
     </LinearLayout>
+
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/buttonsLayout"
         android:layout_above="@id/ly_nav_buttons"
+        android:layout_below="@id/buttonsLayout"
         android:clipToPadding="false"
         android:padding="4dp"
         android:scrollbars="vertical" />

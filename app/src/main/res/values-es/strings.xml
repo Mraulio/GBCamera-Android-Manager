@@ -14,6 +14,7 @@
     <string name="menu_frames">Marcos</string>
     <string name="menu_import">Importar</string>
     <string name="menu_usbserial">USB Serial</string>
+    <string name="menu_extra_gallery">Galería extra</string>
     <string name="menu_settings">Ajustes</string>
 
     <!--Custom_dialog, Gallery Fragment strings-->

@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
+import static com.mraulio.gbcameramanager.utils.StaticValues.timesPalettesUsed;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.Activity;
@@ -61,12 +62,16 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         int selectedImageColor = Color.parseColor("#8C97B3");
         int selectedFrameColor = Color.parseColor("#CEBB8D");
         int sameSelectedPalette = Color.parseColor("#AE4F4F");
+        String id = data.get(position).getPaletteId();
+
+
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             row = inflater.inflate(layoutResourceId, parent, false);
 
             holder = new RecordHolder();
             holder.txtTitle = (TextView) row.findViewById(R.id.tvPaletteName);
+            holder.txtTimesUsed = (TextView) row.findViewById(R.id.tv_palette_times_used);
             holder.imageItem = (ImageView) row.findViewById(R.id.image_view_palette);
             holder.starItem = (ImageView) row.findViewById(R.id.iv_star);
             holder.cardView = (CardView) row.findViewById(R.id.cardViewPalette);
@@ -99,23 +104,27 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         }
         if (!showTextView) {
             holder.txtTitle.setVisibility(View.GONE);
+            holder.txtTimesUsed.setVisibility(View.GONE);
             holder.btnMenu.setVisibility(View.GONE);
         } else {
+            String paletteName = data.get(position).getPaletteName();
+            String showingName = (paletteName != null ? paletteName : "") + " (" + id + ")";
+            holder.txtTitle.setText(showingName);
+
+            Integer timesUsed = timesPalettesUsed.get(id);
+            holder.txtTimesUsed.setText(timesUsed == null ? "0" : String.valueOf(timesUsed));
+
             RecordHolder finalHolder = holder;
             holder.rlTvs.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     showMenu(context, finalHolder, data.get(position).getPaletteId(), customGridViewAdapterPalette);
-
                 }
             });
 
         }
 
         Bitmap image = data.get(position).paletteViewer();
-        String id = data.get(position).getPaletteId();
-        String paletteName = data.get(position).getPaletteName();
-        String showingName = (paletteName != null ? paletteName : "") + " (" + id + ")";
 
         if (showFavorite && data.get(position).isFavorite()) {
             holder.imageItem.setBackgroundColor(context.getResources().getColor(R.color.favorite));
@@ -129,8 +138,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
             }
         }
 
-        holder.txtTitle.setText(showingName);
-        holder.imageItem.setImageBitmap(image.copy(image.getConfig(),false));
+        holder.imageItem.setImageBitmap(image.copy(image.getConfig(), false));
         if (image != null && !image.isRecycled()) {
             image.recycle();
         }
@@ -138,7 +146,7 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
     }
 
     private class RecordHolder {
-        TextView txtTitle, btnMenu;
+        TextView txtTitle, btnMenu, txtTimesUsed;
         CardView cardView;
         ImageView imageItem, starItem;
         RelativeLayout rlTvs;

@@ -40,7 +40,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -50,7 +49,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
-import com.mraulio.gbcameramanager.ui.extraGallery.ExtraGalleryFragment;
 import com.mraulio.gbcameramanager.utils.LoadingDialog;
 import com.mraulio.gbcameramanager.utils.StaticValues;
 import com.mraulio.gbcameramanager.utils.UncaughtExceptionHandler;
@@ -115,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         StaticValues.exportMetadata = StaticValues.sharedPreferences.getBoolean("export_metadata", false);
         StaticValues.alwaysDefaultFrame = StaticValues.sharedPreferences.getBoolean("always_default_frame", false);
         StaticValues.showExtraGallery = StaticValues.sharedPreferences.getBoolean("show_extra_gallery", false);
+        StaticValues.sortPalettesByUsage = StaticValues.sharedPreferences.getBoolean("sort_palettes_by_usage", false);
 
         StaticValues.filterMonth = StaticValues.sharedPreferences.getBoolean("date_filter_month", false);
         StaticValues.filterYear = StaticValues.sharedPreferences.getBoolean("date_filter_year", false);
@@ -381,7 +380,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 Utils.gbcPalettesList.addAll(palettes);
                 //Sort the palettes for the palette grid, showing first the favorites
-                sortPalettes();
             } else {
                 StringBuilder stringBuilder = new StringBuilder();
                 int resourcePalettes = R.raw.palettes;
@@ -403,7 +401,6 @@ public class MainActivity extends AppCompatActivity {
                 List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
                 Utils.gbcPalettesList.addAll(receivedList);
                 //Sort the palettes for the palette grid, showing first the favorites
-                sortPalettes();
                 for (GbcPalette gbcPalette : receivedList) {
                     Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
@@ -433,6 +430,7 @@ public class MainActivity extends AppCompatActivity {
                 //I need to add them to the gbcImagesList(GbcImage)
                 Utils.gbcImagesList.addAll(imagesFromDao);
                 GbcImage.numImages += Utils.gbcImagesList.size();
+                sortPalettes();
             } else mAnyImage = false;
             return null;
         }

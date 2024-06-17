@@ -91,7 +91,7 @@ public class PalettesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_palettes, container, false);
         MainActivity.pressBack = false;
         StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.PALETTES;
-
+        sortPalettes();
         Button btnAdd = view.findViewById(R.id.btnAdd);
         Button btnExportPaletteJson = view.findViewById(R.id.btnExportPaletteJson);
         gridViewPalettes = view.findViewById(R.id.gridViewPalettes);
@@ -196,6 +196,7 @@ public class PalettesFragment extends Fragment {
                                 }
 
                             }
+                            sortPalettes();
                             paletteAdapter.notifyDataSetChanged();
                         }
                     });

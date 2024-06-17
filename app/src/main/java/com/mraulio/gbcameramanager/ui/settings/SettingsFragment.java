@@ -2,9 +2,11 @@ package com.mraulio.gbcameramanager.ui.settings;
 
 import static com.mraulio.gbcameramanager.MainActivity.updateNavigationView;
 import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
+import static com.mraulio.gbcameramanager.utils.StaticValues.sortPalettesByUsage;
 import static com.mraulio.gbcameramanager.utils.Utils.backupDatabase;
 import static com.mraulio.gbcameramanager.utils.Utils.restartApplication;
 import static com.mraulio.gbcameramanager.utils.Utils.showDbBackups;
+import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -54,7 +57,8 @@ public class SettingsFragment extends Fragment {
         CheckBox cbShowExtraGallery = view.findViewById(R.id.cb_extra_gallery);
         Button btnExportDB = view.findViewById(R.id.btnExportDB);
         Button btnRestoreDB = view.findViewById(R.id.btnRestoreDB);
-
+        CheckBox cbSortPalettes = view.findViewById(R.id.sw_sort_palettes);
+        cbSortPalettes.setChecked(sortPalettesByUsage);
         StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.SETTINGS;
 
         cbExportMetadata.setChecked(StaticValues.exportMetadata);
@@ -356,6 +360,15 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        cbSortPalettes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editor.putBoolean("sort_palettes_by_usage", cbSortPalettes.isChecked());
+                StaticValues.sortPalettesByUsage = cbSortPalettes.isChecked();
+                editor.apply();
+                sortPalettes();
+            }
+        });
 
         btnExportDB.setOnClickListener(new View.OnClickListener() {
             @Override

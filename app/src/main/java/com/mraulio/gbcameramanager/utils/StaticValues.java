@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mraulio.gbcameramanager.db.AppDatabase;
 
+import java.util.HashMap;
+
 public class StaticValues {
 
     //Store in the shared preferences
@@ -40,6 +42,8 @@ public class StaticValues {
     public static boolean exportMetadata = false;
     public static boolean alwaysDefaultFrame = false;
     public static boolean showExtraGallery = false;
+    public static boolean sortPalettesByUsage = false;
+    public static HashMap<String, Integer> timesPalettesUsed = new HashMap<>();
 
     public enum CURRENT_FRAGMENT {
         GALLERY,

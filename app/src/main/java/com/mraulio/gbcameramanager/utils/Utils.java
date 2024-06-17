@@ -5,6 +5,8 @@ import static com.mraulio.gbcameramanager.utils.StaticValues.hiddenTags;
 import static com.mraulio.gbcameramanager.utils.StaticValues.selectedTags;
 import static com.mraulio.gbcameramanager.utils.StaticValues.sharedPreferences;
 import static com.mraulio.gbcameramanager.utils.DiskCache.CACHE_DIR_NAME;
+import static com.mraulio.gbcameramanager.utils.StaticValues.sortPalettesByUsage;
+import static com.mraulio.gbcameramanager.utils.StaticValues.timesPalettesUsed;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -294,7 +296,7 @@ public class Utils {
             //Get the database version first.
             int databaseVersion = StaticValues.db.getOpenHelper().getReadableDatabase().getVersion();
 
-            SimpleDateFormat sdf = new SimpleDateFormat(dateLocale+"_HH-mm-ss", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
             Date date = new Date();
             File backupDir = new File(DB_BACKUP_FOLDER + "/" + sdf.format(date) + "_v" + databaseVersion);
 
@@ -537,19 +539,77 @@ public class Utils {
     }
 
     public static void sortPalettes() {
+        StaticValues.timesPalettesUsed = timesPaletteUsed();
         sortedPalettes.clear();
+        List<GbcPalette> sortedFavs = new ArrayList<>();
         //First add the favorites on top
         for (GbcPalette palette : gbcPalettesList) {
             if (palette.isFavorite()) {
-                sortedPalettes.add(palette);
+                sortedFavs.add(palette);
             }
         }
+        if (sortPalettesByUsage) {
+            Collections.sort(sortedFavs, new Comparator<GbcPalette>() {
+                @Override
+                public int compare(GbcPalette o1, GbcPalette o2) {
+                    Integer timesUsed1 = timesPalettesUsed.get(o1.getPaletteId());
+                    Integer timesUsed2 = timesPalettesUsed.get(o2.getPaletteId());
+
+                    if (timesUsed1 == null) timesUsed1 = 0;
+                    if (timesUsed2 == null) timesUsed2 = 0;
+
+                    return timesUsed2.compareTo(timesUsed1);
+                }
+            });
+        }
+        sortedPalettes.addAll(sortedFavs);
         //Then add the rest of the palettes
+        List<GbcPalette> sortedNoFavs = new ArrayList<>();
+
         for (GbcPalette palette : gbcPalettesList) {
             if (!palette.isFavorite()) {
-                sortedPalettes.add(palette);
+                sortedNoFavs.add(palette);
             }
         }
+        if (sortPalettesByUsage) {
+            Collections.sort(sortedNoFavs, new Comparator<GbcPalette>() {
+                @Override
+                public int compare(GbcPalette o1, GbcPalette o2) {
+                    Integer timesUsed1 = timesPalettesUsed.get(o1.getPaletteId());
+                    Integer timesUsed2 = timesPalettesUsed.get(o2.getPaletteId());
+
+                    if (timesUsed1 == null) timesUsed1 = 0;
+                    if (timesUsed2 == null) timesUsed2 = 0;
+
+                    return timesUsed2.compareTo(timesUsed1);
+                }
+            });
+        }
+
+        sortedPalettes.addAll(sortedNoFavs);
+    }
+
+    public static HashMap<String, Integer> timesPaletteUsed() {
+
+        HashMap<String, Integer> timesPaletteUsed = new HashMap<>();
+        for (GbcImage gbcImage : gbcImagesList) {
+            String paletteName = gbcImage.getPaletteId();
+            if (timesPaletteUsed.containsKey(paletteName)) {
+                timesPaletteUsed.put(paletteName, timesPaletteUsed.get(paletteName) + 1);
+            } else {
+                timesPaletteUsed.put(paletteName, 1);
+            }
+            if (gbcImage.isLockFrame()) { //Only add the frame palette to the used counter if it's locked
+                paletteName = gbcImage.getFramePaletteId();
+                if (timesPaletteUsed.containsKey(paletteName)) {
+                    timesPaletteUsed.put(paletteName, timesPaletteUsed.get(paletteName) + 1);
+                } else {
+                    timesPaletteUsed.put(paletteName, 1);
+                }
+            }
+        }
+
+        return timesPaletteUsed;
     }
 }
 

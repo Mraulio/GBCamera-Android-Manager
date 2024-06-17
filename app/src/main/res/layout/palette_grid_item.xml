@@ -67,6 +67,19 @@
                 android:layout_marginHorizontal="3dp"
                 android:text="&#8942;" />
         </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_palette_times_used"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="8dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="2sp"
+            android:autoSizeTextType="uniform"
+            android:layout_below="@id/ly_tvs"
+            android:singleLine="true"
+            android:textColor="@color/black" />
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

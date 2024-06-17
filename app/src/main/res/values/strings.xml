@@ -260,6 +260,7 @@
     <string name="action_toggle_info">Toggle info</string>
     <string name="settings_show_extra_gallery">Show extra gallery</string>
     <string name="sw_bounce">Bounce</string>
+    <string name="sw_sort_palettes">Sort palettes by usage</string>
 
 
 </resources>

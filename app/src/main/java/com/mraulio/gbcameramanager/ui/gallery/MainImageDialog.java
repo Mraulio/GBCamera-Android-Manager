@@ -27,6 +27,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
+import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
 import android.app.Activity;
@@ -120,9 +121,10 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
     static CheckBox cbInvert;
     static Spinner spFrameGroupsImage;
     static GbcImage gbcImage;
+    Dialog dialog;
 
-    public MainImageDialog (GridView gridView, boolean keepFrame, int lastPage, int position,
-                           List<GbcImage> filteredGbcImages,  Context context, DisplayMetrics displayMetrics,
+    public MainImageDialog(GridView gridView, boolean keepFrame, int lastPage, int position,
+                           List<GbcImage> filteredGbcImages, Context context, DisplayMetrics displayMetrics,
                            boolean showPalettes, Activity activity, UsbSerialPort port, SerialInputOutputManager usbIoManager,
                            TextView tvResponseBytes, UsbDeviceConnection connection, TextView tv, UsbManager manager, List<Integer> selectedImages, CustomGridViewAdapterImage customGridViewAdapterImage) {
         this.gridView = gridView;
@@ -142,6 +144,19 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         this.manager = manager;
         this.selectedImages = selectedImages;
         this.customGridViewAdapterImage = customGridViewAdapterImage;
+        initializeDialog();
+    }
+
+    private void initializeDialog(){
+        dialog = new Dialog(context);
+        dialog.setContentView(R.layout.image_main_dialog);
+        dialog.setCancelable(true);//So it closes when clicking outside or back button
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                sortPalettes();
+            }
+        });
     }
 
     public void showImageDialog() {
@@ -161,10 +176,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
             gbcImage = filteredGbcImages.get(globalImageIndex[0]);
 
-            // Create custom dialog
-            final Dialog dialog = new Dialog(context);
-            dialog.setContentView(R.layout.image_main_dialog);
-            dialog.setCancelable(true);//So it closes when clicking outside or back button
             View dialogBackground = dialog.findViewById(android.R.id.content).getRootView();
             LinearLayout mainLayout = dialog.findViewById(R.id.main_image_layout);
             mainLayout.setOnClickListener(null);//So the fast image change doesn't happen when missclicking buttons inside the actual dialog
@@ -698,7 +709,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 }
             }
             imageViewMiniIndex = 0;
-            final Dialog dialog = new Dialog(context);
+
             LoadingDialog loadingDialog = new LoadingDialog(context, context.getString(R.string.load_cache));
             loadingDialog.showDialog();
             LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadingDialog, new AsyncTaskCompleteListener<Result>() {
@@ -711,8 +722,6 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
 
                     final Bitmap[] selectedImage = {Utils.imageBitmapCache.get(filteredGbcImages.get(globalImageIndex[0]).getHashCode())};
                     // Create custom dialog
-                    dialog.setContentView(R.layout.image_main_dialog);
-                    dialog.setCancelable(true);//So it closes when clicking outside or back button
                     ImageView imageView = dialog.findViewById(R.id.image_view);
                     LinearLayout layoutSelected = dialog.findViewById(R.id.ly_selected_images);
                     layoutSelected.setVisibility(VISIBLE);

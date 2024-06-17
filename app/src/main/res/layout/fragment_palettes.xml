@@ -52,7 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:horizontalSpacing="10dp"
-        android:numColumns="3"
+        android:numColumns="4"
         android:padding="10dp"
         android:scrollbars="horizontal"
         android:stretchMode="columnWidth"

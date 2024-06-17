@@ -64,7 +64,6 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         int sameSelectedPalette = Color.parseColor("#AE4F4F");
         String id = data.get(position).getPaletteId();
 
-
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             row = inflater.inflate(layoutResourceId, parent, false);
@@ -81,7 +80,10 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         } else {
             holder = (RecordHolder) row.getTag();
         }
+        if (showFavorite){
+            holder.txtTitle.setSelected(true);
 
+        }
         if (showFavorite && data.get(position).getPaletteId().equals(StaticValues.defaultPaletteId)) {
             holder.starItem.setVisibility(View.VISIBLE);
         } else {
@@ -90,17 +92,15 @@ public class CustomGridViewAdapterPalette extends ArrayAdapter<GbcPalette> {
         holder.cardView.setBackgroundColor(notSelectedColor);
         holder.imageItem.setBackgroundColor(notSelectedColor);
 
-        if (position == lastSelectedImagePosition) {
-            holder.cardView.setBackgroundColor(selectedImageColor);
+        if (position == lastSelectedImagePosition && position == lastSelectedFramePosition) {
+            holder.imageItem.setBackgroundColor(sameSelectedPalette);
+        } else if (position == lastSelectedImagePosition) {
             holder.imageItem.setBackgroundColor(selectedImageColor);
-        }
-        if (position == lastSelectedFramePosition) {
-            holder.cardView.setBackgroundColor(selectedFrameColor);
+        } else if (position == lastSelectedFramePosition) {
             holder.imageItem.setBackgroundColor(selectedFrameColor);
         }
-        if (position == lastSelectedImagePosition && position == lastSelectedFramePosition) {
-            holder.cardView.setBackgroundColor(sameSelectedPalette);
-            holder.imageItem.setBackgroundColor(sameSelectedPalette);
+        if (!showFavorite && data.get(position).isFavorite()) {
+            holder.cardView.setBackgroundColor(context.getResources().getColor(R.color.favorite_dim));
         }
         if (!showTextView) {
             holder.txtTitle.setVisibility(View.GONE);

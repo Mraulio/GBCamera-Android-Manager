@@ -49,9 +49,9 @@
         android:title="@string/collage"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_fun"
+        android:id="@+id/action_fusion"
         android:orderInCategory="100"
-        android:title="Fusion"
+        android:title="@string/menu_fusion"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_json"

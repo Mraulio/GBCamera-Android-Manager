@@ -62,6 +62,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -80,7 +81,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
     public static boolean showInfoExtra;
 
     public static boolean selectionModeExtra = false;
-    public static HashSet<Integer> selectedFilesIndex = new HashSet<>();
+    public static LinkedHashSet<Integer> selectedFilesIndex = new LinkedHashSet<>();
     private int page = 0, lastPage, globalImageIndex;
     private int itemsPage = imagesPage;
     ImageAdapter imageAdapter;
@@ -133,6 +134,9 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                     }
                     if (selectedFilesIndex.size() == 0) {
                         hideSelectionOptionsExtra(getActivity());
+                    }
+                    for (int i : selectedFilesIndex) {
+                        System.out.println(i);
                     }
                     imageAdapter.notifyDataSetChanged();
                 } else {
@@ -759,7 +763,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                             }
                         }
                         if (sameSize) {
-                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList, true);
+                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList, true, null);
                             rgbUtils.showRgbDialog(this);
                         } else {
                             Utils.toast(getContext(), getString(R.string.hdr_exception));

@@ -1105,7 +1105,11 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                         }
                         if (sameSize) {
-                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList, false);
+                            List<GbcImage> gbcImages = new ArrayList<>();
+                            for (int i : selectedImages) {
+                                gbcImages.add(filteredGbcImages.get(i));
+                            }
+                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList, false,gbcImages);
                             rgbUtils.showRgbDialog(null);
                         } else {
                             Utils.toast(getContext(), getString(R.string.hdr_exception));
@@ -1124,7 +1128,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                 getActivity().invalidateOptionsMenu();
 
                 return true;
-            case R.id.action_fun:
+            case R.id.action_fusion:
                 if (selectionMode[0]) {
                     if (selectedImages.size() != 2) {
                         Utils.toast(getContext(), "Select 2 images");

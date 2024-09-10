@@ -233,7 +233,7 @@ public class Utils {
         if (gbcFrame.getTransparentPixelPositions().size() == 0) {
             transparencyHS = transparencyHashSet(gbcFrame.getFrameBitmap());
             if (transparencyHS.size() == 0) {
-                transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+                transparencyHS = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap(), gbcFrame.getImageMargin());
             }
             gbcFrame.setTransparentPixelPositions(transparencyHS);
         } else {
@@ -262,17 +262,18 @@ public class Utils {
         return transparentPixelPositions;
     }
 
-    public static HashSet<int[]> generateDefaultTransparentPixelPositions(Bitmap bitmap) {
+    public static HashSet<int[]> generateDefaultTransparentPixelPositions(Bitmap bitmap, int imageMargin) {
+        System.out.println(imageMargin+" ///////*****");
         HashSet<int[]> transparentPixelPositions = new HashSet<>();
 
         int bitmapHeight = bitmap.getHeight();
         int innerBitmapWidth = 128;
         int innerBitmapHeight = 112;
         int startX = 16;
-        int startY = 16;
-        if (bitmapHeight == 224) startY = 40;
+//        int startY = 16;
+//        if (bitmapHeight == 224) startY = 40;
 
-        for (int y = startY; y < startY + innerBitmapHeight; y++) {
+        for (int y = imageMargin; y < imageMargin + innerBitmapHeight; y++) {
             for (int x = startX; x < startX + innerBitmapWidth; x++) {
                 int[] pos = {x, y};
                 transparentPixelPositions.add(pos);

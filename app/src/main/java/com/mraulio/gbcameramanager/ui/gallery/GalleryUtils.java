@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.utils.StaticValues.DEFAULT_FRAME_MARGIN;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_DUPLICATED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
@@ -9,6 +10,7 @@ import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_DUPLICATED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_SUPER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_TRANSFORMED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.WILD_FRAME_MARGIN;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateFilter;
 import static com.mraulio.gbcameramanager.utils.StaticValues.db;
@@ -139,13 +141,22 @@ public class GalleryUtils {
             if (StaticValues.exportPng) {
                 file = new File(Utils.IMAGES_FOLDER, fileName);
 
-                if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
-                    image = Bitmap.createBitmap(image, 16, 16, 128, 112);
+                if (crop) {
+                    int imageMargin = 16;
+                    if (hashFrames.get(gbcImage.getFrameId()) != null) {
+                        imageMargin = hashFrames.get(gbcImage.getFrameId()).getImageMargin();
+                    } else {
+                        if (image.getHeight() == 144 && image.getWidth() == 160) {
+                            imageMargin = DEFAULT_FRAME_MARGIN;
+                        }
+                        //For the wild frames
+                        else if (image.getHeight() == 224) {
+                            imageMargin = WILD_FRAME_MARGIN;
+                        }
+                    }
+                    image = Bitmap.createBitmap(image, 16, imageMargin, 128, 112);
                 }
-                //For the wild frames
-                else if (image.getHeight() == 224 && crop) {
-                    image = Bitmap.createBitmap(image, 16, 40, 128, 112);
-                }
+
                 //Rotate the image
                 image = rotateBitmap(image, gbcImage);
 
@@ -291,12 +302,20 @@ public class GalleryUtils {
                 GbcImage gbcImage = gbcImages.get(i);
                 Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
 
-                if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
-                    image = Bitmap.createBitmap(image, 16, 16, 128, 112);
-                }
-                //For the wild frames
-                else if (image.getHeight() == 224 && crop) {
-                    image = Bitmap.createBitmap(image, 16, 40, 128, 112);
+                if (crop) {
+                    int imageMargin = 16;
+                    if (hashFrames.get(gbcImage.getFrameId()) != null) {
+                        imageMargin = hashFrames.get(gbcImage.getFrameId()).getImageMargin();
+                    } else {
+                        if (image.getHeight() == 144 && image.getWidth() == 160) {
+                            imageMargin = DEFAULT_FRAME_MARGIN;
+                        }
+                        //For the wild frames
+                        else if (image.getHeight() == 224) {
+                            imageMargin = WILD_FRAME_MARGIN;
+                        }
+                    }
+                    image = Bitmap.createBitmap(image, 16, imageMargin, 128, 112);
                 }
                 //Rotate the image
                 image = rotateBitmap(image, gbcImage);
@@ -549,7 +568,8 @@ public class GalleryUtils {
         }
     }
 
-    public static void showFilterDialog(Context context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
+    public static void showFilterDialog(Context
+                                                context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View dialogView = inflater.inflate(R.layout.tags_dialog, null);
 
@@ -768,7 +788,8 @@ public class GalleryUtils {
         return stringBuilder.toString();
     }
 
-    public static void showDatePicker(Context context, Button btnCalendar, Date date, boolean month, boolean year, boolean filterByDate) {
+    public static void showDatePicker(Context context, Button btnCalendar, Date date,
+                                      boolean month, boolean year, boolean filterByDate) {
 
         List<Calendar> listDates = new ArrayList<>();
         Calendar yesterday = Calendar.getInstance();
@@ -853,7 +874,8 @@ public class GalleryUtils {
      * @param selectedTagsTv
      * @param selectedTags
      */
-    public static void updateSelectedTagsText(TextView selectedTagsTv, TextView hiddenTagsTV, HashSet<String> selectedTags, HashSet<String> notShowingTags) {
+    public static void updateSelectedTagsText(TextView selectedTagsTv, TextView
+            hiddenTagsTV, HashSet<String> selectedTags, HashSet<String> notShowingTags) {
         StringBuilder selectedTagsBuilder = new StringBuilder();
         for (String tag : selectedTags) {
             if (tag.equals(FILTER_FAVOURITE)) {
@@ -964,13 +986,14 @@ public class GalleryUtils {
     }
 
 
-    public static Bitmap frameChange(GbcImage gbcImage, String frameId, boolean invertImagePalette,
+    public static Bitmap frameChange(GbcImage gbcImage, String frameId,
+                                     boolean invertImagePalette,
                                      boolean invertFramePalette, boolean keepFrame, Boolean save) throws IOException {
         Bitmap resultBitmap;
         gbcImage.setFrameId(frameId);
         GbcFrame gbcFrame = hashFrames.get(frameId);
 
-        //If image has a null frame but has the size of a "framable" image, create the placeholder frame
+        //If image has a null frame but has the size of a "frameable" image, create the placeholder frame
         if (gbcFrame == null && keepFrame && ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224)) {
             Bitmap originalBwBitmap = paletteChanger("bw", gbcImage.getImageBytes(), false);
 
@@ -979,15 +1002,13 @@ public class GalleryUtils {
             gbcFrame.setWildFrame(originalBwBitmap.getHeight() == 144 ? false : true);
         }
 
-        if (gbcFrame != null && ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224)) {
+        if (gbcFrame != null) {
 
             int yIndexActualImage = 16;// y Index where the actual image starts
             if ((gbcImage.getImageBytes().length / 40) == 224) {
                 yIndexActualImage = 40;
             }
-            int yIndexNewFrame = 16;
-            boolean isWildFrameNow = gbcFrame.isWildFrame();
-            if (isWildFrameNow) yIndexNewFrame = 40;
+            int yIndexNewFrame = gbcFrame.getImageMargin();
 
             Bitmap framed = gbcFrame.getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             resultBitmap = Bitmap.createBitmap(framed.getWidth(), framed.getHeight(), Bitmap.Config.ARGB_8888);
@@ -1038,7 +1059,8 @@ public class GalleryUtils {
     }
 
     //Change palette
-    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, boolean invertPalette) {
+    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes,
+                                        boolean invertPalette) {
         ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
 

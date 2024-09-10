@@ -44,6 +44,8 @@ public class StaticValues {
     public static boolean showExtraGallery = false;
     public static boolean sortPalettesByUsage = false;
     public static HashMap<String, Integer> timesPalettesUsed = new HashMap<>();
+    public static final int DEFAULT_FRAME_MARGIN = 16;
+    public static final  int WILD_FRAME_MARGIN = 40;
 
     public enum CURRENT_FRAGMENT {
         GALLERY,

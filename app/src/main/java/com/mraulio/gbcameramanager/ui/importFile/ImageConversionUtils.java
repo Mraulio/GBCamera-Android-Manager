@@ -27,7 +27,7 @@ public class ImageConversionUtils {
 
         int originalWidth = originalBitmap.getWidth();
         int originalHeight = originalBitmap.getHeight();
-        if (originalWidth == 160 && originalHeight == 144 || originalWidth == 160 && originalHeight % 16 == 0) {//Regular image, 160 width and *16 height
+        if (originalWidth == 160 && originalHeight == 144 || originalWidth == 160 && originalHeight % 8 == 0) {//Regular image, 160 width and *16 height
             boolean hasAllColors = checkPaletteColors(originalBitmap);
             if (!hasAllColors) {
                 //Check if it only has 4 colors. If it does, convert them to bw palette. Else convert to gray scale and dither
@@ -45,7 +45,7 @@ public class ImageConversionUtils {
             return originalBitmap;
         } else {
             float scaledFactor = originalWidth / 160.0f;
-            if (originalHeight / scaledFactor == 1.0f || originalHeight % (16 * scaledFactor) == 0) {//The image is a regular image scaled
+            if (originalHeight / scaledFactor == 1.0f || originalHeight % (8 * scaledFactor) == 0) {//The image is a regular image scaled
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, (int) (originalWidth / scaledFactor), (int) (originalHeight / scaledFactor), false);
                 boolean hasAllColors = checkPaletteColors(scaledBitmap);
                 if (!hasAllColors) {
@@ -71,7 +71,7 @@ public class ImageConversionUtils {
 
                 boolean isNonFramed = false;
 
-                if (originalWidth == noFrameWidth && originalHeight == noFrameHeight || originalWidth == 160 && originalHeight % 16 == 0) {//Regular image, 160 width and *16 height
+                if (originalWidth == noFrameWidth && originalHeight == noFrameHeight || originalWidth == 160 && originalHeight % 8 == 0) {//Regular image, 160 width and *16 height
                     framelessBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
                     isNonFramed = true;
                 } else {

@@ -147,7 +147,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
         initializeDialog();
     }
 
-    private void initializeDialog(){
+    private void initializeDialog() {
         dialog = new Dialog(context);
         dialog.setContentView(R.layout.image_main_dialog);
         dialog.setCancelable(true);//So it closes when clicking outside or back button
@@ -507,10 +507,13 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                 }
             });
 
-            //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
-            if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
-                cbFrameKeep.setVisibility(GONE);
-                paletteFrameSelButton.setVisibility(GONE);
+            //If Image has no frame and its is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
+            GbcFrame gbcFrame = hashFrames.get(gbcImage.getFrameId());
+            if (gbcFrame == null) {
+                if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
+                    cbFrameKeep.setVisibility(GONE);
+                    paletteFrameSelButton.setVisibility(GONE);
+                }
             }
 
             gridViewFrames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -1042,9 +1045,12 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     });
 
                     //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
-                    if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
-                        cbFrameKeep.setVisibility(GONE);
-                        paletteFrameSelButton.setVisibility(GONE);
+                    GbcFrame gbcFrame = hashFrames.get(gbcImage.getFrameId());
+                    if (gbcFrame == null) {
+                        if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
+                            cbFrameKeep.setVisibility(GONE);
+                            paletteFrameSelButton.setVisibility(GONE);
+                        }
                     }
 
                     cbFrameKeep.setOnClickListener(new View.OnClickListener() {

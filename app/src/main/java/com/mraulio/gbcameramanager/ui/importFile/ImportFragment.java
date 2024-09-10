@@ -434,7 +434,7 @@ public class ImportFragment extends Fragment {
 
                                 } else if (cbAddFrame.isChecked()) {
 
-                                    if (importedBitmap.getHeight() != 144 && importedBitmap.getHeight() != 224) {
+                                    if (importedBitmap.getWidth() != 160 && importedBitmap.getHeight() % 8 == 0 && importedBitmap.getHeight() >= 112) {
                                         Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
                                     } else {

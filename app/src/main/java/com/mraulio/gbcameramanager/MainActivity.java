@@ -170,7 +170,8 @@ public class MainActivity extends AppCompatActivity {
         resources.updateConfiguration(configuration, resources.getDisplayMetrics());
 
         StaticValues.db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "Database").build();
+                        AppDatabase.class, "Database")
+                .build();
 
         // Obtain Intent information
         Intent intent = getIntent();
@@ -425,6 +426,23 @@ public class MainActivity extends AppCompatActivity {
                     frameDao.insert(value);//Saving frames to database
                 }
             }
+            //Fix the frames imageMargin
+            for (GbcFrame gbcFrame : frames) {
+                if (gbcFrame.imageMargin == null) {
+                    int frameHeight = gbcFrame.getFrameBitmap().getHeight();
+                    Integer imageMargin;
+                    if (frameHeight == 144) {
+                        imageMargin = 16;
+                        gbcFrame.setImageMargin(imageMargin);
+                        frameDao.update(gbcFrame);
+                    } else if (frameHeight == 224) {
+                        imageMargin = 40;
+                        gbcFrame.setImageMargin(imageMargin);
+                        frameDao.update(gbcFrame);
+                    }
+                }
+            }
+
             //Now that I have palettes and frames, I can add images:
             if (imagesFromDao.size() > 0) {
                 //I need to add them to the gbcImagesList(GbcImage)

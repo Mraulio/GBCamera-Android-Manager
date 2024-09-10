@@ -83,7 +83,6 @@
 
         </LinearLayout>
 
-
         <EditText
             android:id="@+id/etFrameName"
             android:layout_width="match_parent"
@@ -93,13 +92,31 @@
             android:hint="@string/frame_name"
             android:singleLine="true" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_down_margin"
+                android:layout_width="wrap_content"
+                android:text="@string/btn_down_margin"
+                android:layout_marginRight="20dp"
+                android:layout_height="wrap_content"/>
+            <Button
+                android:id="@+id/btn_up_margin"
+                android:layout_width="wrap_content"
+                android:text="@string/btn_up_margin"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/ivFrame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:background="@color/imageview_bg"
-            android:padding="5dp"
             android:scaleType="fitCenter" />
 
         <Button

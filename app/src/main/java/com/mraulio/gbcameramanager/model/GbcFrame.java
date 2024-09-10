@@ -1,8 +1,11 @@
 package com.mraulio.gbcameramanager.model;
 
+import static com.mraulio.gbcameramanager.utils.StaticValues.DEFAULT_FRAME_MARGIN;
+
 import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -34,6 +37,9 @@ public class GbcFrame {
     @ColumnInfo(name = "frame_groups_names")
     LinkedHashMap<String, String> frameGroupsNames;
 
+    @Nullable @ColumnInfo(name = "image_margin")
+    public Integer imageMargin;
+
     @Ignore
     HashSet<int[]> transparentPixelPositions = new HashSet<>();
 
@@ -53,6 +59,7 @@ public class GbcFrame {
 
     public GbcFrame() {
         this.isWildFrame = false;
+        this.imageMargin = DEFAULT_FRAME_MARGIN; //16 for the default frame (Wild Frames has 40 margin)
     }
 
     public String getFrameId() {
@@ -77,6 +84,15 @@ public class GbcFrame {
 
     public void setFrameBitmap(Bitmap frameBitmap) {
         this.frameBitmap = frameBitmap;
+    }
+
+    @Nullable
+    public Integer getImageMargin() {
+        return imageMargin;
+    }
+
+    public void setImageMargin(@Nullable Integer imageMargin) {
+        this.imageMargin = imageMargin;
     }
 
     public String getFrameName() {

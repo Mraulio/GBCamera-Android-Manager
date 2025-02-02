@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="20dp">
 
     <LinearLayout
@@ -101,14 +102,19 @@
             <Button
                 android:id="@+id/btn_down_margin"
                 android:layout_width="wrap_content"
-                android:text="@string/btn_down_margin"
-                android:layout_marginRight="20dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                app:icon="@drawable/rotated_down_arrow"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                />
             <Button
                 android:id="@+id/btn_up_margin"
                 android:layout_width="wrap_content"
-                android:text="@string/btn_up_margin"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                app:icon="@drawable/rotated_up_arrow"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"                   />
         </LinearLayout>
 
         <ImageView

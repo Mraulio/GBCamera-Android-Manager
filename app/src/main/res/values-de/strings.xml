@@ -259,4 +259,12 @@
     <string name="add_neutral_rgb">Neutral hinzufügen</string>
     <string name="select_rgb">Wählen Sie 3/4 Bilder aus</string>
 
+    <string name="menu_extra_gallery">Extra Galerie</string>
+    <string name="action_toggle_info">Info an/aus</string>
+    <string name="settings_show_extra_gallery">Extra Galerie anzeigen</string>
+    <string name="sw_bounce">Jo-Jo</string>
+    <string name="sw_sort_palettes">Paletten nach Verwendung sortieren</string>
+    <string name="menu_fusion">Fusion</string>
+    <string name="extra_paper">Papier</string>
+
 </resources>

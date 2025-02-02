@@ -14,7 +14,6 @@
     <string name="menu_frames">Marcos</string>
     <string name="menu_import">Importar</string>
     <string name="menu_usbserial">USB Serial</string>
-    <string name="menu_extra_gallery">Galería extra</string>
     <string name="menu_settings">Ajustes</string>
 
     <!--Custom_dialog, Gallery Fragment strings-->
@@ -260,5 +259,13 @@
     <string name="always_default_frame">Usar siempre marco por defecto</string>
     <string name="add_neutral_rgb">Añadir neutra</string>
     <string name="select_rgb">Selecciona 3/4 imágenes</string>
+
+    <string name="menu_extra_gallery">Galería extra</string>
+    <string name="action_toggle_info">Info On/Off</string>
+    <string name="settings_show_extra_gallery">Mostrar Galería Extra</string>
+    <string name="sw_bounce">Rebotar</string>
+    <string name="sw_sort_palettes">Ordenar paletas por uso</string>
+    <string name="menu_fusion">Fusión</string>
+    <string name="extra_paper">Papel</string>
 
 </resources>

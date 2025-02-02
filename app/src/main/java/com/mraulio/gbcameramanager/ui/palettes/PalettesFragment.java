@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.palettes;
 
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.filteredGbcImages;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.StaticValues.lastSeenGalleryImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
@@ -777,23 +778,23 @@ public class PalettesFragment extends Fragment {
         int holderInt = new Integer(lastSeenGalleryImage);
         if (prevImage) {
             if (lastSeenGalleryImage == 0) {
-                lastSeenGalleryImage = gbcImagesList.size() - 1; //Goes to the last image on the gallery
+                lastSeenGalleryImage = filteredGbcImages.size() - 1; //Goes to the last image on the gallery
             } else {
                 lastSeenGalleryImage--;
             }
 
         } else {
-            if (lastSeenGalleryImage >= gbcImagesList.size() - 1) {
+            if (lastSeenGalleryImage >= filteredGbcImages.size() - 1) {
                 lastSeenGalleryImage = 0; //Goes to the last image on the gallery
             } else {
                 lastSeenGalleryImage++;
             }
         }
 
-        Bitmap image = imageBitmapCache.get(gbcImagesList.get(lastSeenGalleryImage).getHashCode());
+        Bitmap image = imageBitmapCache.get(filteredGbcImages.get(lastSeenGalleryImage).getHashCode());
         //If image is not in the hashmap, check the cache. If it's not in the cache do nothing
         if (image == null) {
-            image = GalleryFragment.diskCache.get(gbcImagesList.get(lastSeenGalleryImage).getHashCode());
+            image = GalleryFragment.diskCache.get(filteredGbcImages.get(lastSeenGalleryImage).getHashCode());
         }
         if (image != null) {
             ivPalette.setImageBitmap(paletteMaker(palette));
@@ -806,13 +807,13 @@ public class PalettesFragment extends Fragment {
         Bitmap bitmap;
         Bitmap upscaledBitmap;
         byte[] imageBytes;
-        if (Utils.gbcImagesList.size() == 0) {//If there are no images, or they are not 144 height
+        if (Utils.gbcImagesList.size() == 0) {//If there are no images
             imageBytes = Utils.encodeImage(hashFrames.get("gbcam03").getFrameBitmap(), "bw");
             ImageCodec imageCodec = new ImageCodec(160, 144);//imageBytes.length/40 to get the height of the image
             bitmap = imageCodec.decodeWithPalette(palette, imageBytes, false);
             upscaledBitmap = Bitmap.createScaledBitmap(bitmap, Utils.framesList.get(0).getFrameBitmap().getWidth() * 6, Utils.framesList.get(0).getFrameBitmap().getHeight() * 6, false);
         } else {
-            GbcImage gbcImage = Utils.gbcImagesList.get(lastSeenGalleryImage);
+            GbcImage gbcImage = filteredGbcImages.get(lastSeenGalleryImage);
             bitmap = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
             imageBytes = Utils.encodeImage(bitmap, "bw");
             ImageCodec imageCodec = new ImageCodec(160, bitmap.getHeight());//imageBytes.length/40 to get the height of the image

@@ -127,7 +127,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
     static HashSet<String> selectedFilterTags = new HashSet<>();
     static HashSet<String> hiddenFilterTags = new HashSet<>();
-    static List<GbcImage> filteredGbcImages = new ArrayList<>();
+    public static List<GbcImage> filteredGbcImages = new ArrayList<>();
     static boolean updatingFromChangeImage = false;
     static List<Integer> selectedImages = new ArrayList<>();
     static StringBuilder sbTitle = new StringBuilder();

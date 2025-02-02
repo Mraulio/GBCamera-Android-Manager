@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'com.mraulio.gbcameramanager'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.mraulio.gbcameramanager"

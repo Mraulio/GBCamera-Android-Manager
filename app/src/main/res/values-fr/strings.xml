@@ -65,7 +65,7 @@
     <string name="done_adding_images">\u0020images ajoutées!</string>
     <string name="palettes_added">Palettes ajoutées.</string>
     <string name="done_adding_palettes">Fin d’ajout des palettes!</string>
-    <string name="frames_added">Bordure ajoutées.</string>
+    <string name="frames_added">Bordures ajoutées.</string>
     <string name="done_adding_frames">Fin d\’ajout des bordures!</string>
     <string name="no_valid_file">Fichier non valide.</string>
     <string name="cb_last_seen">Dernière image vue par le capteur.</string>
@@ -93,7 +93,7 @@
     <string name="images_list">\nImages listées:\u0020</string>
     <string name="no_good_dump">\nSauvegarde corrompue.</string>
     <string name="sav_parts">\nSav parties:\u0020</string>
-    <string name="rom_name">\nLe nom de la rom est:\u0020</string>
+    <string name="rom_name">\nLe nom de la ROM est:\u0020</string>
     <string name="dumping_rom_wait">\nTéléchargement 1MB ROM, attendre environ 45s...</string>
     <string name="dumping_ram_wait">\nTéléchargement RAM, attendre...\n...</string>
     <string name="last_sav_name">\Le nom du dernier fichier SAV est:\u0020</string>
@@ -126,8 +126,8 @@
     <string name="hdr_exception">Toutes les images doivent être de taille identique</string>
     <string name="save_location_hint">PNGs, HDRs et animations sont sauvegardées dans \n\u0020 Pictures/GBCamera Manager.\nLes autres fichiers sont sauvegardés dans Download/GBCamera Manager.</string>
 
-    <string name="done_dumping_ram">Copie de la ram terminée ! La copie se trouve dans le répertoire Download/GBCamera Manager/Save dumps</string>
-    <string name="done_dumping_photo">Copie de la rom PHOTO terminée ! La copie se trouve dans le répertoire Download/GBCamera Manager/PHOTO Rom Dumps</string>
+    <string name="done_dumping_ram">Copie de la RAM terminée ! La copie se trouve dans le répertoire Download/GBCamera Manager/Save dumps</string>
+    <string name="done_dumping_photo">Copie de la ROM PHOTO! terminée ! La copie se trouve dans le répertoire Download/GBCamera Manager/PHOTO Rom Dumps</string>
     <string name="filtered_images">Images filtrées:\u0020</string>
     <string name="selected_images">Choisies:\u0020</string>
 
@@ -135,12 +135,12 @@
     <string name="done_analyzing">Analyse terminée!</string>
 
     <string name="check_magic">Vérifier la validité du fichier .sav lors de l\`importation/extraction</string>
-    <string name="delete_photo_folder_dialog">Supprimer le dossier rom Photo?</string>
+    <string name="delete_photo_folder_dialog">Supprimer le dossier ROM PHOTO! ?</string>
     <string name="add_as_frame">Ajouter comme bordure</string>
     <string name="rotation_button">Bouton Afficher la rotation</string>
-    <string name="frame_name">Définir le nom du bordure</string>
+    <string name="frame_name">Définir le nom de la bordure</string>
     <string name="cant_add_frame">Impossible d\`ajouter cette image en tant que bordure</string>
-    <string name="no_empty_frame_name">Le Id ne doit pas être vide</string>
+    <string name="no_empty_frame_name">L\`Id ne doit pas être vide</string>
     <string name="no_spaces_frame_name">Le nom ne doit pas contenir d\`espaces</string>
     <string name="frame_name_exists">Ce nom de bordure existe déjà</string>
     <string name="no_valid_image_file">Fichier image non valide</string>
@@ -156,7 +156,7 @@
     <string name="collage">Collage</string>
 
     <string name="collage_too_many_images">Trop d\`images sélectionnées. Le collage échouera.</string>
-    <string name="square_download">Exporter l\`image carrée</string>
+    <string name="square_download">Exporter image carrée</string>
 
     <string name="toast_frames_json">Bordures Json sauvegardés.</string>
     <string name="import_valid_images">Veuillez sélectionner uniquement des formats d\`image valides (.jpg, .jpeg, .png, .bmp).</string>
@@ -179,13 +179,13 @@
     <string name="menu_sort">Trier</string>
 
     <string name="et_frame_group_name">Définir le nom du groupe de bordures</string>
-    <string name="tv_frame_index">Index du bordure:\u0020</string>
+    <string name="tv_frame_index">Index de la bordure:\u0020</string>
 
     <string name="et_frame_index_error">La valeur doit être comprise entre 1 et 99</string>
     <string name="et_frame_id_error">ID de bordure déjà existant</string>
 
-    <string name="et_frame_group_id_error">Seuls les minuscules sont autorisés, minimum 2 caractères</string>
-    <string name="sp_all_frame_groups">Tous les bordures</string>
+    <string name="et_frame_group_id_error">Seules les minuscules sont autorisées, minimum 2 caractères</string>
+    <string name="sp_all_frame_groups">Toutes les bordures</string>
     <string name="cb_use_mod_date">Utiliser la date de modification</string>
     <string name="btn_backup_db">Sauvegarder la base de données</string>
     <string name="btn_restore_db">Restaurer la base de données</string>
@@ -199,10 +199,10 @@
     <string name="btn_edit_delete_framegroup">Supprimer le groupe</string>
     <string name="notification_download_complete">Téléchargement terminé</string>
     <string name="dialog_rename_frame_group_title">Nouveau nom du groupe de bordures</string>
-    <string name="dialog_edit_frame_title">Modification du bordure:\u0020</string>
+    <string name="dialog_edit_frame_title">Modification de la bordure:\u0020</string>
 
-    <string name="cant_edit_base">Impossible de modifier un bordure de base</string>
-    <string name="btn_edit_frame">Modifier le bordure</string>
+    <string name="cant_edit_base">Impossible de modifier une bordure de base</string>
+    <string name="btn_edit_frame">Modifier la bordure</string>
     <string name="sp_new_frame_group">Nouveau groupe de bordures</string>
     <string name="et_palette_id">*Définir l\`ID de la palette*</string>
     <string name="et_frame_group_id">ID du groupe de bordures</string>
@@ -210,12 +210,12 @@
     <string name="toast_first_image">Ceci est la première image</string>
     <string name="toast_last_image">Ceci est la dernière image</string>
     <string name="action_duplicate">Dupliquer</string>
-    <string name="sw_half_frame">Demi-bordure</string>
+    <string name="sw_half_frame">Demie-bordure</string>
     <string name="tv_extra_padding">Marge supplémentaire:\u0020</string>
     <string name="delete_frame_group_dialog">Supprimer le groupe de bordures\u0020</string>
     <string name="cant_delete_base_framegroup">Impossible de supprimer un groupe de bordures de base</string>
     <string name="btn_transform_image">Transformer</string>
-    <string name="et_palette_id_error">ID de palette non valide. Uniquement des caractères minuscules et des chiffres, minimum 2.</string>
+    <string name="et_palette_id_error">ID de palette non valide. Utiliser uniquement des caractères minuscules et des chiffres, minimum 2.</string>
     <string name="sp_date_format">Format de date\u0020</string>
 
     <string name="sb_rotation">Rotation</string>
@@ -236,13 +236,13 @@
     <string name="load_paperizing">Paperizing...</string>
     <string name="horizontal">Horizontal</string>
     <string name="always_default_frame">Utilisez le bordure par défaut</string>
-    <string name="add_neutral_rgb">Ajouter neutre</string>
+    <string name="add_neutral_rgb">Ajouter filtre neutre</string>
     <string name="select_rgb">Sélectionnez 3/4 images</string>
 
     <string name="menu_extra_gallery">Galerie extra</string>
     <string name="action_toggle_info">Info On/Off</string>
     <string name="settings_show_extra_gallery">Afficher la galerie extra</string>
-    <string name="sw_bounce">Rebond</string>
+    <string name="sw_bounce">Effet rebond</string>
     <string name="sw_sort_palettes">Trier les palettes par utilisation</string>
     <string name="menu_fusion">Fusion</string>
     <string name="extra_paper">Papier</string>

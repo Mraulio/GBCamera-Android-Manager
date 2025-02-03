@@ -140,7 +140,7 @@
     <string name="no_selected">No hi ha imatges seleccionades</string>
     <string name="json_backup_saved">Desada còpia de seguretat JSON!</string>
     <string name="page_selector_dialog">Selecciona pàgina</string>
-    <string name="hdr_exception">Totes les imatges han de tenir la mateixa mida.</string>
+    <string name="sizes_exception">Totes les imatges han de tenir la mateixa mida.</string>
     <string name="save_location_hint">PNGs, HDRs i GIFs es desen a \n\u0020 Pictures/GBCamera Manager.\n Altres fitxers es desen a Download/GBCamera Manager.</string>
     <string name="done_dumping_ram">Bolcat de RAM finalitzat!\u0020 Comprova la carpeta Download/GBCamera Manager/Save dumps</string>
     <string name="done_dumping_photo">Bolcat de ROM PHOTO finalitzat!\u0020 Comprova la carpeta Download/GBCamera Manager/PHOTO Rom Dumps</string>

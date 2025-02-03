@@ -141,7 +141,7 @@
     <string name="no_selected">Nenhuma imagem selecionada</string>
     <string name="json_backup_saved">Backup do JSON salvo!</string>
     <string name="page_selector_dialog">Selecionar página</string>
-    <string name="hdr_exception">As imagens devem ter o mesmo tamanho.</string>
+    <string name="sizes_exception">As imagens devem ter o mesmo tamanho.</string>
     <string name="save_location_hint">PNGs, HDRs e animações são salvas em \n\u0020 Pictures/GBCamera Manager.\nOutros arquivos em Download/GBCamera Manager.</string>
 
     <string name="filtered_images">Imagens filtradas:\u0020</string>

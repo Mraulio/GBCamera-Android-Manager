@@ -442,7 +442,7 @@ public class RgbUtils {
                 }
             }
         } catch (IllegalArgumentException e) {
-            Utils.toast(context, context.getString(R.string.hdr_exception));
+            Utils.toast(context, context.getString(R.string.sizes_exception));
         }
 
         if (crop) {

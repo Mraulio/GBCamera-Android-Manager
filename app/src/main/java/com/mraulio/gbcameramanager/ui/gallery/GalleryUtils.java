@@ -40,7 +40,6 @@ import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -53,7 +52,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Build;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StrikethroughSpan;
@@ -362,7 +360,7 @@ public class GalleryUtils {
      */
     public static Bitmap averageImages(List<Bitmap> bitmaps) {
         if (bitmaps == null || bitmaps.isEmpty()) {
-            throw new IllegalArgumentException("List of images cannot be empty.");
+            throw new IllegalArgumentException((StaticValues.fab.getContext().getString(R.string.no_selected)));
         }
 
         // Make sure all images have the same dimensions
@@ -370,7 +368,7 @@ public class GalleryUtils {
         int height = bitmaps.get(0).getHeight();
         for (Bitmap bitmap : bitmaps) {
             if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
-                throw new IllegalArgumentException("All images must have same dimensions.");
+                throw new IllegalArgumentException(StaticValues.fab.getContext().getString(R.string.sizes_exception));
             }
         }
 
@@ -1093,7 +1091,7 @@ public class GalleryUtils {
 
         for (Bitmap bitmap : bitmaps) {
             if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
-                throw new IllegalArgumentException("All images must have the same dimemsions.");
+                throw new IllegalArgumentException();
             }
         }
         Bitmap mergedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);

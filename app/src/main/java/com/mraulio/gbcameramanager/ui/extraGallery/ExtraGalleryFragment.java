@@ -732,7 +732,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
 
                         dialog.show();
                     } catch (IllegalArgumentException e) {
-                        Utils.toast(getContext(), getString(R.string.hdr_exception));
+                        Utils.toast(getContext(), getString(R.string.sizes_exception));
                     }
                 } else
                     Utils.toast(getContext(), getString(R.string.no_selected));
@@ -766,7 +766,7 @@ public class ExtraGalleryFragment extends Fragment implements RgbUtils.OnRgbSave
                             RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList, true, null);
                             rgbUtils.showRgbDialog(this);
                         } else {
-                            Utils.toast(getContext(), getString(R.string.hdr_exception));
+                            Utils.toast(getContext(), getString(R.string.sizes_exception));
                         }
                     }
                 } else

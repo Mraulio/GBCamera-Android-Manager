@@ -140,7 +140,7 @@
     <string name="no_selected">No images selected</string>
     <string name="json_backup_saved">JSON Backup saved!</string>
     <string name="page_selector_dialog">Select page</string>
-    <string name="hdr_exception">All images must have the same size.</string>
+    <string name="sizes_exception">All images must have the same size.</string>
     <string name="save_location_hint">PNGs, HDRs and GIFs are saved into \n\u0020 Pictures/GBCamera Manager. \nOther files are stored in \n\u0020 Download/GBCamera Manager.</string>
 
     <string name="done_dumping_ram">DONE DUMPING RAM! Check your Download/GBCamera Manager/Save dumps folder</string>
@@ -263,5 +263,6 @@
     <string name="sw_sort_palettes">Sort palettes by usage</string>
     <string name="menu_fusion">Fusion</string>
     <string name="extra_paper">Paper</string>
+
 
 </resources>

@@ -2,6 +2,7 @@ package com.mraulio.gbcameramanager.ui.gallery;
 
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.gridView;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.loadDialog;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.showInfo;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.updatingFromChangeImage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.frameChange;
 import static com.mraulio.gbcameramanager.ui.gallery.MainImageDialog.isChanging;
@@ -74,7 +75,7 @@ public class UpdateGridViewAsyncTask extends AsyncTask<Void, Void, Void> {
         for (GbcImage gbcImage : GalleryFragment.gbcImagesForPage) {
             bitmapList.add(Utils.imageBitmapCache.get(gbcImage.getHashCode()));
         }
-        GalleryFragment.customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex), bitmapList, false, false, true, GalleryFragment.selectedImages);
+        GalleryFragment.customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, GalleryFragment.filteredGbcImages.subList(newStartIndex, newEndIndex), bitmapList, false, showInfo, true, GalleryFragment.selectedImages);
         return null;
     }
 

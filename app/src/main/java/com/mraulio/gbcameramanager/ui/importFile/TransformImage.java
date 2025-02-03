@@ -74,6 +74,7 @@ public class TransformImage {
         TextView tvContrast = dialog.findViewById(R.id.tv_contrast);
 
         Switch swOriginalRatio = dialog.findViewById(R.id.sw_original_ratio);
+        Switch swDither = dialog.findViewById(R.id.sw_dither);
         SeekBar sbRotate = dialog.findViewById(R.id.sb_rotate);
         SeekBar sbBrightness = dialog.findViewById(R.id.sb_brightness);
         SeekBar sbContrast = dialog.findViewById(R.id.sb_contrast);
@@ -118,6 +119,7 @@ public class TransformImage {
                 }
             }
         });
+
         sbContrast.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -174,7 +176,7 @@ public class TransformImage {
         btnReload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                reloadImage(convertedOnce, cropImageView, ivTransformed, swOriginalRatio.isChecked());
+                reloadImage(convertedOnce, cropImageView, ivTransformed, swOriginalRatio.isChecked(), swDither.isChecked());
             }
         });
 
@@ -215,13 +217,13 @@ public class TransformImage {
         dialog.show();
     }
 
-    private void reloadImage(boolean[] convertedOnce, CropImageView cropImageView, ImageView ivTransformed, boolean cropOriginal) {
+    private void reloadImage(boolean[] convertedOnce, CropImageView cropImageView, ImageView ivTransformed, boolean cropOriginal, boolean dither) {
         convertedOnce[0] = true;
         croppedBitmap = cropImageView.getCroppedImage();
         if (cropOriginal) {
             croppedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 128, 112, false);
         }
-        croppedBitmap = resizeImage(croppedBitmap, gbcImage);
+        croppedBitmap = resizeImage(croppedBitmap, gbcImage, dither);
 
         try {
             byte[] imageBytes = Utils.encodeImage(croppedBitmap, "bw");

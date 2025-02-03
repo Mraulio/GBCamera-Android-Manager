@@ -3,6 +3,7 @@ package com.mraulio.gbcameramanager.ui.importFile;
 import static com.mraulio.gbcameramanager.MainActivity.openedFromFile;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
 
+import static com.mraulio.gbcameramanager.ui.importFile.ColorQuantizer.kMeansColorReduction;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.checkPaletteColors;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.convertToGrayScale;
 import static com.mraulio.gbcameramanager.ui.importFile.ImageConversionUtils.ditherImage;
@@ -42,6 +43,8 @@ import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,7 +63,6 @@ import android.widget.TextView;
 
 import com.mraulio.gbcameramanager.model.ImageData;
 import com.mraulio.gbcameramanager.ui.gallery.CustomGridViewAdapterImage;
-import com.mraulio.gbcameramanager.ui.gallery.MainImageDialog;
 import com.mraulio.gbcameramanager.ui.gallery.SaveImageAsyncTask;
 import com.mraulio.gbcameramanager.ui.palettes.CustomGridViewAdapterPalette;
 import com.mraulio.gbcameramanager.db.FrameDao;
@@ -99,6 +101,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 
 public class ImportFragment extends Fragment {
 
@@ -431,17 +434,17 @@ public class ImportFragment extends Fragment {
 
                                 } else if (cbAddFrame.isChecked()) {
 
-                                    if (importedBitmap.getHeight() != 144 && importedBitmap.getHeight() != 224) {
+                                    if (importedBitmap.getWidth() != 160 && importedBitmap.getHeight() % 8 == 0 && importedBitmap.getHeight() >= 112) {
                                         Utils.toast(getContext(), getString(R.string.cant_add_frame));
                                         btnAddImages.setEnabled(true);
                                     } else {
                                         //Make the frame bw
-                                        if (!checkPaletteColors(importedBitmap)){
-                                            if (has4Colors(importedBitmap)){
+                                        if (!checkPaletteColors(importedBitmap)) {
+                                            if (has4Colors(importedBitmap)) {
                                                 importedBitmap = from4toBw(importedBitmap);
-                                            }else{
+                                            } else {
                                                 importedBitmap = convertToGrayScale(importedBitmap);
-                                                importedBitmap = ditherImage(importedBitmap);
+                                                importedBitmap = ditherImage(importedBitmap, true);
 
                                             }
                                         }
@@ -857,7 +860,7 @@ public class ImportFragment extends Fragment {
                                             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
                                             GbcImage gbcImage = new GbcImage();
-                                            bitmap = resizeImage(bitmap, gbcImage);
+                                            bitmap = resizeImage(bitmap, gbcImage, true);
 
 
                                             byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
@@ -1023,7 +1026,7 @@ public class ImportFragment extends Fragment {
                 importedBitmap = BitmapFactory.decodeStream(inputStream);
 
                 GbcImage gbcImage = new GbcImage();
-                Bitmap bitmap = resizeImage(importedBitmap, gbcImage);
+                Bitmap bitmap = resizeImage(importedBitmap, gbcImage, true);
 
                 byte[] imageBytes = Utils.encodeImage(bitmap, "bw");
                 gbcImage.setImageBytes(imageBytes);
@@ -1094,22 +1097,25 @@ public class ImportFragment extends Fragment {
         int[] pixels = new int[width * height];
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
 
+        boolean manyColors = false;
+
         LinkedHashSet<Integer> colorSet = new LinkedHashSet<>();
         for (int pixel : pixels) {
             colorSet.add(pixel);
             if (colorSet.size() > 8) {
-                return null;
+                manyColors = true;
+                break;
             }
         }
         if (colorSet.size() < 4) {
             return null;
         }
+        int[] sortedColorsIntArray;
 
-        int[] sortedColorsIntArray = new int[colorSet.size()];
-
-        if (colorSet.size() <9) {
+        if (!manyColors) {
 
             List<Integer> sortedColors = new ArrayList<>(colorSet);
+            sortedColorsIntArray = new int[colorSet.size()];
             Collections.sort(sortedColors, new Comparator<Integer>() {
                 @Override
                 public int compare(Integer color1, Integer color2) {
@@ -1123,12 +1129,35 @@ public class ImportFragment extends Fragment {
                 sortedColorsIntArray[i] = sortedColors.get(i);
             }
 
-            Bitmap paletteBitmap = paletteViewer(sortedColorsIntArray);
-            lyPalette.setVisibility(View.VISIBLE);
-            ivNewPalette.setImageBitmap(paletteBitmap);
-            return sortedColorsIntArray;
+        } else {
+
+            Bitmap copy = bitmap.copy(bitmap.getConfig(), true);
+            int[] colors = kMeansColorReduction(copy, 4);
+
+            List<Integer> list = new ArrayList<>();
+            for (int i : colors) {
+                list.add(i);
+            }
+
+            Collections.sort(list, new Comparator<Integer>() {
+                @Override
+                public int compare(Integer color1, Integer color2) {
+                    double luminance1 = calculateLuminance(color1);
+                    double luminance2 = calculateLuminance(color2);
+                    return Double.compare(luminance2, luminance1);
+                }
+            });
+            sortedColorsIntArray = new int[4];
+            for (int i = 0; i < list.size(); i++) {
+                sortedColorsIntArray[i] = list.get(i);
+            }
         }
-        return null;
+
+        lyPalette.setVisibility(View.VISIBLE);
+        Bitmap paletteBitmap = paletteViewer(sortedColorsIntArray);
+        ivNewPalette.setImageBitmap(paletteBitmap);
+        return sortedColorsIntArray;
+
     }
 
     public static double calculateLuminance(int color) {

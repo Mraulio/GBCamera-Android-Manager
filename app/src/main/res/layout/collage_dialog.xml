@@ -70,6 +70,7 @@
                         android:autoSizeMaxTextSize="30sp"
                         android:autoSizeMinTextSize="2sp"
                         android:autoSizeTextType="uniform"
+                        android:maxLines="1"
                         android:text="@string/cb_crop"></Switch>
 
                     <Switch

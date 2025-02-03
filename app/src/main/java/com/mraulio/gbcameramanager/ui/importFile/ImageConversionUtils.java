@@ -23,19 +23,19 @@ import java.util.Set;
 
 public class ImageConversionUtils {
 
-    public static Bitmap resizeImage(Bitmap originalBitmap, GbcImage gbcImage) {
+    public static Bitmap resizeImage(Bitmap originalBitmap, GbcImage gbcImage, boolean dither) {
 
         int originalWidth = originalBitmap.getWidth();
         int originalHeight = originalBitmap.getHeight();
-        if (originalWidth == 160 && originalHeight == 144 || originalWidth == 160 && originalHeight % 16 == 0) {//Regular image, 160 width and *16 height
+        if (originalWidth == 160 && originalHeight == 144 || originalWidth == 160 && originalHeight % 8 == 0) {//Regular image, 160 width and *16 height
             boolean hasAllColors = checkPaletteColors(originalBitmap);
             if (!hasAllColors) {
                 //Check if it only has 4 colors. If it does, convert them to bw palette. Else convert to gray scale and dither
-                if (has4Colors(originalBitmap)){
+                if (has4Colors(originalBitmap)) {
                     originalBitmap = from4toBw(originalBitmap);
-                }else{
+                } else {
                     originalBitmap = convertToGrayScale(originalBitmap);
-                    originalBitmap = ditherImage(originalBitmap);
+                    originalBitmap = ditherImage(originalBitmap, dither);
                     LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                     metadata.put("Type", "Transformed");
                     gbcImage.setImageMetadata(metadata);
@@ -45,16 +45,16 @@ public class ImageConversionUtils {
             return originalBitmap;
         } else {
             float scaledFactor = originalWidth / 160.0f;
-            if (originalHeight / scaledFactor == 1.0f || originalHeight % (16 * scaledFactor) == 0) {//The image is a regular image scaled
+            if (originalHeight / scaledFactor == 1.0f || originalHeight % (8 * scaledFactor) == 0) {//The image is a regular image scaled
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, (int) (originalWidth / scaledFactor), (int) (originalHeight / scaledFactor), false);
                 boolean hasAllColors = checkPaletteColors(scaledBitmap);
                 if (!hasAllColors) {
                     //Check if it only has 4 colors. If it does, convert them to bw palette. Else convert to gray scale and dither
-                    if (has4Colors(scaledBitmap)){
+                    if (has4Colors(scaledBitmap)) {
                         scaledBitmap = from4toBw(scaledBitmap);
-                    }else{
+                    } else {
                         scaledBitmap = convertToGrayScale(scaledBitmap);
-                        scaledBitmap = ditherImage(scaledBitmap);
+                        scaledBitmap = ditherImage(scaledBitmap, dither);
                         LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                         metadata.put("Type", "Transformed");
                         gbcImage.setImageMetadata(metadata);
@@ -71,7 +71,7 @@ public class ImageConversionUtils {
 
                 boolean isNonFramed = false;
 
-                if (originalWidth == noFrameWidth && originalHeight == noFrameHeight || originalWidth == 160 && originalHeight % 16 == 0) {//Regular image, 160 width and *16 height
+                if (originalWidth == noFrameWidth && originalHeight == noFrameHeight || originalWidth == 160 && originalHeight % 8 == 0) {//Regular image, 160 width and *16 height
                     framelessBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
                     isNonFramed = true;
                 } else {
@@ -85,17 +85,15 @@ public class ImageConversionUtils {
 
                 if (isNonFramed) {
                     //Adding a frame to the image so it's 160x144
-//                    if (hasJoeyJrPalette(framelessBitmap)) {
-//                        framelessBitmap = convertJoeyPalette(framelessBitmap);
-//                    }
+
                     boolean hasAllColors = checkPaletteColors(framelessBitmap);
                     if (!hasAllColors) {
                         //Check if it only has 4 colors. If it does, convert them to bw palette. Else convert to gray scale and dither
-                        if (has4Colors(framelessBitmap)){
+                        if (has4Colors(framelessBitmap)) {
                             framelessBitmap = from4toBw(framelessBitmap);
-                        }else{
+                        } else {
                             framelessBitmap = convertToGrayScale(framelessBitmap);
-                            framelessBitmap = ditherImage(framelessBitmap);
+                            framelessBitmap = ditherImage(framelessBitmap, dither);
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                             metadata.put("Type", "Transformed");
                             gbcImage.setImageMetadata(metadata);
@@ -135,11 +133,11 @@ public class ImageConversionUtils {
 
                     if (!hasAllColors) {
                         //Check if it only has 4 colors. If it does, convert them to bw palette. Else convert to gray scale and dither
-                        if (has4Colors(scaledBitmap)){
+                        if (has4Colors(scaledBitmap)) {
                             scaledBitmap = from4toBw(scaledBitmap);
-                        }else{
+                        } else {
                             scaledBitmap = convertToGrayScale(scaledBitmap);
-                            scaledBitmap = ditherImage(scaledBitmap);
+                            scaledBitmap = ditherImage(scaledBitmap, dither);
                             LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
                             metadata.put("Type", "Transformed");
                             gbcImage.setImageMetadata(metadata);
@@ -152,61 +150,6 @@ public class ImageConversionUtils {
             }
         }
     }
-
-//    /**
-//     * Method to check if an image was  JoeyJr imported image
-//     *
-//     * @param image Image to be checked
-//     * @return
-//     */
-//    private static boolean hasJoeyJrPalette(Bitmap image) {
-//        //
-//        Set<String> originalColors = new HashSet<>(Arrays.asList("#000000", "#808080", "#C0C0C0", "#FFFFFF"));
-//        for (int y = 0; y < image.getHeight(); y++) {
-//            for (int x = 0; x < image.getWidth(); x++) {
-//                int pixelColor = image.getPixel(x, y);
-//                String hexColor = String.format("#%06X", (0xFFFFFF & pixelColor));
-//                if (!originalColors.contains(hexColor)) {
-//                    return false;  // Not a JoeyJr image
-//                }
-//            }
-//        }
-//        return true;  // Image has JoeyJr palette
-//    }
-//
-//    /**
-//     * Transform JoeyJr image into a valid palette image
-//     *
-//     * @param image
-//     * @return
-//     */
-//    public static Bitmap convertJoeyPalette(Bitmap image) {
-//
-//        Bitmap newImage = Bitmap.createBitmap(image.getWidth(), image.getHeight(), image.getConfig());
-//
-//        for (int y = 0; y < image.getHeight(); y++) {
-//            for (int x = 0; x < image.getWidth(); x++) {
-//                int pixelColor = image.getPixel(x, y);
-//
-//                // Convert to hex
-//                String hexColor = String.format("#%06X", (0xFFFFFF & pixelColor));
-//
-//                String newHexColor;
-//                if ("#808080".equals(hexColor)) {
-//                    newHexColor = "#555555";
-//                } else if ("#C0C0C0".equals(hexColor)) {
-//                    newHexColor = "#AAAAAA";
-//                } else {
-//                    newHexColor = hexColor;
-//                }
-//
-//                int newColor = Color.parseColor(newHexColor);
-//                newImage.setPixel(x, y, newColor);
-//            }
-//        }
-//
-//        return newImage;
-//    }
 
     static boolean has4Colors(Bitmap bitmap) {
 
@@ -224,13 +167,14 @@ public class ImageConversionUtils {
                 }
             }
         }
-        if (uniqueColors.size() == 4) {
+        if (uniqueColors.size() <= 4) {
             return true;
         } else return false;
     }
 
     /**
      * Maps the 4 colors of the bitmap comparing the grey value to the colors in the BW palette
+     *
      * @param bitmap Bitmap to get the 4 colors
      * @return
      */
@@ -255,8 +199,14 @@ public class ImageConversionUtils {
         });
         Map<Integer, Integer> colorMap = new HashMap<>();
 
-        for (int i = 0; i < 4; i++) {
-            colorMap.put(uniqueColors[i], hashPalettes.get("bw").getPaletteColorsInt()[i]);
+        if (uniqueColors.length == 4) {
+            for (int i = 0; i < uniqueColors.length; i++) {
+                colorMap.put(uniqueColors[i], hashPalettes.get("bw").getPaletteColorsInt()[i]);
+            }
+        } else if (uniqueColors.length < 4) {
+            for (int i = 0; i < uniqueColors.length; i++) {
+                colorMap.put(uniqueColors[i], findClosestColor(hashPalettes.get("bw").getPaletteColorsInt(), calculateGrayValue(uniqueColors[i])));
+            }
         }
 
         for (int y = 0; y < height; y++) {
@@ -267,6 +217,20 @@ public class ImageConversionUtils {
         }
 
         return b;
+    }
+
+    private static int findClosestColor(int[] defaultColors, int givenGray) {
+        int closestColor = defaultColors[0];
+        int minDifference = Math.abs(calculateGrayValue(defaultColors[0]) - givenGray);
+
+        for (int i = 1; i < defaultColors.length; i++) {
+            int difference = Math.abs(calculateGrayValue(defaultColors[i]) - givenGray);
+            if (difference < minDifference) {
+                minDifference = difference;
+                closestColor = defaultColors[i];
+            }
+        }
+        return closestColor;
     }
 
     public static Bitmap convertToGrayScale(Bitmap bitmap) {
@@ -294,7 +258,7 @@ public class ImageConversionUtils {
      * Dithering the image to the bw palette using Bayer Matrix, and enhancing the edges.
      * https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface/blob/5584b0dacc92ee1b9cae5abe3e51ee02d9aa4cbd/Octave_Interface/image_rectifier.m#L32C1-L69C6
      */
-    public static Bitmap ditherImage(Bitmap originalBitmap) {
+    public static Bitmap ditherImage(Bitmap originalBitmap, boolean applyDithering) {
         int[] Dithering_patterns = {
                 0x2A, 0x5E, 0x9B, 0x51, 0x8B, 0xCA, 0x33, 0x69, 0xA6, 0x5A, 0x97, 0xD6, 0x44, 0x7C, 0xBA,
                 0x37, 0x6D, 0xAA, 0x4D, 0x87, 0xC6, 0x40, 0x78, 0xB6, 0x30, 0x65, 0xA2, 0x57, 0x93, 0xD2,
@@ -342,25 +306,41 @@ public class ImageConversionUtils {
                 }
             }
         }
+
         for (int y = 0; y < bitmapHeight; y++) {
             for (int x = 0; x < bitmapWidth; x++) {
                 int pixel = Color.red(originalBitmap.getPixel(x, y)); // Get the grayscale value
 
                 int pixel_out;
-                if (pixel < Bayer_matDG_B_2D[y][x]) {
-                    pixel_out = 0;
-                } else if (pixel < Bayer_matLG_DG_2D[y][x]) {
-                    pixel_out = 85;
-                } else if (pixel < Bayer_matW_LG_2D[y][x]) {
-                    pixel_out = 170;
+                if (applyDithering) {
+                    if (pixel < Bayer_matDG_B_2D[y][x]) {
+                        pixel_out = 0;
+                    } else if (pixel < Bayer_matLG_DG_2D[y][x]) {
+                        pixel_out = 85;
+                    } else if (pixel < Bayer_matW_LG_2D[y][x]) {
+                        pixel_out = 170;
+                    } else {
+                        pixel_out = 255;
+                    }
                 } else {
-                    pixel_out = 255;
+                    // No dithering applied, use simple thresholding
+                    if (pixel < 64) {
+                        pixel_out = 0;
+                    } else if (pixel < 128) {
+                        pixel_out = 85;
+                    } else if (pixel < 192) {
+                        pixel_out = 170;
+                    } else {
+                        pixel_out = 255;
+                    }
                 }
+
                 originalBitmap.setPixel(x, y, Color.rgb(pixel_out, pixel_out, pixel_out));
             }
         }
         return originalBitmap;
     }
+
 
     public static Bitmap enhanceEdges(Bitmap a) {
         int width = a.getWidth();

@@ -141,7 +141,7 @@
     <string name="no_selected">Keine Bilder ausgewählt</string>
     <string name="json_backup_saved">JSON Backup gespeichert!</string>
     <string name="page_selector_dialog">Seite wählen</string>
-    <string name="hdr_exception">Alle Bilder müssen dieselbe Größe haben.</string>
+    <string name="sizes_exception">Alle Bilder müssen dieselbe Größe haben.</string>
     <string name="save_location_hint">PNGs, HDRs und Animationen werden unter \n\u0020 Pictures/GBCamera Manager gespeichert\nAndere Dateien werden unter Download/GBCamera Manager gespeichert.</string>
 
     <string name="done_dumping_ram">RAM WURDE AUSGELESEN! Schau in den Ordner Download/GBCamera Manager/Save dumps</string>
@@ -258,5 +258,13 @@
     <string name="always_default_frame">Standard Rahmen immer benutzen</string>
     <string name="add_neutral_rgb">Neutral hinzufügen</string>
     <string name="select_rgb">Wählen Sie 3/4 Bilder aus</string>
+
+    <string name="menu_extra_gallery">Extra Galerie</string>
+    <string name="action_toggle_info">Info an/aus</string>
+    <string name="settings_show_extra_gallery">Extra Galerie anzeigen</string>
+    <string name="sw_bounce">Jo-Jo</string>
+    <string name="sw_sort_palettes">Paletten nach Verwendung sortieren</string>
+    <string name="menu_fusion">Fusion</string>
+    <string name="extra_paper">Papier</string>
 
 </resources>

@@ -1,5 +1,6 @@
 package com.mraulio.gbcameramanager.ui.gallery;
 
+import static com.mraulio.gbcameramanager.utils.StaticValues.DEFAULT_FRAME_MARGIN;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_DUPLICATED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.FILTER_SUPER_FAVOURITE;
@@ -9,6 +10,7 @@ import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_DUPLICATED;
 import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_SUPER_FAVOURITE;
 import static com.mraulio.gbcameramanager.utils.StaticValues.TAG_TRANSFORMED;
+import static com.mraulio.gbcameramanager.utils.StaticValues.WILD_FRAME_MARGIN;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateFilter;
 import static com.mraulio.gbcameramanager.utils.StaticValues.db;
@@ -38,7 +40,6 @@ import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -51,7 +52,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Build;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StrikethroughSpan;
@@ -139,13 +139,22 @@ public class GalleryUtils {
             if (StaticValues.exportPng) {
                 file = new File(Utils.IMAGES_FOLDER, fileName);
 
-                if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
-                    image = Bitmap.createBitmap(image, 16, 16, 128, 112);
+                if (crop) {
+                    int imageMargin = 16;
+                    if (hashFrames.get(gbcImage.getFrameId()) != null) {
+                        imageMargin = hashFrames.get(gbcImage.getFrameId()).getImageMargin();
+                    } else {
+                        if (image.getHeight() == 144 && image.getWidth() == 160) {
+                            imageMargin = DEFAULT_FRAME_MARGIN;
+                        }
+                        //For the wild frames
+                        else if (image.getHeight() == 224) {
+                            imageMargin = WILD_FRAME_MARGIN;
+                        }
+                    }
+                    image = Bitmap.createBitmap(image, 16, imageMargin, 128, 112);
                 }
-                //For the wild frames
-                else if (image.getHeight() == 224 && crop) {
-                    image = Bitmap.createBitmap(image, 16, 40, 128, 112);
-                }
+
                 //Rotate the image
                 image = rotateBitmap(image, gbcImage);
 
@@ -231,7 +240,7 @@ public class GalleryUtils {
             showNotification(context, file);
         }
         if (StaticValues.exportPng) {
-            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved)+" x" + StaticValues.exportSize);
+            toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved) + " x" + StaticValues.exportSize);
         } else
             toast(StaticValues.fab.getContext(), StaticValues.fab.getContext().getString(R.string.toast_saved_txt));
     }
@@ -291,12 +300,20 @@ public class GalleryUtils {
                 GbcImage gbcImage = gbcImages.get(i);
                 Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
 
-                if (image.getHeight() == 144 && image.getWidth() == 160 && crop) {
-                    image = Bitmap.createBitmap(image, 16, 16, 128, 112);
-                }
-                //For the wild frames
-                else if (image.getHeight() == 224 && crop) {
-                    image = Bitmap.createBitmap(image, 16, 40, 128, 112);
+                if (crop) {
+                    int imageMargin = 16;
+                    if (hashFrames.get(gbcImage.getFrameId()) != null) {
+                        imageMargin = hashFrames.get(gbcImage.getFrameId()).getImageMargin();
+                    } else {
+                        if (image.getHeight() == 144 && image.getWidth() == 160) {
+                            imageMargin = DEFAULT_FRAME_MARGIN;
+                        }
+                        //For the wild frames
+                        else if (image.getHeight() == 224) {
+                            imageMargin = WILD_FRAME_MARGIN;
+                        }
+                    }
+                    image = Bitmap.createBitmap(image, 16, imageMargin, 128, 112);
                 }
                 //Rotate the image
                 image = rotateBitmap(image, gbcImage);
@@ -343,7 +360,7 @@ public class GalleryUtils {
      */
     public static Bitmap averageImages(List<Bitmap> bitmaps) {
         if (bitmaps == null || bitmaps.isEmpty()) {
-            throw new IllegalArgumentException("List of images cannot be empty.");
+            throw new IllegalArgumentException((StaticValues.fab.getContext().getString(R.string.no_selected)));
         }
 
         // Make sure all images have the same dimensions
@@ -351,7 +368,7 @@ public class GalleryUtils {
         int height = bitmaps.get(0).getHeight();
         for (Bitmap bitmap : bitmaps) {
             if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
-                throw new IllegalArgumentException("All images must have same dimensions.");
+                throw new IllegalArgumentException(StaticValues.fab.getContext().getString(R.string.sizes_exception));
             }
         }
 
@@ -549,7 +566,8 @@ public class GalleryUtils {
         }
     }
 
-    public static void showFilterDialog(Context context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
+    public static void showFilterDialog(Context
+                                                context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View dialogView = inflater.inflate(R.layout.tags_dialog, null);
 
@@ -768,7 +786,8 @@ public class GalleryUtils {
         return stringBuilder.toString();
     }
 
-    public static void showDatePicker(Context context, Button btnCalendar, Date date, boolean month, boolean year, boolean filterByDate) {
+    public static void showDatePicker(Context context, Button btnCalendar, Date date,
+                                      boolean month, boolean year, boolean filterByDate) {
 
         List<Calendar> listDates = new ArrayList<>();
         Calendar yesterday = Calendar.getInstance();
@@ -853,7 +872,8 @@ public class GalleryUtils {
      * @param selectedTagsTv
      * @param selectedTags
      */
-    public static void updateSelectedTagsText(TextView selectedTagsTv, TextView hiddenTagsTV, HashSet<String> selectedTags, HashSet<String> notShowingTags) {
+    public static void updateSelectedTagsText(TextView selectedTagsTv, TextView
+            hiddenTagsTV, HashSet<String> selectedTags, HashSet<String> notShowingTags) {
         StringBuilder selectedTagsBuilder = new StringBuilder();
         for (String tag : selectedTags) {
             if (tag.equals(FILTER_FAVOURITE)) {
@@ -964,13 +984,14 @@ public class GalleryUtils {
     }
 
 
-    public static Bitmap frameChange(GbcImage gbcImage, String frameId, boolean invertImagePalette,
+    public static Bitmap frameChange(GbcImage gbcImage, String frameId,
+                                     boolean invertImagePalette,
                                      boolean invertFramePalette, boolean keepFrame, Boolean save) throws IOException {
         Bitmap resultBitmap;
         gbcImage.setFrameId(frameId);
         GbcFrame gbcFrame = hashFrames.get(frameId);
 
-        //If image has a null frame but has the size of a "framable" image, create the placeholder frame
+        //If image has a null frame but has the size of a "frameable" image, create the placeholder frame
         if (gbcFrame == null && keepFrame && ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224)) {
             Bitmap originalBwBitmap = paletteChanger("bw", gbcImage.getImageBytes(), false);
 
@@ -979,15 +1000,13 @@ public class GalleryUtils {
             gbcFrame.setWildFrame(originalBwBitmap.getHeight() == 144 ? false : true);
         }
 
-        if (gbcFrame != null && ((gbcImage.getImageBytes().length / 40) == 144 || (gbcImage.getImageBytes().length / 40) == 224)) {
+        if (gbcFrame != null) {
 
             int yIndexActualImage = 16;// y Index where the actual image starts
             if ((gbcImage.getImageBytes().length / 40) == 224) {
                 yIndexActualImage = 40;
             }
-            int yIndexNewFrame = 16;
-            boolean isWildFrameNow = gbcFrame.isWildFrame();
-            if (isWildFrameNow) yIndexNewFrame = 40;
+            int yIndexNewFrame = gbcFrame.getImageMargin();
 
             Bitmap framed = gbcFrame.getFrameBitmap().copy(Bitmap.Config.ARGB_8888, true);
             resultBitmap = Bitmap.createBitmap(framed.getWidth(), framed.getHeight(), Bitmap.Config.ARGB_8888);
@@ -1038,7 +1057,8 @@ public class GalleryUtils {
     }
 
     //Change palette
-    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes, boolean invertPalette) {
+    public static Bitmap paletteChanger(String paletteId, byte[] imageBytes,
+                                        boolean invertPalette) {
         ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
         Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
 
@@ -1064,4 +1084,61 @@ public class GalleryUtils {
         }
         return true;
     }
+
+    public static Bitmap fusionBitmap(List<Bitmap> bitmaps, int mode) {
+        int width = bitmaps.get(0).getWidth();
+        int height = bitmaps.get(0).getHeight();
+
+        for (Bitmap bitmap : bitmaps) {
+            if (bitmap.getWidth() != width || bitmap.getHeight() != height) {
+                throw new IllegalArgumentException();
+            }
+        }
+        Bitmap mergedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        if (mode == 0) {
+            //Fuse alternating pixels
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if ((x + y) % 2 == 0) {
+                        mergedBitmap.setPixel(x, y, bitmaps.get(0).getPixel(x, y));
+                    } else {
+                        mergedBitmap.setPixel(x, y, bitmaps.get(1).getPixel(x, y));
+                    }
+                }
+            }
+        } else if (mode == 1) {
+            // Fuse alternating rows
+            for (int y = 0; y < height; y++) {
+                if (y % 2 == 0) {
+                    for (int x = 0; x < width; x++) {
+                        int pixel = bitmaps.get(0).getPixel(x, y);
+                        mergedBitmap.setPixel(x, y, pixel);
+                    }
+                } else {
+                    for (int x = 0; x < width; x++) {
+                        int pixel = bitmaps.get(1).getPixel(x, y);
+                        mergedBitmap.setPixel(x, y, pixel);
+                    }
+                }
+            }
+        } else if (mode == 2) {
+            // Fuse alternating columns
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    int pixel;
+                    if (x % 2 == 0) {
+                        pixel = bitmaps.get(0).getPixel(x, y);
+                    } else {
+                        pixel = bitmaps.get(1).getPixel(x, y);
+                    }
+                    mergedBitmap.setPixel(x, y, pixel);
+                }
+            }
+        }
+
+        return mergedBitmap;
+    }
+
+
 }

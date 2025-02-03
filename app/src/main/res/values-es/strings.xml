@@ -140,7 +140,7 @@
     <string name="no_selected">No hay imágenes seleccionadas</string>
     <string name="json_backup_saved">¡Guardado JSON Backup!</string>
     <string name="page_selector_dialog">Selecciona página</string>
-    <string name="hdr_exception">Todas las imágenes deben tener el mismo tamaño.</string>
+    <string name="sizes_exception">Todas las imágenes deben tener el mismo tamaño.</string>
     <string name="save_location_hint">PNGs, HDRs y GIFs se guardan en \n\u0020 Pictures/GBCamera Manager.\n Otros archivos se guardan en Download/GBCamera Manager.</string>
     <string name="done_dumping_ram">¡Volcado de RAM terminado!\u0020 Comprueba la carpeta Download/GBCamera Manager/Save dumps</string>
     <string name="done_dumping_photo">¡Volcado de ROM PHOTO terminado!\u0020 Comprueba la carpeta Download/GBCamera Manager/PHOTO Rom Dumps</string>
@@ -259,5 +259,13 @@
     <string name="always_default_frame">Usar siempre marco por defecto</string>
     <string name="add_neutral_rgb">Añadir neutra</string>
     <string name="select_rgb">Selecciona 3/4 imágenes</string>
+
+    <string name="menu_extra_gallery">Galería extra</string>
+    <string name="action_toggle_info">Info On/Off</string>
+    <string name="settings_show_extra_gallery">Mostrar Galería Extra</string>
+    <string name="sw_bounce">Rebotar</string>
+    <string name="sw_sort_palettes">Ordenar paletas por uso</string>
+    <string name="menu_fusion">Fusión</string>
+    <string name="extra_paper">Papel</string>
 
 </resources>

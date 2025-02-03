@@ -12,12 +12,16 @@ import static com.mraulio.gbcameramanager.utils.Utils.framesList;
 import static com.mraulio.gbcameramanager.utils.Utils.gbcImagesList;
 import static com.mraulio.gbcameramanager.utils.Utils.generateHashFromBytes;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
+import static com.mraulio.gbcameramanager.utils.Utils.toast;
 import static com.mraulio.gbcameramanager.utils.Utils.transparentBitmap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -46,6 +50,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,7 +64,7 @@ public class FrameImportDialogClass {
     String oldFrameGroupId;
     String oldFrameId;
     boolean putSpToCero;
-
+    int imageMargin = 0;
 
     public FrameImportDialogClass(Bitmap frameBitmap, Context context, GbcFrame gbcFrame, boolean editingFrame) {
         this.frameBitmap = frameBitmap;
@@ -68,20 +73,40 @@ public class FrameImportDialogClass {
         this.editingFrame = editingFrame;
     }
 
+    private void initializeMargin(){
+        if (frameBitmap.getHeight() == 144) {
+            imageMargin = 16;
+        } else if (frameBitmap.getHeight() == 224){
+            imageMargin = 40;
+        } else {
+            int margins = (frameBitmap.getHeight() - 112) / 2;
+            if (margins % 8 == 0) {
+                imageMargin = margins;
+            } else {
+                imageMargin = margins - 4;
+            }
+        }
+    }
+
     public void frameImportDialog() {
+        initializeMargin();
+
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.frame_import_dialog, null);
         ImageView ivFrame = view.findViewById(R.id.ivFrame);
         if (gbcFrame == null) {
             gbcFrame = new GbcFrame();
+            gbcFrame.setImageMargin(imageMargin);
             gbcFrame.setFrameBitmap(frameBitmap);
 
-        } else{
+        } else {
             oldFrameGroupId = new String(gbcFrame.getFrameId().replaceAll("^(\\D+).*", "$1"));
             oldFrameId = new String(gbcFrame.getFrameId());
         }
         Button btnDecrement = view.findViewById(R.id.decrementButton);
         Button btnIncrement = view.findViewById(R.id.incrementButton);
+        Button btnDownMargin = view.findViewById(R.id.btn_down_margin);
+        Button btnUpMargin = view.findViewById(R.id.btn_up_margin);
         EditText etFrameIndex = view.findViewById(R.id.numberEditText);
         AutoCompleteTextView autoCompNewId = view.findViewById(R.id.etFrameId);
         EditText etFrameName = view.findViewById(R.id.etFrameName);
@@ -130,8 +155,9 @@ public class FrameImportDialogClass {
             validId[0] = true;
 
             frameId[0] = gbcFrame.getFrameId();
-            spFrameGroupDialog.setSelection(frameGroupIds.indexOf(frameGroupId[0])+1);//+1 because it has the New Frame group
+            spFrameGroupDialog.setSelection(frameGroupIds.indexOf(frameGroupId[0]) + 1);//+1 because it has the New Frame group
         }
+
 
         btnDecrement.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,10 +240,41 @@ public class FrameImportDialogClass {
                 }
             }
         });
-
         Bitmap bitmapCopy = frameBitmap.copy(frameBitmap.getConfig(), true);
-        Bitmap bitmap = transparentBitmap(bitmapCopy, gbcFrame);
-        gbcFrame.setFrameBitmap(bitmap);
+        final Bitmap[] bitmap = {transparentBitmap(bitmapCopy, gbcFrame)};
+        ;
+        btnDownMargin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (frameBitmap.getHeight() - 112 - imageMargin > 0) {
+                    imageMargin += 8;
+                    gbcFrame.setTransparentPixelPositions(new HashSet<>());
+                    gbcFrame.setImageMargin(imageMargin);
+                    Bitmap bitmapCopy = frameBitmap.copy(frameBitmap.getConfig(), true);
+                    gbcFrame.setFrameBitmap(bitmapCopy);
+                    bitmap[0] = transparentBitmap(bitmapCopy, gbcFrame);
+                    gbcFrame.setFrameBitmap(bitmap[0]);
+                    ivFrame.setImageBitmap(drawPlaceholderFrame(frameBitmap,imageMargin));
+                }
+            }
+        });
+
+        btnUpMargin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (imageMargin >= 8) {
+                    imageMargin -= 8;
+                    gbcFrame.setTransparentPixelPositions(new HashSet<>());
+                    gbcFrame.setImageMargin(imageMargin);
+                    Bitmap bitmapCopy = frameBitmap.copy(frameBitmap.getConfig(), true);
+                    gbcFrame.setFrameBitmap(bitmapCopy);
+                    bitmap[0] = transparentBitmap(bitmapCopy, gbcFrame);
+                    gbcFrame.setFrameBitmap(bitmap[0]);
+                    ivFrame.setImageBitmap(drawPlaceholderFrame(frameBitmap,imageMargin));
+                }
+            }
+        });
+
 
         autoCompNewId.dismissDropDown();//Disabled at the beginning
 
@@ -283,7 +340,7 @@ public class FrameImportDialogClass {
                             String groupName = frameGroupsNames.get(autoCompNewId.getText().toString().trim());
                             etFrameGroupName.setText(groupName);
                             etFrameGroupName.setEnabled(false);//An existing frame group
-                            spFrameGroupDialog.setSelection(frameGroupIds.indexOf(frameGroupId[0])+1);
+                            spFrameGroupDialog.setSelection(frameGroupIds.indexOf(frameGroupId[0]) + 1);
 
                         } else {
                             etFrameGroupName.setText(newFrameGroupPlaceholder[0]);
@@ -333,7 +390,7 @@ public class FrameImportDialogClass {
                     autoCompNewId.setEnabled(true);
                     etFrameGroupName.setText(newFrameGroupPlaceholder[0]);
                 } else {
-                    autoCompNewId.setText(frameGroupsIdsList.get(position-1));
+                    autoCompNewId.setText(frameGroupsIdsList.get(position - 1));
                     autoCompNewId.setSelection(autoCompNewId.getText().length());
                 }
             }
@@ -343,19 +400,8 @@ public class FrameImportDialogClass {
             }
         });
 
-        try {
-            byte[] gbFrameBytes = Utils.encodeImage(bitmap, "bw");
-            gbcFrame.setFrameBytes(gbFrameBytes);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] byteArray = stream.toByteArray();
-            String gbFrameHash = generateHashFromBytes(byteArray);//Getting the hash from the transparent bitmap, and not the encoded bitmap because it can be all white when encoding, causing false duplicated hashes
-            gbcFrame.setFrameHash(gbFrameHash);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        ivFrame.setImageBitmap(bitmap);
+        ivFrame.setImageBitmap(drawPlaceholderFrame(frameBitmap,imageMargin));
 
         etFrameName.requestFocus();
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -384,11 +430,23 @@ public class FrameImportDialogClass {
         if (editingFrame) {
             btnSaveFrame.setText(R.string.btn_edit_frame);
         }
+
         btnSaveFrame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!editingFrame) {
-                    if (frameBitmap.getHeight() == 224) {
+                    try {
+                        byte[] gbFrameBytes = Utils.encodeImage(bitmap[0], "bw");
+                        gbcFrame.setFrameBytes(gbFrameBytes);
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap[0].compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] byteArray = stream.toByteArray();
+                        String gbFrameHash = generateHashFromBytes(byteArray);//Getting the hash from the transparent bitmap, and not the encoded bitmap because it can be all white when encoding, causing false duplicated hashes
+                        gbcFrame.setFrameHash(gbFrameHash);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    if (frameBitmap.getHeight() != 144) {
                         gbcFrame.setWildFrame(true);
                     }
                     try {
@@ -396,7 +454,6 @@ public class FrameImportDialogClass {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                     List<GbcFrame> newFrameImages = new ArrayList<>();
                     //Add here the dialog for the frame name
                     if (frameGroupId[0].equals("")) {
@@ -533,4 +590,26 @@ public class FrameImportDialogClass {
         }
         return true;
     }
+
+    public Bitmap drawPlaceholderFrame(Bitmap originalBitmap, int y) {
+        Bitmap resultBitmap = Bitmap.createBitmap(
+                originalBitmap.getWidth(),
+                originalBitmap.getHeight(),
+                originalBitmap.getConfig());
+
+        Canvas canvas = new Canvas(resultBitmap);
+
+        Paint greenPaint = new Paint();
+        greenPaint.setColor(Color.GREEN);
+        greenPaint.setAlpha(64);
+
+        canvas.drawBitmap(originalBitmap, 0, 0, null);
+
+        int width = 128;
+        int height = 112;
+        canvas.drawRect(16, y, 16 + width, y + height, greenPaint);
+
+        return resultBitmap;
+    }
+
 }

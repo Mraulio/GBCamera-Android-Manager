@@ -15,7 +15,7 @@
             <com.mraulio.gbcameramanager.utils.TouchImageView
                 android:id="@+id/rgb_image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="300dp"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp" />
@@ -57,9 +57,153 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ly_sbs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:layout_below="@id/ly_sw"
+                android:orientation="vertical"
+                android:paddingHorizontal="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:orientation="horizontal">
+
+                    <SeekBar
+                        android:id="@+id/sb_redFactor"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="150"
+                        android:min="0"
+                        android:progress="100"
+                        android:progressTint="#FF0000"
+                        android:thumbTint="#FF0000"></SeekBar>
+
+                    <TextView
+                        android:id="@+id/tv_redFactor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="100%"></TextView>
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:orientation="horizontal">
+
+                    <SeekBar
+                        android:id="@+id/sb_greenFactor"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="150"
+                        android:min="0"
+                        android:progress="100"
+                        android:progressTint="#00FF00"
+                        android:thumbTint="#00FF00"></SeekBar>
+
+                    <TextView
+                        android:id="@+id/tv_greenFactor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="100%"></TextView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:orientation="horizontal">
+
+                    <SeekBar
+                        android:id="@+id/sb_blueFactor"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="150"
+                        android:min="0"
+                        android:progress="100"
+                        android:progressTint="#0000FF"
+                        android:thumbTint="#0000FF"></SeekBar>
+
+                    <TextView
+                        android:id="@+id/tv_blueFactor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="100%"></TextView>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ly_fourThumbs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:orientation="horizontal">
+
+                    <com.mraulio.gbcameramanager.utils.FourThumbSeekBar
+                        android:id="@+id/ft_red"
+                        android:layout_width="0dp"
+                        android:layout_height="20dp"
+                        android:layout_weight="1"
+                        app:lineColor="#FF0000"
+                        app:thumbColor="#FF0000"
+                        app:lineThickness="4dp"
+                        android:paddingHorizontal="20dp"></com.mraulio.gbcameramanager.utils.FourThumbSeekBar>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:orientation="horizontal">
+
+                    <com.mraulio.gbcameramanager.utils.FourThumbSeekBar
+                        android:id="@+id/ft_green"
+                        android:layout_width="0dp"
+                        android:layout_height="20dp"
+                        android:layout_weight="1"
+                        app:lineColor="#00FF00"
+                        app:thumbColor="#00FF00"
+                        app:lineThickness="4dp"
+                        android:paddingHorizontal="20dp"></com.mraulio.gbcameramanager.utils.FourThumbSeekBar>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:orientation="horizontal">
+
+                    <com.mraulio.gbcameramanager.utils.FourThumbSeekBar
+                        android:id="@+id/ft_blue"
+                        android:layout_width="0dp"
+                        android:layout_height="20dp"
+                        android:layout_weight="1"
+                        app:lineThickness="4dp"
+                        android:paddingHorizontal="20dp"></com.mraulio.gbcameramanager.utils.FourThumbSeekBar>
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ly_sbs"
+                android:layout_marginTop="10dp"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal">
 

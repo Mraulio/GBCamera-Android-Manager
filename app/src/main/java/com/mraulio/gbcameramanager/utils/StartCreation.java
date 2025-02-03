@@ -98,7 +98,7 @@ public class StartCreation {
         }
         HashSet<int[]> transparencyHS = transparencyHashSet(bitmap);
         if (transparencyHS.size() == 0) {
-            transparencyHS = generateDefaultTransparentPixelPositions(bitmap);
+            transparencyHS = generateDefaultTransparentPixelPositions(bitmap, 16);
         }
         myframe.setTransparentPixelPositions(transparencyHS);
         Utils.hashFrames.put(myframe.getFrameId(), myframe);

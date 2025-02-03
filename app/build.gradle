@@ -4,14 +4,14 @@ plugins {
 
 android {
     namespace 'com.mraulio.gbcameramanager'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.mraulio.gbcameramanager"
         minSdk 23
         targetSdk 33
         versionCode 6
-        versionName "0.54"
+        versionName "0.60"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {

@@ -34,7 +34,7 @@ public interface ImageDao {
     void insert(GbcImage gbcimage);
 
     @Transaction
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertManyImages(List<GbcImage> gbcImages);
     @Delete
     void delete(GbcImage gbcimage);

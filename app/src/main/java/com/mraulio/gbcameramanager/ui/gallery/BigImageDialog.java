@@ -188,7 +188,7 @@ public class BigImageDialog {
         SimpleDateFormat sdf = new SimpleDateFormat(loc + " HH:mm:ss");
 
         LinkedHashMap lhm = filteredGbcImages.get(globalImageIndex).getImageMetadata();
-        stringBuilder.append(sdf.format(filteredGbcImages.get(globalImageIndex).getCreationDate()).toString() + "\n");
+        stringBuilder.append(sdf.format(filteredGbcImages.get(globalImageIndex).getCreationDate()) + "\n");
 
         if (lhm != null) { //Last seen images don't have metadata
             for (Object key : lhm.keySet()) {

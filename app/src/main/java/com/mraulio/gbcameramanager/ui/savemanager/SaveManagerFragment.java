@@ -284,7 +284,7 @@ public class SaveManagerFragment extends Fragment {
 
             loadingDialog.dismissDialog();
             if (lastSeenImage != null) {
-                showImages(gridviewSaves, gridAdapter);
+                showImages(gridviewSaves);
                 btnAdd.setEnabled(true);
 
             } else {
@@ -366,7 +366,7 @@ public class SaveManagerFragment extends Fragment {
     }
 
     //Refactor
-    private void showImages(GridView gridView, CustomGridViewAdapterImage gridAdapterSI) {
+    private void showImages(GridView gridView) {
 
         finalListImages = new ArrayList<>(listActiveImages);
         finalListBitmaps = new ArrayList<>(listActiveBitmaps);
@@ -378,7 +378,6 @@ public class SaveManagerFragment extends Fragment {
         bitmapsAdapterList.addAll(listDeletedBitmapsRedStroke);
 
         gridView.setAdapter((new CustomGridViewAdapterImage(getContext(), R.layout.row_items, finalListImages, bitmapsAdapterList, true, true, false, null)));
-        gridAdapterSI = (CustomGridViewAdapterImage) gridviewSaves.getAdapter();
     }
 
     private void createDeleteDialog() {
@@ -389,7 +388,7 @@ public class SaveManagerFragment extends Fragment {
         grid.setNumColumns(4);
         grid.setPadding(30, 10, 30, 10);
         if (lastSeenImage != null) {
-            showImages(grid, gridAdapter);
+            showImages(grid);
         } else {
             grid.setAdapter(null);
         }

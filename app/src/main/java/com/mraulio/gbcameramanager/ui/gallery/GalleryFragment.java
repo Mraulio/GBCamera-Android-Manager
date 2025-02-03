@@ -3,6 +3,8 @@ package com.mraulio.gbcameramanager.ui.gallery;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.checkFilterPass;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.fusionBitmap;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryUtils.paletteChanger;
 import static com.mraulio.gbcameramanager.utils.StaticValues.dateLocale;
 import static com.mraulio.gbcameramanager.utils.StaticValues.exportSize;
 import static com.mraulio.gbcameramanager.utils.StaticValues.exportSquare;
@@ -30,6 +32,7 @@ import static com.mraulio.gbcameramanager.utils.Utils.imageBitmapCache;
 import static com.mraulio.gbcameramanager.utils.Utils.retrieveTags;
 import static com.mraulio.gbcameramanager.utils.Utils.rotateBitmap;
 import static com.mraulio.gbcameramanager.utils.Utils.showNotification;
+import static com.mraulio.gbcameramanager.utils.Utils.sortPalettes;
 import static com.mraulio.gbcameramanager.utils.Utils.tagsHash;
 import static com.mraulio.gbcameramanager.utils.Utils.toast;
 
@@ -60,6 +63,7 @@ import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -96,6 +100,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -121,7 +127,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     static SharedPreferences.Editor editor = StaticValues.sharedPreferences.edit();
     static HashSet<String> selectedFilterTags = new HashSet<>();
     static HashSet<String> hiddenFilterTags = new HashSet<>();
-    static List<GbcImage> filteredGbcImages = new ArrayList<>();
+    public static List<GbcImage> filteredGbcImages = new ArrayList<>();
     static boolean updatingFromChangeImage = false;
     static List<Integer> selectedImages = new ArrayList<>();
     static StringBuilder sbTitle = new StringBuilder();
@@ -134,6 +140,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
     public static TextView tvResponseBytes;
     static boolean crop = false;
     boolean showPalettes = true;
+    public static boolean showInfo = false;
     static TextView tv_page;
     boolean keepFrame = false;
     public static CustomGridViewAdapterImage customGridViewAdapterImage;
@@ -154,7 +161,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                              ViewGroup container, Bundle savedInstanceState) {
         galleryActivity = getActivity();
 
-
+        sortPalettes();
         StaticValues.currentFragment = StaticValues.CURRENT_FRAGMENT.GALLERY;
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
         MainActivity.pressBack = true;
@@ -572,7 +579,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                     bitmap = makeSquareImage(bitmap);
                                 }
                                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) +" "+ getString(R.string.collage), Toast.LENGTH_LONG);
+                                Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + " " + getString(R.string.collage), Toast.LENGTH_LONG);
                                 toast.show();
                                 mediaScanner(file, getContext());
                                 showNotification(getContext(), file);
@@ -610,7 +617,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 applyBorderToIV(ivPaddingColor, lastPicked[0]);
                                 dialog.show();
                             } catch (IllegalArgumentException e) {
-                                Utils.toast(getContext(), getString(R.string.hdr_exception));
+                                Utils.toast(getContext(), getString(R.string.sizes_exception));
                                 e.printStackTrace();
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -673,7 +680,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             for (int i : selectedImages) {
                                 deleteBitmapList.add(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()));
                             }
-                            deleteImageGridView.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, deleteGbcImage, deleteBitmapList, false, false, false, null));
+                            deleteImageGridView.setAdapter(new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, deleteGbcImage, deleteBitmapList, false, showInfo, false, null));
                             builder.setView(deleteImageGridView);
                             deleteDialog = builder.create();
                             deleteDialog.show();
@@ -725,30 +732,31 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                             DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
 
-                            file = new File(Utils.IMAGES_FOLDER, "HDR" + dtf.format(now) + ".png");
+                            file = new File(Utils.IMAGES_FOLDER, "HDR_" + dtf.format(now) + ".png");
                         } else {
                             SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
-                            file = new File(Utils.IMAGES_FOLDER, "HDR" + sdf.format(nowDate) + ".png");
+                            file = new File(Utils.IMAGES_FOLDER, "HDR_" + sdf.format(nowDate) + ".png");
 
                         }
                         //Regular image
-                        if (averaged[0].getHeight() == 144 * 6 && averaged[0].getWidth() == 160 * 6 && crop) {
-                            averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 128 * 6, 112 * 6);
+                        if (averaged[0].getHeight() == 144 && averaged[0].getWidth() == 160 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16, 16, 128, 112);
                         }
                         //Rotated image
-                        else if (averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 144 * 6 && crop) {
-                            averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 16 * 6, 112 * 6, 128 * 6);
+                        else if (averaged[0].getHeight() == 160 && averaged[0].getWidth() == 144 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16, 16, 112, 128);
                         }
                         //Regular Wild frame
-                        else if (averaged[0].getHeight() == 224 * 6 && averaged[0].getWidth() == 160 * 6 && crop) {
-                            averaged[0] = Bitmap.createBitmap(averaged[0], 16 * 6, 40 * 6, 128 * 6, 112 * 6);
+                        else if (averaged[0].getHeight() == 224 && averaged[0].getWidth() == 160 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 16, 40, 128, 112);
                         }
                         //Rotated Wild frame
-                        else if (averaged[0].getHeight() == 160 * 6 && averaged[0].getWidth() == 224 * 6 && crop) {
-                            averaged[0] = Bitmap.createBitmap(averaged[0], 40 * 6, 16 * 6, 112 * 6, 128 * 6);
+                        else if (averaged[0].getHeight() == 160 && averaged[0].getWidth() == 224 && crop) {
+                            averaged[0] = Bitmap.createBitmap(averaged[0], 40, 16, 112, 128);
                         }
                         try (FileOutputStream out = new FileOutputStream(file)) {
-                            averaged[0].compress(Bitmap.CompressFormat.PNG, 100, out);
+                            Bitmap savedAveraged = Bitmap.createScaledBitmap(averaged[0], averaged[0].getWidth() * exportSize, averaged[0].getHeight() * exportSize, false);
+                            savedAveraged.compress(Bitmap.CompressFormat.PNG, 100, out);
                             Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + " HDR!", Toast.LENGTH_LONG);
                             toast.show();
                             mediaScanner(file, getContext());
@@ -775,13 +783,13 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                             try {
                                 Bitmap bitmap = averageImages(listBitmaps);
-                                averaged[0] = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false);
-                                imageView.setImageBitmap(averaged[0]);
+                                averaged[0] = bitmap;
+                                imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 6, bitmap.getHeight() * 6, false));
 
                                 AlertDialog dialog = builder.create();
                                 dialog.show();
                             } catch (IllegalArgumentException e) {
-                                Utils.toast(getContext(), getString(R.string.hdr_exception));
+                                Utils.toast(getContext(), getString(R.string.sizes_exception));
                             }
                             loadDialog.dismissDialog();
                         }
@@ -808,6 +816,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     TextView tv_animation = dialogView.findViewById(R.id.tv_animation);
                     Button reload_anim = dialogView.findViewById(R.id.btnReload);
                     Switch swLoop = dialogView.findViewById(R.id.swLoop);
+                    Switch swBounce = dialogView.findViewById(R.id.swBounce);
                     Switch swSort = dialogView.findViewById(R.id.swSort);
                     Switch swCrop = dialogView.findViewById(R.id.swCrop);
 
@@ -889,7 +898,16 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                 encoder.start(bos);
                                 List<Bitmap> bitmapList = new ArrayList<>();
 
-                                listInUse[0] = swSort.isChecked() ? sortedList : selectedImages;
+                                listInUse[0] = swSort.isChecked() ? new ArrayList<>(sortedList) : new ArrayList<>(selectedImages);
+
+                                //For the bounce effect
+                                if (swBounce.isChecked()) {
+                                    List<Integer> reverseFrames = new ArrayList<>();
+                                    for (int i = listInUse[0].size() - 2; i > 0; i--) {
+                                        reverseFrames.add(listInUse[0].get(i));
+                                    }
+                                    listInUse[0].addAll(reverseFrames);
+                                }
 
                                 for (int i : listInUse[0]) {
                                     Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(), true);
@@ -939,7 +957,14 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
                             bitmapList.add(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * exportSize, bitmap.getHeight() * exportSize, false));
                         }
-
+                        //For the bounce effect
+                        if (swBounce.isChecked()) {
+                            List<Bitmap> reverseFrames = new ArrayList<>(bitmapList);
+                            for (int i = bitmapList.size() - 2; i > 0; i--) {
+                                reverseFrames.add(bitmapList.get(i).copy(bitmapList.get(i).getConfig(), false));
+                            }
+                            bitmapList.addAll(reverseFrames);
+                        }
                         for (Bitmap bitmap : bitmapList) {
                             encoder.addFrame(bitmap);
                         }
@@ -1080,11 +1105,208 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                             }
                         }
                         if (sameSize) {
-                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList);
-                            rgbUtils.showRgbDialog();
+                            List<GbcImage> gbcImages = new ArrayList<>();
+                            for (int i : selectedImages) {
+                                gbcImages.add(filteredGbcImages.get(i));
+                            }
+                            RgbUtils rgbUtils = new RgbUtils(getContext(), bitmapList, false,gbcImages);
+                            rgbUtils.showRgbDialog(null);
                         } else {
-                            Utils.toast(getContext(), getString(R.string.hdr_exception));
+                            Utils.toast(getContext(), getString(R.string.sizes_exception));
                         }
+                    }
+                } else
+                    Utils.toast(getContext(), getString(R.string.no_selected));
+                return true;
+            case R.id.action_toggle_info:
+                if (showInfo) {
+                    showInfo = false;
+                } else {
+                    showInfo = true;
+                }
+                updateGridView();
+                getActivity().invalidateOptionsMenu();
+
+                return true;
+            case R.id.action_fusion:
+                if (selectionMode[0]) {
+                    if (selectedImages.size() != 2) {
+                        Utils.toast(getContext(), "Select 2 images");
+                    } else {
+                        List<Integer> indexesToLoad = new ArrayList<>();
+                        for (int i : selectedImages) {
+                            String hashCode = filteredGbcImages.get(i).getHashCode();
+                            if (imageBitmapCache.get(hashCode) == null) {
+                                indexesToLoad.add(i);
+                            }
+                        }
+
+                        LoadBitmapCacheAsyncTask asyncTask = new LoadBitmapCacheAsyncTask(indexesToLoad, loadDialog, result -> {
+                            List<Bitmap> bitmapList = new ArrayList<>();
+
+                            for (int i : selectedImages) {
+                                Bitmap bitmap = imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).copy(imageBitmapCache.get(filteredGbcImages.get(i).getHashCode()).getConfig(), true);
+                                bitmap = rotateBitmap(bitmap, (filteredGbcImages.get(i)));
+                                bitmapList.add(bitmap);
+                            }
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            builder.setTitle(getContext().getString(R.string.menu_fusion));
+                            LayoutInflater inflater = LayoutInflater.from(getContext());
+                            View dialogView = inflater.inflate(R.layout.dialog_fun, null);
+
+                            builder.setView(dialogView);
+
+                            Button btnSave = dialogView.findViewById(R.id.btn_save_fun);
+                            Button btnCancel = dialogView.findViewById(R.id.btn_cancel_fun);
+                            RadioButton rb1x1 = dialogView.findViewById(R.id.rb_1x1);
+                            RadioButton rbHoriz = dialogView.findViewById(R.id.rb_horiz);
+                            RadioButton rbVert = dialogView.findViewById(R.id.rb_vert);
+                            Switch swAddGallery = dialogView.findViewById(R.id.sw_add_gallery);
+
+                            final int[] mode = {0};
+                            final Bitmap[] mergedBitmap = new Bitmap[1];
+
+                            try {
+                                mergedBitmap[0] = fusionBitmap(bitmapList, 0);
+
+                                ImageView ivFun = dialogView.findViewById(R.id.iv_fun);
+
+                                rb1x1.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        mode[0] = 0;
+                                        mergedBitmap[0] = fusionBitmap(bitmapList, mode[0]);
+                                        ivFun.setImageBitmap(Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * 4, mergedBitmap[0].getHeight() * 4, false));
+
+                                    }
+                                });
+                                rbHoriz.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        mode[0] = 1;
+                                        mergedBitmap[0] = fusionBitmap(bitmapList, mode[0]);
+                                        ivFun.setImageBitmap(Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * 4, mergedBitmap[0].getHeight() * 4, false));
+
+                                    }
+                                });
+                                rbVert.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        mode[0] = 2;
+                                        mergedBitmap[0] = fusionBitmap(bitmapList, mode[0]);
+                                        ivFun.setImageBitmap(Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * 4, mergedBitmap[0].getHeight() * 4, false));
+
+                                    }
+                                });
+                                AlertDialog dialog = builder.create();
+
+                                ivFun.setImageBitmap(Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * 4, mergedBitmap[0].getHeight() * 4, false));
+
+                                btnCancel.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                                GbcImage gbcImage = new GbcImage();
+                                final Bitmap[] fusedImage = {null};
+
+                                btnSave.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+
+                                        if (swAddGallery.isChecked()) {
+                                            // Need to change all images to B&W and redo the collage first for the encoding to work
+                                            List<Bitmap> bwBitmapsFun = new ArrayList<>();
+                                            for (int i : selectedImages) {
+                                                GbcImage gbcImage = filteredGbcImages.get(i);
+                                                //Need to change the palette to bw so the encodeImage method works
+                                                Bitmap image;
+                                                try {
+                                                    image = frameChange(gbcImage, gbcImage.getFrameId(), gbcImage.isInvertPalette(), gbcImage.isInvertFramePalette(), gbcImage.isLockFrame(), false);
+                                                } catch (IOException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                                image = rotateBitmap(image, gbcImage);
+                                                bwBitmapsFun.add(image);
+                                            }
+
+                                            fusedImage[0] = fusionBitmap(bwBitmapsFun, mode[0]);
+                                            byte[] imageBytes;
+
+                                            try {
+                                                if (fusedImage[0].getWidth() != 160 && fusedImage[0].getHeight() == 160) {
+                                                    Matrix matrix = new Matrix();
+                                                    matrix.postRotate(270);
+                                                    fusedImage[0] = Bitmap.createBitmap(fusedImage[0], 0, 0, fusedImage[0].getWidth(), fusedImage[0].getHeight(), matrix, false);
+                                                    gbcImage.setRotation(1);
+                                                }
+                                                imageBytes = Utils.encodeImage(fusedImage[0], "bw");
+                                                gbcImage.setImageBytes(imageBytes);
+                                                fusedImage[0] = paletteChanger(gbcImage.getPaletteId(), imageBytes, gbcImage.isInvertPalette());
+                                                byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
+                                                String hashHex = Utils.bytesToHex(hash);
+                                                gbcImage.setHashCode(hashHex);
+                                                gbcImage.setName("Fused");
+
+                                            } catch (IOException e) {
+                                                throw new RuntimeException(e);
+                                            } catch (NoSuchAlgorithmException e) {
+                                                throw new RuntimeException(e);
+                                            }
+
+                                            HashSet tags = new HashSet();
+                                            tags.add("Fusion");
+                                            gbcImage.setTags(tags);
+                                            List<GbcImage> gbcImages = new ArrayList<>();
+                                            List<Bitmap> bitmaps = new ArrayList<>();
+                                            bitmaps.add(fusedImage[0]);
+                                            gbcImages.add(gbcImage);
+                                            new SaveImageAsyncTask(gbcImages, bitmaps, getContext(), null, 0, customGridViewAdapterImage, loadDialog).execute();
+                                        }
+
+                                        LocalDateTime now = null;
+                                        Date nowDate = new Date();
+                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                            now = LocalDateTime.now();
+                                        }
+                                        File file = null;
+                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
+
+                                            file = new File(Utils.IMAGES_FOLDER, "Fusion_" + dtf.format(now) + ".png");
+                                        } else {
+                                            SimpleDateFormat sdf = new SimpleDateFormat(dateLocale + "_HH-mm-ss", Locale.getDefault());
+                                            file = new File(Utils.IMAGES_FOLDER, "Fusion_" + sdf.format(nowDate) + ".png");
+                                        }
+                                        try (FileOutputStream out = new FileOutputStream(file)) {
+                                            Bitmap bitmap = Bitmap.createScaledBitmap(mergedBitmap[0], mergedBitmap[0].getWidth() * exportSize, mergedBitmap[0].getHeight() * exportSize, false);
+                                            //Make square if checked in settings
+                                            if (exportSquare) {
+                                                bitmap = makeSquareImage(bitmap);
+                                            }
+                                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                                            Toast toast = Toast.makeText(getContext(), getString(R.string.toast_saved) + " Fusion", Toast.LENGTH_LONG);
+                                            toast.show();
+                                            mediaScanner(file, getContext());
+                                            showNotification(getContext(), file);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+
+
+                                dialog.show();
+                            } catch (IllegalArgumentException iae) {
+                                Utils.toast(getContext(), getString(R.string.sizes_exception));
+                                iae.printStackTrace();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        asyncTask.execute();
                     }
                 } else
                     Utils.toast(getContext(), getString(R.string.no_selected));
@@ -1215,7 +1437,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                     for (GbcImage gbcImage : filteredGbcImages.subList(startIndex, endIndex)) {
                         bitmapList.add(imageBitmapCache.get(gbcImage.getHashCode()));
                     }
-                    customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, filteredGbcImages.subList(startIndex, endIndex), bitmapList, false, false, true, selectedImages);
+                    customGridViewAdapterImage = new CustomGridViewAdapterImage(gridView.getContext(), R.layout.row_items, filteredGbcImages.subList(startIndex, endIndex), bitmapList, false, showInfo, true, selectedImages);
 
                     if (updatingFromChangeImage) {
                         MainImageDialog.fastImageChange();

@@ -1,7 +1,11 @@
 package com.mraulio.gbcameramanager;
 
+import static com.mraulio.gbcameramanager.ui.extraGallery.ExtraGalleryFragment.egf;
+import static com.mraulio.gbcameramanager.ui.extraGallery.ExtraGalleryFragment.selectionModeExtra;
+import static com.mraulio.gbcameramanager.ui.extraGallery.ExtraGalleryFragment.showInfoExtra;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.hideSelectionOptions;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.selectionMode;
+import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.showInfo;
 import static com.mraulio.gbcameramanager.utils.Utils.createNotificationChannel;
 import static com.mraulio.gbcameramanager.utils.Utils.frameGroupSorting;
 import static com.mraulio.gbcameramanager.utils.Utils.hashFrames;
@@ -24,8 +28,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+
 import static android.os.Build.VERSION.SDK_INT;
 
 import com.google.android.material.navigation.NavigationView;
@@ -34,7 +40,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -71,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+    private static NavigationView navigationView;
     Uri mUri;
     NavController mNavController;
     boolean mAnyImage = true;
@@ -101,11 +107,13 @@ public class MainActivity extends AppCompatActivity {
         StaticValues.customColorPaper = StaticValues.sharedPreferences.getInt("custom_paper_color", Color.WHITE);
         StaticValues.exportSquare = StaticValues.sharedPreferences.getBoolean("export_square", false);
         StaticValues.sortMode = StaticValues.sharedPreferences.getString("sort_by_date", StaticValues.SORT_MODE.CREATION_DATE.name());
-        StaticValues.defaultPaletteId = StaticValues.sharedPreferences.getString("default_palette_id","bw");
-        StaticValues.defaultFrameId = StaticValues.sharedPreferences.getString("default_frame_id","gbcam01");
+        StaticValues.defaultPaletteId = StaticValues.sharedPreferences.getString("default_palette_id", "bw");
+        StaticValues.defaultFrameId = StaticValues.sharedPreferences.getString("default_frame_id", "gbcam01");
         StaticValues.dateLocale = StaticValues.sharedPreferences.getString("date_locale", "yyyy-MM-dd");
         StaticValues.exportMetadata = StaticValues.sharedPreferences.getBoolean("export_metadata", false);
         StaticValues.alwaysDefaultFrame = StaticValues.sharedPreferences.getBoolean("always_default_frame", false);
+        StaticValues.showExtraGallery = StaticValues.sharedPreferences.getBoolean("show_extra_gallery", false);
+        StaticValues.sortPalettesByUsage = StaticValues.sharedPreferences.getBoolean("sort_palettes_by_usage", false);
 
         StaticValues.filterMonth = StaticValues.sharedPreferences.getBoolean("date_filter_month", false);
         StaticValues.filterYear = StaticValues.sharedPreferences.getBoolean("date_filter_year", false);
@@ -162,17 +170,17 @@ public class MainActivity extends AppCompatActivity {
         resources.updateConfiguration(configuration, resources.getDisplayMetrics());
 
         StaticValues.db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "Database").build();
+                        AppDatabase.class, "Database")
+                .build();
 
         // Obtain Intent information
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
         mUri = intent.getData();
-        if (mUri == null){
+        if (mUri == null) {
             mUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);// For the SEND action
         }
-
 
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -181,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(binding.appBarMain.toolbar);
 
         DrawerLayout drawer = binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
+        navigationView = binding.navView;
 
         View headerView = navigationView.getHeaderView(0);
         TextView tvGit = headerView.findViewById(R.id.tvGit);
@@ -254,8 +262,8 @@ public class MainActivity extends AppCompatActivity {
         createNotificationChannel(getBaseContext());
     }
 
-    private void requestPermissions(){
-        if ( SDK_INT <= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    private void requestPermissions() {
+        if (SDK_INT <= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
             // Ask for permission
@@ -272,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
                     1);
         }
     }
+
     private void openingFromIntent(NavController navController) {
 
         if (openedFromFile) {
@@ -292,9 +301,17 @@ public class MainActivity extends AppCompatActivity {
                 if (StaticValues.showEditMenuButton) {
                     menu.getItem(0).setVisible(true);
                 }
-                if (selectionMode[0]) StaticValues.fab.show();
-
-                if (StaticValues.fab != null && !StaticValues.fab.hasOnClickListeners()) {
+                if (selectionMode[0]) {
+                    StaticValues.fab.show();
+                } else {
+                    StaticValues.fab.hide();
+                }
+                if (showInfo) {
+                    menu.getItem(1).setIcon(R.drawable.ic_visibility_off);
+                } else {
+                    menu.getItem(1).setIcon(R.drawable.ic_visibility_on);
+                }
+                if (StaticValues.fab != null) {
                     Activity activity = this;
                     StaticValues.fab.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -305,6 +322,30 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
 
+            case EXTRA_GALLERY:
+                menu.clear(); // Cleans the current menu
+                getMenuInflater().inflate(R.menu.extra_menu, menu); // Inflates the menu
+
+                if (selectionModeExtra) {
+                    StaticValues.fab.show();
+                } else {
+                    StaticValues.fab.hide();
+                }
+                if (showInfoExtra) {
+                    menu.getItem(0).setIcon(R.drawable.ic_visibility_off);
+                } else {
+                    menu.getItem(0).setIcon(R.drawable.ic_visibility_on);
+                }
+                if (StaticValues.fab != null) {
+                    Activity activity = this;
+                    StaticValues.fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            egf.hideSelectionOptionsExtra(activity);
+                        }
+                    });
+                }
+                break;
             case PALETTES:
             case SETTINGS:
             case SAVE_MANAGER:
@@ -316,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
                 menu.close();
                 break;
         }
+        updateNavigationView(R.id.nav_extra_gallery, StaticValues.showExtraGallery);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -339,7 +381,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 Utils.gbcPalettesList.addAll(palettes);
                 //Sort the palettes for the palette grid, showing first the favorites
-                sortPalettes();
             } else {
                 StringBuilder stringBuilder = new StringBuilder();
                 int resourcePalettes = R.raw.palettes;
@@ -361,7 +402,6 @@ public class MainActivity extends AppCompatActivity {
                 List<GbcPalette> receivedList = (List<GbcPalette>) JsonReader.jsonCheck(fileContent);
                 Utils.gbcPalettesList.addAll(receivedList);
                 //Sort the palettes for the palette grid, showing first the favorites
-                sortPalettes();
                 for (GbcPalette gbcPalette : receivedList) {
                     Utils.hashPalettes.put(gbcPalette.getPaletteId(), gbcPalette);
                 }
@@ -386,11 +426,29 @@ public class MainActivity extends AppCompatActivity {
                     frameDao.insert(value);//Saving frames to database
                 }
             }
+            //Fix the frames imageMargin
+            for (GbcFrame gbcFrame : frames) {
+                if (gbcFrame.imageMargin == null) {
+                    int frameHeight = gbcFrame.getFrameBitmap().getHeight();
+                    Integer imageMargin;
+                    if (frameHeight == 144) {
+                        imageMargin = 16;
+                        gbcFrame.setImageMargin(imageMargin);
+                        frameDao.update(gbcFrame);
+                    } else if (frameHeight == 224) {
+                        imageMargin = 40;
+                        gbcFrame.setImageMargin(imageMargin);
+                        frameDao.update(gbcFrame);
+                    }
+                }
+            }
+
             //Now that I have palettes and frames, I can add images:
             if (imagesFromDao.size() > 0) {
                 //I need to add them to the gbcImagesList(GbcImage)
                 Utils.gbcImagesList.addAll(imagesFromDao);
                 GbcImage.numImages += Utils.gbcImagesList.size();
+                sortPalettes();
             } else mAnyImage = false;
             return null;
         }
@@ -401,7 +459,7 @@ public class MainActivity extends AppCompatActivity {
             doneLoading = true;
             openingFromIntent(mNavController);
             gf.updateFromMain(MainActivity.this);
-            if (mLoadDialog != null && mLoadDialog.isShowing()){
+            if (mLoadDialog != null && mLoadDialog.isShowing()) {
                 mLoadDialog.dismissDialog();
             }
 
@@ -425,11 +483,11 @@ public class MainActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
-
-    private void openFragment(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.nav_gallery, fragment)
-                .commit();
+    public static void updateNavigationView(int itemId, boolean visible) {
+        Menu menu = navigationView.getMenu();
+        MenuItem menuItem = menu.findItem(itemId);
+        if (menuItem != null) {
+            menuItem.setVisible(visible);
+        }
     }
-
 }

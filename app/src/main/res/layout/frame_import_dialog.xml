@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="20dp">
 
     <LinearLayout
@@ -83,7 +84,6 @@
 
         </LinearLayout>
 
-
         <EditText
             android:id="@+id/etFrameName"
             android:layout_width="match_parent"
@@ -93,13 +93,36 @@
             android:hint="@string/frame_name"
             android:singleLine="true" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_down_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                app:icon="@drawable/rotated_down_arrow"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                />
+            <Button
+                android:id="@+id/btn_up_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:icon="@drawable/rotated_up_arrow"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"                   />
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/ivFrame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:background="@color/imageview_bg"
-            android:padding="5dp"
             android:scaleType="fitCenter" />
 
         <Button

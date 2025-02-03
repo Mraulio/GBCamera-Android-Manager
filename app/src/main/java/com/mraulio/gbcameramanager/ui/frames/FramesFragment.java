@@ -466,7 +466,7 @@ public class FramesFragment extends Fragment {
             if (!isWebAppCompatible) {
                 HashSet<int[]> transparencyHashSet = Utils.transparencyHashSet(gbcFrame.getFrameBitmap());
                 if (transparencyHashSet.size() == 0) {
-                    transparencyHashSet = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap());
+                    transparencyHashSet = generateDefaultTransparentPixelPositions(gbcFrame.getFrameBitmap(), gbcFrame.getImageMargin());
                 }
                 String toStringHash = hashSetToString(transparencyHashSet);
 

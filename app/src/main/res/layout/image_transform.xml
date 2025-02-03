@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/imageview_bg"
     android:paddingHorizontal="10dp">
 
     <LinearLayout
@@ -26,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="360"
-             />
+            />
     </LinearLayout>
     <!-- Image Cropper fill the remaining available height -->
     <com.canhub.cropper.CropImageView
@@ -69,7 +68,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@id/sw_original_ratio"
+        app:layout_constraintBottom_toTopOf="@id/ly_switches"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ly_brightness">
@@ -88,15 +87,32 @@
             android:progress="100" />
     </LinearLayout>
 
-    <Switch
-        android:id="@+id/sw_original_ratio"
+    <LinearLayout
         android:layout_width="wrap_content"
+        android:id="@+id/ly_switches"
         android:layout_height="wrap_content"
-        android:text="@string/sw_original_ratio"
         app:layout_constraintBottom_toTopOf="@id/iv_transformed"
         app:layout_constraintEnd_toStartOf="@id/btn_reload_transform"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/crop_iv"></Switch>
+        app:layout_constraintTop_toBottomOf="@id/crop_iv"
+        android:orientation="vertical">
+
+        <Switch
+            android:id="@+id/sw_original_ratio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sw_original_ratio"
+            ></Switch>
+        <Switch
+            android:id="@+id/sw_dither"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dither"
+            android:checked="true"
+            ></Switch>
+
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/btn_reload_transform"
@@ -106,7 +122,7 @@
         android:text="@string/btn_realod_anim"
         app:layout_constraintBottom_toTopOf="@id/iv_transformed"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/sw_original_ratio"
+        app:layout_constraintStart_toEndOf="@id/ly_switches"
         app:layout_constraintTop_toBottomOf="@id/crop_iv"></Button>
 
 

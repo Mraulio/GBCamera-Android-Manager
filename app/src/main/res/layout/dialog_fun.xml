@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.mraulio.gbcameramanager.utils.TouchImageView
+        android:id="@+id/iv_fun"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp">
+
+    </com.mraulio.gbcameramanager.utils.TouchImageView>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rb_1x1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="1x1"></RadioButton>
+
+        <RadioButton
+            android:id="@+id/rb_horiz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Horiz"></RadioButton>
+
+        <RadioButton
+            android:id="@+id/rb_vert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vert"></RadioButton>
+    </RadioGroup>
+
+    <Switch
+        android:id="@+id/sw_add_gallery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Save to gallery"></Switch>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_cancel_fun"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/cancel"></Button>
+
+
+        <Button
+            android:id="@+id/btn_save_fun"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/save_color"
+            android:text="@string/btn_save"></Button>
+
+    </LinearLayout>
+
+</LinearLayout>

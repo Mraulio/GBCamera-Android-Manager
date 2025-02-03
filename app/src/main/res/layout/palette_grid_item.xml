@@ -4,8 +4,8 @@
     android:id="@+id/cardViewPalette"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="1dp"
-    android:padding="2dp"
+    android:layout_margin="2dp"
+    android:padding="1dp"
     app:cardBackgroundColor="#fff"
     app:cardCornerRadius="4dp"
     app:cardElevation="4dp">
@@ -22,7 +22,8 @@
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
             android:background="@color/white"
-            android:padding="3dp"
+            android:padding="2dp"
+            android:layout_margin="1dp"
             android:scaleType="fitXY"
             android:src="@mipmap/ic_launcher" />
 
@@ -52,10 +53,10 @@
                 android:layout_alignParentStart="true"
                 android:layout_marginEnd="8dp"
                 android:layout_toLeftOf="@id/btn_menu_palette"
-                android:autoSizeMaxTextSize="30sp"
-                android:autoSizeMinTextSize="2sp"
-                android:autoSizeTextType="uniform"
                 android:singleLine="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
                 android:textColor="@color/black" />
 
             <TextView
@@ -67,6 +68,19 @@
                 android:layout_marginHorizontal="3dp"
                 android:text="&#8942;" />
         </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_palette_times_used"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="8dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="2sp"
+            android:autoSizeTextType="uniform"
+            android:layout_below="@id/ly_tvs"
+            android:singleLine="true"
+            android:textColor="@color/black" />
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

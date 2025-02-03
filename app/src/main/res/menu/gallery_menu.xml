@@ -2,26 +2,31 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
-
     <item
         android:id="@+id/action_multi_edit"
         android:orderInCategory="100"
         android:icon="@drawable/ic_edit"
         android:title="@string/edit_selected_item"
         android:visible="false"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_toggle_info"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_visibility_on"
+        android:title="@string/action_toggle_info"
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_filter_tags"
         android:orderInCategory="100"
         android:icon="@drawable/ic_filter"
         android:title="@string/menu_filter"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_sort"
         android:orderInCategory="100"
         android:icon="@drawable/ic_sort"
         android:title="@string/menu_sort"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_average"
@@ -42,6 +47,11 @@
         android:id="@+id/action_collage"
         android:orderInCategory="100"
         android:title="@string/collage"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_fusion"
+        android:orderInCategory="100"
+        android:title="@string/menu_fusion"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_json"

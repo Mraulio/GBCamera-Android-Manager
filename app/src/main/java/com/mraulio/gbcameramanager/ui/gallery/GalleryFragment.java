@@ -1270,7 +1270,7 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                                     gbcImages.add(gbcImage);
                                                     new SaveImageAsyncTask(gbcImages, bitmaps, getContext(), null, 0, customGridViewAdapterImage, loadDialog).execute();
                                                 } else {
-                                                    toast(getContext(), "Image already exists");
+                                                    toast(getContext(), getContext().getString(R.string.image_exists));
                                                 }
 
                                             } catch (IOException e) {

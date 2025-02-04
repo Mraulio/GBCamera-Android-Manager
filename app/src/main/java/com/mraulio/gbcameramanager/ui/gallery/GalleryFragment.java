@@ -1247,23 +1247,37 @@ public class GalleryFragment extends Fragment implements SerialInputOutputManage
                                                 fusedImage[0] = paletteChanger(gbcImage.getPaletteId(), imageBytes, gbcImage.isInvertPalette());
                                                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(imageBytes);
                                                 String hashHex = Utils.bytesToHex(hash);
-                                                gbcImage.setHashCode(hashHex);
-                                                gbcImage.setName("Fused");
+
+                                                boolean alreadyIncluded = false;
+                                                for (GbcImage image : gbcImagesList) {
+                                                    if (image.getHashCode().equals(hashHex)) {
+                                                        alreadyIncluded = true;
+                                                        break;
+                                                    }
+                                                }
+
+                                                //If the image already exists I don't save it. It could be duplicated or add here a method to have different hash for same images
+                                                if (!alreadyIncluded) {
+                                                    gbcImage.setHashCode(hashHex);
+                                                    gbcImage.setName("Fused");
+
+                                                    HashSet tags = new HashSet();
+                                                    tags.add("Fusion");
+                                                    gbcImage.setTags(tags);
+                                                    List<GbcImage> gbcImages = new ArrayList<>();
+                                                    List<Bitmap> bitmaps = new ArrayList<>();
+                                                    bitmaps.add(fusedImage[0]);
+                                                    gbcImages.add(gbcImage);
+                                                    new SaveImageAsyncTask(gbcImages, bitmaps, getContext(), null, 0, customGridViewAdapterImage, loadDialog).execute();
+                                                } else {
+                                                    toast(getContext(), "Image already exists");
+                                                }
 
                                             } catch (IOException e) {
                                                 throw new RuntimeException(e);
                                             } catch (NoSuchAlgorithmException e) {
                                                 throw new RuntimeException(e);
                                             }
-
-                                            HashSet tags = new HashSet();
-                                            tags.add("Fusion");
-                                            gbcImage.setTags(tags);
-                                            List<GbcImage> gbcImages = new ArrayList<>();
-                                            List<Bitmap> bitmaps = new ArrayList<>();
-                                            bitmaps.add(fusedImage[0]);
-                                            gbcImages.add(gbcImage);
-                                            new SaveImageAsyncTask(gbcImages, bitmaps, getContext(), null, 0, customGridViewAdapterImage, loadDialog).execute();
                                         }
 
                                         LocalDateTime now = null;

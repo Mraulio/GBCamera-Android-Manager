@@ -587,9 +587,7 @@ public class GalleryUtils {
         Switch swMonth = dialogView.findViewById(R.id.sw_date_month);
         Switch swYear = dialogView.findViewById(R.id.sw_date_year);
         Switch swFilterByDate = dialogView.findViewById(R.id.sw_fitler_by_date);
-        Switch swInclusiveTags = dialogView.findViewById(R.id.sw_inclusive_tags);
-
-        swInclusiveTags.setChecked(inclusiveTags);
+        CheckBox cbInclusiveTags = dialogView.findViewById(R.id.cb_inclusive_tags);
 
         swMonth.setChecked(filterMonth);
         swYear.setChecked(filterYear);
@@ -627,6 +625,9 @@ public class GalleryUtils {
         Drawable drawableSelected = ContextCompat.getDrawable(context, R.drawable.ic_selected);
         drawableSelected.setColorFilter(context.getColor(R.color.save_color), PorterDuff.Mode.SRC_ATOP);
 
+
+        cbInclusiveTags.setChecked(inclusiveTags);
+
         Dialog dialog = new Dialog(context);
         dialog.setContentView(dialogView);
         int screenHeight = displayMetrics.heightPixels;
@@ -660,16 +661,16 @@ public class GalleryUtils {
         newTagsSetWithTopFavorite.addAll(sortedHashTags);
         Iterator<String> tagIterator = newTagsSetWithTopFavorite.iterator();
 
-        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, swInclusiveTags.isChecked());
+        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
 
-        swInclusiveTags.setOnClickListener(new View.OnClickListener() {
+        cbInclusiveTags.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View view) {
-                   updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, swInclusiveTags.isChecked());
-
+                   updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
                }
            }
         );
+
         List<CheckBox> checkBoxList = new ArrayList<>();
         //Dynamically add checkboxes
         while (tagIterator.hasNext()) {
@@ -695,7 +696,6 @@ public class GalleryUtils {
 
             checkBox.setCompoundDrawablePadding(10);
             checkBox.setText(item);
-            checkBox.setTextSize(20);
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -715,7 +715,7 @@ public class GalleryUtils {
                         selectedTags.remove(selectedTag);
                         hiddenTags.add(selectedTag);
 
-                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, swInclusiveTags.isChecked());
+                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
                         checkBox.setButtonDrawable(drawableHidden);
 
                     } else {
@@ -727,7 +727,7 @@ public class GalleryUtils {
                             selectedTags.add(selectedTag);
                             checkBox.setButtonDrawable(drawableSelected);
                         }
-                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, swInclusiveTags.isChecked());
+                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
                     }
                 }
             });
@@ -744,13 +744,13 @@ public class GalleryUtils {
             for (CheckBox cb : checkBoxList) {
                 cb.setButtonDrawable(drawableNotSelected);
             }
-            updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, swInclusiveTags.isChecked());
+            updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
 
         });
 
         Button btnAccept = dialog.findViewById(R.id.btnAccept);
         btnAccept.setOnClickListener(v -> {
-            inclusiveTags = swInclusiveTags.isChecked();
+            inclusiveTags = cbInclusiveTags.isChecked();
             selectedFilterTags = selectedTags;
             Gson gson = new Gson();
             StaticValues.selectedTags = gson.toJson(selectedTags);
@@ -911,10 +911,11 @@ public class GalleryUtils {
             } else if (tag.equals(FILTER_TRANSFORMED)) {
                 tag = TAG_TRANSFORMED;
             }
+
             if (inclusive) {
-                selectedTagsBuilder.append(tag).append(", ");
-            } else {
                 selectedTagsBuilder.append(tag).append(" + ");
+            } else {
+                selectedTagsBuilder.append(tag).append(", ");
             }
         }
 
@@ -1103,7 +1104,7 @@ public class GalleryUtils {
         }
 
         //If is exclusion method
-        if (!inclusiveTags) {
+        if (inclusiveTags) {
             //If the image doesn't one of the tags it won't show
             for (String tag : selectedFilterTags) {
                 if (!imageTags.contains(tag)) {

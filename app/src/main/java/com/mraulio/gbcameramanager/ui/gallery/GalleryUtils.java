@@ -21,6 +21,8 @@ import static com.mraulio.gbcameramanager.utils.StaticValues.filterYear;
 import static com.mraulio.gbcameramanager.utils.StaticValues.sortDescending;
 import static com.mraulio.gbcameramanager.utils.StaticValues.sortMode;
 import static com.mraulio.gbcameramanager.utils.StaticValues.sortModeEnum;
+import static com.mraulio.gbcameramanager.utils.StaticValues.inclusiveTags;
+
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.currentPage;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.diskCache;
 import static com.mraulio.gbcameramanager.ui.gallery.GalleryFragment.editor;
@@ -52,6 +54,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StrikethroughSpan;
@@ -113,7 +116,7 @@ public class GalleryUtils {
         LocalDateTime now = null;
         Date nowDate = new Date();
         File file = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             now = LocalDateTime.now();
         }
 
@@ -123,7 +126,7 @@ public class GalleryUtils {
             GbcImage gbcImage = gbcImages.get(i);
             Bitmap image = Utils.imageBitmapCache.get(gbcImage.getHashCode());
             String fileName = null;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateLocale + "_HH-mm-ss");
                 fileName = fileNameBase + dtf.format(now);
             } else {
@@ -477,7 +480,7 @@ public class GalleryUtils {
             public void onClick(View view) {
                 sortByDate(gbcImagesList, sortDescending);
                 sortMode = CREATION_DATE.name();
-                sortModeEnum = StaticValues.SORT_MODE.valueOf(sortMode);
+                sortModeEnum = valueOf(sortMode);
                 editor.putString("sort_by_date", CREATION_DATE.name());
                 editor.apply();
                 checkSorting(context);
@@ -490,7 +493,7 @@ public class GalleryUtils {
             public void onClick(View view) {
                 sortByTitle(gbcImagesList, sortDescending);
                 sortMode = IMPORT_DATE.name();
-                sortModeEnum = StaticValues.SORT_MODE.valueOf(sortMode);
+                sortModeEnum = valueOf(sortMode);
                 editor.putString("sort_by_date", IMPORT_DATE.name());
                 editor.apply();
                 checkSorting(context);
@@ -502,7 +505,7 @@ public class GalleryUtils {
             public void onClick(View view) {
                 sortByTitle(gbcImagesList, sortDescending);
                 sortMode = TITLE.name();
-                sortModeEnum = StaticValues.SORT_MODE.valueOf(sortMode);
+                sortModeEnum = valueOf(sortMode);
                 editor.putString("sort_by_date", TITLE.name());
                 editor.apply();
                 checkSorting(context);
@@ -566,8 +569,15 @@ public class GalleryUtils {
         }
     }
 
-    public static void showFilterDialog(Context
-                                                context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
+    public static void showFilterDialog(Context context, LinkedHashSet<String> hashTags, DisplayMetrics displayMetrics) {
+
+        //Sorting alphabetically the hashTags
+        // Convertir a lista y ordenar
+        List<String> sortedList = new ArrayList<>(hashTags);
+        Collections.sort(sortedList);
+
+        LinkedHashSet<String> sortedHashTags = new LinkedHashSet<>(sortedList);
+
         LayoutInflater inflater = LayoutInflater.from(context);
         View dialogView = inflater.inflate(R.layout.tags_dialog, null);
 
@@ -577,10 +587,13 @@ public class GalleryUtils {
         Switch swMonth = dialogView.findViewById(R.id.sw_date_month);
         Switch swYear = dialogView.findViewById(R.id.sw_date_year);
         Switch swFilterByDate = dialogView.findViewById(R.id.sw_fitler_by_date);
+        CheckBox cbInclusiveTags = dialogView.findViewById(R.id.cb_inclusive_tags);
+
         swMonth.setChecked(filterMonth);
         swYear.setChecked(filterYear);
         swFilterByDate.setChecked(filterByDate);
         Date date = new Date(dateFilter);
+
         swMonth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -612,6 +625,9 @@ public class GalleryUtils {
         Drawable drawableSelected = ContextCompat.getDrawable(context, R.drawable.ic_selected);
         drawableSelected.setColorFilter(context.getColor(R.color.save_color), PorterDuff.Mode.SRC_ATOP);
 
+
+        cbInclusiveTags.setChecked(inclusiveTags);
+
         Dialog dialog = new Dialog(context);
         dialog.setContentView(dialogView);
         int screenHeight = displayMetrics.heightPixels;
@@ -632,20 +648,29 @@ public class GalleryUtils {
         HashSet<String> hiddenTags = new HashSet<>(hiddenFilterTags);
 
         LinkedHashSet newTagsSetWithTopFavorite = new LinkedHashSet();
-        if (hashTags.contains(FILTER_SUPER_FAVOURITE)) {
+        if (sortedHashTags.contains(FILTER_SUPER_FAVOURITE)) {
             newTagsSetWithTopFavorite.add(FILTER_SUPER_FAVOURITE);
         }
         newTagsSetWithTopFavorite.add(FILTER_FAVOURITE); //adding it in case it doesn't exist, so it appears at the top with the comparator
-        if (hashTags.contains(FILTER_DUPLICATED)) {
+        if (sortedHashTags.contains(FILTER_DUPLICATED)) {
             newTagsSetWithTopFavorite.add(FILTER_DUPLICATED);
         }
-        if (hashTags.contains(FILTER_TRANSFORMED)) {
+        if (sortedHashTags.contains(FILTER_TRANSFORMED)) {
             newTagsSetWithTopFavorite.add(FILTER_TRANSFORMED);
         }
-        newTagsSetWithTopFavorite.addAll(hashTags);
+        newTagsSetWithTopFavorite.addAll(sortedHashTags);
         Iterator<String> tagIterator = newTagsSetWithTopFavorite.iterator();
 
-        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags);
+        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
+
+        cbInclusiveTags.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View view) {
+                   updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
+               }
+           }
+        );
+
         List<CheckBox> checkBoxList = new ArrayList<>();
         //Dynamically add checkboxes
         while (tagIterator.hasNext()) {
@@ -671,7 +696,6 @@ public class GalleryUtils {
 
             checkBox.setCompoundDrawablePadding(10);
             checkBox.setText(item);
-            checkBox.setTextSize(20);
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -691,7 +715,7 @@ public class GalleryUtils {
                         selectedTags.remove(selectedTag);
                         hiddenTags.add(selectedTag);
 
-                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags);
+                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
                         checkBox.setButtonDrawable(drawableHidden);
 
                     } else {
@@ -703,7 +727,7 @@ public class GalleryUtils {
                             selectedTags.add(selectedTag);
                             checkBox.setButtonDrawable(drawableSelected);
                         }
-                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags);
+                        updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
                     }
                 }
             });
@@ -720,12 +744,13 @@ public class GalleryUtils {
             for (CheckBox cb : checkBoxList) {
                 cb.setButtonDrawable(drawableNotSelected);
             }
-            updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags);
+            updateSelectedTagsText(selectedTagsTextView, hiddenTagsTv, selectedTags, hiddenTags, cbInclusiveTags.isChecked());
 
         });
 
         Button btnAccept = dialog.findViewById(R.id.btnAccept);
         btnAccept.setOnClickListener(v -> {
+            inclusiveTags = cbInclusiveTags.isChecked();
             selectedFilterTags = selectedTags;
             Gson gson = new Gson();
             StaticValues.selectedTags = gson.toJson(selectedTags);
@@ -743,6 +768,7 @@ public class GalleryUtils {
             editor.putBoolean("date_filter_year", filterYear);
             editor.putBoolean("date_filter_by_date", filterByDate);
             editor.putLong("date_filter", dateFilter);
+            editor.putBoolean("inclusive_tags", inclusiveTags);
 
             editor.apply();
             currentPage = 0;
@@ -873,7 +899,7 @@ public class GalleryUtils {
      * @param selectedTags
      */
     public static void updateSelectedTagsText(TextView selectedTagsTv, TextView
-            hiddenTagsTV, HashSet<String> selectedTags, HashSet<String> notShowingTags) {
+            hiddenTagsTV, HashSet<String> selectedTags, HashSet<String> notShowingTags, boolean inclusive) {
         StringBuilder selectedTagsBuilder = new StringBuilder();
         for (String tag : selectedTags) {
             if (tag.equals(FILTER_FAVOURITE)) {
@@ -885,7 +911,12 @@ public class GalleryUtils {
             } else if (tag.equals(FILTER_TRANSFORMED)) {
                 tag = TAG_TRANSFORMED;
             }
-            selectedTagsBuilder.append(tag).append(", ");
+
+            if (inclusive) {
+                selectedTagsBuilder.append(tag).append(" + ");
+            } else {
+                selectedTagsBuilder.append(tag).append(", ");
+            }
         }
 
         StringBuilder notShowingTagsSB = new StringBuilder();
@@ -1060,7 +1091,7 @@ public class GalleryUtils {
     public static Bitmap paletteChanger(String paletteId, byte[] imageBytes,
                                         boolean invertPalette) {
         ImageCodec imageCodec = new ImageCodec(160, imageBytes.length / 40);//imageBytes.length/40 to get the height of the image
-        Bitmap image = imageCodec.decodeWithPalette(Utils.hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
+        Bitmap image = imageCodec.decodeWithPalette(hashPalettes.get(paletteId).getPaletteColorsInt(), imageBytes, invertPalette);
 
         return image;
     }
@@ -1072,16 +1103,41 @@ public class GalleryUtils {
             if (!checkImageDateFilter(gbcImage)) return false;
         }
 
-        for (String tag : selectedFilterTags) {
-            if (!imageTags.contains(tag)) {
-                return false;
+        //If is exclusion method
+        if (inclusiveTags) {
+            //If the image doesn't one of the tags it won't show
+            for (String tag : selectedFilterTags) {
+                if (!imageTags.contains(tag)) {
+                    return false;
+                }
             }
-        }
-        for (String tag : hiddenFilterTags) {
-            if (imageTags.contains(tag)) {
-                return false;
+
+            for (String tag : hiddenFilterTags) {
+                if (imageTags.contains(tag)) {
+                    return false;
+                }
             }
+
+        } else {
+            //The image only needs to have 1 of the selected tags, and not have a tag in the hidden tags
+            boolean include = false;
+            
+            for (String tag : hiddenFilterTags) {
+                if (imageTags.contains(tag)) {
+                    return false;
+                }
+            }
+
+            for (String tag : selectedFilterTags) {
+                if (imageTags.contains(tag)) {
+                    include = true;
+                    break;
+                }
+            }
+            return include;
+
         }
+
         return true;
     }
 

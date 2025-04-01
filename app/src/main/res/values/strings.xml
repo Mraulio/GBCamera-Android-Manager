@@ -263,6 +263,7 @@
     <string name="sw_sort_palettes">Sort palettes by usage</string>
     <string name="menu_fusion">Fusion</string>
     <string name="extra_paper">Paper</string>
+    <string name="image_exists">Image already exists</string>
 
 
 </resources>

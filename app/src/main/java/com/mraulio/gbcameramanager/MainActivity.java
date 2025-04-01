@@ -114,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
         StaticValues.alwaysDefaultFrame = StaticValues.sharedPreferences.getBoolean("always_default_frame", false);
         StaticValues.showExtraGallery = StaticValues.sharedPreferences.getBoolean("show_extra_gallery", false);
         StaticValues.sortPalettesByUsage = StaticValues.sharedPreferences.getBoolean("sort_palettes_by_usage", false);
+        StaticValues.inclusiveTags = StaticValues.sharedPreferences.getBoolean("inclusive_tags", true);
+
 
         StaticValues.filterMonth = StaticValues.sharedPreferences.getBoolean("date_filter_month", false);
         StaticValues.filterYear = StaticValues.sharedPreferences.getBoolean("date_filter_year", false);

@@ -266,5 +266,6 @@
     <string name="sw_sort_palettes">Paletten nach Verwendung sortieren</string>
     <string name="menu_fusion">Fusion</string>
     <string name="extra_paper">Papier</string>
+    <string name="image_exists">Das Bild existiert bereits</string>
 
 </resources>

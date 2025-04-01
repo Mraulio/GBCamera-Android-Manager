@@ -267,4 +267,5 @@
     <string name="sw_sort_palettes">Ordenar paletes per us</string>
     <string name="menu_fusion">Fusió</string>
     <string name="extra_paper">Paper</string>
+    <string name="image_exists">La imatge ja existeix</string>
 </resources>

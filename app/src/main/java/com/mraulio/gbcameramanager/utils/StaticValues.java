@@ -32,6 +32,7 @@ public class StaticValues {
     public static boolean filterMonth;
     public static boolean filterYear;
     public static boolean filterByDate;
+    public static boolean inclusiveTags = false;
     public static FloatingActionButton fab;
     public static AppDatabase db;
     public static CURRENT_FRAGMENT currentFragment;

@@ -1045,7 +1045,7 @@ public class MainImageDialog implements SerialInputOutputManager.Listener {
                     });
 
                     //If Image is not 144 pixels high (regular camera image), like panoramas, I remove the frames selector
-                    GbcFrame gbcFrame = hashFrames.get(gbcImage.getFrameId());
+                    GbcFrame gbcFrame = hashFrames.get(filteredGbcImages.get(globalImageIndex[0]).getFrameId());
                     if (gbcFrame == null) {
                         if (selectedImage[0].getHeight() != 144 && selectedImage[0].getHeight() != 160 && selectedImage[0].getHeight() != 224) {
                             cbFrameKeep.setVisibility(GONE);
